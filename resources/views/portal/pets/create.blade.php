@@ -24,14 +24,14 @@
     </div>
     <div class="col-md-12">
       <label class="form-label">Condiciones médicas</label>
-      <textarea name="medical_conditions" class="form-control">{{ old('medical_conditions') }}</textarea>
+      <textarea name="medical_conditions" class="form-control" rows="3">{{ old('medical_conditions') }}</textarea>
     </div>
     <div class="col-md-6">
       <label class="form-label">Foto</label>
       <input type="file" name="photo" class="form-control">
     </div>
   </div>
-  <div class="mt-3">
+  <div class="mt-3 d-flex gap-2">
     <button class="btn btn-primary">Guardar</button>
     <a class="btn btn-outline-secondary" href="{{ route('portal.pets.index') }}">Cancelar</a>
   </div>
