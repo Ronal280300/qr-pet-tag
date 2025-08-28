@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 27-08-2025 a las 08:07:12
+-- Tiempo de generación: 28-08-2025 a las 22:15:12
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -120,7 +120,14 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (5, '2025_08_27_031055_create_pets_table', 1),
 (6, '2025_08_27_031055_create_qr_codes_table', 1),
 (7, '2025_08_27_031055_create_rewards_table', 1),
-(8, '2025_08_27_031055_create_scans_table', 1);
+(8, '2025_08_27_031055_create_scans_table', 1),
+(9, '2025_08_27_100000_add_unique_indexes_qr_and_reward', 2),
+(10, '2025_08_27_100100_add_zone_to_pets_table', 2),
+(11, '2025_08_27_120000_add_fields_to_rewards_table', 3),
+(12, '2025_08_27_130000_add_image_to_qr_codes', 4),
+(13, '2025_08_28_100000_add_activation_fields_to_qr_codes', 5),
+(14, '2025_08_28_110000_make_pets_user_id_nullable', 5),
+(15, '2025_08_28_120000_add_activation_code_to_qr_codes_table', 6);
 
 -- --------------------------------------------------------
 
@@ -134,6 +141,13 @@ CREATE TABLE `password_reset_tokens` (
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `password_reset_tokens`
+--
+
+INSERT INTO `password_reset_tokens` (`email`, `token`, `created_at`) VALUES
+('rosepa2803@gmail.com', '$2y$12$Xi2HDkbNGlM05XFH1dEwUeBEat93rW5bpGI6tWY0HbYxa9tXsG9lK', '2025-08-27 13:09:22');
+
 -- --------------------------------------------------------
 
 --
@@ -142,9 +156,10 @@ CREATE TABLE `password_reset_tokens` (
 
 CREATE TABLE `pets` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `breed` varchar(255) DEFAULT NULL,
+  `zone` varchar(120) DEFAULT NULL,
   `age` int(11) DEFAULT NULL,
   `medical_conditions` text DEFAULT NULL,
   `photo` varchar(255) DEFAULT NULL,
@@ -157,10 +172,13 @@ CREATE TABLE `pets` (
 -- Volcado de datos para la tabla `pets`
 --
 
-INSERT INTO `pets` (`id`, `user_id`, `name`, `breed`, `age`, `medical_conditions`, `photo`, `is_lost`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Morgan', 'Labrador', 5, 'No tiene', 'pet-photos/MtLzrE6xKEyfcumYSzeZcl1q65EEIumJ3Wxw9a1B.jpg', 0, '2025-08-27 11:37:19', '2025-08-27 11:47:21'),
-(2, 1, 'asd', 'asd', 2, 'asd', 'pet-photos/mApYyGSxqqdcm2Df62RVISbjUhl8D5LXxmjznVx9.jpg', 0, '2025-08-27 11:56:08', '2025-08-27 11:56:08'),
-(3, 1, 'asd', 'asd', 2, 'asd', 'pet-photos/CXWgL7X0PvU9ImWfFaJ4heTgexA8JI1KH1lId7KG.jpg', 0, '2025-08-27 12:05:57', '2025-08-27 12:05:57');
+INSERT INTO `pets` (`id`, `user_id`, `name`, `breed`, `zone`, `age`, `medical_conditions`, `photo`, `is_lost`, `created_at`, `updated_at`) VALUES
+(11, 3, 'Morgan', 'Labrador', 'San Juan, Grecia, Alajuela', 2, 'No tiene condiciones medicas', 'pets/RwxdOcdu6icRyom9P3ZHUkffugGCxkPG4pd19H1i.jpg', 0, '2025-08-28 11:15:17', '2025-08-28 12:17:15'),
+(12, NULL, 'Asha', 'No definida', 'Curridabat', 1, NULL, 'pets/ARednEwzYVaPcPYqAK2MjiXDHqwQcj6m0wyZhN4k.jpg', 0, '2025-08-28 11:47:37', '2025-08-28 12:49:12'),
+(13, 3, 'asd', 'asd', 'asd', 2, NULL, 'pets/7Up38026FFAQI1bO5Afx8Ye7NGMiPExkIjt1oGn2.jpg', 0, '2025-08-28 13:12:48', '2025-08-28 13:59:39'),
+(14, 3, 'cvh', 'asdfsgh', 'Bolivar, Grecia, Alajuela', 1, NULL, 'pets/QAsFwBpbrURfBmydp4A4Mf5agM14Svp88SWieQZZ.jpg', 0, '2025-08-28 13:21:40', '2025-08-28 14:50:14'),
+(16, 6, 'Negro Pomposo', 'Labrador', 'Puraba, Santa Barbara, Heredia', 1, NULL, 'pets/NvEhF1YqOmzqxv2Nu7BOOVByMV8wCZ6BfNFT7Z05.png', 1, '2025-08-28 14:52:29', '2025-08-28 15:19:55'),
+(17, NULL, 'Totto', NULL, 'Escazú, Escazú, San José', 5, NULL, 'pets/79mwKTW7Ok8GQXeTvstKD9JyDMicHG0uIrWcP2Pp.jpg', 0, '2025-08-28 15:22:32', '2025-08-28 15:22:32');
 
 -- --------------------------------------------------------
 
@@ -173,18 +191,27 @@ CREATE TABLE `qr_codes` (
   `pet_id` bigint(20) UNSIGNED NOT NULL,
   `qr_code` varchar(255) NOT NULL,
   `slug` varchar(255) NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `activation_code` varchar(50) NOT NULL,
+  `is_activated` tinyint(1) NOT NULL DEFAULT 0,
+  `activated_at` timestamp NULL DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `activated_by` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `qr_codes`
 --
 
-INSERT INTO `qr_codes` (`id`, `pet_id`, `qr_code`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES
-(6, 2, 'QR_GENERATION_FAILED: You need to install the imagick extension to use this back end', '68ae9df814aa7', 1, '2025-08-27 11:56:08', '2025-08-27 11:56:08'),
-(12, 1, 'QR_GENERATION_FAILED', '68aea013cb7f9', 1, '2025-08-27 12:05:08', '2025-08-27 12:05:08');
+INSERT INTO `qr_codes` (`id`, `pet_id`, `qr_code`, `slug`, `image`, `activation_code`, `is_activated`, `activated_at`, `is_active`, `created_at`, `updated_at`, `activated_by`) VALUES
+(19, 11, 'http://127.0.0.1:8000/pet/asd-11', 'asd-11', 'qrcodes/asd-11.svg', 'POUP-SPZF-5355', 1, '2025-08-28 11:16:56', 1, '2025-08-28 11:15:17', '2025-08-28 11:16:56', 3),
+(20, 12, 'http://127.0.0.1:8000/pet/asha-12', 'asha-12', 'qrcodes/asha-12.svg', 'VGUB-FO3B-5194', 0, NULL, 1, '2025-08-28 11:47:37', '2025-08-28 11:47:37', NULL),
+(21, 13, 'http://127.0.0.1:8000/pet/asd-13', 'asd-13', 'qrcodes/asd-13.svg', 'D9NEOTQG', 1, '2025-08-28 13:13:11', 1, '2025-08-28 13:12:48', '2025-08-28 14:00:33', 3),
+(22, 14, 'http://127.0.0.1:8000/pet/cvh-14', 'cvh-14', 'qrcodes/cvh-14.svg', 'QI28IEWY', 1, '2025-08-28 13:21:53', 1, '2025-08-28 13:21:40', '2025-08-28 13:54:07', 3),
+(24, 16, 'http://127.0.0.1:8000/pet/negro-pomposo-16', 'negro-pomposo-16', 'qrcodes/negro-pomposo-16.svg', 'S90UQGEJ', 1, '2025-08-28 14:56:01', 1, '2025-08-28 14:52:29', '2025-08-28 15:19:39', 6),
+(25, 17, 'http://127.0.0.1:8000/pet/totto-17', 'totto-17', 'qrcodes/totto-17.svg', 'HDMC-UGPO-6465', 0, NULL, 1, '2025-08-28 15:22:32', '2025-08-28 15:22:32', NULL);
 
 -- --------------------------------------------------------
 
@@ -195,6 +222,7 @@ INSERT INTO `qr_codes` (`id`, `pet_id`, `qr_code`, `slug`, `is_active`, `created
 CREATE TABLE `rewards` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `pet_id` bigint(20) UNSIGNED NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 0,
   `amount` decimal(8,2) NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 0,
   `message` text DEFAULT NULL,
@@ -206,9 +234,11 @@ CREATE TABLE `rewards` (
 -- Volcado de datos para la tabla `rewards`
 --
 
-INSERT INTO `rewards` (`id`, `pet_id`, `amount`, `is_active`, `message`, `created_at`, `updated_at`) VALUES
-(1, 1, 0.00, 1, NULL, '2025-08-27 11:37:19', '2025-08-27 11:47:30'),
-(2, 2, 0.00, 0, '', '2025-08-27 11:56:08', '2025-08-27 11:56:08');
+INSERT INTO `rewards` (`id`, `pet_id`, `active`, `amount`, `is_active`, `message`, `created_at`, `updated_at`) VALUES
+(7, 11, 0, 0.00, 0, NULL, '2025-08-28 11:18:45', '2025-08-28 12:11:56'),
+(8, 12, 0, 0.00, 0, 'Gracias por tu ayuda 🙏', '2025-08-28 12:54:39', '2025-08-28 12:54:39'),
+(9, 13, 0, 0.00, 0, 'Gracias por tu ayuda 🙏', '2025-08-28 13:16:39', '2025-08-28 13:59:28'),
+(10, 16, 1, 130000.00, 0, 'Gracias por tu ayuda 🙏', '2025-08-28 15:19:42', '2025-08-28 15:19:53');
 
 -- --------------------------------------------------------
 
@@ -225,13 +255,6 @@ CREATE TABLE `scans` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `scans`
---
-
-INSERT INTO `scans` (`id`, `qr_code_id`, `ip_address`, `location`, `user_agent`, `created_at`, `updated_at`) VALUES
-(7, 6, '127.0.0.1', NULL, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36', '2025-08-27 11:56:20', '2025-08-27 11:56:20');
 
 -- --------------------------------------------------------
 
@@ -253,7 +276,8 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('gqUJLXJmb9DtSpm4EypmFVkbpVoNnQgwN4ETQt82', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaE1HUUxmUkNZTVlUS25TYlpQdGVzaTJpekNobmJmRWZzcHFQdU9DUSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDA6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9wb3J0YWwvcGV0cy9jcmVhdGUiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1756274760);
+('7OIckTmaix6oUpb6tz1VwZLLtdhSP4MvtrO2jlW1', 3, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoibHE3ZjZXbTNqZVo4V3dueFkxUW5HZEJVNXY4R3R0Q2JsZmZWUWh0TCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzM6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9wb3J0YWwvcGV0cyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjM7czo0OiJhdXRoIjthOjE6e3M6MjE6InBhc3N3b3JkX2NvbmZpcm1lZF9hdCI7aToxNzU2NDExMDkxO319', 1756411760),
+('unRP4xMyKTnTGgAAIeYH9R0BUZ2S0iL0iU53R4tD', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiTjA5Qm9RUzAxVUJ6U1ZPcVJ5UWJGWUlIV1Q2eTI2czY4UWFwQ20wNiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzM6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9wb3J0YWwvcGV0cyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7czo0OiJhdXRoIjthOjE6e3M6MjE6InBhc3N3b3JkX2NvbmZpcm1lZF9hdCI7aToxNzU2NDExMDc1O319', 1756411772);
 
 -- --------------------------------------------------------
 
@@ -281,7 +305,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `phone`, `address`, `emergency_contact`, `is_admin`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Ronaldo', 'rosepa2803@gmail.com', '85307942', NULL, NULL, 0, NULL, '$2y$12$u7KD7kS/yKPVPToaCPmkpem614FxT8IIS6vwZHdjEc7E2UY3xxKy2', NULL, '2025-08-27 11:37:01', '2025-08-27 11:37:01');
+(1, 'Ronaldo', 'rosepa2803@gmail.com', '85307942', NULL, NULL, 1, NULL, '$2y$12$u7KD7kS/yKPVPToaCPmkpem614FxT8IIS6vwZHdjEc7E2UY3xxKy2', 'NvjvcCZJuizI5YBpgqHSRNSYcDukJrcaOftshB3PNLH05nPROannGBWAiOa9', '2025-08-27 11:37:01', '2025-08-27 11:37:01'),
+(2, 'RonaldoS', 'rosepa28030@gmail.com', '85307942', NULL, NULL, 0, NULL, '$2y$12$eJ85axmP9kae3tjaP9TWC.AsdfDx6aMXKzkJQnO6sRmmUcNushVi2', NULL, '2025-08-27 13:08:37', '2025-08-27 13:08:37'),
+(3, 'Priscilla Leiva Ramirez', 'prileiva@gmail.com', '88888888', NULL, NULL, 0, NULL, '$2y$12$Wk4ORLD/px4yX5aakqyJSupBELFr1eFE5QGTX9JR.Lez8IoaBD9V.', NULL, '2025-08-27 14:05:06', '2025-08-27 14:05:06'),
+(4, 'Robertho', 'rosepa280300@gmail.com', '85307942', NULL, NULL, 0, NULL, '$2y$12$7XqRQ58exVR1eGfptWxkreZiPRoXFguIYx3BG6Y4KhKASPVEmeGve', NULL, '2025-08-27 14:36:53', '2025-08-27 14:36:53'),
+(5, 'Priscilla', 'prileiva1@gmail.com', '45', NULL, NULL, 0, NULL, '$2y$12$5QUFO5G6jce6uF6q.b9/lezy8gw7CubQxz3KjwTnzI4ATTao3I7l6', NULL, '2025-08-27 16:50:10', '2025-08-27 16:50:10'),
+(6, 'Ronaldo Ronaldo', 'rosepa2803000@gmail.com', '85307942', NULL, NULL, 0, NULL, '$2y$12$/3opsU8eWu8xVDqWjE6UYOQTIWAQTtOLg4Sh.hg3syH1XbwSTPf3e', NULL, '2025-08-28 13:53:46', '2025-08-28 13:53:46');
 
 --
 -- Índices para tablas volcadas
@@ -345,14 +374,15 @@ ALTER TABLE `qr_codes`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `qr_codes_qr_code_unique` (`qr_code`),
   ADD UNIQUE KEY `qr_codes_slug_unique` (`slug`),
-  ADD KEY `qr_codes_pet_id_foreign` (`pet_id`);
+  ADD UNIQUE KEY `qr_codes_pet_id_unique` (`pet_id`),
+  ADD KEY `qr_codes_activated_by_foreign` (`activated_by`);
 
 --
 -- Indices de la tabla `rewards`
 --
 ALTER TABLE `rewards`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `rewards_pet_id_foreign` (`pet_id`);
+  ADD UNIQUE KEY `rewards_pet_id_unique` (`pet_id`);
 
 --
 -- Indices de la tabla `scans`
@@ -396,25 +426,25 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT de la tabla `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `pets`
 --
 ALTER TABLE `pets`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `qr_codes`
 --
 ALTER TABLE `qr_codes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT de la tabla `rewards`
 --
 ALTER TABLE `rewards`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `scans`
@@ -426,7 +456,7 @@ ALTER TABLE `scans`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Restricciones para tablas volcadas
@@ -442,6 +472,7 @@ ALTER TABLE `pets`
 -- Filtros para la tabla `qr_codes`
 --
 ALTER TABLE `qr_codes`
+  ADD CONSTRAINT `qr_codes_activated_by_foreign` FOREIGN KEY (`activated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `qr_codes_pet_id_foreign` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`id`) ON DELETE CASCADE;
 
 --
