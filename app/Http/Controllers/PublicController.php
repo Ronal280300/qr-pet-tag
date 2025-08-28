@@ -8,13 +8,12 @@ class PublicController extends Controller
 {
     public function home()
     {
-        // Tu landing pública
         return view('public.home');
     }
 
     public function showPet(string $slug)
     {
-        $qr = QrCode::with(['pet.reward', 'pet.user'])->where('slug', $slug)->firstOrFail();
+        $qr = QrCode::with(['pet.user', 'pet.reward'])->where('slug', $slug)->firstOrFail();
 
         // Si el TAG no tiene mascota asociada, mostrar vista especial
         if (!$qr->pet) {

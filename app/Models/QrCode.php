@@ -10,46 +10,39 @@ class QrCode extends Model
 {
     use HasFactory;
 
-    // Tabla
     protected $table = 'qr_codes';
 
-    // Asignación masiva
     protected $fillable = [
         'pet_id',
         'slug',
-        'qr_code',        // si lo usas para guardar el contenido del QR o la url
-        'image',          // ruta en storage (public)
-        'activation_code' // código de activación impreso en el TAG
+        'image',
+        'activation_code',
+        'is_activated',
+        'activated_by',
+        'activated_at',
+        'qr_code', // si mantienes este campo por retrocompatibilidad
     ];
 
-    // Relaciones
+    protected $casts = [
+        'is_activated' => 'boolean',
+        'activated_at' => 'datetime',
+    ];
+
     public function pet()
     {
         return $this->belongsTo(Pet::class);
     }
 
-    /**
-     * Genera un código de activación aleatorio y único.
-     */
-    public static function generateActivationCode(int $length = 8): string
+    public function activatedByUser()
     {
-        do {
-            // Solo letras/números, en mayúsculas
-            $code = strtoupper(Str::random($length));
-        } while (static::where('activation_code', $code)->exists());
-
-        return $code;
+        return $this->belongsTo(User::class, 'activated_by');
     }
 
     /**
-     * Si no viene 'activation_code' al crear, lo genera automáticamente.
+     * Código legible (fallback si no existe).
      */
-    protected static function booted(): void
+    public static function generateActivationCode(): string
     {
-        static::creating(function (self $qr) {
-            if (empty($qr->activation_code)) {
-                $qr->activation_code = static::generateActivationCode();
-            }
-        });
+        return strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4)) . '-' . random_int(1000, 9999);
     }
 }

@@ -11,42 +11,57 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 class PetQrService
 {
     /**
-     * Asegura slug público, URL pública, imagen del QR y activation_code.
+     * Asegura slug público, activation_code e imagen del QR.
      * Guarda el modelo $qr al final.
      */
-    public function ensureSlugAndImage(QrCodeModel $qr, Pet $pet): void
+    public function ensureSlugAndImage(QrCodeModel $qr, Pet $pet): QrCodeModel
     {
-        // 1) Si es un QR nuevo, genera un activation_code único
-        if (!$qr->exists || empty($qr->activation_code)) {
+        // 1) Slug estable (si no existe): nombre-normalizado + id
+        if (empty($qr->slug)) {
+            $base = Str::slug($pet->name ?: 'pet');
+            $qr->slug = $this->uniqueSlug($base, $qr->id ?? null, $pet->id);
+        }
+
+        // 2) Activation code (si no existe)
+        if (empty($qr->activation_code)) {
             $qr->activation_code = $this->generateUniqueActivationCode();
         }
 
-        // 2) Slug estable (nombre + id) si no existe
-        if (empty($qr->slug)) {
-            $qr->slug = Str::slug($pet->name) . '-' . $pet->id;
-        }
+        // 3) Generar imagen QR (URL pública del perfil)
+        $publicUrl = route('public.pet.show', $qr->slug);
 
-        // 3) URL pública del perfil
-        $publicUrl = route('public.pet.show', ['slug' => $qr->slug]);
-        $qr->qr_code = $publicUrl;
-
-        // 4) Generar imagen del QR (SVG para evitar dependencia de Imagick)
-        $folder   = 'qrcodes';
-        $filename = $qr->slug . '.svg';
-        $path     = $folder . '/' . $filename;
-
+        // Generamos SVG nítido (también puedes usar ->format('png') si prefieres PNG)
         $svg = QrCodeFacade::format('svg')
-            ->size(800)
+            ->size(600)
             ->margin(1)
-            ->errorCorrection('M')
+            ->errorCorrection('H')
             ->generate($publicUrl);
 
-        Storage::disk('public')->put($path, $svg);
+        $dir  = 'qrcodes';
+        $file = $dir . '/' . $qr->slug . '.svg';
 
-        $qr->image = $path;
+        Storage::disk('public')->put($file, $svg);
+        $qr->image = $file;
 
-        // 5) Guardar
         $qr->save();
+
+        return $qr;
+    }
+
+    /**
+     * Slug único tipo: "luna-123"
+     */
+    private function uniqueSlug(string $base, ?int $qrId, int $petId): string
+    {
+        $slug = $base . '-' . $petId;
+        $i = 0;
+        while (QrCodeModel::where('slug', $slug)
+                ->when($qrId, fn ($q) => $q->where('id', '!=', $qrId))
+                ->exists()) {
+            $i++;
+            $slug = $base . '-' . $petId . '-' . $i;
+        }
+        return $slug;
     }
 
     /**
