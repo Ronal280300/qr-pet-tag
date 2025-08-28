@@ -4,100 +4,95 @@
 
 @section('content')
 <div class="container my-4">
-  <div class="row justify-content-center">
-    <div class="col-12 col-lg-10">
+  <h1 class="h3 mb-3 fw-bold">Nueva Mascota</h1>
 
-      <div class="card border-0 shadow-sm">
-        <div class="card-body p-4 p-md-5">
-          <div class="d-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0">Nueva Mascota</h1>
-            <a href="{{ route('portal.pets.index') }}" class="btn btn-light">
-              <i class="fa-solid fa-arrow-left me-2"></i>Volver
-            </a>
+  <div class="card card-elevated">
+    <div class="card-body">
+      <form action="{{ route('portal.pets.store') }}" method="POST" enctype="multipart/form-data" id="pet-form">
+        @csrf
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <label class="form-label">Nombre *</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="col-12 col-lg-6">
+            <label class="form-label">Raza</label>
+            <input type="text" name="breed" class="form-control" placeholder="Labrador, Poodle, etc.">
           </div>
 
-          {{-- Errores --}}
-          @if ($errors->any())
-            <div class="alert alert-danger">
-              <div class="fw-semibold mb-1">Corrige los siguientes campos:</div>
-              <ul class="mb-0">
-                @foreach ($errors->all() as $e)
-                  <li>{{ $e }}</li>
-                @endforeach
-              </ul>
-            </div>
-          @endif
-
-          <form method="POST" action="{{ route('portal.pets.store') }}" enctype="multipart/form-data" id="pet-create-form">
-            @csrf
-
-            <div class="row g-3">
-              <div class="col-12 col-md-6">
-                <label class="form-label">Nombre <span class="text-danger">*</span></label>
-                <input type="text" name="name" class="form-control" value="{{ old('name') }}" required maxlength="120" autocomplete="off">
+          {{-- UBICACIÓN (Provincia > Cantón > Distrito) --}}
+          <div class="col-12">
+            <label class="form-label">Ubicación</label>
+            <div class="row g-2" id="cr-geo"
+                 data-current-province=""
+                 data-current-canton=""
+                 data-current-district="">
+              <div class="col-md-4">
+                <select id="cr-province" class="form-select" aria-label="Provincia" disabled>
+                  <option value="">Provincia</option>
+                </select>
               </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label">Raza</label>
-                <input type="text" name="breed" class="form-control" value="{{ old('breed') }}" maxlength="120" autocomplete="off">
+              <div class="col-md-4">
+                <select id="cr-canton" class="form-select" aria-label="Cantón" disabled>
+                  <option value="">Cantón</option>
+                </select>
               </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label">Zona</label>
-                <input type="text" name="zone" class="form-control" value="{{ old('zone') }}" maxlength="120" placeholder="Ej. San Juan, Grecia, Alajuela">
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label">Edad</label>
-                <input type="number" name="age" class="form-control" value="{{ old('age') }}" min="0" max="50" placeholder="Años">
-              </div>
-
-              <div class="col-12">
-                <div class="d-flex align-items-center justify-content-between">
-                  <label for="medical_conditions" class="form-label mb-1">Condiciones médicas</label>
-
-                  {{-- FIX: check funcional y accesible --}}
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="1" id="no-med-check">
-                    <label class="form-check-label" for="no-med-check">
-                      No tiene condiciones médicas
-                    </label>
-                  </div>
-                </div>
-
-                {{-- Usamos readonly (no disabled) para que el campo se envíe siempre --}}
-                <textarea
-                  id="medical_conditions"
-                  name="medical_conditions"
-                  class="form-control"
-                  rows="4"
-                  placeholder="Alergias, medicación, veterinario, etc."
-                >{{ old('medical_conditions') }}</textarea>
-
-                {{-- Ayuda visual cuando está readonly --}}
-                <div id="no-med-hint" class="form-text d-none">
-                  El campo está bloqueado porque marcaste “No tiene condiciones médicas”.
-                </div>
-              </div>
-
-              <div class="col-12">
-                <label class="form-label">Foto</label>
-                <input type="file" name="photo" class="form-control" accept="image/*">
-                <div class="form-text">JPG, PNG o WEBP hasta 4MB.</div>
+              <div class="col-md-4">
+                <select id="cr-district" class="form-select" aria-label="Distrito" disabled>
+                  <option value="">Distrito</option>
+                </select>
               </div>
             </div>
+            <input type="hidden" name="zone" id="zone" value="">
+            <div class="form-text">Se guardará como: <code id="zone-preview">—</code></div>
+          </div>
 
-            <div class="d-flex gap-2 mt-4">
-              <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-floppy-disk me-2"></i>Guardar
-              </button>
-              <a href="{{ route('portal.pets.index') }}" class="btn btn-outline-secondary">Cancelar</a>
+          <div class="col-12 col-lg-6">
+            <label class="form-label">Edad</label>
+            <input type="number" name="age" min="0" max="50" class="form-control" placeholder="0">
+          </div>
+
+          <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+              <label class="form-label mb-0">Condiciones médicas</label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="no-medical">
+                <label class="form-check-label small" for="no-medical">No tiene condiciones</label>
+              </div>
             </div>
-          </form>
+            <textarea name="medical_conditions" id="medical_conditions" rows="4" class="form-control" placeholder="Alergias, medicación, etc."></textarea>
+          </div>
 
+          {{-- FOTO (uploader pequeño con preview) --}}
+          <div class="col-12">
+            <label class="form-label">Foto</label>
+            <div class="photo-uploader">
+              <div class="photo-uploader__preview" id="photoDrop">
+                <img id="photoPreview" src="" alt="Vista previa" class="d-none">
+                <div class="photo-uploader__overlay">Arrastra una imagen o haz clic en “Seleccionar imagen”.</div>
+              </div>
+              <div class="photo-uploader__actions">
+                <label for="photo" class="btn btn-outline-primary">
+                  <i class="fa-solid fa-image me-1"></i> Seleccionar imagen
+                </label>
+                <input id="photo" name="photo" type="file" accept="image/*" class="d-none">
+                <button type="button" id="btnClearPhoto" class="btn btn-outline-danger">
+                  <i class="fa-solid fa-xmark me-1"></i> Quitar
+                </button>
+              </div>
+            </div>
+            <small class="text-muted d-block mt-2">
+              Formatos: JPG/PNG. Tamaño máx. 4 MB. El recorte es solo de vista previa.
+            </small>
+          </div>
         </div>
-      </div>
 
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar</button>
+          <a href="{{ route('portal.pets.index') }}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -106,40 +101,143 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/portal.css') }}">
 <style>
-  /* detalles suaves para inputs */
-  .form-control:focus { box-shadow: 0 0 0 .2rem rgba(30,124,242,.15); border-color:#1e7cf2; }
-  .card .form-label { font-weight:600; color:#334155; }
-  .form-text { color:#6b7280; }
-  .is-readonly { background:#f8fafc; }
+  /* loader visual para selects */
+  .select-loading { position: relative; }
+  .select-loading::after{
+    content:""; position:absolute; inset:0; background:rgba(255,255,255,.5);
+    border-radius:.375rem; display:none;
+  }
+  .select-loading.loading::after{ display:block; }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-  // Toggle del check "No tiene condiciones médicas"
-  document.addEventListener('DOMContentLoaded', function(){
-    const cb = document.getElementById('no-med-check');
-    const ta = document.getElementById('medical_conditions');
-    const hint = document.getElementById('no-med-hint');
+(() => {
+  const API = 'https://ubicaciones.paginasweb.cr';
+  const $prov = document.getElementById('cr-province');
+  const $cant = document.getElementById('cr-canton');
+  const $dist = document.getElementById('cr-district');
+  const $zone = document.getElementById('zone');
+  const $zonePreview = document.getElementById('zone-preview');
 
-    function sync(){
-      if(cb.checked){
-        ta.value = '';
-        ta.readOnly = true;      // IMPORTANTe: readonly (no disabled) para que se envíe en el form
-        ta.classList.add('is-readonly');
-        hint.classList.remove('d-none');
-      }else{
-        ta.readOnly = false;
-        ta.classList.remove('is-readonly');
-        hint.classList.add('d-none');
-      }
+  const $noMedical = document.getElementById('no-medical');
+  const $medical   = document.getElementById('medical_conditions');
+  function toggleMedical(){
+    if($noMedical.checked){ $medical.value = ''; $medical.setAttribute('disabled','disabled'); }
+    else{ $medical.removeAttribute('disabled'); }
+  }
+  $noMedical.addEventListener('change', toggleMedical);
+
+  async function getJSON(path){
+    const resp = await fetch(`${API}${path}`);
+    if(!resp.ok) throw new Error('Network');
+    return await resp.json();
+  }
+  function fillSelect($sel, map, placeholder){
+    $sel.innerHTML = `<option value="">${placeholder}</option>`;
+    for (const [id, name] of Object.entries(map)) {
+      const opt = document.createElement('option');
+      opt.value = id; opt.textContent = name;
+      $sel.appendChild(opt);
     }
+  }
+  function setZone(){
+    const pName = $prov.options[$prov.selectedIndex]?.text || '';
+    const cName = $cant.options[$cant.selectedIndex]?.text || '';
+    const dName = $dist.options[$dist.selectedIndex]?.text || '';
+    if(pName && cName && dName){
+      const z = `${dName}, ${cName}, ${pName}`;
+      $zone.value = z; $zonePreview.textContent = z;
+    }else{
+      $zone.value = ''; $zonePreview.textContent = '—';
+    }
+  }
 
-    // Si viene vacío por old() puedes decidir arrancar marcado o no:
-    // cb.checked = (ta.value.trim() === '');
-    sync();
+  // Carga inicial de provincias
+  (async () => {
+    try{
+      const provincias = await getJSON('/provincias.json');
+      fillSelect($prov, provincias, 'Provincia');
+      $prov.disabled = false;
+    } catch(e){
+      // Fallback manual (si no hay internet)
+      const wrap = $prov.closest('.row');
+      wrap.outerHTML = `
+        <div class="col-12">
+          <div class="alert alert-warning small mb-2">
+            No se pudo cargar la lista de ubicaciones. Ingresa manualmente la zona.
+          </div>
+          <input class="form-control" placeholder="Ej: San Juan, Grecia, Alajuela"
+                 oninput="document.getElementById('zone').value=this.value;document.getElementById('zone-preview').textContent=this.value;">
+        </div>`;
+    }
+  })();
 
-    cb.addEventListener('change', sync);
+  // Eventos de cascada
+  $prov.addEventListener('change', async () => {
+    $cant.classList.add('select-loading','loading');
+    $cant.disabled = true; $dist.disabled = true;
+    $dist.innerHTML = `<option value="">Distrito</option>`;
+    setZone();
+
+    if(!$prov.value){
+      $cant.innerHTML = `<option value="">Cantón</option>`;
+      $cant.classList.remove('loading'); return;
+    }
+    const cantones = await getJSON(`/provincia/${$prov.value}/cantones.json`);
+    fillSelect($cant, cantones, 'Cantón');
+    $cant.disabled = false; $cant.classList.remove('loading');
   });
+
+  $cant.addEventListener('change', async () => {
+    $dist.classList.add('select-loading','loading');
+    $dist.disabled = true;
+    $dist.innerHTML = `<option value="">Distrito</option>`;
+    setZone();
+
+    if(!$prov.value || !$cant.value){ $dist.classList.remove('loading'); return; }
+    const distritos = await getJSON(`/provincia/${$prov.value}/canton/${$cant.value}/distritos.json`);
+    fillSelect($dist, distritos, 'Distrito');
+    $dist.disabled = false; $dist.classList.remove('loading');
+  });
+
+  $dist.addEventListener('change', setZone);
+})();
+</script>
+
+<script>
+/* Uploader pequeño con preview (mismo que en Editar) */
+(function(){
+  const input   = document.getElementById('photo');
+  const preview = document.getElementById('photoPreview');
+  const drop    = document.getElementById('photoDrop');
+  const clear   = document.getElementById('btnClearPhoto');
+
+  function show(file){
+    if(!file) return;
+    const url = URL.createObjectURL(file);
+    preview.src = url;
+    preview.classList.remove('d-none');
+    drop.classList.remove('is-dragover');
+  }
+
+  input.addEventListener('change', e => show(e.target.files[0]));
+
+  ['dragenter','dragover'].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('is-dragover'); })
+  );
+  ['dragleave','drop'].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('is-dragover'); })
+  );
+  drop.addEventListener('drop', e => {
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(file){ input.files = e.dataTransfer.files; show(file); }
+  });
+
+  clear.addEventListener('click', () => {
+    preview.src = ''; preview.classList.add('d-none'); input.value = '';
+  });
+})();
 </script>
 @endpush

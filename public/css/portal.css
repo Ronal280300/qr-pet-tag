@@ -100,4 +100,60 @@ html,body{ background:var(--bg); color:var(--ink); }
 
 
 
+/* ========= Uploader de foto (preview fijo y pequeño) ========= */
+:root{
+  /* tamaño del cuadrito */
+  --uploader-size: 140px;          /* móvil */
+}
+@media (min-width: 576px){ :root{ --uploader-size: 160px; } }  /* sm */
+@media (min-width: 992px){ :root{ --uploader-size: 190px; } }  /* lg */
+
+.photo-uploader{
+  display:flex; gap:1rem; align-items:flex-start; flex-wrap:wrap;
+}
+
+/* Marco cuadrado PEQUEÑO: nunca crece con la imagen */
+.photo-uploader__preview{
+  position:relative;
+  width:var(--uploader-size);
+  height:var(--uploader-size);
+  min-width:var(--uploader-size);
+  min-height:var(--uploader-size);
+  flex:0 0 var(--uploader-size);
+  border:1px dashed #d9e2ef;
+  border-radius:14px;
+  overflow:hidden;
+  background:#f8fafc;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* La imagen queda recortada dentro del marco y NO se expande */
+.photo-uploader__preview img{
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
+
+/* Feedback de arrastre (opcional) */
+#photoDrop.is-dragover{
+  border-color:#1e7cf2;
+  background:#eef5ff;
+}
+
+/* Texto flotante opcional */
+.photo-uploader__overlay{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  color:#64748b; background:linear-gradient(to bottom,rgba(255,255,255,.0),rgba(255,255,255,.6));
+  opacity:0; transition:opacity .2s ease; text-align:center; font-size:.9rem; padding:.5rem;
+}
+.photo-uploader__preview:hover .photo-uploader__overlay{ opacity:1; }
+
+
+
+
+
 

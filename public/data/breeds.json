@@ -1,0 +1,18 @@
+{
+  "perro": [
+    "Labrador Retriever","Poodle","Pastor Alemán","Golden Retriever","Bulldog Inglés","Beagle","Rottweiler",
+    "Chihuahua","Pug","Shih Tzu","Schnauzer","Doberman","Boxer","Pitbull","Husky Siberiano","Border Collie",
+    "Cocker Spaniel","Dachshund (Salchicha)","Boston Terrier","Bichón Frisé","Maltés","Akita","American Staffordshire Terrier",
+    "Australian Shepherd","Basenji","Basset Hound","Bernés de la Montaña","Bloodhound","Borzoi","Braco Alemán",
+    "Bull Terrier","Cane Corso","Cavalier King Charles","Collie","Dálmata","Galgo","Gran Danés","Greyhound",
+    "Hovawart","Jack Russell Terrier","Mastín Español","Mastín Napolitano","Pastor Belga","Pastor de Anatolia",
+    "Pastor Shetland","Perro de Agua Español","Pointer","Presa Canario","Samoyedo","San Bernardo","Shar Pei",
+    "Shiba Inu","Spaniel Bretón","Terranova","Vizsla","Weimaraner","West Highland White Terrier","Yorkshire Terrier"
+  ],
+  "gato": [
+    "Siames","Persa","Maine Coon","Bengalí","British Shorthair","Ragdoll","Sphynx","Azul Ruso","Abisinio","Birmano",
+    "Manx","Oriental","Scottish Fold","American Shorthair","Bosque de Noruega","Angora Turco","Van Turco","Burmés",
+    "Chartreux","Cornish Rex","Devon Rex","Egipcio Mau","Himalayo","Korat","Munchkin","Noruego de Bosque","Ocicat",
+    "Peterbald","Savannah","Snowshoe","Somalí","Tonquinés"
+  ]
+}

@@ -40,18 +40,21 @@ class PetController extends Controller
 
     public function store(Request $request, PetQrService $qrService)
     {
-        // Solo admin pre-carga mascotas
-        $this->ensureAdmin();
+        $this->ensureAdmin(); // pre-carga solo admin
 
         $data = $request->validate([
             'name'               => ['required', 'string', 'max:120'],
             'breed'              => ['nullable', 'string', 'max:120'],
-            'zone'               => ['nullable', 'string', 'max:120'],
+            'zone'               => ['nullable', 'string', 'max:255'],   // <- agregado
             'age'                => ['nullable', 'integer', 'min:0', 'max:50'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
             'photo'              => ['nullable', 'image', 'max:4096'],
-            'user_id'            => ['nullable', 'integer'], // opcional: asignar dueño
+            'user_id'            => ['nullable', 'integer'],
         ]);
+
+        if ($request->filled('zone')) {
+            $data['zone'] = $request->input('zone');
+        }
 
         $data['is_lost'] = false;
 
@@ -61,12 +64,10 @@ class PetController extends Controller
 
         $pet = Pet::create($data);
 
-        // ===== Nuevo: generar TAG automáticamente (QR + activation_code) =====
+        // Generar TAG/QR automáticamente si quieres
         $qr = QrCodeModel::firstOrNew(['pet_id' => $pet->id]);
-        $qrService->ensureSlugAndImage($qr, $pet); // setea slug, qr_code, image y activation_code
-        // ====================================================================
+        $qrService->ensureSlugAndImage($qr, $pet);
 
-        // Llevar al show con un mensajito que incluya el code
         return redirect()
             ->route('portal.pets.show', $pet)
             ->with('status', 'Mascota y TAG creados. Código de activación: ' . $qr->activation_code);
@@ -89,17 +90,20 @@ class PetController extends Controller
 
     public function update(Request $request, Pet $pet)
     {
-        // Dueño o admin pueden actualizar
         $this->authorizePetOrAdmin($pet);
 
         $data = $request->validate([
             'name'               => ['required', 'string', 'max:120'],
             'breed'              => ['nullable', 'string', 'max:120'],
-            'zone'               => ['nullable', 'string', 'max:120'],
+            'zone'               => ['nullable', 'string', 'max:255'],   // <- agregado
             'age'                => ['nullable', 'integer', 'min:0', 'max:50'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
             'photo'              => ['nullable', 'image', 'max:4096'],
         ]);
+
+        if ($request->filled('zone')) {
+            $data['zone'] = $request->input('zone');
+        }
 
         if ($request->hasFile('photo')) {
             if ($pet->photo && Storage::disk('public')->exists($pet->photo)) {
