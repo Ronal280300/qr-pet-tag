@@ -7,62 +7,83 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 class Kernel extends HttpKernel
 {
     /**
-     * The application's global HTTP middleware stack.
+     * Global HTTP middleware stack.
      *
-     * These middleware are run during every request to your application.
-     *
-     * @var array<int, class-string|string>
+     * Estos se ejecutan en *todas* las peticiones.
      */
     protected $middleware = [
-        // \App\Http\Middleware\TrustHosts::class,
+        // Confiar en los hosts (opcional; mantenlo si lo usas)
+        \App\Http\Middleware\TrustHosts::class,
+
+        // Respeta proxies/reverse proxies (Cloudflare, Nginx, etc.)
         \App\Http\Middleware\TrustProxies::class,
+
+        // CORS (si no usas el de API Platform, este está bien)
         \Illuminate\Http\Middleware\HandleCors::class,
-        \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
-        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+
+        // Validación de tamaño de POST
+        \Illuminate\Http\Middleware\ValidatePostSize::class,
+
+        // Trimea strings y convierte vacíos a null
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+
+        // Modo mantenimiento
+        \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
     ];
 
     /**
-     * The application's route middleware groups.
-     *
-     * @var array<string, array<int, class-string|string>>
+     * Middleware groups.
      */
     protected $middlewareGroups = [
         'web' => [
+            // Cookies y sesión
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
+
+            // Debe ir después de StartSession
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+
+            // Protección CSRF
             \App\Http\Middleware\VerifyCsrfToken::class,
+
+            // Enlaces modelo/route bindings
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
         'api' => [
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            // Rate limiting
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
+
+            // Enlaces modelo/route bindings
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
 
     /**
-     * The application's middleware aliases.
+     * Route middleware (aliases).
      *
-     * Aliases may be used to assign middleware to routes and groups.
-     *
-     * @var array<string, class-string|string>
+     * Se pueden aplicar individualmente en rutas.
      */
-    protected $middlewareAliases = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-        'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
-        'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        'can' => \Illuminate\Auth\Middleware\Authorize::class,
-        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+    protected $routeMiddleware = [
+        // Auth & permisos
+        'auth'             => \App\Http\Middleware\Authenticate::class,
+        'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'can'              => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest'            => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
-        'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
-        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'admin' => \App\Http\Middleware\AdminMiddleware::class, // ← Aquí agregamos el nuevo middleware
+        'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+
+        // Firma de URLs y cache headers
+        'signed'        => \Illuminate\Routing\Middleware\ValidateSignature::class,
+        'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+
+        // Throttle y bindings
+        'throttle'            => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'substituteBindings'  => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+
+        // 🔒 Solo administradores (tu middleware)
+        'admin' => \App\Http\Middleware\AdminOnly::class,
     ];
 }
