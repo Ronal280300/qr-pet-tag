@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'QR-Pet Tag')</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@yield('title', 'QR-Pet Tag')</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
 
-    <style>
-        :root {
-            --brand: #1e7cf2;
-            --brand-900: #0e61c6;
-        }
-        body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
-        .navbar { background: linear-gradient(90deg, var(--brand), var(--brand-900)); }
-        .navbar-brand { font-weight: 700; letter-spacing:.2px; }
-        .container-narrow { max-width: 1080px; }
-        .card { border: 0; box-shadow: 0 4px 20px rgba(0,0,0,.06); }
-        .card-title { font-weight: 600; }
-        .badge { font-weight: 600; }
-        .btn-primary { background-color: var(--brand); border-color: var(--brand); }
-        .btn-primary:hover { background-color: var(--brand-900); border-color: var(--brand-900); }
-        .hero { padding: 3rem 0 2rem; }
-        .hero h1 { font-weight: 800; letter-spacing: .3px; }
-        .qr-image { max-width: 240px; }
-        .list-kv .list-group-item { display:flex; justify-content:space-between; align-items:center; }
-        .list-kv .key { font-weight:600; color:#506176; }
-        .list-kv .val { text-align:right; }
-        @media (max-width: 576px) {
-            .list-kv .list-group-item { flex-direction: column; align-items: flex-start; }
-            .list-kv .val { text-align:left; }
-        }
-    </style>
+  <style>
+    :root { --brand:#1e7cf2; --brand-900:#0e61c6; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
+    .navbar{ background:linear-gradient(90deg,var(--brand),var(--brand-900)); }
+    .navbar-brand{ font-weight:700; letter-spacing:.2px; }
+    .container-narrow{ max-width:1080px; }
+    .card{ border:0; box-shadow:0 4px 20px rgba(0,0,0,.06); }
+    .card-title{ font-weight:600; }
+    .badge{ font-weight:600; }
+    .btn-primary{ background-color:var(--brand); border-color:var(--brand); }
+    .btn-primary:hover{ background-color:var(--brand-900); border-color:var(--brand-900); }
+    .hero{ padding:3rem 0 2rem; }
+    .hero h1{ font-weight:800; letter-spacing:.3px; }
+    .qr-image{ max-width:240px; }
+    .list-kv .list-group-item{ display:flex; justify-content:space-between; align-items:center; }
+    .list-kv .key{ font-weight:600; color:#506176; }
+    .list-kv .val{ text-align:right; }
+    @media (max-width:576px){
+      .list-kv .list-group-item{ flex-direction:column; align-items:flex-start; }
+      .list-kv .val{ text-align:left; }
+    }
+  </style>
 
-    @stack('styles')
+  @stack('styles')
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark">
@@ -80,11 +77,18 @@
 
 <main class="py-4">
   <div class="container container-narrow">
-    @if(session('error'))
-      <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-    @if(session('status'))
-      <div class="alert alert-success">{{ session('status') }}</div>
+
+    {{-- Avisos flash centralizados (UNA sola vez) --}}
+    @if(
+      session()->has('success') ||
+      session()->has('status')  ||
+      session()->has('error')   ||
+      session()->has('danger')  ||
+      session()->has('warning') ||
+      session()->has('info')    ||
+      $errors->any()
+    )
+      @include('partials.flash')
     @endif
 
     @yield('content')

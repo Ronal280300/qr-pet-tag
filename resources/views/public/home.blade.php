@@ -246,7 +246,7 @@
 {{-- Footer simple dentro de la landing (puede moverse a un layout parcial si quieres) --}}
 <section class="py-4 text-center text-muted">
   <div class="container container-narrow small">
-    © {{ date('Y') }} QR-Pet Tag — Hecho con ❤️ en Costa Rica
+    © {{ date('Y') }} QR-Pet Tag
   </div>
 </section>
 

@@ -4,46 +4,61 @@ namespace App\Services;
 
 use App\Models\Pet;
 use App\Models\QrCode as QrCodeModel;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeFacade;
 
 class PetQrService
 {
+    /**
+     * Asegura slug público, URL pública, imagen del QR y activation_code.
+     * Guarda el modelo $qr al final.
+     */
     public function ensureSlugAndImage(QrCodeModel $qr, Pet $pet): void
     {
-        // Slug único legible
+        // 1) Si es un QR nuevo, genera un activation_code único
+        if (!$qr->exists || empty($qr->activation_code)) {
+            $qr->activation_code = $this->generateUniqueActivationCode();
+        }
+
+        // 2) Slug estable (nombre + id) si no existe
         if (empty($qr->slug)) {
-            $base = Str::slug($pet->name . '-' . $pet->id);
-            $slug = $base;
-            $n = 1;
-            while (QrCodeModel::where('slug', $slug)->where('id', '!=', $qr->id)->exists()) {
-                $slug = $base . '-' . $n++;
-            }
-            $qr->slug = $slug;
+            $qr->slug = Str::slug($pet->name) . '-' . $pet->id;
         }
 
-        $publicUrl = url('/pet/' . $qr->slug);
-        $dir = 'qrcodes';
+        // 3) URL pública del perfil
+        $publicUrl = route('public.pet.show', ['slug' => $qr->slug]);
+        $qr->qr_code = $publicUrl;
 
-        // ¿Está disponible la extensión Imagick?
-        $hasImagick = class_exists(\Imagick::class);
+        // 4) Generar imagen del QR (SVG para evitar dependencia de Imagick)
+        $folder   = 'qrcodes';
+        $filename = $qr->slug . '.svg';
+        $path     = $folder . '/' . $filename;
 
-        if ($hasImagick) {
-            // PNG (requiere imagick)
-            $binary = QrCode::format('png')->size(600)->margin(2)->errorCorrection('M')->generate($publicUrl);
-            $path = $dir . '/' . $qr->slug . '.png';
-            Storage::disk('public')->put($path, $binary);
-        } else {
-            // Fallback: SVG (sin dependencias, 100% funcional)
-            $svg = QrCode::format('svg')->size(600)->margin(2)->errorCorrection('M')->generate($publicUrl);
-            $path = $dir . '/' . $qr->slug . '.svg';
-            Storage::disk('public')->put($path, $svg);
-        }
+        $svg = QrCodeFacade::format('svg')
+            ->size(800)
+            ->margin(1)
+            ->errorCorrection('M')
+            ->generate($publicUrl);
 
-        $qr->pet_id  = $pet->id;
-        $qr->qr_code = $publicUrl;  // URL pública del perfil
-        $qr->image   = $path;       // ajusta a image_path si tu columna se llama distinto
+        Storage::disk('public')->put($path, $svg);
+
+        $qr->image = $path;
+
+        // 5) Guardar
         $qr->save();
+    }
+
+    /**
+     * Genera un activation_code único (legible y con buen “feel” para imprimir).
+     * Ej: ABCD-EFGH-1234
+     */
+    public function generateUniqueActivationCode(): string
+    {
+        do {
+            $code = strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4)) . '-' . random_int(1000, 9999);
+        } while (QrCodeModel::where('activation_code', $code)->exists());
+
+        return $code;
     }
 }
