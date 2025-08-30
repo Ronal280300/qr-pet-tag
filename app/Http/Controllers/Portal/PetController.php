@@ -14,27 +14,35 @@ use Illuminate\Validation\Rule;
 
 class PetController extends Controller
 {
+    public function __construct()
+    {
+        // Rutas que sí requieren ADMIN (solo estas)
+        $this->middleware(\App\Http\Middleware\AdminOnly::class)
+            ->only(['create', 'store', 'destroy', 'generateQR', 'regenCode']);
+    }
+
     public function index()
     {
-        $query = Pet::with(['qrCode', 'reward', 'user']);
+        $query = Pet::with(['qrCode', 'reward', 'user'])->latest('id');
+
         if (!$this->isAdmin()) {
             $query->where('user_id', Auth::id());
         }
-        $pets = $query->latest('id')->paginate(12);
+
+        $pets = $query->paginate(12);
 
         return view('portal.pets.index', compact('pets'));
     }
 
     public function create()
     {
-        $this->ensureAdmin();
+        // Solo admin (enforced via middleware), aquí no necesitamos lógica extra
         return view('portal.pets.create');
     }
 
     public function store(Request $request, PetQrService $qrService)
     {
-        $this->ensureAdmin();
-
+        // Solo admin (enforced via middleware)
         $data = $request->validate([
             'name'               => ['required', 'string', 'max:120'],
             'breed'              => ['nullable', 'string', 'max:120'],
@@ -65,6 +73,7 @@ class PetController extends Controller
     public function show(Pet $pet)
     {
         $this->authorizePetOrAdmin($pet);
+
         $qr = $pet->qrCode()->first();
         return view('portal.pets.show', [
             'pet' => $pet,
@@ -74,12 +83,15 @@ class PetController extends Controller
 
     public function edit(Pet $pet)
     {
+        // DUEÑO O ADMIN pueden editar
         $this->authorizePetOrAdmin($pet);
+
         return view('portal.pets.edit', compact('pet'));
     }
 
     public function update(Request $request, Pet $pet)
     {
+        // DUEÑO O ADMIN
         $this->authorizePetOrAdmin($pet);
 
         $data = $request->validate([
@@ -107,13 +119,14 @@ class PetController extends Controller
 
     public function destroy(Pet $pet)
     {
-        $this->ensureAdmin(); // SOLO ADMIN
+        // Solo admin (enforced via middleware)
         $pet->delete();
         return redirect()->route('portal.pets.index')->with('status', 'Mascota eliminada.');
     }
 
     public function toggleLost(Pet $pet)
     {
+        // DUEÑO O ADMIN
         $this->authorizePetOrAdmin($pet);
 
         $pet->is_lost = ! $pet->is_lost;
@@ -126,6 +139,7 @@ class PetController extends Controller
 
     public function updateReward(Request $request, Pet $pet)
     {
+        // DUEÑO O ADMIN
         $this->authorizePetOrAdmin($pet);
 
         $activeBool = filter_var($request->input('active'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
@@ -147,7 +161,7 @@ class PetController extends Controller
 
         $reward = Reward::firstOrNew(['pet_id' => $pet->id]);
         $reward->active  = $data['active'];
-        $reward->amount  = $data['active'] ? (float) $data['amount'] : 0.00;
+        $reward->amount  = $data['active'] ? (float) ($data['amount'] ?? 0) : 0.00;
         $reward->message = $data['message'] ?? null;
         $reward->save();
 
@@ -156,8 +170,7 @@ class PetController extends Controller
 
     public function generateQR(Pet $pet, PetQrService $qrService)
     {
-        $this->ensureAdmin(); // solo admin genera/regenera
-
+        // Solo admin (enforced via middleware)
         $qr = QrCodeModel::firstOrCreate(
             ['pet_id' => $pet->id],
             [
@@ -174,13 +187,12 @@ class PetController extends Controller
 
     public function downloadQr(Pet $pet)
     {
-        if (!$this->isAdmin() && $pet->user_id !== Auth::id()) {
-            abort(403, 'No tienes permiso para esta mascota.');
-        }
+        // DUEÑO O ADMIN
+        $this->authorizePetOrAdmin($pet);
 
         $qr = QrCodeModel::firstWhere('pet_id', $pet->id);
         if (!$qr || !$qr->image || !Storage::disk('public')->exists($qr->image)) {
-            abort(404, 'QR no disponible.');
+            return back()->with('danger', 'No hay imagen del QR para descargar.');
         }
 
         $absolutePath = Storage::disk('public')->path($qr->image);
@@ -194,38 +206,35 @@ class PetController extends Controller
 
     public function regenCode(Pet $pet)
     {
-        $this->ensureAdmin(); // solo admin
-
+        // Solo admin (enforced via middleware)
         $qr = QrCodeModel::firstOrCreate(
             ['pet_id' => $pet->id],
             ['slug' => null, 'image' => null, 'activation_code' => null]
         );
 
-        // Solo cambiamos el código; el slug/imagen del QR se mantienen
+        // Cambiamos solo el código de activación
         $qr->activation_code = QrCodeModel::generateActivationCode();
         $qr->save();
 
         return back()->with('status', 'Código de activación regenerado: ' . $qr->activation_code);
     }
 
+    /* ===================== Helpers ===================== */
+
     private function authorizePetOrAdmin(Pet $pet): void
     {
         if ($this->isAdmin()) return;
+
+        // Dueño
         if (!is_null($pet->user_id) && $pet->user_id === Auth::id()) {
             return;
         }
+
         abort(403, 'No tienes permiso para esta mascota.');
     }
 
     private function isAdmin(): bool
     {
         return (bool) (Auth::user()->is_admin ?? false);
-    }
-
-    private function ensureAdmin(): void
-    {
-        if (!$this->isAdmin()) {
-            abort(403, 'Solo administradores.');
-        }
     }
 }

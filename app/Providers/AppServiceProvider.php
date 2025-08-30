@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-// use Illuminate\Support\Facades\Schema; // Descomenta si necesitas defaultStringLength
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Si usas MySQL antiguo y da error con índices grandes:
-        // Schema::defaultStringLength(191);
+        // Forzar a Laravel a usar las vistas de paginación de Bootstrap 5
+        Paginator::useBootstrapFive();
     }
 }

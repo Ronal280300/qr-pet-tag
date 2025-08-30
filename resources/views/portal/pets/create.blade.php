@@ -64,9 +64,25 @@
             <textarea name="medical_conditions" id="medical_conditions" rows="4" class="form-control" placeholder="Alergias, medicación, etc."></textarea>
           </div>
 
-          {{-- FOTO (uploader pequeño con preview) --}}
+          {{-- ==========================================
+               NUEVO: FOTOS MÚLTIPLES (con vista previa)
+               ========================================== --}}
           <div class="col-12">
-            <label class="form-label">Foto</label>
+            <label class="form-label fw-semibold">Fotos (puedes seleccionar varias)</label>
+            <input type="file" id="photos" name="photos[]" class="form-control" multiple accept="image/*">
+            <div class="form-text">Formatos: JPG/PNG. Tamaño máx. 6 MB por imagen.</div>
+
+            {{-- Previews en cuadrícula --}}
+            <div id="photosPreviewGrid" class="mt-3 photos-grid d-none"></div>
+
+            <button type="button" id="btnClearPhotos" class="btn btn-outline-danger btn-sm mt-2 d-none">
+              <i class="fa-solid fa-xmark me-1"></i> Quitar todas
+            </button>
+          </div>
+
+          {{-- FOTO (uploader pequeño con preview) - COMPATIBILIDAD LEGACY --}}
+          <div class="col-12">
+            <label class="form-label">Foto principal (opcional, sistema antiguo)</label>
             <div class="photo-uploader">
               <div class="photo-uploader__preview" id="photoDrop">
                 <img id="photoPreview" src="" alt="Vista previa" class="d-none">
@@ -108,6 +124,31 @@
     border-radius:.375rem; display:none;
   }
   .select-loading.loading::after{ display:block; }
+
+  /* Previews grid de fotos múltiples */
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: .75rem;
+  }
+  .photos-grid .ph {
+    position: relative;
+    border: 1px solid #e5e7eb;
+    border-radius: .5rem;
+    overflow: hidden;
+    background: #f8fafc;
+    aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photos-grid .ph img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .photos-grid .ph .ph-remove {
+    position: absolute; top: .35rem; right: .35rem;
+    border: 0; border-radius: 999px; width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.55); color: #fff;
+  }
 </style>
 @endpush
 
@@ -237,6 +278,73 @@
 
   clear.addEventListener('click', () => {
     preview.src = ''; preview.classList.add('d-none'); input.value = '';
+  });
+})();
+</script>
+
+<script>
+/* NUEVO: Previews de fotos múltiples */
+(function(){
+  const input = document.getElementById('photos');
+  const grid  = document.getElementById('photosPreviewGrid');
+  const btnClear = document.getElementById('btnClearPhotos');
+
+  // Mantenemos una lista virtual para poder "remover" antes de enviar
+  let filesBuffer = [];
+
+  function refreshGrid(){
+    grid.innerHTML = '';
+    if(filesBuffer.length === 0){
+      grid.classList.add('d-none');
+      btnClear.classList.add('d-none');
+      return;
+    }
+    grid.classList.remove('d-none');
+    btnClear.classList.remove('d-none');
+
+    filesBuffer.forEach((file, idx) => {
+      const url = URL.createObjectURL(file);
+      const cell = document.createElement('div');
+      cell.className = 'ph';
+
+      const img = document.createElement('img');
+      img.src = url; img.alt = `Foto ${idx+1}`;
+      cell.appendChild(img);
+
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'ph-remove';
+      rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      rm.addEventListener('click', () => { removeAt(idx); });
+      cell.appendChild(rm);
+
+      grid.appendChild(cell);
+    });
+  }
+
+  function removeAt(i){
+    filesBuffer.splice(i, 1);
+    // reconstruimos FileList en el input
+    const dt = new DataTransfer();
+    filesBuffer.forEach(f => dt.items.add(f));
+    input.files = dt.files;
+    refreshGrid();
+  }
+
+  input.addEventListener('change', (e) => {
+    // concatenamos a buffer (respetando múltiples selecciones)
+    filesBuffer = [...filesBuffer, ...Array.from(e.target.files)];
+    // reconstruimos FileList con el buffer
+    const dt = new DataTransfer();
+    filesBuffer.forEach(f => dt.items.add(f));
+    input.files = dt.files;
+    refreshGrid();
+  });
+
+  btnClear.addEventListener('click', () => {
+    filesBuffer = [];
+    input.value = '';
+    refreshGrid();
   });
 })();
 </script>

@@ -15,6 +15,9 @@
         [$zDistrict, $zCanton, $zProvince] = $parts;
       }
     }
+
+    // fotos existentes (si tienes la relación $pet->photos)
+    $existingPhotos = method_exists($pet, 'photos') ? $pet->photos : collect();
   @endphp
 
   <form action="{{ route('portal.pets.update', $pet) }}" method="POST" enctype="multipart/form-data" id="pet-form">
@@ -74,41 +77,83 @@
         <textarea name="medical_conditions" id="medical_conditions" rows="4" class="form-control" placeholder="Alergias, medicación, etc." {{ $noMed ? 'disabled' : '' }}>{{ $pet->medical_conditions }}</textarea>
       </div>
 
-<div class="mb-4">
-  <label class="form-label">Foto</label>
+      {{-- ==================================================
+           NUEVO: FOTOS EXISTENTES + FOTOS NUEVAS (múltiples)
+           ================================================== --}}
+      <div class="col-12">
+        <label class="form-label fw-semibold">Fotos actuales</label>
 
-  <div class="photo-uploader">
-    <!-- Marco pequeño del preview -->
-    <div class="photo-uploader__preview" id="photoDrop">
-      <img
-        id="photoPreview"
-        src="{{ $pet->photo ? asset('storage/'.$pet->photo) : '' }}"
-        alt="Vista previa"
-        class="{{ $pet->photo ? '' : 'd-none' }}"
-      >
-      @unless($pet->photo)
-        <div class="photo-uploader__overlay">Arrastra una imagen o haz clic en “Seleccionar imagen”.</div>
-      @endunless
+        @if($existingPhotos->isEmpty())
+          <div class="text-muted mb-2">No hay fotos adicionales.</div>
+        @else
+          <div class="photos-grid mb-2">
+            @foreach($existingPhotos as $ph)
+              <div class="ph">
+                <img src="{{ asset('storage/'.$ph->path) }}" alt="Foto existente">
+                {{-- Marcar para eliminar (el backend debe honrar esto) --}}
+                <label class="ph-remove" title="Quitar esta foto">
+                  <input type="checkbox" name="delete_photos[]" value="{{ $ph->id }}" class="d-none">
+                  <i class="fa-solid fa-xmark"></i>
+                </label>
+              </div>
+            @endforeach
+          </div>
+          <div class="small text-muted mb-3">
+            Marca la ❌ de una foto para eliminarla al guardar.
+          </div>
+        @endif
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold">Agregar fotos (puedes seleccionar varias)</label>
+        <input type="file" id="photos" name="photos[]" class="form-control" multiple accept="image/*">
+        <div class="form-text">Formatos: JPG/PNG. Tamaño máx. 6 MB por imagen.</div>
+
+        {{-- Previews de nuevas fotos --}}
+        <div id="photosPreviewGrid" class="mt-3 photos-grid d-none"></div>
+
+        <button type="button" id="btnClearPhotos" class="btn btn-outline-danger btn-sm mt-2 d-none">
+          <i class="fa-solid fa-xmark me-1"></i> Quitar todas (nuevas)
+        </button>
+      </div>
+
+      {{-- ===========================================
+           LEGACY: FOTO PRINCIPAL (sistema anterior)
+           =========================================== --}}
+      <div class="mb-4">
+        <label class="form-label">Foto principal (opcional, sistema antiguo)</label>
+
+        <div class="photo-uploader">
+          <!-- Marco pequeño del preview -->
+          <div class="photo-uploader__preview" id="photoDrop">
+            <img
+              id="photoPreview"
+              src="{{ $pet->photo ? asset('storage/'.$pet->photo) : '' }}"
+              alt="Vista previa"
+              class="{{ $pet->photo ? '' : 'd-none' }}"
+            >
+            @unless($pet->photo)
+              <div class="photo-uploader__overlay">Arrastra una imagen o haz clic en “Seleccionar imagen”.</div>
+            @endunless
+          </div>
+
+          <!-- Botones / acciones -->
+          <div class="photo-uploader__actions">
+            <label for="photo" class="btn btn-outline-primary">
+              <i class="fa-solid fa-image me-1"></i> Seleccionar imagen
+            </label>
+            <input id="photo" name="photo" type="file" accept="image/*" class="d-none">
+            <button type="button" id="btnClearPhoto" class="btn btn-outline-danger">
+              <i class="fa-solid fa-xmark me-1"></i> Quitar
+            </button>
+          </div>
+        </div>
+
+        <small class="text-muted d-block mt-2">
+          Formatos: JPG/PNG. Tamaño máx. 4 MB. El recorte es solo de vista previa.
+        </small>
+      </div>
     </div>
-
-    <!-- Botones / acciones -->
-    <div class="photo-uploader__actions">
-      <label for="photo" class="btn btn-outline-primary">
-        <i class="fa-solid fa-image me-1"></i> Seleccionar imagen
-      </label>
-      <input id="photo" name="photo" type="file" accept="image/*" class="d-none">
-      <button type="button" id="btnClearPhoto" class="btn btn-outline-danger">
-        <i class="fa-solid fa-xmark me-1"></i> Quitar
-      </button>
-    </div>
-  </div>
-
-  <small class="text-muted d-block mt-2">
-    Formatos: JPG/PNG. Tamaño máx. 4 MB. El recorte es solo de vista previa.
-  </small>
-</div>
-
-
 
     <div class="mt-4 d-flex gap-2">
       <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar</button>
@@ -128,9 +173,34 @@
     border-radius:.375rem; display:none;
   }
   .select-loading.loading::after{ display:block; }
+
+  /* Previews grid de fotos múltiples */
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: .75rem;
+  }
+  .photos-grid .ph {
+    position: relative;
+    border: 1px solid #e5e7eb;
+    border-radius: .5rem;
+    overflow: hidden;
+    background: #f8fafc;
+    aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photos-grid .ph img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .photos-grid .ph .ph-remove {
+    position: absolute; top: .35rem; right: .35rem;
+    border: 0; border-radius: 999px; width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.55); color: #fff; cursor: pointer;
+  }
+  .photos-grid .ph .ph-remove input { display:none; }
 </style>
 @endpush
-
 
 @push('scripts')
 <script>
@@ -182,6 +252,8 @@
     if(pName && cName && dName){
       const z = `${dName}, ${cName}, ${pName}`;
       $zone.value = z; $zonePreview.textContent = z;
+    } else {
+      $zone.value = ''; $zonePreview.textContent = '—';
     }
   }
 
@@ -251,6 +323,7 @@
 </script>
 
 <script>
+/* LEGACY: uploader pequeño de foto principal */
 (function(){
   const input   = document.getElementById('photo');
   const preview = document.getElementById('photoPreview');
@@ -267,7 +340,6 @@
 
   input.addEventListener('change', e => show(e.target.files[0]));
 
-  // Opcional: drag & drop
   ['dragenter','dragover'].forEach(ev =>
     drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('is-dragover'); })
   );
@@ -279,14 +351,74 @@
     if(file){ input.files = e.dataTransfer.files; show(file); }
   });
 
-  // Quitar preview (solo visual; si quieres limpiar el archivo enviado, resetea el input)
   clear.addEventListener('click', () => {
     preview.src = '';
     preview.classList.add('d-none');
-    input.value = ''; // limpia el input para que no se envíe el archivo
+    input.value = '';
   });
 })();
 </script>
 
-@endpush
+<script>
+/* NUEVO: Previews de fotos NUEVAS (múltiples) */
+(function(){
+  const input = document.getElementById('photos');
+  const grid  = document.getElementById('photosPreviewGrid');
+  const btnClear = document.getElementById('btnClearPhotos');
 
+  let filesBuffer = [];
+
+  function refreshGrid(){
+    grid.innerHTML = '';
+    if(filesBuffer.length === 0){
+      grid.classList.add('d-none');
+      btnClear.classList.add('d-none');
+      return;
+    }
+    grid.classList.remove('d-none');
+    btnClear.classList.remove('d-none');
+
+    filesBuffer.forEach((file, idx) => {
+      const url = URL.createObjectURL(file);
+      const cell = document.createElement('div');
+      cell.className = 'ph';
+
+      const img = document.createElement('img');
+      img.src = url; img.alt = `Nueva foto ${idx+1}`;
+      cell.appendChild(img);
+
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'ph-remove';
+      rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      rm.addEventListener('click', () => { removeAt(idx); });
+      cell.appendChild(rm);
+
+      grid.appendChild(cell);
+    });
+  }
+
+  function removeAt(i){
+    filesBuffer.splice(i, 1);
+    const dt = new DataTransfer();
+    filesBuffer.forEach(f => dt.items.add(f));
+    input.files = dt.files;
+    refreshGrid();
+  }
+
+  input.addEventListener('change', (e) => {
+    filesBuffer = [...filesBuffer, ...Array.from(e.target.files)];
+    const dt = new DataTransfer();
+    filesBuffer.forEach(f => dt.items.add(f));
+    input.files = dt.files;
+    refreshGrid();
+  });
+
+  btnClear.addEventListener('click', () => {
+    filesBuffer = [];
+    input.value = '';
+    refreshGrid();
+  });
+})();
+</script>
+@endpush

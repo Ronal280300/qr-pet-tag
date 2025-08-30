@@ -5,35 +5,66 @@
 
 @section('content')
 @php
-/** Vars de ayuda */
-$isAdmin = (bool) (auth()->user()->is_admin ?? false);
+    /** Vars de ayuda */
+    $isAdmin = (bool) (auth()->user()->is_admin ?? false);
 
-// Relación del QR de la mascota
-$qr = $pet->qrCode; // asegúrate que existe $pet->qrCode()
+    // Relación del QR de la mascota
+    $qr = $pet->qrCode; // asegúrate que existe $pet->qrCode()
 
-// Slug y URL pública: SOLO si ya existe el slug (se crea cuando generas el QR)
-$slug = $qr->slug ?? null;
-$publicUrl = $slug ? route('public.pet.show', $slug) : null;
+    // Slug y URL pública: SOLO si ya existe el slug (se crea cuando generas el QR)
+    $slug = $qr->slug ?? null;
+    $publicUrl = $slug ? route('public.pet.show', $slug) : null;
 
-// Imagen del QR si fue generada
-$qrImageUrl = ($qr && $qr->image && Storage::disk('public')->exists($qr->image))
-? Storage::url($qr->image)
-: null;
+    // Imagen del QR si fue generada
+    $qrImageUrl = ($qr && $qr->image && Storage::disk('public')->exists($qr->image))
+        ? Storage::url($qr->image)
+        : null;
 
-// ¿Puede descargar QR? — dueño o admin
-$canDownloadQr = $qrImageUrl && (auth()->id() === $pet->user_id || $isAdmin);
+    // ¿Puede descargar QR? — dueño o admin
+    $canDownloadQr = $qrImageUrl && (auth()->id() === $pet->user_id || $isAdmin);
+
+    // === NUEVO: fotos múltiples ===
+    $photos = $pet->photos;              // colección (puede estar vacía)
+    $mainPhotoUrl = $pet->main_photo_url; // accesor del modelo (primera múltiple | 'photo' legacy | placeholder)
 @endphp
 <div class="row g-4">
     {{-- Columna izquierda: foto y ficha --}}
     <div class="col-12 col-lg-8">
         <div class="card card-elevated mb-3">
-            <div class="ratio ratio-16x9 rounded-top overflow-hidden">
-                @if($pet->photo && Storage::disk('public')->exists($pet->photo))
-                <img src="{{ Storage::url($pet->photo) }}" class="w-100 h-100 object-cover" alt="Mascota">
-                @else
-                <img src="https://placehold.co/1280x720?text=Mascota" class="w-100 h-100 object-cover" alt="Mascota">
-                @endif
+            {{-- === NUEVO: Carrusel si hay varias fotos (o 1), sin recortes === --}}
+            <div class="rounded-top overflow-hidden">
+                <div id="petPhotosCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        @if($photos->isEmpty())
+                            <div class="carousel-item active">
+                                <div class="ratio ratio-16x9">
+                                    <img src="{{ $mainPhotoUrl }}" class="w-100 h-100 object-contain bg-light" alt="Mascota">
+                                </div>
+                            </div>
+                        @else
+                            @foreach($photos as $i => $ph)
+                                <div class="carousel-item {{ $i === 0 ? 'active' : '' }}">
+                                    <div class="ratio ratio-16x9">
+                                        <img src="{{ asset('storage/'.$ph->path) }}" class="w-100 h-100 object-contain bg-light" alt="Mascota {{ $i+1 }}">
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+
+                    @if($photos->count() > 1)
+                        <button class="carousel-control-prev" type="button" data-bs-target="#petPhotosCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#petPhotosCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Siguiente</span>
+                        </button>
+                    @endif
+                </div>
             </div>
+            {{-- === FIN carrusel === --}}
 
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
@@ -45,29 +76,29 @@ $canDownloadQr = $qrImageUrl && (auth()->id() === $pet->user_id || $isAdmin);
                         </a>
 
                         @if($isAdmin)
-                        <form action="{{ route('portal.pets.destroy',$pet) }}" method="POST" onsubmit="return confirmDelete(event)">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                <i class="fa-solid fa-trash-can me-1"></i> Eliminar
-                            </button>
-                        </form>
+                            <form action="{{ route('portal.pets.destroy',$pet) }}" method="POST" onsubmit="return confirmDelete(event)">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+                                </button>
+                            </form>
                         @endif
                     </div>
                 </div>
 
                 <div class="meta mb-3">
                     @if($pet->breed)
-                    <span class="chip"><i class="fa-solid fa-dog me-1"></i> {{ $pet->breed }}</span>
+                        <span class="chip"><i class="fa-solid fa-dog me-1"></i> {{ $pet->breed }}</span>
                     @else
-                    <span class="chip"><i class="fa-solid fa-dog me-1"></i> No definida</span>
+                        <span class="chip"><i class="fa-solid fa-dog me-1"></i> No definida</span>
                     @endif
 
                     @if($pet->zone)
-                    <span class="chip"><i class="fa-solid fa-location-dot me-1"></i> {{ $pet->zone }}</span>
+                        <span class="chip"><i class="fa-solid fa-location-dot me-1"></i> {{ $pet->zone }}</span>
                     @endif
 
                     @if(!is_null($pet->age))
-                    <span class="chip"><i class="fa-solid fa-cake-candles me-1"></i> {{ $pet->age }} {{ Str::plural('año',$pet->age) }}</span>
+                        <span class="chip"><i class="fa-solid fa-cake-candles me-1"></i> {{ $pet->age }} {{ Str::plural('año',$pet->age) }}</span>
                     @endif
 
                     <span class="chip"><i class="fa-solid fa-user me-1"></i> {{ optional($pet->user)->name }}</span>
@@ -107,68 +138,68 @@ $canDownloadQr = $qrImageUrl && (auth()->id() === $pet->user_id || $isAdmin);
 
                     {{-- El TAG solo lo ve el admin --}}
                     @if($isAdmin && $qr && $qr->activation_code)
-                    <span class="badge rounded-pill text-bg-light fw-semibold">
-                        TAG: <span class="text-primary ms-1">{{ $qr->activation_code }}</span>
-                    </span>
+                        <span class="badge rounded-pill text-bg-light fw-semibold">
+                            TAG: <span class="text-primary ms-1">{{ $qr->activation_code }}</span>
+                        </span>
                     @endif
                 </div>
 
                 {{-- PREVISUALIZACIÓN DEL QR --}}
                 <div class="qr-preview mb-2 d-flex justify-content-center">
                     @if($qrImageUrl)
-                    <img src="{{ $qrImageUrl }}" alt="QR" class="qr-img">
+                        <img src="{{ $qrImageUrl }}" alt="QR" class="qr-img">
                     @else
-                    <div class="qr-placeholder text-muted small text-center">
-                        <i class="fa-solid fa-qrcode fa-2x mb-2"></i>
-                        <div>Aún no se ha generado el QR.</div>
-                    </div>
+                        <div class="qr-placeholder text-muted small text-center">
+                            <i class="fa-solid fa-qrcode fa-2x mb-2"></i>
+                            <div>Aún no se ha generado el QR.</div>
+                        </div>
                     @endif
                 </div>
 
                 {{-- URL pública (solo si hay slug) --}}
                 <div class="small text-muted mb-2" style="word-break: break-all;">
                     @if($publicUrl)
-                    {{ $publicUrl }}
+                        {{ $publicUrl }}
                     @else
-                    <em>Genera el QR para obtener la URL pública.</em>
+                        <em>Genera el QR para obtener la URL pública.</em>
                     @endif
                 </div>
 
                 {{-- Acciones --}}
                 <div class="vstack gap-2">
                     @if($isAdmin)
-                    <form action="{{ route('portal.pets.generate-qr',$pet) }}" method="POST">
-                        @csrf
-                        <button class="btn btn-primary w-100">
-                            <i class="fa-solid fa-qrcode me-2"></i> Generar / Regenerar QR
-                        </button>
-                    </form>
+                        <form action="{{ route('portal.pets.generate-qr',$pet) }}" method="POST">
+                            @csrf
+                            <button class="btn btn-primary w-100">
+                                <i class="fa-solid fa-qrcode me-2"></i> Generar / Regenerar QR
+                            </button>
+                        </form>
                     @endif
 
                     <a class="btn btn-outline-secondary w-100 {{ $canDownloadQr ? '' : 'disabled opacity-50' }}"
-                        href="{{ $canDownloadQr ? route('portal.pets.download-qr', $pet) : '#' }}">
+                       href="{{ $canDownloadQr ? route('portal.pets.download-qr', $pet) : '#' }}">
                         <i class="fa-solid fa-download me-2"></i> Descargar QR
                     </a>
 
                     <a class="btn btn-outline-info w-100 {{ $publicUrl ? '' : 'disabled opacity-50' }}"
-                        href="{{ $publicUrl ?: '#' }}" target="_blank" rel="noopener">
+                       href="{{ $publicUrl ?: '#' }}" target="_blank" rel="noopener">
                         <i class="fa-solid fa-up-right-from-square me-2"></i> Ver perfil público
                     </a>
 
                     <button type="button"
-                        class="btn btn-outline-secondary w-100 copy-url {{ $publicUrl ? '' : 'disabled opacity-50' }}"
-                        data-url="{{ $publicUrl ?? '' }}">
+                            class="btn btn-outline-secondary w-100 copy-url {{ $publicUrl ? '' : 'disabled opacity-50' }}"
+                            data-url="{{ $publicUrl ?? '' }}">
                         <i class="fa-solid fa-link me-2"></i> Copiar URL
                     </button>
 
                     {{-- Regenerar código/tag: solo admin --}}
                     @if($isAdmin && $qr)
-                    <form action="{{ route('portal.pets.regen-code', $pet) }}" method="POST">
-                        @csrf
-                        <button class="btn btn-outline-warning w-100">
-                            <i class="fa-solid fa-rotate me-2"></i> Regenerar código (TAG)
-                        </button>
-                    </form>
+                        <form action="{{ route('portal.pets.regen-code', $pet) }}" method="POST">
+                            @csrf
+                            <button class="btn btn-outline-warning w-100">
+                                <i class="fa-solid fa-rotate me-2"></i> Regenerar código (TAG)
+                            </button>
+                        </form>
                     @endif
                 </div>
             </div>
@@ -191,13 +222,13 @@ $canDownloadQr = $qrImageUrl && (auth()->id() === $pet->user_id || $isAdmin);
                         <div class="col-7">
                             <label class="form-label">Monto</label>
                             <input type="number" step="0.01" min="0" name="amount" class="form-control"
-                                value="{{ number_format((float) (optional($pet->reward)->amount ?? 0), 2, '.', '') }}">
+                                   value="{{ number_format((float) (optional($pet->reward)->amount ?? 0), 2, '.', '') }}">
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Mensaje</label>
                         <input type="text" name="message" class="form-control"
-                            value="{{ optional($pet->reward)->message ?? 'Gracias por tu ayuda 🙏' }}">
+                               value="{{ optional($pet->reward)->message ?? 'Gracias por tu ayuda 🙏' }}">
                     </div>
                     <button class="btn btn-success">
                         <i class="fa-solid fa-floppy-disk me-2"></i> Guardar recompensa
@@ -213,58 +244,24 @@ $canDownloadQr = $qrImageUrl && (auth()->id() === $pet->user_id || $isAdmin);
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/portal.css') }}">
 <style>
-    .card-elevated {
-        border: 0;
-        box-shadow: 0 10px 30px rgba(31, 41, 55, .06);
-    }
+    .card-elevated { border: 0; box-shadow: 0 10px 30px rgba(31, 41, 55, .06); }
+    .card-soft { border: 1px solid #eef1f5 }
+    .chip { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .7rem; background: #f5f7fb; border-radius: 999px; margin-right: .35rem }
+    .object-cover { object-fit: cover }
 
-    .card-soft {
-        border: 1px solid #eef1f5
-    }
-
-    .chip {
-        display: inline-flex;
-        align-items: center;
-        gap: .35rem;
-        padding: .35rem .7rem;
-        background: #f5f7fb;
-        border-radius: 999px;
-        margin-right: .35rem
-    }
-
-    .object-cover {
-        object-fit: cover
-    }
+    /* NUEVO: para que el carrusel no recorte imágenes */
+    .object-contain { object-fit: contain }
 
     /* Tamaño del QR responsive */
-    :root {
-        --qr-size: 180px;
-    }
-
-    @media (max-width: 576px) {
-        :root {
-            --qr-size: 150px;
-        }
-    }
+    :root { --qr-size: 180px; }
+    @media (max-width: 576px) { :root { --qr-size: 150px; } }
 
     .qr-preview {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f5f7fb;
-        border: 1px dashed #e3e8ef;
-        border-radius: 1rem;
-        padding: .5rem;
-        min-height: calc(var(--qr-size) + 20px);
+        display: flex; align-items: center; justify-content: center;
+        background: #f5f7fb; border: 1px dashed #e3e8ef; border-radius: 1rem;
+        padding: .5rem; min-height: calc(var(--qr-size) + 20px);
     }
-
-    .qr-img {
-        width: var(--qr-size);
-        height: var(--qr-size);
-        object-fit: contain;
-        image-rendering: crisp-edges;
-        image-rendering: pixelated;
-    }
+    .qr-img { width: var(--qr-size); height: var(--qr-size); object-fit: contain; image-rendering: crisp-edges; image-rendering: pixelated; }
 </style>
 @endpush
 

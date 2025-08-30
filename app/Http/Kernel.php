@@ -7,19 +7,20 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 class Kernel extends HttpKernel
 {
     /**
-     * Global HTTP middleware stack.
-     *
-     * Estos se ejecutan en *todas* las peticiones.
+     * Middleware globales (se ejecutan en todas las peticiones).
      */
     protected $middleware = [
-        // Confiar en los hosts (opcional; mantenlo si lo usas)
+        // Confiar en los hosts
         \App\Http\Middleware\TrustHosts::class,
 
         // Respeta proxies/reverse proxies (Cloudflare, Nginx, etc.)
         \App\Http\Middleware\TrustProxies::class,
 
-        // CORS (si no usas el de API Platform, este está bien)
+        // CORS
         \Illuminate\Http\Middleware\HandleCors::class,
+
+        // Modo mantenimiento
+        \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
 
         // Validación de tamaño de POST
         \Illuminate\Http\Middleware\ValidatePostSize::class,
@@ -27,46 +28,33 @@ class Kernel extends HttpKernel
         // Trimea strings y convierte vacíos a null
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-
-        // Modo mantenimiento
-        \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
     ];
 
     /**
-     * Middleware groups.
+     * Grupos de middleware.
      */
     protected $middlewareGroups = [
         'web' => [
-            // Cookies y sesión
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
-
-            // Debe ir después de StartSession
+            // \Illuminate\Session\Middleware\AuthenticateSession::class, // opcional
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-
-            // Protección CSRF
             \App\Http\Middleware\VerifyCsrfToken::class,
-
-            // Enlaces modelo/route bindings
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
         'api' => [
-            // Rate limiting
-            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
-
-            // Enlaces modelo/route bindings
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
 
     /**
-     * Route middleware (aliases).
-     *
-     * Se pueden aplicar individualmente en rutas.
+     * Aliases de middleware para las rutas (Laravel 11/12).
+     * Reemplaza al antiguo $routeMiddleware.
      */
-    protected $routeMiddleware = [
+    protected $middlewareAliases = [
         // Auth & permisos
         'auth'             => \App\Http\Middleware\Authenticate::class,
         'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
@@ -80,8 +68,8 @@ class Kernel extends HttpKernel
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
 
         // Throttle y bindings
-        'throttle'            => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'substituteBindings'  => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        'throttle'           => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'substituteBindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
 
         // 🔒 Solo administradores (tu middleware)
         'admin' => \App\Http\Middleware\AdminOnly::class,

@@ -6,21 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
+
+
 class QrCode extends Model
 {
     use HasFactory;
 
     protected $table = 'qr_codes';
 
-    protected $fillable = [
+   protected $fillable = [
         'pet_id',
         'slug',
-        'image',
+        'code',
         'activation_code',
-        'is_activated',
-        'activated_by',
-        'activated_at',
-        'qr_code', // si mantienes este campo por retrocompatibilidad
+        'image',
     ];
 
     protected $casts = [
@@ -30,7 +29,7 @@ class QrCode extends Model
 
     public function pet()
     {
-        return $this->belongsTo(Pet::class);
+       return $this->belongsTo(Pet::class, 'pet_id');
     }
 
     public function activatedByUser()

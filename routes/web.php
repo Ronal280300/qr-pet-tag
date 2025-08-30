@@ -3,11 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+// Controladores públicos y de portal
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\Portal\DashboardController;
 use App\Http\Controllers\Portal\PetController;
 use App\Http\Controllers\Portal\ActivateTagController;
-use App\Http\Controllers\Admin\TagController as AdminTagController;
+
+// Controladores de administración
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\TagController as AdminTagController;
+
+// Middleware
+use App\Http\Middleware\AdminOnly;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,10 +22,11 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 |--------------------------------------------------------------------------
 */
 
+// Home / landing
 Route::get('/', [PublicController::class, 'home'])->name('home');
 
-// Perfil público de la mascota (desde el QR por slug)
-Route::get('/pet/{slug}', [PublicController::class, 'showPet'])->name('public.pet.show');
+// Perfil público por SLUG (URL impresa en el TAG/QR)
+Route::get('/p/{slug}', [PublicController::class, 'showPet'])->name('public.pet.show');
 
 /*
 |--------------------------------------------------------------------------
@@ -29,44 +37,70 @@ Auth::routes();
 
 /*
 |--------------------------------------------------------------------------
-| Portal (usuarios autenticados: dueños + admin)
+| Portal (usuarios autenticados)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () {
 
-    // DASHBOARD ADMIN (solo admins)
+    // Dashboard dinámico (cambia según rol)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Dashboard Admin (atajo directo)
     Route::get('admin/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
 
-    // Dashboard (puede ser distinto para admin/cliente en la misma vista)
-    Route::view('/dashboard', 'portal.dashboard')->name('dashboard');
+    // Eliminar UNA foto de una mascota (solo admin)
+    Route::delete('pets/{pet}/photos/{photo}', [PetController::class, 'deletePhoto'])
+        ->name('pets.photos.destroy');
 
-    // Mascotas (REST). Los permisos se validan en el controlador.
-    Route::resource('pets', PetController::class);
-
-    // Acciones específicas sobre mascota
-    Route::post('pets/{pet}/toggle-lost', [PetController::class, 'toggleLost'])->name('pets.toggle-lost');
-    Route::post('pets/{pet}/reward',      [PetController::class, 'updateReward'])->name('pets.update-reward');
-
-    // QR (el controlador valida que solo admin pueda generar/regenerar)
-    Route::post('pets/{pet}/generate-qr', [PetController::class, 'generateQR'])->name('pets.generate-qr');
-    Route::get('pets/{pet}/download-qr', [PetController::class, 'downloadQr'])->name('pets.download-qr');
-    Route::post('pets/{pet}/regen-code',  [PetController::class, 'regenCode'])->name('pets.regen-code');
-
-    // Activación de TAG por el cliente
-    Route::get('/activate-tag', [ActivateTagController::class, 'create'])->name('activate-tag');
-    Route::post('/activate-tag', [ActivateTagController::class, 'store'])->name('activate-tag.store');
 
     /*
     |--------------------------------------------------------------------------
-    | Panel Admin de TAGs
+    | Gestión de mascotas del usuario
     |--------------------------------------------------------------------------
     */
-    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
-        Route::get('tags',                 [AdminTagController::class, 'index'])->name('tags.index');
-        Route::get('tags-export',          [AdminTagController::class, 'exportCsv'])->name('tags.export');
-        Route::post('tags/{qr}/regen-code', [AdminTagController::class, 'regenCode'])->name('tags.regen-code');
-        Route::post('tags/{qr}/rebuild',    [AdminTagController::class, 'rebuild'])->name('tags.rebuild');
-        Route::get('tags/{qr}/download',   [AdminTagController::class, 'download'])->name('tags.download');
-    });
+    Route::resource('pets', PetController::class);
+
+    // Acciones sobre mascota
+    Route::post('pets/{pet}/toggle-lost', [PetController::class, 'toggleLost'])->name('pets.toggle-lost');
+    Route::post('pets/{pet}/reward',      [PetController::class, 'updateReward'])->name('pets.update-reward');
+
+    // QR de la mascota
+    Route::post('pets/{pet}/generate-qr', [PetController::class, 'generateQR'])->name('pets.generate-qr');
+    Route::get('pets/{pet}/download-qr',  [PetController::class, 'downloadQr'])->name('pets.download-qr');
+    Route::post('pets/{pet}/regen-code',  [PetController::class, 'regenCode'])->name('pets.regen-code');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Activación de TAG para USUARIOS (no admin)
+    |--------------------------------------------------------------------------
+    | Estas rutas permiten que cualquier usuario autenticado active un TAG y lo
+    | asocie a una de sus mascotas.
+    */
+    Route::get('activate-tag',  [ActivateTagController::class, 'create'])->name('activate-tag');
+    Route::post('activate-tag', [ActivateTagController::class, 'store'])->name('activate-tag.store');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Panel de administración (dentro del portal)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('admin')
+        ->name('admin.')
+        ->middleware(AdminOnly::class)
+        ->group(function () {
+            // Inventario de TAGs
+            Route::get('tags',                  [AdminTagController::class, 'index'])->name('tags.index');
+            Route::get('tags-export',           [AdminTagController::class, 'exportCsv'])->name('tags.export');
+            Route::post('tags/{qr}/regen-code', [AdminTagController::class, 'regenCode'])->name('tags.regen-code');
+            Route::post('tags/{qr}/rebuild',    [AdminTagController::class, 'rebuild'])->name('tags.rebuild');
+            Route::get('tags/{qr}/download',    [AdminTagController::class, 'download'])->name('tags.download');
+
+            // Sincronizar TAGs faltantes (backfill de qr_codes para mascotas sin TAG)
+            Route::post('tags/backfill',        [AdminTagController::class, 'backfill'])->name('tags.backfill');
+
+            // Activar TAG (atajo para admin)
+            Route::get('activate-tag',  [ActivateTagController::class, 'create'])->name('activate-tag');
+            Route::post('activate-tag', [ActivateTagController::class, 'store'])->name('activate-tag.store');
+        });
 });

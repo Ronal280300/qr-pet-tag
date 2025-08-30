@@ -51,11 +51,30 @@
           <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Crear cuenta</a></li>
         @else
           <li class="nav-item"><a class="nav-link" href="{{ route('portal.dashboard') }}">Mi Portal</a></li>
+
+          {{-- Mascotas --}}
           <li class="nav-item">
             <a class="nav-link" href="{{ route('portal.pets.index') }}">
               <i class="fa-solid fa-dog me-1"></i> Mascotas
             </a>
           </li>
+
+          {{-- Admin dropdown solo si es admin --}}
+          @if(Auth::user()->is_admin)
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
+              <i class="fa-solid fa-screwdriver-wrench me-1"></i> Admin
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{{ route('portal.admin.dashboard') }}">Panel de administración</a></li>
+              <li><a class="dropdown-item" href="{{ route('portal.admin.tags.index') }}">Inventario de TAGs</a></li>
+              <li><a class="dropdown-item" href="{{ route('portal.admin.activate-tag') }}">Activar TAG</a></li>
+              <li><a class="dropdown-item" href="{{ route('portal.admin.tags.export') }}">Exportar TAGs (CSV)</a></li>
+            </ul>
+          </li>
+          @endif
+
+          {{-- Usuario --}}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
               {{ Auth::user()->name }}
@@ -78,7 +97,7 @@
 <main class="py-4">
   <div class="container container-narrow">
 
-    {{-- Avisos flash centralizados (UNA sola vez) --}}
+    {{-- Avisos flash centralizados --}}
     @if(
       session()->has('success') ||
       session()->has('status')  ||
@@ -96,6 +115,9 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{{-- SweetAlert2 global --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
+
 @stack('scripts')
 </body>
 </html>

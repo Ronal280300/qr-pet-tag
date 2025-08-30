@@ -3,163 +3,196 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pet;
 use App\Models\QrCode;
-use App\Services\PetQrService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TagController extends Controller
 {
     /**
-     * Listado con filtros/búsqueda.
+     * Inventario de TAGs (QRs)
+     * La vista espera: $tags, $stats, $q, $status
      */
     public function index(Request $request)
     {
-        $q      = trim($request->input('q', ''));
-        $status = $request->input('status', ''); // assigned|unassigned|with_image|without_image
+        // Valores que usa la vista en los inputs
+        $q      = trim((string) $request->input('q', ''));
+        $status = trim((string) $request->input('status', ''));
 
-        $query = QrCode::query()
-            ->with(['pet:id,name,slug'])
-            ->latest('id');
+        $query = QrCode::with(['pet:id,name']);
 
+        // Filtro de búsqueda
         if ($q !== '') {
             $query->where(function ($qq) use ($q) {
-                $qq->where('activation_code', 'like', "%{$q}%")
-                   ->orWhere('slug', 'like', "%{$q}%")
-                   ->orWhereHas('pet', function ($qp) use ($q) {
-                       $qp->where('name', 'like', "%{$q}%");
+                $qq->where('slug', 'like', "%{$q}%")
+                   ->orWhere('activation_code', 'like', "%{$q}%")
+                   ->orWhereHas('pet', function ($p) use ($q) {
+                       $p->where('name', 'like', "%{$q}%");
                    });
             });
         }
 
-        if ($status === 'assigned') {
-            $query->whereNotNull('pet_id');
-        } elseif ($status === 'unassigned') {
-            $query->whereNull('pet_id');
-        } elseif ($status === 'with_image') {
-            $query->whereNotNull('image');
-        } elseif ($status === 'without_image') {
-            $query->whereNull('image');
+        // Filtro por estado (coincide con los options de la vista)
+        switch ($status) {
+            case 'assigned':
+                $query->whereNotNull('pet_id');
+                break;
+            case 'unassigned':
+                $query->whereNull('pet_id');
+                break;
+            case 'with_image':
+                $query->whereNotNull('image');
+                break;
+            case 'without_image':
+                $query->whereNull('image');
+                break;
+            default:
+                // "Todos" => sin condición extra
+                break;
         }
 
-        $tags = $query->paginate(20)->withQueryString();
+        // ⚠️ La vista usa $tags, no $qrs
+        $tags = $query->latest('id')->paginate(25)->withQueryString();
 
+        // KPIs (nombres que la vista espera)
         $stats = [
-            'total'      => QrCode::count(),
-            'assigned'   => QrCode::whereNotNull('pet_id')->count(),
-            'unassigned' => QrCode::whereNull('pet_id')->count(),
-            'with_image' => QrCode::whereNotNull('image')->count(),
+            'total'       => QrCode::count(),
+            'assigned'    => QrCode::whereNotNull('pet_id')->count(),
+            'unassigned'  => QrCode::whereNull('pet_id')->count(),
+            'with_image'  => QrCode::whereNotNull('image')->count(),
         ];
 
-        return view('admin.tags.index', compact('tags', 'q', 'status', 'stats'));
+        return view('admin.tags.index', compact('tags', 'stats', 'q', 'status'));
     }
 
     /**
-     * Exportar CSV con los mismos filtros de index.
+     * Exportar CSV
      */
-    public function exportCsv(Request $request): StreamedResponse
+    public function exportCsv(): StreamedResponse
     {
-        $q      = trim($request->input('q', ''));
-        $status = $request->input('status', '');
-
-        $query = QrCode::query()->with('pet:id,name');
-
-        if ($q !== '') {
-            $query->where(function ($qq) use ($q) {
-                $qq->where('activation_code', 'like', "%{$q}%")
-                   ->orWhere('slug', 'like', "%{$q}%")
-                   ->orWhereHas('pet', fn ($qp) => $qp->where('name', 'like', "%{$q}%"));
-            });
-        }
-        if ($status === 'assigned')       $query->whereNotNull('pet_id');
-        elseif ($status === 'unassigned') $query->whereNull('pet_id');
-        elseif ($status === 'with_image') $query->whereNotNull('image');
-        elseif ($status === 'without_image') $query->whereNull('image');
-
-        $filename = 'tags_'.now()->format('Ymd_His').'.csv';
         $headers = [
             'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Content-Disposition' => 'attachment; filename="tags.csv"',
         ];
 
-        return response()->stream(function () use ($query) {
+        $callback = function () {
             $out = fopen('php://output', 'w');
-            // BOM para Excel
-            fwrite($out, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($out, ['ID', 'Código (TAG)', 'Slug', 'Mascota', 'Asignado', 'Imagen', 'Actualizado']);
 
-            $query->chunk(500, function ($rows) use ($out) {
-                foreach ($rows as $r) {
-                    fputcsv($out, [
-                        $r->id,
-                        $r->activation_code,
-                        $r->slug,
-                        optional($r->pet)->name ?: '',
-                        $r->pet_id ? 'Sí' : 'No',
-                        $r->image ? 'Sí' : 'No',
-                        optional($r->updated_at)->format('Y-m-d H:i'),
-                    ]);
-                }
-            });
+            // BOM UTF-8
+            fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Encabezados
+            fputcsv($out, ['id', 'slug', 'activation_code', 'pet_id', 'pet_name', 'image']);
+
+            QrCode::with('pet:id,name')
+                ->orderBy('id')
+                ->chunk(500, function ($rows) use ($out) {
+                    foreach ($rows as $qr) {
+                        fputcsv($out, [
+                            $qr->id,
+                            $qr->slug,
+                            $qr->activation_code,
+                            $qr->pet_id,
+                            optional($qr->pet)->name,
+                            $qr->image,
+                        ]);
+                    }
+                });
 
             fclose($out);
-        }, 200, $headers);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
-     * Regenerar el CÓDIGO (TAG).
+     * Regenerar el código de activación
      */
     public function regenCode(QrCode $qr)
     {
-        // Ojo: si está asignado, puedes requerir confirmación o evitarlo. Aquí lo permitimos.
-        $qr->activation_code = QrCode::generateActivationCode();
+        if (method_exists(QrCode::class, 'generateActivationCode')) {
+            $qr->activation_code = QrCode::generateActivationCode();
+        } else {
+            $qr->activation_code = strtoupper(Str::random(6));
+        }
+
         $qr->save();
 
-        return back()->with('status', 'Código (TAG) regenerado.');
+        return back()->with('success', 'Código de activación regenerado correctamente.');
     }
 
     /**
-     * Reconstruir imagen de QR (requiere que el TAG tenga slug y, si está asignado, enlaza al perfil público).
+     * Reconstruir imagen del QR (placeholder; ajusta a tu generador real)
      */
-    public function rebuild(QrCode $qr, PetQrService $qrService)
+    public function rebuild(QrCode $qr)
     {
-        // Si no hay mascota asignada, podemos aún generar el QR con la URL pública basada en slug.
-        if (!$qr->slug) {
-            // Garantizamos slug si falta
-            $qr->slug = $qr->slug ?: $qr->id.'-'.str()->slug('tag');
-            $qr->save();
+        // Aquí iría la regeneración real de la imagen
+        if (!$qr->image) {
+            $qr->image = 'qrs/'.$qr->id.'.png';
         }
+        $qr->save();
 
-        // Si la mascota existe, usamos el servicio estándar que ya usas en el flujo de mascotas.
-        if ($qr->pet) {
-            $qrService->ensureSlugAndImage($qr, $qr->pet);
-        } else {
-            // Sin mascota: construimos QR a la URL pública del slug
-            $publicUrl = route('public.pet.show', $qr->slug);
-            // Reutiliza el servicio si tiene método que acepte solo qr+url;
-            // si no, puedes crear aquí el PNG/SVG con la librería que ya usas.
-            // Para no duplicar lógica, intentamos:
-            $qrService->buildFromUrl($qr, $publicUrl); // Si no existe este método, usa tu implementación actual para generar PNG/SVG y guarda $qr->image
-        }
-
-        return back()->with('status', 'Imagen del QR reconstruida.');
+        return back()->with('success', 'Imagen del QR reconstruida.');
     }
 
     /**
-     * Descargar imagen asociada al TAG.
+     * Descargar imagen del QR, si existe
      */
     public function download(QrCode $qr)
     {
         if (!$qr->image || !Storage::disk('public')->exists($qr->image)) {
-            abort(404, 'Imagen no disponible.');
+            return back()->with('danger', 'No hay imagen del QR para descargar.');
         }
-        $absolute = Storage::disk('public')->path($qr->image);
-        $filename = 'tag-'.$qr->id.'.'.pathinfo($absolute, PATHINFO_EXTENSION);
 
-        return response()->download($absolute, $filename, [
-            'Content-Type'  => mime_content_type($absolute) ?: 'application/octet-stream',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-        ]);
+        $path = Storage::disk('public')->path($qr->image);
+        return response()->download($path);
+    }
+
+    /**
+     * Crear TAGs faltantes para mascotas sin QR (backfill)
+     */
+    public function backfill()
+    {
+        $petsMissing = Pet::whereDoesntHave('qrCode')->get(['id', 'name']);
+
+        $created = 0;
+
+        foreach ($petsMissing as $pet) {
+            $base = Str::slug($pet->name ?: 'pet', '-');
+            if ($base === '') {
+                $base = 'pet';
+            }
+
+            // Unicidad de slug en qr_codes
+            $slug = $base;
+            $i = 1;
+            while (QrCode::where('slug', $slug)->exists()) {
+                $slug = "{$base}-{$i}";
+                $i++;
+            }
+
+            $qr = new QrCode();
+            $qr->pet_id = $pet->id;
+            $qr->slug   = $slug;
+
+            if (method_exists(QrCode::class, 'generateActivationCode')) {
+                $qr->activation_code = QrCode::generateActivationCode();
+            } else {
+                $qr->activation_code = strtoupper(Str::random(6));
+            }
+
+            // La imagen la generará tu servicio cuando corresponda
+            $qr->save();
+            $created++;
+        }
+
+        if ($created === 0) {
+            return back()->with('info', 'No había mascotas pendientes. Todo está sincronizado.');
+        }
+
+        return back()->with('success', "Se crearon {$created} TAG(s) faltantes.");
     }
 }

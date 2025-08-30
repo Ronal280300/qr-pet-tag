@@ -102,7 +102,10 @@
               <td class="text-muted">{{ $t->slug ?: '—' }}</td>
               <td>
                 @if($t->pet)
-                  <a href="{{ route('portal.pets.show', $t->pet) }}">{{ $t->pet->name }}</a>
+                  <span class="badge rounded-pill text-bg-light"
+                        title="Mascota asignada">
+                    <i class="fa-solid fa-paw me-1"></i>{{ $t->pet->name }}
+                  </span>
                 @else
                   <span class="text-muted">—</span>
                 @endif
@@ -125,19 +128,21 @@
                 @endif
               </td>
               <td class="text-end">
-                <form action="{{ route('portal.admin.tags.regen-code', $t) }}" method="POST" class="d-inline"
-                      onsubmit="return confirm('¿Regenerar el código (TAG)?');">
+                {{-- Regenerar código --}}
+                <form action="{{ route('portal.admin.tags.regen-code', $t) }}" method="POST" class="d-inline">
                   @csrf
-                  <button class="btn btn-sm btn-outline-warning">
+                  <button type="submit" class="btn btn-sm btn-outline-warning js-confirm"
+                          data-confirm="¿Regenerar el código (TAG)?">
                     <i class="fa-solid fa-rotate me-1"></i> Regenerar código
                   </button>
                 </form>
 
-                <form action="{{ route('portal.admin.tags.rebuild', $t) }}" method="POST" class="d-inline"
-                      onsubmit="return confirm('¿Reconstruir la imagen del QR?');">
+                {{-- Regenerar QR (antes: Reconstruir imagen) --}}
+                <form action="{{ route('portal.admin.tags.rebuild', $t) }}" method="POST" class="d-inline">
                   @csrf
-                  <button class="btn btn-sm btn-outline-info">
-                    <i class="fa-solid fa-hammer me-1"></i> Reconstruir imagen
+                  <button type="submit" class="btn btn-sm btn-outline-info js-confirm"
+                          data-confirm="¿Regenerar QR para este TAG?">
+                    <i class="fa-solid fa-qrcode me-1"></i> Regenerar QR
                   </button>
                 </form>
               </td>
@@ -158,4 +163,37 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css') }}">
+<style>
+  /* Detalles visuales suaves */
+  .badge.text-bg-light { border: 1px solid rgba(0,0,0,.06); }
+</style>
+@endpush
+
+@push('scripts')
+{{-- SweetAlert2 para confirmaciones --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.js-confirm').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const form = this.closest('form');
+      const msg  = this.getAttribute('data-confirm') || '¿Confirmar acción?';
+
+      Swal.fire({
+        title: msg,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, confirmar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+      }).then(result => {
+        if (result.isConfirmed) form.submit();
+      });
+    });
+  });
+});
+</script>
 @endpush

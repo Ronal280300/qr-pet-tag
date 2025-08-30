@@ -2,6 +2,23 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/portal.css') }}">
+<style>
+  /* Evitar recortes: la imagen se adapta completa dentro del contenedor */
+  .pet-card .pet-thumb {
+    position: relative;
+    width: 100%;
+    height: 200px;              /* altura uniforme */
+    background: #fff;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+  }
+  .pet-card .pet-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;        /* <- clave: NO recortar */
+    background: #f8fafc;
+  }
+</style>
 @endpush
 
 @section('content')
@@ -49,11 +66,7 @@
                data-owner="{{ Str::lower(optional($pet->user)->name.' '.optional($pet->user)->email) }}">
             <div class="pet-card h-100 d-flex flex-column">
               <div class="pet-thumb">
-                @if($pet->photo)
-                  <img src="{{ asset('storage/'.$pet->photo) }}" alt="{{ $pet->name }}">
-                @else
-                  <img src="https://images.unsplash.com/photo-1558944351-cbbdcc8c4fba?q=80&w=1200&auto=format&fit=crop" alt="{{ $pet->name }}">
-                @endif
+                <img src="{{ $pet->main_photo_url }}" alt="{{ $pet->name }}">
               </div>
               <div class="pet-body flex-grow-1 d-flex flex-column">
                 <h3 class="pet-name">{{ $pet->name }}</h3>
@@ -75,7 +88,7 @@
       </div>
 
       <div class="mt-3">
-        {{ $pets->links() }}
+        {{ $pets->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
       </div>
     @endif
 
