@@ -205,39 +205,118 @@
             </div>
         </div>
 
-        {{-- RECOMPENSA --}}
-        <div class="card card-elevated">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Recompensa</h5>
-                <form action="{{ route('portal.pets.update-reward',$pet) }}" method="POST">
-                    @csrf
-                    <div class="row g-2 align-items-center mb-2">
-                        <div class="col-5">
-                            <label class="form-label">Activa</label>
-                            <select name="active" class="form-select">
-                                <option value="0" {{ optional($pet->reward)->active ? '' : 'selected' }}>No</option>
-                                <option value="1" {{ optional($pet->reward)->active ? 'selected' : '' }}>Sí</option>
-                            </select>
-                        </div>
-                        <div class="col-7">
-                            <label class="form-label">Monto</label>
-                            <input type="number" step="0.01" min="0" name="amount" class="form-control"
-                                   value="{{ number_format((float) (optional($pet->reward)->amount ?? 0), 2, '.', '') }}">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Mensaje</label>
-                        <input type="text" name="message" class="form-control"
-                               value="{{ optional($pet->reward)->message ?? 'Gracias por tu ayuda 🙏' }}">
-                    </div>
-                    <button class="btn btn-success">
-                        <i class="fa-solid fa-floppy-disk me-2"></i> Guardar recompensa
-                    </button>
-                </form>
-            </div>
+      {{-- ======================= RECOMPENSA ======================= --}}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title mb-3 d-flex align-items-center gap-2">
+      Recompensa
+      <i class="fa-solid fa-circle-info text-muted"
+         style="cursor:pointer;"
+         data-bs-toggle="tooltip"
+         title="Para activar la recompensa, selecciona 'Sí' y define un monto mayor a 0.">
+      </i>
+    </h5>
+
+    <form action="{{ route('portal.pets.reward.update', $pet) }}" method="POST" id="rewardForm">
+      @csrf
+      @method('PUT')
+
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-sm-4">
+          <label class="form-label">Activa</label>
+          <select name="active" id="rwActive" class="form-select">
+            <option value="0" {{ optional($pet->reward)->active ? '' : 'selected' }}>No</option>
+            <option value="1" {{ optional($pet->reward)->active ? 'selected' : '' }}>Sí</option>
+          </select>
         </div>
-    </div>
+
+        <div class="col-12 col-sm-4">
+          <label class="form-label">Monto</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            name="amount"
+            id="rwAmount"
+            class="form-control"
+            value="{{ number_format((float) (optional($pet->reward)->amount ?? 0), 2, '.', '') }}"
+          >
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Mensaje</label>
+          <input
+            type="text"
+            name="message"
+            id="rwMessage"
+            class="form-control"
+            maxlength="200"
+            value="{{ optional($pet->reward)->message }}"
+            placeholder="Gracias por tu ayuda 🙏"
+          >
+        </div>
+
+        <div class="col-12 mt-2">
+          <button type="submit" id="rwSave" class="btn btn-success">
+            <i class="fa-solid fa-floppy-disk me-1"></i> Guardar recompensa
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
+
+@push('scripts')
+<script>
+(function(){
+  const form   = document.getElementById('rewardForm');
+  const active = document.getElementById('rwActive');
+  const amount = document.getElementById('rwAmount');
+  const save   = document.getElementById('rwSave');
+
+  function isActive(){ return String(active.value) === '1'; }
+  function amountOk(){
+    const v = parseFloat((amount.value || '').toString().replace(',', '.'));
+    return !isNaN(v) && v > 0;
+  }
+
+  let canDeactivateNow = isActive() && amountOk();
+
+  function setEnabled(ok){
+    save.disabled = !ok;
+    save.classList.toggle('disabled', !ok);
+    save.style.pointerEvents = ok ? '' : 'none';
+    save.style.opacity = ok ? '' : '.65';
+  }
+
+  function refresh(){
+    if (isActive() && amountOk()) canDeactivateNow = true;
+    const ok = isActive() ? amountOk() : canDeactivateNow;
+    setEnabled(ok);
+  }
+
+  refresh();
+  active.addEventListener('change', refresh);
+  amount.addEventListener('input', refresh);
+
+  form.addEventListener('submit', (e) => {
+    if (isActive() && !amountOk()) {
+      e.preventDefault();
+      return false;
+    }
+  });
+})();
+
+// inicializar tooltips Bootstrap 5
+document.addEventListener('DOMContentLoaded', () => {
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+});
+</script>
+@endpush
+
 </div>
 @endsection
 

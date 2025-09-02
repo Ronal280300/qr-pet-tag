@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Pet extends Model
 {
@@ -23,6 +24,9 @@ class Pet extends Model
         'district_id',
     ];
 
+    /**
+     * Laravel 10+: caster por método.
+     */
     protected function casts(): array
     {
         return [
@@ -50,6 +54,7 @@ class Pet extends Model
 
     public function scans()
     {
+        // keys: hasManyThrough(Final, Through, foreignKeyOnThrough, foreignKeyOnFinal)
         return $this->hasManyThrough(Scan::class, QrCode::class, 'pet_id', 'qr_code_id');
     }
 
@@ -59,22 +64,34 @@ class Pet extends Model
 
     /* ===================== NUEVO: Fotos múltiples ===================== */
 
-    // Relación para varias fotos (ordenadas)
+    /**
+     * Relación para varias fotos. Se ordena por sort_order (y luego id).
+     */
     public function photos()
     {
-        return $this->hasMany(PetPhoto::class, 'pet_id')->orderBy('order')->orderBy('id');
+        return $this->hasMany(PetPhoto::class, 'pet_id')
+                    ->orderBy('sort_order')
+                    ->orderBy('id');
     }
 
-    // URL principal: 1) primera foto múltiple; 2) foto antigua 'photo'; 3) placeholder
+    /**
+     * URL principal:
+     * 1) primera foto de pet_photos
+     * 2) foto antigua 'photo'
+     * 3) placeholder
+     */
     public function getMainPhotoUrlAttribute(): string
     {
         $first = $this->photos()->first();
-        if ($first) {
-            return asset('storage/' . $first->path);
+
+        if ($first && $first->path) {
+            return Storage::url($first->path);
         }
-        if ($this->photo) {
-            return asset('storage/' . $this->photo);
+
+        if ($this->photo && Storage::disk('public')->exists($this->photo)) {
+            return Storage::url($this->photo);
         }
+
         return 'https://images.unsplash.com/photo-1558944351-cbbdcc8c4fba?q=80&w=1200&auto=format&fit=crop';
     }
 

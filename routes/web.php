@@ -42,8 +42,22 @@ Auth::routes();
 */
 Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () {
 
+    // PERFIL (usuario autenticado)
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::put('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])
+        ->name('profile.password.update');
+
     // Dashboard dinámico (cambia según rol)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Recompensa de mascota (update)
+    Route::put('/pets/{pet}/reward', [PetController::class, 'updateReward'])
+        ->name('pets.reward.update');
 
     // Dashboard Admin (atajo directo)
     Route::get('admin/dashboard', [AdminDashboardController::class, 'index'])

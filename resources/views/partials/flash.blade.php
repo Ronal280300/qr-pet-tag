@@ -1,33 +1,48 @@
+{{-- resources/views/partials/flash.blade.php --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  @if (session('swal'))
+    // Mensaje ya armado desde el controlador (array para SweetAlert2)
+    Swal.fire(@json(session('swal')));
+  @elseif ($errors->any())
+    // Validaciones de Laravel
+    Swal.fire({
+      icon: 'error',
+      title: 'Corrige los siguientes errores',
+      html: `{!! implode('<br>', $errors->all()) !!}`,
+      confirmButtonText: 'OK'
+    });
+  @else
+    @php
+      // Buscar el primer key de mensaje disponible
+      $keys  = ['success','status','error','danger','warning','info'];
+      $found = collect($keys)->first(fn ($k) => session()->has($k));
+      $text  = $found ? session($found) : null;
 
-@php
-    // Mapear tipos a estilos Bootstrap
-    $map = [
-        'success' => 'success',
-        'status'  => 'success',   // por compatibilidad
-        'error'   => 'danger',
-        'danger'  => 'danger',
-        'warning' => 'warning',
-        'info'    => 'info',
-    ];
-@endphp
+      // Mapear icono/título según tipo
+      $icon = match ($found) {
+        'error','danger' => 'error',
+        'warning'        => 'warning',
+        'info'           => 'info',
+        default          => 'success',
+      };
 
-@foreach (['success','status','error','danger','warning','info'] as $key)
-    @if (session()->has($key))
-        <div class="alert alert-{{ $map[$key] ?? 'info' }} alert-dismissible fade show shadow-sm" role="alert">
-            {!! session($key) !!}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-        </div>
+      $title = match ($icon) {
+        'error'   => 'Ocurrió un problema',
+        'warning' => 'Atención',
+        'info'    => 'Aviso',
+        default   => 'Éxito',
+      };
+    @endphp
+
+    @if ($text)
+      Swal.fire({
+        icon: @json($icon),
+        title: @json($title),
+        text: @json($text),
+        confirmButtonText: 'OK'
+      });
     @endif
-@endforeach
-
-@if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-        <strong>Corrige los siguientes errores:</strong>
-        <ul class="mb-0 mt-2">
-            @foreach ($errors->all() as $e)
-                <li>{{ $e }}</li>
-            @endforeach
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-@endif
+  @endif
+});
+</script>

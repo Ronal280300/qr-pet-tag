@@ -153,6 +153,8 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 (() => {
   const API = 'https://ubicaciones.paginasweb.cr';
@@ -248,12 +250,28 @@
 </script>
 
 <script>
-/* Uploader pequeño con preview (mismo que en Editar) */
+/* Uploader pequeño con preview (mismo que en Editar) + obligación de principal */
 (function(){
   const input   = document.getElementById('photo');
   const preview = document.getElementById('photoPreview');
   const drop    = document.getElementById('photoDrop');
   const clear   = document.getElementById('btnClearPhoto');
+  const form    = document.getElementById('pet-form');
+  const submit  = form.querySelector('button[type="submit"]') || form.querySelector('.btn-primary');
+
+  // hacemos obligatorio el campo (sin tocar HTML original)
+  input.setAttribute('required', 'required');
+
+  function hasMain(){
+    return !!preview.src && !preview.classList.contains('d-none');
+  }
+  function syncSubmit(){
+    const ok = hasMain();
+    submit.disabled = !ok;
+    submit.classList.toggle('disabled', !ok);
+    submit.style.pointerEvents = ok ? '' : 'none';
+    submit.style.opacity = ok ? '' : '.65';
+  }
 
   function show(file){
     if(!file) return;
@@ -261,6 +279,7 @@
     preview.src = url;
     preview.classList.remove('d-none');
     drop.classList.remove('is-dragover');
+    syncSubmit();
   }
 
   input.addEventListener('change', e => show(e.target.files[0]));
@@ -277,14 +296,28 @@
   });
 
   clear.addEventListener('click', () => {
-    preview.src = ''; preview.classList.add('d-none'); input.value = '';
+    preview.src = '';
+    preview.classList.add('d-none');
+    input.value = '';
+    syncSubmit();
   });
+
+  // bloquear envío si no hay principal
+  form.addEventListener('submit', (e) => {
+    if(!hasMain()){
+      e.preventDefault();
+    }
+  });
+
+  // estado inicial
+  syncSubmit();
 })();
 </script>
 
 <script>
-/* NUEVO: Previews de fotos múltiples */
+/* NUEVO: Previews de fotos múltiples + LÍMITE 3 (principal NO cuenta) */
 (function(){
+  const MAX = 3;
   const input = document.getElementById('photos');
   const grid  = document.getElementById('photosPreviewGrid');
   const btnClear = document.getElementById('btnClearPhotos');
@@ -322,29 +355,52 @@
     });
   }
 
-  function removeAt(i){
-    filesBuffer.splice(i, 1);
-    // reconstruimos FileList en el input
+  function applyBufferToInput(){
     const dt = new DataTransfer();
     filesBuffer.forEach(f => dt.items.add(f));
     input.files = dt.files;
-    refreshGrid();
+  }
+
+  function removeAt(i){
+    filesBuffer.splice(i, 1);
+    applyBufferToInput(); refreshGrid();
   }
 
   input.addEventListener('change', (e) => {
-    // concatenamos a buffer (respetando múltiples selecciones)
-    filesBuffer = [...filesBuffer, ...Array.from(e.target.files)];
-    // reconstruimos FileList con el buffer
-    const dt = new DataTransfer();
-    filesBuffer.forEach(f => dt.items.add(f));
-    input.files = dt.files;
-    refreshGrid();
+    const incoming = Array.from(e.target.files || []);
+    const totalIfAdded = filesBuffer.length + incoming.length;
+
+    if (totalIfAdded > MAX) {
+      const allowed = Math.max(0, MAX - filesBuffer.length);
+      Swal.fire({
+        icon:'warning',
+        title:'Máximo 3 fotos adicionales',
+        text:`Puedes añadir ${allowed} foto(s) más.`,
+        confirmButtonText:'Entendido'
+      });
+      if (allowed > 0) {
+        filesBuffer = filesBuffer.concat(incoming.slice(0, allowed));
+      }
+    } else {
+      filesBuffer = filesBuffer.concat(incoming);
+    }
+
+    applyBufferToInput(); refreshGrid();
+    input.value = ''; // permitir volver a abrir el diálogo
   });
 
   btnClear.addEventListener('click', () => {
     filesBuffer = [];
     input.value = '';
     refreshGrid();
+  });
+
+  // validación final (no deja enviar con >3 adicionales)
+  const form = document.getElementById('pet-form');
+  form.addEventListener('submit', (e) => {
+    if (filesBuffer.length > MAX) {
+      e.preventDefault();
+    }
   });
 })();
 </script>
