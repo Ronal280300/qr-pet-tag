@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\ResetPasswordEs;
 
 class User extends Authenticatable
 {
@@ -21,6 +22,7 @@ class User extends Authenticatable
         'address',
         'emergency_contact',
         'is_admin',
+        'google_id',
     ];
 
     /**
@@ -58,4 +60,16 @@ class User extends Authenticatable
     {
         return (bool) $this->is_admin;
     }
+
+public function sendPasswordResetNotification($token): void
+{
+    $url = url(route('password.reset', [
+        'token' => $token,
+        'email' => $this->getEmailForPasswordReset(),
+    ], false));
+
+    $this->notify(new ResetPasswordEs($url));
+}
+
+    
 }

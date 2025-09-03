@@ -16,6 +16,9 @@ use App\Http\Controllers\Admin\TagController as AdminTagController;
 // Middleware
 use App\Http\Middleware\AdminOnly;
 
+//Google
+use App\Http\Controllers\Auth\GoogleController;
+
 /*
 |--------------------------------------------------------------------------
 | Rutas públicas
@@ -25,8 +28,39 @@ use App\Http\Middleware\AdminOnly;
 // Home / landing
 Route::get('/', [PublicController::class, 'home'])->name('home');
 
+
+// Google / Autenticador
+Route::get('auth/google/redirect', [GoogleController::class, 'redirect'])
+    ->name('google.redirect');
+
+Route::get('auth/google/callback', [GoogleController::class, 'callback'])
+    ->name('google.callback');
+
 // Perfil público por SLUG (URL impresa en el TAG/QR)
 Route::get('/p/{slug}', [PublicController::class, 'showPet'])->name('public.pet.show');
+
+// Página de Términos y Condiciones
+Route::view('/terminos', 'legal.terms')->name('legal.terms');
+
+
+// ===== Login / Logout =====
+Route::get('login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [\App\Http\Controllers\Auth\LoginController::class, 'login']);
+Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
+
+// ===== Password Reset =====
+Route::get('password/reset', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])
+    ->name('password.request');
+
+Route::post('password/email', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->name('password.email');
+
+Route::get('password/reset/{token}', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])
+    ->name('password.reset');
+
+Route::post('password/reset', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])
+    ->name('password.update');
+
 
 /*
 |--------------------------------------------------------------------------

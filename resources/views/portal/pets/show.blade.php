@@ -107,10 +107,10 @@
                 <div class="card card-soft">
                     <div class="card-body">
                         <div class="fw-semibold mb-1">
-                            <i class="fa-solid fa-notes-medical me-1"></i> Condiciones médicas
+                            <i class="fa-solid fa-notes-medical me-1"></i> Observaciones
                         </div>
                         <div class="text-muted">
-                            {{ $pet->medical_conditions ?: 'No tiene condiciones médicas registradas.' }}
+                            {{ $pet->medical_conditions ?: 'No tiene observaciones registradas.' }}
                         </div>
                     </div>
                 </div>

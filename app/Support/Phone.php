@@ -9,11 +9,11 @@ class Phone
      * nsn = National Significant Number length (longitud del número local SIN el prefijo).
      */
     protected static array $COUNTRIES = [
-        '506' => ['name' => 'Costa Rica (+506)',      'nsn' => 8],
-        '1'   => ['name' => 'Estados Unidos/Canadá (+1)', 'nsn' => 10],
-        '52'  => ['name' => 'México (+52)',           'nsn' => 10],
-        '34'  => ['name' => 'España (+34)',           'nsn' => 9],
-        '57'  => ['name' => 'Colombia (+57)',         'nsn' => 10],
+        '506' => ['name' => 'Costa Rica (+506)',           'nsn' => 8],
+        '1'   => ['name' => 'Estados Unidos/Canadá (+1)',  'nsn' => 10],
+        '52'  => ['name' => 'México (+52)',                'nsn' => 10],
+        '34'  => ['name' => 'España (+34)',                'nsn' => 9],
+        '57'  => ['name' => 'Colombia (+57)',              'nsn' => 10],
         // agrega aquí los que necesites…
     ];
 
@@ -61,7 +61,7 @@ class Phone
         $code  = self::digits((string) $code);
         $local = self::digits((string) $local);
 
-        if ($code !== '' && str_starts_with($local, $code)) {
+        if ($code !== '' && str_starts_with($local, (string)$code)) {
             $local = substr($local, strlen($code));
         }
 
@@ -85,12 +85,45 @@ class Phone
         usort($codes, fn($a, $b) => strlen($b) <=> strlen($a)); // largo a corto
 
         foreach ($codes as $code) {
-            if (str_starts_with($digits, $code)) {
+            if (str_starts_with($digits, (string)$code)) {
                 return [$code, substr($digits, strlen($code))];
             }
         }
 
         // fallback (toma 3 + resto)
         return [substr($digits, 0, 3), substr($digits, 3)];
+    }
+
+    /**
+     * Formato humano opcional para UI (no obligatorio).
+     * E.164 -> "(+506) 8888-8888", "+1 (212) 555-1212", etc.
+     */
+    public static function formatHuman(?string $e164): ?string
+    {
+        $e164 = (string) $e164;
+        if ($e164 === '') return null;
+
+        [$code, $local] = self::fromE164($e164);
+        if (!$code || !$local) return $e164;
+
+        switch ($code) {
+            case '506': // CR 8 dígitos: 4-4
+                $fmt = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $local);
+                return "(+$code) $fmt";
+            case '1':   // US/CA 10 dígitos: 3-3-4
+                $fmt = preg_replace('/^(\d{3})(\d{3})(\d{4})$/', '($1) $2-$3', $local);
+                return "+$code $fmt";
+            case '52':  // MX 10 dígitos (simplificado): 3-3-4
+                $fmt = preg_replace('/^(\d{3})(\d{3})(\d{4})$/', '$1 $2 $3', $local);
+                return "(+$code) " . ($fmt ?: $local);
+            case '34':  // ES 9 dígitos: 3-3-3
+                $fmt = preg_replace('/^(\d{3})(\d{3})(\d{3})$/', '$1 $2 $3', $local);
+                return "(+$code) $fmt";
+            case '57':  // CO 10 dígitos: 3-3-4
+                $fmt = preg_replace('/^(\d{3})(\d{3})(\d{4})$/', '$1 $2 $3', $local);
+                return "(+$code) $fmt";
+            default:
+                return "(+$code) $local";
+        }
     }
 }

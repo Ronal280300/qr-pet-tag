@@ -43,7 +43,7 @@
                             <p><strong>Edad:</strong> {{ $qrCode->pet->age ?? 'No especificada' }}</p>
                             
                             @if($qrCode->pet->medical_conditions)
-                                <p><strong>Condiciones médicas:</strong> {{ $qrCode->pet->medical_conditions }}</p>
+                                <p><strong>Observaciones:</strong> {{ $qrCode->pet->medical_conditions }}</p>
                             @endif
                         </div>
 

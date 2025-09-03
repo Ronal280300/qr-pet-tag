@@ -68,11 +68,11 @@
 
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center">
-          <label class="form-label mb-0">Condiciones médicas</label>
+          <label class="form-label mb-0">Observaciones</label>
           <div class="form-check">
             @php $noMed = empty($pet->medical_conditions); @endphp
             <input class="form-check-input" type="checkbox" id="no-medical" {{ $noMed ? 'checked' : '' }}>
-            <label class="form-check-label small" for="no-medical">No tiene condiciones</label>
+            <label class="form-check-label small" for="no-medical">Sin observaciones</label>
           </div>
         </div>
         <textarea name="medical_conditions" id="medical_conditions" rows="4" class="form-control" placeholder="Alergias, medicación, etc." {{ $noMed ? 'disabled' : '' }}>{{ $pet->medical_conditions }}</textarea>

@@ -224,20 +224,43 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
 
-  <script>
-    // micro-interacción: sombra/altura al hacer scroll
-    (function(){
-      const shell = document.getElementById('navShell');
-      let lastY = 0;
-      const onScroll = () => {
-        const y = window.scrollY || document.documentElement.scrollTop;
-        shell.classList.toggle('scrolled', y > 4 && y >= lastY);
-        lastY = y;
-      };
-      onScroll();
-      window.addEventListener('scroll', onScroll, {passive:true});
-    })();
-  </script>
+<script>
+(() => {
+  const shell = document.getElementById('navShell');
+  if (!shell) return;
+
+  // Histeresis: añade a los 12px, quita por debajo de 6px (evita parpadeo)
+  const ADD_AT = 12;
+  const REMOVE_AT = 6;
+
+  let isScrolled = false;
+  let ticking = false;
+
+  function update() {
+    ticking = false;
+    const y = Math.max(0, window.scrollY || document.documentElement.scrollTop || 0);
+
+    if (!isScrolled && y > ADD_AT) {
+      shell.classList.add('scrolled');
+      isScrolled = true;
+    } else if (isScrolled && y < REMOVE_AT) {
+      shell.classList.remove('scrolled');
+      isScrolled = false;
+    }
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      requestAnimationFrame(update);
+      ticking = true;
+    }
+  }
+
+  update();
+  window.addEventListener('scroll', onScroll, { passive: true });
+})();
+</script>
+
 
   @stack('scripts')
 </body>
