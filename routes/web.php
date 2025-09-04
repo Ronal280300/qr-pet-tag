@@ -48,6 +48,10 @@ Route::get('login', [\App\Http\Controllers\Auth\LoginController::class, 'showLog
 Route::post('login', [\App\Http\Controllers\Auth\LoginController::class, 'login']);
 Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
+//Generar imagen
+Route::post('/portal/pets/{pet}/share-card', [\App\Http\Controllers\Portal\PetController::class, 'shareCard'])
+    ->name('portal.pets.share-card');
+
 // ===== Password Reset =====
 Route::get('password/reset', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])
     ->name('password.request');

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use App\Services\PetShareCardService;
 
 class PetController extends Controller
 {
@@ -51,9 +52,15 @@ class PetController extends Controller
             'medical_conditions' => ['nullable', 'string', 'max:500'],
             'photo'              => ['nullable', 'image', 'max:4096'],
             'photos.*'           => ['nullable', 'image', 'max:6144'],
-            'user_id'            => ['nullable', 'integer', 'exists:users,id'],
+
+            // NUEVOS CAMPOS
+            'sex'            => 'nullable|in:male,female,unknown',
+            'is_neutered'    => 'nullable|boolean',
+            'rabies_vaccine' => 'nullable|boolean',
         ]);
 
+        // Mascota nueva SIEMPRE sin dueño (queda para que el cliente la ligue al activar el TAG)
+        $data['user_id'] = null;
         $data['is_lost'] = false;
 
         DB::transaction(function () use ($request, $data, $qrService, &$pet) {
@@ -61,35 +68,40 @@ class PetController extends Controller
                 $data['photo'] = $request->file('photo')->store('pets', 'public');
             }
 
-            $pet = Pet::create($data);
+            $pet = \App\Models\Pet::create($data);
 
+            // Fotos múltiples
             $sort = 1;
             foreach ($request->file('photos', []) as $file) {
                 if (!$file || !$file->isValid()) continue;
                 $path = $file->store('pets/photos', 'public');
-                PetPhoto::create([
+                \App\Models\PetPhoto::create([
                     'pet_id'     => $pet->id,
                     'path'       => $path,
                     'sort_order' => $sort++,
                 ]);
             }
 
+            // Si no subieron fotos múltiples pero sí 'photo' legacy, la usamos como primera
             if ($sort === 1 && !empty($data['photo'])) {
-                PetPhoto::create([
+                \App\Models\PetPhoto::create([
                     'pet_id'     => $pet->id,
                     'path'       => $data['photo'],
                     'sort_order' => $sort++,
                 ]);
             }
 
-            $qr = QrCodeModel::firstOrNew(['pet_id' => $pet->id]);
+            // Generar/asegurar slug + imagen del QR
+            $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $pet->id]);
             $qrService->ensureSlugAndImage($qr, $pet);
         });
 
         return redirect()
             ->route('portal.pets.show', $pet)
-            ->with('status', 'Mascota y TAG creados. Código de activación: ' . optional($pet->qrCode)->activation_code);
+            ->with('status', 'Mascota creada sin dueño. Entrega el TAG al cliente para que lo active.');
     }
+
+
 
     public function show(Pet $pet)
     {
@@ -120,10 +132,24 @@ class PetController extends Controller
             'zone'               => ['nullable', 'string', 'max:255'],
             'age'                => ['nullable', 'integer', 'min:0', 'max:50'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
+
             'photo'              => ['nullable', 'image', 'max:4096'],
             'photos.*'           => ['nullable', 'image', 'max:6144'],
             'delete_photos'      => ['nullable', 'string'],
+
+            'species'        => ['nullable', Rule::in(['dog', 'cat', 'other'])],
+            'sex'            => ['nullable', Rule::in(['male', 'female', 'unknown'])],
+            'size'           => ['nullable', Rule::in(['small', 'medium', 'large'])],
+            'color'          => ['nullable', 'string', 'max:80'],
+
+            // Se normalizan abajo
+            'is_neutered'    => ['nullable', 'boolean'],
+            'rabies_vaccine' => ['nullable', 'boolean'],
         ]);
+
+        // Normalización de toggles (aunque no lleguen en la request)
+        $data['is_neutered']    = $request->boolean('is_neutered');
+        $data['rabies_vaccine'] = $request->boolean('rabies_vaccine');
 
         DB::transaction(function () use ($request, $pet, $data) {
             // 1) Eliminar fotos marcadas
@@ -152,7 +178,7 @@ class PetController extends Controller
                 ]);
             }
 
-            // 3) Actualizar datos base
+            // 3) Actualizar datos
             $pet->update($data);
 
             // 4) Guardar nuevas fotos múltiples
@@ -172,6 +198,7 @@ class PetController extends Controller
             ->route('portal.pets.show', $pet)
             ->with('status', 'Mascota actualizada correctamente.');
     }
+
 
     public function destroy(Pet $pet)
     {
@@ -193,47 +220,47 @@ class PetController extends Controller
 
     // app/Http/Controllers/Portal/PetController.php
 
-public function updateReward(Request $request, Pet $pet)
-{
-    // Dueño o admin
-    $this->authorizePetOrAdmin($pet);
+    public function updateReward(Request $request, Pet $pet)
+    {
+        // Dueño o admin
+        $this->authorizePetOrAdmin($pet);
 
-    // Normalizamos el booleano desde el select (0/1, "0"/"1", true/false, etc.)
-    $activeBool = filter_var(
-        $request->input('active'),
-        FILTER_VALIDATE_BOOLEAN,
-        FILTER_NULL_ON_FAILURE
-    );
-    // Si no llega nada, lo tratamos como falso
-    $activeBool = $activeBool === null ? false : $activeBool;
+        // Normalizamos el booleano desde el select (0/1, "0"/"1", true/false, etc.)
+        $activeBool = filter_var(
+            $request->input('active'),
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        );
+        // Si no llega nada, lo tratamos como falso
+        $activeBool = $activeBool === null ? false : $activeBool;
 
-    // Validación: si está activa => amount requerido y > 0; si no, amount opcional
-    $rules = [
-        'active'  => ['required', Rule::in([0, 1, '0', '1', true, false, 'true', 'false'])],
-        'message' => ['nullable', 'string', 'max:200'],
-    ];
+        // Validación: si está activa => amount requerido y > 0; si no, amount opcional
+        $rules = [
+            'active'  => ['required', Rule::in([0, 1, '0', '1', true, false, 'true', 'false'])],
+            'message' => ['nullable', 'string', 'max:200'],
+        ];
 
-    if ($activeBool) {
-        $rules['amount'] = ['required', 'numeric', 'min:0.01', 'max:999999.99'];
-    } else {
-        // Permitimos 0 o vacío al desactivar
-        $rules['amount'] = ['nullable', 'numeric', 'min:0', 'max:999999.99'];
+        if ($activeBool) {
+            $rules['amount'] = ['required', 'numeric', 'min:0.01', 'max:999999.99'];
+        } else {
+            // Permitimos 0 o vacío al desactivar
+            $rules['amount'] = ['nullable', 'numeric', 'min:0', 'max:999999.99'];
+        }
+
+        $data = $request->validate($rules);
+        $data['active'] = $activeBool;
+
+        // Guardado/Upsert de la recompensa
+        $reward = \App\Models\Reward::firstOrNew(['pet_id' => $pet->id]);
+        $reward->active  = (bool) $data['active'];
+
+        // Si está activa, guardamos el monto; si no, lo reseteamos a 0
+        $reward->amount  = $reward->active ? (float) ($data['amount'] ?? 0) : 0.00;
+        $reward->message = $data['message'] ?? null;
+        $reward->save();
+
+        return back()->with('status', 'Recompensa actualizada.');
     }
-
-    $data = $request->validate($rules);
-    $data['active'] = $activeBool;
-
-    // Guardado/Upsert de la recompensa
-    $reward = \App\Models\Reward::firstOrNew(['pet_id' => $pet->id]);
-    $reward->active  = (bool) $data['active'];
-
-    // Si está activa, guardamos el monto; si no, lo reseteamos a 0
-    $reward->amount  = $reward->active ? (float) ($data['amount'] ?? 0) : 0.00;
-    $reward->message = $data['message'] ?? null;
-    $reward->save();
-
-    return back()->with('status', 'Recompensa actualizada.');
-}
 
 
     public function generateQR(Pet $pet, PetQrService $qrService)
@@ -296,4 +323,20 @@ public function updateReward(Request $request, Pet $pet)
     {
         return (bool) (Auth::user()->is_admin ?? false);
     }
+
+    public function shareCard(Pet $pet, PetShareCardService $svc)
+{
+    $this->authorizePetOrAdmin($pet);
+
+    // Genera imagen
+    $path = $svc->generate($pet); // ej: share/pet-12-171....png
+    $url  = Storage::disk('public')->url($path);
+
+    // Vuelve a la vista de la mascota con la previsualización y CTAs
+    return redirect()
+        ->route('portal.pets.show', $pet)
+        ->with('share_card_path', $path)
+        ->with('share_card_url', $url)
+        ->with('status', 'Publicación generada. ¡Lista para compartir!');
+}
 }

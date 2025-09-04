@@ -10,6 +10,11 @@ class Pet extends Model
 {
     use HasFactory;
 
+    /**
+     * Campos asignables en masa.
+     * Mantiene compatibilidad con el campo 'photo' (sistema antiguo) y con las
+     * claves foráneas de ubicación que ya usas.
+     */
     protected $fillable = [
         'user_id',
         'name',
@@ -22,6 +27,14 @@ class Pet extends Model
         'province_id',
         'city_id',
         'district_id',
+
+        // ===== NUEVOS CAMPOS =====
+        'species',        // dog | cat | other
+        'sex',            // male | female | unknown
+        'size',           // small | medium | large
+        'color',          // texto libre
+        'is_neutered',    // bool
+        'rabies_vaccine', // bool
     ];
 
     /**
@@ -30,8 +43,12 @@ class Pet extends Model
     protected function casts(): array
     {
         return [
-            'age'     => 'integer',
-            'is_lost' => 'boolean',
+            'age'            => 'integer',
+            'is_lost'        => 'boolean',
+
+            // ===== NUEVOS CASTS =====
+            'is_neutered'    => 'boolean',
+            'rabies_vaccine' => 'boolean',
         ];
     }
 
@@ -62,7 +79,7 @@ class Pet extends Model
     public function city()     { return $this->belongsTo(City::class); }
     public function district() { return $this->belongsTo(District::class); }
 
-    /* ===================== NUEVO: Fotos múltiples ===================== */
+    /* ===================== Fotos múltiples ===================== */
 
     /**
      * Relación para varias fotos. Se ordena por sort_order (y luego id).

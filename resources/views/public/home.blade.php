@@ -270,14 +270,23 @@
   <div class="container container-narrow">
     <div class="mockstripe p-3 reveal">
       <div class="row g-3 align-items-center">
-        <div class="col-6 col-md-3"><img class="img-fluid" src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=800&auto=format&fit=crop" alt=""></div>
-        <div class="col-6 col-md-3"><img class="img-fluid" src="https://images.unsplash.com/photo-1534361960057-19889db9621e?q=80&w=800&auto=format&fit=crop" alt=""></div>
-        <div class="col-6 col-md-3"><img class="img-fluid" src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=800&auto=format&fit=crop" alt=""></div>
-        <div class="col-6 col-md-3"><img class="img-fluid" src="https://images.unsplash.com/photo-1525253013412-55c1a69a5738?q=80&w=800&auto=format&fit=crop" alt=""></div>
+        <div class="col-6 col-md-3">
+          <img class="img-fluid" src="{{ asset('storage/images/asha.jpeg') }}" alt="asha">
+        </div>
+        <div class="col-6 col-md-3">
+          <img class="img-fluid" src="{{ asset('storage/images/coqueta.jpeg') }}" alt="coqueta">
+        </div>
+        <div class="col-6 col-md-3">
+          <img class="img-fluid" src="{{ asset('storage/images/morgan.jpeg') }}" alt="morgan">
+        </div>
+        <div class="col-6 col-md-3">
+          <img class="img-fluid" src="{{ asset('storage/images/negro.jpeg') }}" alt="negro">
+        </div>
       </div>
     </div>
   </div>
 </section>
+
 
 <section class="py-5">
   <div class="container container-narrow faq">
