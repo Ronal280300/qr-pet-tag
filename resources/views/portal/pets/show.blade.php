@@ -77,20 +77,35 @@ $sexLabel = [
               @endif
             </div>
 
-            <div class="d-flex gap-2 no-swipe">
-              <a href="{{ route('portal.pets.edit',$pet) }}" class="btn btn-light btn-sm">
-                <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+            <div class="d-flex gap-2 no-swipe flex-wrap hero-actions">
+              <a href="{{ route('portal.pets.edit',$pet) }}"
+                class="btn btn-light btn-sm btn-compact">
+                <i class="fa-solid fa-pen-to-square me-1"></i>
+                <span>Editar</span>
               </a>
 
               @if($isAdmin)
-              <form action="{{ route('portal.pets.destroy',$pet) }}" method="POST" class="pet-delete-form">
+              <form action="{{ route('portal.pets.destroy',$pet) }}" method="POST" class="pet-delete-form m-0 p-0">
                 @csrf @method('DELETE')
-                <button type="submit" class="btn btn-danger btn-sm">
-                  <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+                <button type="submit" class="btn btn-danger btn-sm btn-compact">
+                  <i class="fa-solid fa-trash-can me-1"></i>
+                  <span>Eliminar</span>
                 </button>
               </form>
+
+              <button
+                type="button"
+                class="btn btn-primary btn-sm btn-compact"
+                data-url="{{ route('portal.pets.share.facebook', $pet) }}"
+                data-name="{{ $pet->name }}"
+                data-page="{{ config('services.facebook.page_id') }}"
+                onclick="publishToFacebook(event)">
+                <i class="fa-brands fa-facebook me-1"></i>
+                <span>Publicar</span><span class="d-none d-sm-inline"> en Facebook</span>
+              </button>
               @endif
             </div>
+
           </div>
         </div>
       </div>
@@ -355,6 +370,45 @@ $sexLabel = [
     border: 0;
     box-shadow: 0 18px 50px rgba(31, 41, 55, .08);
     border-radius: 18px
+  }
+
+  /* Botón compacto (evita “tarjeta alta”) */
+  .btn-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .6rem !important;
+    font-size: .875rem !important;
+    line-height: 1.2 !important;
+    border-radius: 10px !important;
+    white-space: nowrap;
+    /* que no rompa palabras */
+  }
+
+  /* Contenedor de acciones en la hero */
+  .hero-actions {
+    justify-content: flex-end;
+  }
+
+  /* En móviles: título arriba, acciones debajo en fila compacta */
+  @media (max-width: 576px) {
+    .hero-bar .container-fluid {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: .5rem;
+    }
+
+    .hero-actions {
+      width: 100%;
+      justify-content: flex-start;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-actions .btn-compact {
+      padding: .32rem .5rem !important;
+      font-size: .82rem !important;
+    }
   }
 
   .card-soft {
@@ -632,28 +686,133 @@ $sexLabel = [
     });
   })();
 
-   (function(){
+  (function() {
     const btn = document.getElementById('btnShareCard');
-    if(!btn) return;
+    if (!btn) return;
     const url = btn.dataset.url;
     const title = btn.dataset.title || document.title;
 
     btn.addEventListener('click', async () => {
       if (navigator.share) {
         try {
-          await navigator.share({ title, url });
-        } catch(e) { /* cancelado */ }
+          await navigator.share({
+            title,
+            url
+          });
+        } catch (e) {
+          /* cancelado */
+        }
       } else {
         try {
           await navigator.clipboard.writeText(url);
           const prev = btn.innerHTML;
           btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Enlace copiado';
-          setTimeout(()=> btn.innerHTML = prev, 1300);
+          setTimeout(() => btn.innerHTML = prev, 1300);
         } catch {
           alert('Copia este enlace:\n' + url);
         }
       }
     });
   })();
+
+
+  async function publishToFacebook(event) {
+    const btn = event.currentTarget || event.target;
+    const url = btn.dataset.url;
+    const petName = btn.dataset.name || 'la mascota';
+    const pageId = btn.dataset.page || ''; // opcional si lo envías en data-page
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    if (!url) return;
+    if (btn.dataset.loading === '1') return; // anti-doble click
+
+    btn.dataset.loading = '1';
+    btn.disabled = true;
+
+    // ⛔️ OJO: SIN await aquí
+    Swal.fire({
+      title: 'Publicando…',
+      html: 'Enviando la publicación a Facebook',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    // Timeout de seguridad (25s)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrf,
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        signal: controller.signal
+      });
+
+      const raw = await res.text();
+      let data = null;
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch {}
+
+      clearTimeout(timeoutId);
+      Swal.close(); // cerrar el loading
+
+      if (!res.ok || !data || data.ok !== true) {
+        const msg =
+          (data && data.error) ? data.error :
+          `HTTP ${res.status} ${res.statusText}.\n` +
+          (raw ? raw.slice(0, 300) : 'Sin cuerpo de respuesta.');
+        return Swal.fire({
+          icon: 'error',
+          title: 'No se pudo publicar en Facebook.',
+          text: msg,
+          confirmButtonText: 'Aceptar'
+        });
+      }
+
+      // Construir link a la publicación
+      let fbUrl = '';
+      const postId = data?.result?.post_id || '';
+      if (postId && postId.includes('_')) {
+        const [pid, suffix] = postId.split('_');
+        fbUrl = `https://www.facebook.com/${pid}/posts/${suffix}`;
+      } else if (postId && pageId) {
+        const suffix = postId.split('_').pop();
+        fbUrl = `https://www.facebook.com/${pageId}/posts/${suffix}`;
+      }
+
+      return Swal.fire({
+        icon: 'success',
+        title: `¡Publicado ${petName} en Facebook!`,
+        html: fbUrl ?
+          `Ver publicación:<br><a href="${fbUrl}" target="_blank" rel="noopener">${fbUrl}</a>` : 'Se publicó correctamente.',
+        confirmButtonText: 'Aceptar'
+      });
+
+    } catch (err) {
+      clearTimeout(timeoutId);
+      Swal.close();
+      const msg = (err?.name === 'AbortError') ?
+        'Se agotó el tiempo de espera. Inténtalo de nuevo.' :
+        (err?.message || 'Error de red o de servidor.');
+      return Swal.fire({
+        icon: 'error',
+        title: 'No se pudo publicar en Facebook.',
+        text: msg,
+        confirmButtonText: 'Aceptar'
+      });
+    } finally {
+      btn.dataset.loading = '';
+      btn.disabled = false;
+    }
+  }
+
+  // si usas onclick="publishToFacebook(event)"
+  window.publishToFacebook = publishToFacebook;
 </script>
 @endpush

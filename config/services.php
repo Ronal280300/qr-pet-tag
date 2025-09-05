@@ -40,4 +40,10 @@ return [
         'redirect'      => env('GOOGLE_REDIRECT_URI', 'http://127.0.0.1:8000/auth/google/callback'),
     ],
 
+    'facebook' => [
+        'page_id'           => env('FB_PAGE_ID'),
+        'page_access_token' => env('FB_PAGE_ACCESS_TOKEN'),
+        'version'           => env('FB_GRAPH_VERSION', 'v23.0'),
+    ],
+
 ];

@@ -12,11 +12,12 @@ use App\Http\Controllers\Portal\ActivateTagController;
 // Controladores de administración
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
+use App\Http\Controllers\Admin\FacebookShareController; // <-- agregado
 
 // Middleware
 use App\Http\Middleware\AdminOnly;
 
-//Google
+// Google
 use App\Http\Controllers\Auth\GoogleController;
 
 /*
@@ -27,7 +28,6 @@ use App\Http\Controllers\Auth\GoogleController;
 
 // Home / landing
 Route::get('/', [PublicController::class, 'home'])->name('home');
-
 
 // Google / Autenticador
 Route::get('auth/google/redirect', [GoogleController::class, 'redirect'])
@@ -42,15 +42,10 @@ Route::get('/p/{slug}', [PublicController::class, 'showPet'])->name('public.pet.
 // Página de Términos y Condiciones
 Route::view('/terminos', 'legal.terms')->name('legal.terms');
 
-
 // ===== Login / Logout =====
 Route::get('login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [\App\Http\Controllers\Auth\LoginController::class, 'login']);
 Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
-
-//Generar imagen
-Route::post('/portal/pets/{pet}/share-card', [\App\Http\Controllers\Portal\PetController::class, 'shareCard'])
-    ->name('portal.pets.share-card');
 
 // ===== Password Reset =====
 Route::get('password/reset', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])
@@ -65,10 +60,9 @@ Route::get('password/reset/{token}', [\App\Http\Controllers\Auth\ResetPasswordCo
 Route::post('password/reset', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])
     ->name('password.update');
 
-
 /*
 |--------------------------------------------------------------------------
-| Auth
+| Auth scaffolding
 |--------------------------------------------------------------------------
 */
 Auth::routes();
@@ -77,8 +71,14 @@ Auth::routes();
 |--------------------------------------------------------------------------
 | Portal (usuarios autenticados)
 |--------------------------------------------------------------------------
+|
+| Todas las rutas bajo /portal requieren auth. Dentro, habrá rutas para todos
+| los usuarios y un subgrupo para administración con AdminOnly.
+|
 */
 Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () {
+    Route::get('activate-tag',  [ActivateTagController::class, 'create'])->name('activate-tag');
+    Route::post('activate-tag', [ActivateTagController::class, 'store'])->name('activate-tag.store');
 
     // PERFIL (usuario autenticado)
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])
@@ -93,18 +93,9 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
     // Dashboard dinámico (cambia según rol)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Recompensa de mascota (update)
+    // Recompensa de mascota (update - PUT)
     Route::put('/pets/{pet}/reward', [PetController::class, 'updateReward'])
         ->name('pets.reward.update');
-
-    // Dashboard Admin (atajo directo)
-    Route::get('admin/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('admin.dashboard');
-
-    // Eliminar UNA foto de una mascota (solo admin)
-    Route::delete('pets/{pet}/photos/{photo}', [PetController::class, 'deletePhoto'])
-        ->name('pets.photos.destroy');
-
 
     /*
     |--------------------------------------------------------------------------
@@ -122,15 +113,20 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
     Route::get('pets/{pet}/download-qr',  [PetController::class, 'downloadQr'])->name('pets.download-qr');
     Route::post('pets/{pet}/regen-code',  [PetController::class, 'regenCode'])->name('pets.regen-code');
 
+    // Generar imagen (share-card) desde el portal
+    Route::post('pets/{pet}/share-card', [PetController::class, 'shareCard'])
+        ->name('pets.share-card');
+
     /*
     |--------------------------------------------------------------------------
-    | Activación de TAG para USUARIOS (no admin)
+    | Botón: Publicar en Facebook (detalle de mascota)
     |--------------------------------------------------------------------------
-    | Estas rutas permiten que cualquier usuario autenticado active un TAG y lo
-    | asocie a una de sus mascotas.
+    | NUEVO: endpoint para publicar la mascota actual en la Página de Facebook.
+    | Solo lo puede ejecutar un administrador (AdminOnly).
     */
-    Route::get('activate-tag',  [ActivateTagController::class, 'create'])->name('activate-tag');
-    Route::post('activate-tag', [ActivateTagController::class, 'store'])->name('activate-tag.store');
+    Route::post('pets/{pet}/share/facebook', FacebookShareController::class)
+        ->middleware(AdminOnly::class)
+        ->name('pets.share.facebook');
 
     /*
     |--------------------------------------------------------------------------
@@ -154,5 +150,8 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             // Activar TAG (atajo para admin)
             Route::get('activate-tag',  [ActivateTagController::class, 'create'])->name('activate-tag');
             Route::post('activate-tag', [ActivateTagController::class, 'store'])->name('activate-tag.store');
+
+            // Dashboard Admin (atajo directo dentro del portal)
+            Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         });
 });
