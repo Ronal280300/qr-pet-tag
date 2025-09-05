@@ -155,5 +155,93 @@ html,body{ background:var(--bg); color:var(--ink); }
 
 
 
+/* Tamaño compacto consistente para todos los botones */
+.btn-compact{
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.42rem .62rem !important;      /* alto bajo */
+  font-size:.9rem !important; line-height:1.2 !important;
+  border-radius:12px !important;
+  white-space:nowrap;
+}
+
+/* Iconos alineados */
+.btn-compact i,
+.btn-compact .fa { line-height:1; }
+
+/* Variante solo icono (si la usas) */
+.btn-icon-only{ padding:.42rem !important; width:36px; height:36px; justify-content:center; }
+
+/* En XS aún más compacto */
+@media (max-width:576px){
+  .btn-compact{ padding:.35rem .55rem !important; font-size:.86rem !important; }
+}
+
+/* Opcional: botones outline más finos */
+.btn-outline-secondary.btn-compact,
+.btn-outline-info.btn-compact,
+.btn-outline-warning.btn-compact{
+  border-width:1px;
+}
+
+/* Centrar contenido (icono + texto) dentro de botones flex */
+.btn-center{
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* Separación consistente del icono cuando centramos */
+.btn-center i,
+.btn-center .fa {
+  margin-right: .55rem;
+}
 
 
+
+
+ /* Contenedor del slider */
+  .hero-slider{
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f7f9fc;
+    /* ratio: más alto en móvil (4:5) y panorámico en desktop (16:9) */
+    aspect-ratio: 4 / 5;
+  }
+  @media (min-width: 768px){
+    .hero-slider{ aspect-ratio: 16 / 9; }
+  }
+
+  .hero-slider .swiper-slide{
+    display: grid;
+    place-items: center;
+    background: #f7f9fc;
+  }
+  .hero-slider img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;     /* la mascota se ve grande y moderna */
+  }
+
+  /* Overlay del título + acciones */
+  .hero-overlay{
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 14px;
+    color: #fff;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.65) 80%);
+    z-index: 5;
+  }
+  .hero-title{ font-weight: 900; letter-spacing: .2px; }
+
+  /* Swiper UI */
+  .hero-slider .swiper-pagination-bullet{ background: rgba(255,255,255,.75); }
+  .hero-slider .swiper-pagination-bullet-active{ background: #fff; }
+  .hero-slider .swiper-button-prev,
+  .hero-slider .swiper-button-next{
+    color: #fff; text-shadow: 0 3px 12px rgba(0,0,0,.4);
+  }
+
+  /* Evitar que el overlay dispare el swipe */
+  .swiper-no-swiping, .swiper-no-swiping *{
+    touch-action: manipulation;
+    pointer-events: auto; /* los botones sí deben recibir click */
+  }

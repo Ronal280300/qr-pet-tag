@@ -40,17 +40,26 @@ $sexLabel = [
           <div class="carousel-inner">
             @if($photos->isEmpty())
             <div class="carousel-item active">
-              <div class="ratio ratio-16x9">
-                <img src="{{ $mainPhotoUrl }}" class="w-100 h-100 object-contain bg-light" alt="Mascota">
+              <div class="ratio ratio-16x9 js-skel">
+                <img
+                  src="{{ $mainPhotoUrl }}"
+                  alt="Mascota"
+                  class="w-100 h-100 object-contain"
+                  loading="lazy">
               </div>
             </div>
             @else
             @foreach($photos as $i => $ph)
             <div class="carousel-item {{ $i === 0 ? 'active' : '' }}">
-              <div class="ratio ratio-16x9">
-                <img src="{{ asset('storage/'.$ph->path) }}" class="w-100 h-100 object-contain bg-light" alt="Mascota {{ $i+1 }}">
+              <div class="ratio ratio-16x9 js-skel">
+                <img
+                  src="{{ asset('storage/'.$ph->path) }}"
+                  alt="Mascota {{ $i+1 }}"
+                  class="w-100 h-100 object-contain"
+                  loading="lazy">
               </div>
             </div>
+
             @endforeach
             @endif
           </div>
@@ -68,7 +77,7 @@ $sexLabel = [
         </div>
 
         {{-- Cinta con título y acciones (marcadas como .no-swipe para no disparar el slide) --}}
-        <div class="hero-bar">
+        <div class="hero-bar no-swipe">
           <div class="container-fluid px-3 d-flex align-items-center justify-content-between gap-2">
             <div class="d-flex align-items-center gap-2 flex-wrap">
               <h2 class="hero-title mb-0">{{ $pet->name }}</h2>
@@ -100,12 +109,10 @@ $sexLabel = [
                 data-name="{{ $pet->name }}"
                 data-page="{{ config('services.facebook.page_id') }}"
                 onclick="publishToFacebook(event)">
-                <i class="fa-brands fa-facebook me-1"></i>
-                <span>Publicar</span><span class="d-none d-sm-inline"> en Facebook</span>
+                <i class="fa-brands fa-facebook me-1"></i> Publicar en Facebook
               </button>
               @endif
             </div>
-
           </div>
         </div>
       </div>
@@ -167,9 +174,9 @@ $sexLabel = [
         <div class="mt-3 d-flex flex-wrap gap-2">
           <form action="{{ route('portal.pets.toggle-lost', $pet) }}" method="POST" id="toggleLostForm">
             @csrf
-            <button type="submit" class="btn btn-warning btn-sm" id="toggleLostBtn">
+            <button type="submit" class="btn btn-warning btn-sm btn-compact" id="toggleLostBtn">
               <i class="fa-solid fa-triangle-exclamation me-1"></i>
-              {{ $pet->is_lost ? 'Quitar marca de perdida/robada' : 'Marcar como perdida/robada' }}
+              <span class="d-none d-sm-inline">Marcar como </span>{{ $pet->is_lost ? 'Quitar pérdida' : 'Perdida/robada' }}
             </button>
           </form>
 
@@ -177,12 +184,12 @@ $sexLabel = [
           @if($pet->is_lost)
           <form action="{{ route('portal.pets.share-card', $pet) }}" method="POST" class="d-inline">
             @csrf
-            <button class="btn btn-outline-danger btn-sm">
-              <i class="fa-solid fa-bullhorn me-1"></i> Generar publicación
+            <button class="btn btn-outline-danger btn-sm btn-compact">
+              <i class="fa-solid fa-bullhorn me-1"></i>
+              <span class="d-none d-sm-inline">Generar </span>publicación
             </button>
           </form>
           @endif
-
         </div>
       </div>
     </div>
@@ -200,24 +207,24 @@ $sexLabel = [
             Publicación lista para redes
           </h5>
           <div class="d-flex gap-2">
-            <a class="btn btn-primary btn-sm"
+            <a class="btn btn-primary btn-sm btn-compact"
               href="{{ session('share_card_url') }}"
               download="qr-pet-{{ $pet->id }}.png">
-              <i class="fa-solid fa-download me-1"></i> Descargar
+              <i class="fa-solid fa-download me-1"></i><span class="d-none d-sm-inline">Descargar</span><span class="d-sm-none">Descargar</span>
             </a>
-            <button type="button" class="btn btn-outline-primary btn-sm"
-              id="btnShareCard"
-              data-url="{{ session('share_card_url') }}"
+            <button type="button" class="btn btn-outline-primary btn-sm btn-compact" id="btnShareCard" "
+              data-url=" {{ session('share_card_url') }}"
               data-title="Mascota perdida: {{ $pet->name }}">
               <i class="fa-solid fa-share-nodes me-1"></i> Compartir
             </button>
           </div>
         </div>
-
-        <div class="ratio ratio-4x5 bg-light rounded" style="max-width:420px">
-          <img src="{{ session('share_card_url') }}"
+        <div class="ratio ratio-4x5 bg-light rounded js-skel" style="max-width:420px">
+          <img
+            src="{{ session('share_card_url') }}"
             alt="Publicación de {{ $pet->name }}"
-            class="w-100 h-100 object-fit-contain rounded">
+            class="w-100 h-100 object-fit-contain rounded"
+            loading="lazy">
         </div>
         <small class="text-muted d-block mt-2">
           Formato 1080×1350 optimizado para historias y publicaciones.
@@ -240,16 +247,17 @@ $sexLabel = [
           @endif
         </div>
 
-        <div class="qr-preview mb-2 d-flex justify-content-center">
+        <div class="qr-preview mb-2 d-flex justify-content-center js-skel">
           @if($qrImageUrl)
-          <img src="{{ $qrImageUrl }}" alt="QR" class="qr-img">
+          <img src="{{ $qrImageUrl }}" alt="QR" class="qr-img" loading="lazy">
           @else
-          <div class="qr-placeholder text-muted small text-center">
+          <div class="qr-placeholder text-muted small text-center w-100">
             <i class="fa-solid fa-qrcode fa-2x mb-2"></i>
             <div>Aún no se ha generado el QR.</div>
           </div>
           @endif
         </div>
+
 
         <div class="small text-muted mb-2" style="word-break: break-all;">
           @if($publicUrl)
@@ -263,24 +271,24 @@ $sexLabel = [
           @if($isAdmin)
           <form action="{{ route('portal.pets.generate-qr',$pet) }}" method="POST" class="no-swipe">
             @csrf
-            <button class="btn btn-primary w-100">
-              <i class="fa-solid fa-bolt me-2"></i> Generar / Regenerar QR
+            <button class="btn btn-primary w-100 btn-compact btn-center">
+              <i class="fa-solid fa-bolt me-2"></i><span class="d-none d-sm-inline">Generar / Regenerar</span><span class="d-sm-none">Generar</span> QR
             </button>
           </form>
           @endif
 
-          <a class="btn btn-outline-secondary w-100 {{ $canDownloadQr ? '' : 'disabled opacity-50' }}"
+          <a class="btn btn-outline-secondary w-100 btn-compact btn-center {{ $canDownloadQr ? '' : 'disabled opacity-50' }}"
             href="{{ $canDownloadQr ? route('portal.pets.download-qr', $pet) : '#' }}">
             <i class="fa-solid fa-download me-2"></i> Descargar QR
           </a>
 
-          <a class="btn btn-outline-info w-100 {{ $publicUrl ? '' : 'disabled opacity-50' }}"
+          <a class="btn btn-outline-info w-100 btn-compact btn-center {{ $publicUrl ? '' : 'disabled opacity-50' }}"
             href="{{ $publicUrl ?: '#' }}" target="_blank" rel="noopener">
             <i class="fa-solid fa-up-right-from-square me-2"></i> Ver perfil público
           </a>
 
           <button type="button"
-            class="btn btn-outline-secondary w-100 copy-url {{ $publicUrl ? '' : 'disabled opacity-50' }}"
+            class="btn btn-outline-secondary w-100 btn-compact btn-center copy-url {{ $publicUrl ? '' : 'disabled opacity-50' }}"
             data-url="{{ $publicUrl ?? '' }}">
             <i class="fa-solid fa-link me-2"></i> Copiar URL
           </button>
@@ -288,7 +296,7 @@ $sexLabel = [
           @if($isAdmin && $qr)
           <form action="{{ route('portal.pets.regen-code', $pet) }}" method="POST" class="no-swipe">
             @csrf
-            <button class="btn btn-outline-warning w-100">
+            <button class="btn btn-outline-warning w-100 btn-compact btn-center">
               <i class="fa-solid fa-rotate me-2"></i> Regenerar código (TAG)
             </button>
           </form>
@@ -350,7 +358,7 @@ $sexLabel = [
             </div>
 
             <div class="col-12 mt-1">
-              <button type="submit" id="rwSave" class="btn btn-success w-100">
+              <button type="submit" id="rwSave" class="btn btn-success w-100 btn-compact btn-center">
                 <i class="fa-solid fa-floppy-disk me-1"></i> Guardar recompensa
               </button>
             </div>
@@ -361,6 +369,7 @@ $sexLabel = [
 
   </div>
 </div>
+
 @endsection
 
 @push('styles')
@@ -415,6 +424,8 @@ $sexLabel = [
     border: 1px solid #eef1f5;
     border-radius: 14px
   }
+.hero-bar { z-index: 30 !important; }
+
 
   .hero-bar {
     position: absolute;
@@ -551,6 +562,52 @@ $sexLabel = [
   .switch.on::after {
     transform: translateX(28px)
   }
+
+  /* ===== Skeleton (shimmer) ===== */
+  .js-skel {
+    position: relative;
+    overflow: hidden;
+    background: #f2f4f7;
+    /* color base */
+  }
+
+  /* capa de brillo */
+  .js-skel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, #f2f4f7 8%, #e8ebf1 18%, #f2f4f7 33%);
+    background-size: 200% 100%;
+    animation: skel-shimmer 1.1s linear infinite;
+  }
+
+  /* ocultar imagen hasta que esté lista */
+  .js-skel>img {
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+
+  /* cuando se carga, se muestra img y se apaga el shimmer */
+  .js-skel.is-loaded::after {
+    opacity: 0;
+    pointer-events: none;
+    animation: none;
+  }
+
+  .js-skel.is-loaded>img {
+    opacity: 1;
+  }
+
+  @keyframes skel-shimmer {
+    0% {
+      background-position-x: 200%;
+    }
+
+    100% {
+      background-position-x: -200%;
+    }
+  }
+  
 </style>
 @endpush
 
@@ -814,5 +871,38 @@ $sexLabel = [
 
   // si usas onclick="publishToFacebook(event)"
   window.publishToFacebook = publishToFacebook;
+
+  // Inicializa skeletons: cuando la imagen carga, marcamos is-loaded
+  (function initSkeletons() {
+    const containers = document.querySelectorAll('.js-skel');
+    containers.forEach(c => {
+      const img = c.querySelector('img');
+      if (!img) {
+        c.classList.add('is-loaded');
+        return;
+      }
+
+      const markLoaded = () => c.classList.add('is-loaded');
+      const markError = () => c.classList.add('is-loaded'); // en error, también apaga el shimmer
+
+      // Si ya está en caché y con dimensiones, no mostramos shimmer
+      if (img.complete && img.naturalWidth > 0) {
+        markLoaded();
+      } else {
+        img.addEventListener('load', markLoaded, {
+          once: true
+        });
+        img.addEventListener('error', markError, {
+          once: true
+        });
+
+        // Fallback por si el navegador no dispara eventos (muy raro)
+        setTimeout(() => c.classList.add('is-loaded'), 10000);
+      }
+    });
+  })();
+
+  
 </script>
+
 @endpush
