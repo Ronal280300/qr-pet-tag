@@ -8,7 +8,7 @@
   --muted:#667085;
   --line:#e9edf5;
   --card-bg:#fff; --card-br:#e9edf5; --card-shadow:0 14px 40px rgba(16,24,40,.08);
-  --wa:#25D366;            /* WhatsApp oficial */
+  --wa:#ab431d;            /* WhatsApp oficial */
 }
 
 html,body{ background:var(--bg); color:var(--ink); }

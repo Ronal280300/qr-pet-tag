@@ -122,7 +122,7 @@
     box-shadow:0 10px 24px rgba(0,0,0,.10);
   }
   .social-cta .social-btn:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(0,0,0,.12); filter:saturate(1.05) }
-  .social-cta .wa{ background:linear-gradient(135deg,#25D366,#128C7E) }
+  .social-cta .wa {background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);}
   .social-cta .fb{ background:linear-gradient(135deg,#1877F2,#0e5ad6) }
   .social-cta .tt{ background:linear-gradient(135deg,#000000,#111827) }
   .social-cta .tt i{ color:#fff }
@@ -326,10 +326,10 @@
     <h2 class="section-title mb-3">Únete a nuestra comunidad</h2>
     <p class="text-muted-2 mb-4">Muy pronto compartiremos tips, rescates y novedades. ¡Síguenos!</p>
     <div class="d-flex flex-wrap justify-content-center gap-3">
-      <a class="social-btn wa" href="#" target="_blank" rel="noopener">
-        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+      <a class="social-btn wa" href="https://www.instagram.com/qrpettag?igsh=MWRzdG1kMWVsZ2F0cQ%3D%3D&utm_source=qr" target="_blank" rel="noopener">
+        <i class="fa-brands fa-instagram"></i> Instagram
       </a>
-      <a class="social-btn fb" href="#" target="_blank" rel="noopener">
+      <a class="social-btn fb" href="https://www.facebook.com/share/17VnVJfcxr/?mibextid=wwXIfr" target="_blank" rel="noopener">
         <i class="fa-brands fa-facebook-f"></i> Facebook
       </a>
       <a class="social-btn tt" href="#" target="_blank" rel="noopener">

@@ -174,9 +174,9 @@ $sexLabel = [
         <div class="mt-3 d-flex flex-wrap gap-2">
           <form action="{{ route('portal.pets.toggle-lost', $pet) }}" method="POST" id="toggleLostForm">
             @csrf
-            <button type="submit" class="btn btn-warning btn-sm btn-compact" id="toggleLostBtn">
+            <button type="submit" class="btn btn-warning btn-sm btn-compact" id="toggleLostBtn" >
               <i class="fa-solid fa-triangle-exclamation me-1"></i>
-              <span class="d-none d-sm-inline">Marcar como </span>{{ $pet->is_lost ? 'Quitar pérdida' : 'Perdida/robada' }}
+              <span class="d-none d-sm-inline" >Marcar como </span>{{ $pet->is_lost ? 'Quitar pérdida' : 'Perdida/robada' }}
             </button>
           </form>
 
@@ -269,7 +269,7 @@ $sexLabel = [
 
         <div class="vstack gap-2">
           @if($isAdmin)
-          <form action="{{ route('portal.pets.generate-qr',$pet) }}" method="POST" class="no-swipe">
+          <form action="{{ route('portal.pets.generate-qr',$pet) }}" method="POST" class="no-swipe" data-confirm="¿Quieres generar o regenerar el QR de esta mascota?">
             @csrf
             <button class="btn btn-primary w-100 btn-compact btn-center">
               <i class="fa-solid fa-bolt me-2"></i><span class="d-none d-sm-inline">Generar / Regenerar</span><span class="d-sm-none">Generar</span> QR
@@ -294,7 +294,7 @@ $sexLabel = [
           </button>
 
           @if($isAdmin && $qr)
-          <form action="{{ route('portal.pets.regen-code', $pet) }}" method="POST" class="no-swipe">
+          <form action="{{ route('portal.pets.regen-code', $pet) }}" method="POST" class="no-swipe" data-confirm="¿Quieres regenerar el TAG de esta mascota?">
             @csrf
             <button class="btn btn-outline-warning w-100 btn-compact btn-center">
               <i class="fa-solid fa-rotate me-2"></i> Regenerar código (TAG)
@@ -357,8 +357,8 @@ $sexLabel = [
                 placeholder="Gracias por tu ayuda 🙏">
             </div>
 
-            <div class="col-12 mt-1">
-              <button type="submit" id="rwSave" class="btn btn-success w-100 btn-compact btn-center">
+            <div class="col-12 mt-1" >
+              <button type="submit" id="rwSave" class="btn btn-success w-100 btn-compact btn-center" >
                 <i class="fa-solid fa-floppy-disk me-1"></i> Guardar recompensa
               </button>
             </div>
@@ -424,7 +424,10 @@ $sexLabel = [
     border: 1px solid #eef1f5;
     border-radius: 14px
   }
-.hero-bar { z-index: 30 !important; }
+
+  .hero-bar {
+    z-index: 30 !important;
+  }
 
 
   .hero-bar {
@@ -607,7 +610,6 @@ $sexLabel = [
       background-position-x: -200%;
     }
   }
-  
 </style>
 @endpush
 
@@ -777,16 +779,26 @@ $sexLabel = [
     const btn = event.currentTarget || event.target;
     const url = btn.dataset.url;
     const petName = btn.dataset.name || 'la mascota';
-    const pageId = btn.dataset.page || ''; // opcional si lo envías en data-page
+    const pageIdAttr = btn.dataset.page || '';
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
     if (!url) return;
-    if (btn.dataset.loading === '1') return; // anti-doble click
+    if (btn.dataset.loading === '1') return;
+
+    // Confirmación
+    const confirm = await Swal.fire({
+      title: '¿Publicar en Facebook?',
+      html: `Se publicará la ficha de <b>${petName}</b> en tu Página.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, publicar',
+      cancelButtonText: 'Cancelar'
+    });
+    if (!confirm.isConfirmed) return;
 
     btn.dataset.loading = '1';
     btn.disabled = true;
 
-    // ⛔️ OJO: SIN await aquí
     Swal.fire({
       title: 'Publicando…',
       html: 'Enviando la publicación a Facebook',
@@ -794,7 +806,6 @@ $sexLabel = [
       didOpen: () => Swal.showLoading(),
     });
 
-    // Timeout de seguridad (25s)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 25000);
 
@@ -817,13 +828,12 @@ $sexLabel = [
       } catch {}
 
       clearTimeout(timeoutId);
-      Swal.close(); // cerrar el loading
+      Swal.close();
 
       if (!res.ok || !data || data.ok !== true) {
-        const msg =
-          (data && data.error) ? data.error :
-          `HTTP ${res.status} ${res.statusText}.\n` +
-          (raw ? raw.slice(0, 300) : 'Sin cuerpo de respuesta.');
+        const msg = (data && data.error) ?
+          data.error :
+          `HTTP ${res.status} ${res.statusText}.` + (raw ? `\n${raw.slice(0,300)}` : '');
         return Swal.fire({
           icon: 'error',
           title: 'No se pudo publicar en Facebook.',
@@ -832,14 +842,13 @@ $sexLabel = [
         });
       }
 
-      // Construir link a la publicación
+      // Construcción robusta del link
+      const postId = data?.result?.post_id || data?.result?.id || '';
+      const pageIdResp = data?.result?.page_id || '';
+      const pageId = pageIdResp || pageIdAttr || (postId.includes('_') ? postId.split('_')[0] : '');
       let fbUrl = '';
-      const postId = data?.result?.post_id || '';
-      if (postId && postId.includes('_')) {
-        const [pid, suffix] = postId.split('_');
-        fbUrl = `https://www.facebook.com/${pid}/posts/${suffix}`;
-      } else if (postId && pageId) {
-        const suffix = postId.split('_').pop();
+      if (postId && pageId) {
+        const suffix = postId.includes('_') ? postId.split('_').pop() : postId;
         fbUrl = `https://www.facebook.com/${pageId}/posts/${suffix}`;
       }
 
@@ -847,7 +856,7 @@ $sexLabel = [
         icon: 'success',
         title: `¡Publicado ${petName} en Facebook!`,
         html: fbUrl ?
-          `Ver publicación:<br><a href="${fbUrl}" target="_blank" rel="noopener">${fbUrl}</a>` : 'Se publicó correctamente.',
+          `Ver publicación:<br><a href="${fbUrl}" target="_blank" rel="noopener">${fbUrl}</a>` : 'Publicado correctamente.',
         confirmButtonText: 'Aceptar'
       });
 
@@ -868,9 +877,9 @@ $sexLabel = [
       btn.disabled = false;
     }
   }
-
-  // si usas onclick="publishToFacebook(event)"
   window.publishToFacebook = publishToFacebook;
+
+
 
   // Inicializa skeletons: cuando la imagen carga, marcamos is-loaded
   (function initSkeletons() {
@@ -902,7 +911,27 @@ $sexLabel = [
     });
   })();
 
-  
+   (function () {
+    const forms = document.querySelectorAll('form[data-confirm]');
+    forms.forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        // evitar que el carousel “captura” el gesto
+        e.stopPropagation();
+        e.preventDefault();
+
+        const msg = form.getAttribute('data-confirm') || '¿Confirmas la acción?';
+        const res = await Swal.fire({
+          title: 'Confirmar',
+          text: msg,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, continuar',
+          cancelButtonText: 'Cancelar'
+        });
+        if (res.isConfirmed) form.submit();
+      }, { passive: false });
+    });
+  })();
 </script>
 
 @endpush
