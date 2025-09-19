@@ -14,55 +14,92 @@ class FacebookPoster
 
     public function __construct()
     {
-        $this->token   = config('services.facebook.page_access_token');
-        $this->version = config('services.facebook.version', 'v23.0');
-        $this->pageId  = config('services.facebook.page_id');
+        $this->token   = (string) config('services.facebook.page_access_token');
+        $this->version = (string) config('services.facebook.version', 'v23.0');
+        $this->pageId  = (string) config('services.facebook.page_id');
     }
 
-    // ⚠️ Versión mínima: SOLO url + access_token (como en Postman/Tinker)
+    /**
+     * Publica una foto usando una URL pública directa (https) + mensaje opcional.
+     */
     public function postPhotoByUrl(string $imageUrl, ?string $message = null): array
     {
+        // Validación dura para evitar el (#100)
+        if (!$this->isPublicHttpsUrl($imageUrl)) {
+            throw new \InvalidArgumentException('imageUrl must be a public https URL');
+        }
+
         $endpoint = "https://graph.facebook.com/{$this->version}/{$this->pageId}/photos";
 
         $payload = [
-            'url'          => $imageUrl,      // debe ser https público
+            'url'          => $imageUrl,      // solo 'url' (NO mezclar con 'source')
             'access_token' => $this->token,
         ];
         if ($message !== null && $message !== '') {
-            $payload['message'] = mb_substr($message, 0, 1000); // por si acaso
+            $payload['message'] = mb_substr($message, 0, 1000);
         }
 
+        Log::info('FB publish by URL', ['url' => $imageUrl]);
+
         $res = Http::asForm()->post($endpoint, $payload);
-        if ($res->failed()) throw new \Illuminate\Http\Client\RequestException($res);
-        return $res->json();
+        if ($res->failed()) {
+            Log::error('FB publish by URL failed', ['status' => $res->status(), 'body' => $res->body()]);
+            throw new RequestException($res);
+        }
+        return $res->json(); // { id, post_id }
+    }
+
+    /**
+     * Publica una foto subiendo el archivo local (multipart).
+     * Úsalo en desarrollo/local para evitar URLs no públicas.
+     */
+    public function postPhotoFile(string $message, string $absPath, string $mime = null): array
+    {
+        if (!is_file($absPath) || !is_readable($absPath) || filesize($absPath) <= 0) {
+            throw new \RuntimeException("Invalid photo file: {$absPath}");
+        }
+
+        $endpoint = "https://graph.facebook.com/{$this->version}/{$this->pageId}/photos";
+
+        if ($mime === null) {
+            $probe = @mime_content_type($absPath);
+            $mime = $probe ?: 'image/jpeg';
+        }
+
+        Log::info('FB publish by FILE', ['path' => $absPath, 'mime' => $mime]);
+
+        $res = Http::asMultipart()
+            ->attach('source', fopen($absPath, 'r'), basename($absPath), ['Content-Type' => $mime])
+            ->post($endpoint, [
+                'message'      => mb_substr($message ?? '', 0, 1000),
+                'published'    => 'true',
+                'access_token' => $this->token,
+            ]);
+
+        if ($res->failed()) {
+            Log::error('FB publish by FILE failed', ['status' => $res->status(), 'body' => $res->body()]);
+            throw new RequestException($res);
+        }
+
+        return $res->json(); // { id, post_id }
+    }
+
+    /**
+     * URL https pública y no-localhost.
+     */
+    private function isPublicHttpsUrl(string $url): bool
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) return false;
+        $parts = parse_url($url);
+        if (($parts['scheme'] ?? '') !== 'https') return false;
+
+        $host = strtolower($parts['host'] ?? '');
+        if (!$host) return false;
+
+        // No permitir localhost ni IPs privadas
+        if ($host === 'localhost' || $host === '127.0.0.1') return false;
+        if (preg_match('/^10\.|^172\.(1[6-9]|2\d|3[0-1])\.|^192\.168\./', $host)) return false;
+
+        return true;
     }
 }
-
-//     // app/Services/FacebookPoster.php
-//     public function postPhotoFile(string $message, string $absPath, string $mime = 'image/png'): array
-//     {
-//         $endpoint = "https://graph.facebook.com/{$this->version}/{$this->pageId}/photos";
-
-//         // Validaciones duras
-//         if (!is_file($absPath) || !is_readable($absPath) || filesize($absPath) <= 0) {
-//             throw new \RuntimeException("Foto inválida: $absPath");
-//         }
-//         $stream = @fopen($absPath, 'r');
-//         if (!$stream) {
-//             throw new \RuntimeException("No se pudo abrir la foto: $absPath");
-//         }
-
-//         $res = Http::asMultipart()
-//             ->attach('source', $stream, basename($absPath), ['Content-Type' => $mime])
-//             ->post($endpoint, [
-//                 'message'      => $message,
-//                 'published'    => 'true',
-//                 'access_token' => $this->token,
-//             ]);
-
-//         if (is_resource($stream)) @fclose($stream);
-
-//         if ($res->failed()) throw new \Illuminate\Http\Client\RequestException($res);
-//         return $res->json();
-//     }
-// }

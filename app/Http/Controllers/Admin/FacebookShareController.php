@@ -3,117 +3,133 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\PostPetToFacebookJob;
 use App\Models\Pet;
-use App\Services\FacebookPoster;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Facades\Log;
+use App\Models\PetFbPost;
+use App\Services\FacebookPoster; // sólo para tipos; no lo usamos aquí
+use Illuminate\Support\Str;
 
 class FacebookShareController extends Controller
 {
-    public function __invoke(Pet $pet, FacebookPoster $poster)
-    {
-        $pet->loadMissing('qrCode', 'photos', 'reward');
+    private int $dedupeWindowMinutes = 60;
 
-        // URL del perfil público (por QR)
+    public function __invoke(Pet $pet)
+    {
+        $pet->loadMissing('qrCode','photos','reward');
+
+        // ===== Construir mensaje =====
         $publicProfileUrl = $pet->qrCode?->slug
             ? route('public.pet.show', $pet->qrCode->slug)
             : null;
 
-        // ===== MENSAJE con emojis =====
         $sexTxt = match ($pet->sex) {
-            'male'   => '♂️ Macho',
-            'female' => '♀️ Hembra',
-            default  => '❔ Desconocido',
+            'male'   => 'Macho ♂️',
+            'female' => 'Hembra ♀️',
+            default  => 'Desconocido ❔',
         };
 
-        $ageTxt = null;
-        if (!is_null($pet->age)) {
-            $ageTxt = 'Edad: ' . $pet->age . ' ' . ((int) $pet->age === 1 ? 'año' : 'años');
-        }
+        $rewardTxt = ($pet->is_lost && $pet->reward?->active && ($pet->reward?->amount ?? 0) > 0)
+            ? "💰 Recompensa: ₡" . number_format($pet->reward->amount, 2)
+            : null;
 
-        $rewardActive = (bool) ($pet->reward?->active ?? false);
-        $rewardAmount = (float) ($pet->reward?->amount ?? 0);
-        $hasReward    = $rewardActive && $rewardAmount > 0;
-
-        // Línea combinada cuando está perdida y hay recompensa
-        $lostRewardLine = null;
-        if ($pet->is_lost && $hasReward) {
-            $lostRewardLine = '⚠️ Perdida/robada — 💰 Recompensa: ₡' . number_format($rewardAmount, 2);
-        }
+        $ageTxt = !is_null($pet->age) ? "Edad: {$pet->age} " . Str::plural('año', $pet->age) : null;
+        $statusLost = $pet->is_lost ? '⚠️ Reportada como perdida/robada' : null;
 
         $messageLines = array_filter([
             "🐾 {$pet->name}",
             $pet->breed ? "Raza: {$pet->breed}" : null,
             "Sexo: {$sexTxt}",
-            $ageTxt, //edad
+            $ageTxt,
             $pet->zone ? "Zona: {$pet->zone}" : null,
-
-            // Si existe la línea combinada, úsala. Si no:
-            $lostRewardLine ?: ($pet->is_lost ? '⚠️ Perdida/robada' : null),
-            !$lostRewardLine && $hasReward ? ('💰 Recompensa: ₡' . number_format($rewardAmount, 2)) : null,
-
+            $statusLost,
+            $rewardTxt,
             $publicProfileUrl ? "Perfil: {$publicProfileUrl}" : null,
-            'QR-Pet Tag',
+            "QR-Pet Tag",
         ]);
-
         $message = implode("\n", $messageLines);
 
-        // ===== Imagen: normalizar a URL pública o fallback =====
-        $imageUrl = $pet->main_photo_url ?: null;
+        // ===== Determinar imagen (archivo o URL) =====
+        $imageKind = null;
+        $imageRef  = null;
 
-        // Si viene ruta relativa, volverla absoluta
-        if ($imageUrl && !preg_match('#^https?://#i', $imageUrl)) {
-            $imageUrl = asset(ltrim($imageUrl, '/'));
+        if ($pet->photos->first()) {
+            $rel = $pet->photos->first()->path;
+            $abs = storage_path('app/public/'.$rel);
+            if (is_file($abs) && is_readable($abs) && filesize($abs) > 0) {
+                $imageKind = 'file';
+                $imageRef  = $abs;
+            }
         }
 
-        // Si no hay main_photo_url, usa la primera foto guardada
-        if (!$imageUrl && $pet->photos->first()) {
-            $imageUrl = asset('storage/' . $pet->photos->first()->path);
+        if (!$imageKind) {
+            $url = $pet->main_photo_url ?: null;
+            if (!$url && $pet->photos->first()) {
+                $url = asset('storage/'.$pet->photos->first()->path);
+            }
+            $isLocal = !$url || str_contains($url,'127.0.0.1') || str_contains($url,'localhost');
+            if ($isLocal || !filter_var($url, FILTER_VALIDATE_URL)) {
+                $url = 'https://picsum.photos/seed/qrpet/1080/1080';
+            }
+            $imageKind = 'url';
+            $imageRef  = $url;
         }
 
-        // Validar que sea https pública y no local
-        $host    = parse_url((string) $imageUrl, PHP_URL_HOST);
-        $invalid = !$imageUrl || !filter_var($imageUrl, FILTER_VALIDATE_URL);
-        $isLocal = in_array($host, ['127.0.0.1', 'localhost'], true);
+        // ===== Idempotencia por fingerprint =====
+        $imageKey    = $imageKind === 'file' ? ('file:' . sha1_file($imageRef)) : ('url:' . $imageRef);
+        $fingerprint = hash('sha256', $message.'|'.$imageKey);
 
-        if ($invalid || $isLocal) {
-            $imageUrl = 'https://picsum.photos/seed/qrpet/800/600';
+        $force = request()->boolean('force');
+        if (!$force
+            && $pet->last_fb_content_hash === $fingerprint
+            && $pet->last_fb_post_at
+            && now()->diffInMinutes($pet->last_fb_post_at) < $this->dedupeWindowMinutes
+        ) {
+            // Responder duplicado, el front decidirá si forzar
+            return response()->json([
+                'ok'               => false,
+                'duplicate'        => true,
+                'cooldown_minutes' => $this->dedupeWindowMinutes,
+            ], 200);
         }
 
-        Log::info('FB publish - image & message', [
-            'pet_id'   => $pet->id,
-            'imageUrl' => $imageUrl,
-            'has_msg'  => mb_strlen($message) > 0,
+        // ===== Crear registro y encolar job =====
+        $reg = PetFbPost::create([
+            'pet_id'     => $pet->id,
+            'status'     => 'queued',
+            'message'    => $message,
+            'fingerprint'=> $fingerprint,
+            'image_kind' => $imageKind,
+            'image_ref'  => $imageRef,
         ]);
 
-        try {
-            $result = $poster->postPhotoByUrl($imageUrl, $message);
+        PostPetToFacebookJob::dispatch($reg->id);
 
-            return response()->json([
-                'ok'     => true,
-                'result' => $result,
-            ]);
-        } catch (RequestException $e) {
-            $json = $e->response?->json();
-            Log::error('FB publish failed (RequestException)', [
-                'pet_id'   => $pet->id,
-                'fb_error' => $json,
-            ]);
+        return response()->json([
+            'ok'         => true,
+            'queued'     => true,
+            'post_id'    => $reg->id,
+            'status_url' => route('portal.pets.share.facebook.status', [$pet, $reg]),
+        ]);
+    }
 
-            return response()->json([
-                'ok'    => false,
-                'error' => $json['error']['message'] ?? 'No se pudo publicar',
-            ], 422);
-        } catch (\Throwable $e) {
-            Log::error('FB publish failed (Throwable)', [
-                'pet_id' => $pet->id,
-                'msg'    => $e->getMessage(),
-            ]);
+    // Endpoint de estado (se añade en routes más abajo)
+    public function status(Pet $pet, PetFbPost $reg)
+    {
+        abort_if($reg->pet_id !== $pet->id, 404);
 
-            return response()->json([
-                'ok'    => false,
-                'error' => $e->getMessage(),
-            ], 422);
+        $pageId = config('services.facebook.page_id');
+        $fbUrl = null;
+        if ($reg->status === 'success' && $reg->post_id) {
+            $suffix = str_contains($reg->post_id,'_') ? explode('_', $reg->post_id)[1] : $reg->post_id;
+            $fbUrl = "https://www.facebook.com/{$pageId}/posts/{$suffix}";
         }
+
+        return response()->json([
+            'ok'            => true,
+            'status'        => $reg->status,
+            'attempts'      => $reg->attempts,
+            'error'         => $reg->error_message,
+            'facebook_url'  => $fbUrl,
+        ]);
     }
 }

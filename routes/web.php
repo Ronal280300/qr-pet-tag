@@ -128,6 +128,12 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
         ->middleware(AdminOnly::class)
         ->name('pets.share.facebook');
 
+    Route::get(
+        'pets/{pet}/share/facebook/status/{reg}',
+        [\App\Http\Controllers\Admin\FacebookShareController::class, 'status']
+    )->middleware(\App\Http\Middleware\AdminOnly::class)
+        ->name('pets.share.facebook.status');
+
     /*
     |--------------------------------------------------------------------------
     | Panel de administración (dentro del portal)

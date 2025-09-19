@@ -174,9 +174,9 @@ $sexLabel = [
         <div class="mt-3 d-flex flex-wrap gap-2">
           <form action="{{ route('portal.pets.toggle-lost', $pet) }}" method="POST" id="toggleLostForm">
             @csrf
-            <button type="submit" class="btn btn-warning btn-sm btn-compact" id="toggleLostBtn" >
+            <button type="submit" class="btn btn-warning btn-sm btn-compact" id="toggleLostBtn">
               <i class="fa-solid fa-triangle-exclamation me-1"></i>
-              <span class="d-none d-sm-inline" >Marcar como </span>{{ $pet->is_lost ? 'Quitar pérdida' : 'Perdida/robada' }}
+              <span class="d-none d-sm-inline">Marcar como </span>{{ $pet->is_lost ? 'Quitar pérdida' : 'Perdida/robada' }}
             </button>
           </form>
 
@@ -357,8 +357,8 @@ $sexLabel = [
                 placeholder="Gracias por tu ayuda 🙏">
             </div>
 
-            <div class="col-12 mt-1" >
-              <button type="submit" id="rwSave" class="btn btn-success w-100 btn-compact btn-center" >
+            <div class="col-12 mt-1">
+              <button type="submit" id="rwSave" class="btn btn-success w-100 btn-compact btn-center">
                 <i class="fa-solid fa-floppy-disk me-1"></i> Guardar recompensa
               </button>
             </div>
@@ -775,18 +775,18 @@ $sexLabel = [
   })();
 
 
+
   async function publishToFacebook(event) {
     const btn = event.currentTarget || event.target;
-    const url = btn.dataset.url;
+    const baseUrl = btn.dataset.url;
     const petName = btn.dataset.name || 'la mascota';
-    const pageIdAttr = btn.dataset.page || '';
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-    if (!url) return;
+    if (!baseUrl) return;
     if (btn.dataset.loading === '1') return;
 
-    // Confirmación
-    const confirm = await Swal.fire({
+    // 1) Confirmación previa
+    const c1 = await Swal.fire({
       title: '¿Publicar en Facebook?',
       html: `Se publicará la ficha de <b>${petName}</b> en tu Página.`,
       icon: 'question',
@@ -794,23 +794,21 @@ $sexLabel = [
       confirmButtonText: 'Sí, publicar',
       cancelButtonText: 'Cancelar'
     });
-    if (!confirm.isConfirmed) return;
+    if (!c1.isConfirmed) return;
 
     btn.dataset.loading = '1';
     btn.disabled = true;
 
-    Swal.fire({
-      title: 'Publicando…',
-      html: 'Enviando la publicación a Facebook',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-    });
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
-
     try {
-      const res = await fetch(url, {
+      // 2) Pedimos encolar el trabajo
+      Swal.fire({
+        title: 'Publicando…',
+        html: 'Se encoló la publicación. Procesando en segundo plano.',
+        didOpen: () => Swal.showLoading(),
+        allowOutsideClick: false
+      });
+
+      const res = await fetch(baseUrl, {
         method: 'POST',
         headers: {
           'X-CSRF-TOKEN': csrf,
@@ -818,66 +816,117 @@ $sexLabel = [
           'Accept': 'application/json'
         },
         credentials: 'same-origin',
-        signal: controller.signal
       });
-
-      const raw = await res.text();
-      let data = null;
-      try {
-        data = raw ? JSON.parse(raw) : null;
-      } catch {}
-
-      clearTimeout(timeoutId);
+      const data = await res.json().catch(() => null);
       Swal.close();
 
-      if (!res.ok || !data || data.ok !== true) {
-        const msg = (data && data.error) ?
-          data.error :
-          `HTTP ${res.status} ${res.statusText}.` + (raw ? `\n${raw.slice(0,300)}` : '');
+      // ¿Contenido duplicado?
+      if (data && data.duplicate) {
+        const r = await Swal.fire({
+          icon: 'info',
+          title: 'Este contenido ya se publicó recientemente',
+          html: `¿Quieres <b>forzar</b> una nueva publicación?<br><small>Ventana anti-duplicados: ${data.cooldown_minutes} min.</small>`,
+          showCancelButton: true,
+          confirmButtonText: 'Forzar',
+          cancelButtonText: 'Cancelar'
+        });
+        if (!r.isConfirmed) return;
+
+        // volvemos a llamar con ?force=1
+        const forced = await fetch(baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'force=1', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrf,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin',
+        }).then(r => r.json()).catch(() => null);
+
+        if (!forced || !forced.ok) {
+          return Swal.fire({
+            icon: 'error',
+            title: 'No se pudo encolar la publicación',
+            text: (forced && forced.error) || 'Error inesperado.'
+          });
+        }
+        return pollPublication(forced.status_url, petName);
+      }
+
+      if (!res.ok || !data || !data.ok) {
+        const msg = (data && data.error) || `HTTP ${res.status}`;
         return Swal.fire({
           icon: 'error',
-          title: 'No se pudo publicar en Facebook.',
-          text: msg,
-          confirmButtonText: 'Aceptar'
+          title: 'No se pudo encolar la publicación',
+          text: msg
         });
       }
 
-      // Construcción robusta del link
-      const postId = data?.result?.post_id || data?.result?.id || '';
-      const pageIdResp = data?.result?.page_id || '';
-      const pageId = pageIdResp || pageIdAttr || (postId.includes('_') ? postId.split('_')[0] : '');
-      let fbUrl = '';
-      if (postId && pageId) {
-        const suffix = postId.includes('_') ? postId.split('_').pop() : postId;
-        fbUrl = `https://www.facebook.com/${pageId}/posts/${suffix}`;
-      }
+      // 3) Hacemos polling del estado
+      return pollPublication(data.status_url, petName);
 
-      return Swal.fire({
-        icon: 'success',
-        title: `¡Publicado ${petName} en Facebook!`,
-        html: fbUrl ?
-          `Ver publicación:<br><a href="${fbUrl}" target="_blank" rel="noopener">${fbUrl}</a>` : 'Publicado correctamente.',
-        confirmButtonText: 'Aceptar'
-      });
-
-    } catch (err) {
-      clearTimeout(timeoutId);
+    } catch (e) {
       Swal.close();
-      const msg = (err?.name === 'AbortError') ?
-        'Se agotó el tiempo de espera. Inténtalo de nuevo.' :
-        (err?.message || 'Error de red o de servidor.');
       return Swal.fire({
         icon: 'error',
-        title: 'No se pudo publicar en Facebook.',
-        text: msg,
-        confirmButtonText: 'Aceptar'
+        title: 'Error de red',
+        text: e?.message || 'Inténtalo de nuevo.'
       });
     } finally {
       btn.dataset.loading = '';
       btn.disabled = false;
     }
   }
+
+  // Polling de estado (cada 3s, máx 2 min)
+  async function pollPublication(statusUrl, petName) {
+    const endAt = Date.now() + 120000;
+    Swal.fire({
+      title: 'Publicando…',
+      html: 'Tu publicación está en proceso.',
+      didOpen: () => Swal.showLoading(),
+      allowOutsideClick: false
+    });
+
+    while (Date.now() < endAt) {
+      await new Promise(r => setTimeout(r, 3000));
+      const s = await fetch(statusUrl, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      }).then(r => r.json()).catch(() => null);
+      if (!s || !s.ok) continue;
+
+      if (s.status === 'success') {
+        Swal.close();
+        return Swal.fire({
+          icon: 'success',
+          title: `¡Publicado ${petName} en Facebook!`,
+          html: s.facebook_url ? `Ver publicación:<br><a href="${s.facebook_url}" target="_blank" rel="noopener">${s.facebook_url}</a>` : 'Se publicó correctamente.',
+        });
+      }
+      if (s.status === 'failed') {
+        Swal.close();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Falló la publicación',
+          text: s.error || 'Error desconocido.'
+        });
+      }
+      // queued / processing => seguimos
+    }
+
+    Swal.close();
+    return Swal.fire({
+      icon: 'info',
+      title: 'Publicación en proceso',
+      text: 'Sigue encolada o procesándose. Puedes revisar más tarde.',
+    });
+  }
+
   window.publishToFacebook = publishToFacebook;
+
+
 
 
 
@@ -911,7 +960,7 @@ $sexLabel = [
     });
   })();
 
-   (function () {
+  (function() {
     const forms = document.querySelectorAll('form[data-confirm]');
     forms.forEach(form => {
       form.addEventListener('submit', async (e) => {
@@ -929,7 +978,9 @@ $sexLabel = [
           cancelButtonText: 'Cancelar'
         });
         if (res.isConfirmed) form.submit();
-      }, { passive: false });
+      }, {
+        passive: false
+      });
     });
   })();
 </script>
