@@ -13,6 +13,7 @@ use App\Http\Controllers\Portal\ActivateTagController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\FacebookShareController; // <-- agregado
+use App\Http\Controllers\PublicPetPingController;
 
 // Middleware
 use App\Http\Middleware\AdminOnly;
@@ -60,6 +61,10 @@ Route::get('password/reset/{token}', [\App\Http\Controllers\Auth\ResetPasswordCo
 Route::post('password/reset', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])
     ->name('password.update');
 
+
+//Ubicación
+Route::post('/p/{slug}/ping', [PublicPetPingController::class, 'store'])
+    ->name('public.pet.ping');
 /*
 |--------------------------------------------------------------------------
 | Auth scaffolding

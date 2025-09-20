@@ -321,3 +321,58 @@
   })();
 </script>
 @endsection
+ 
+@section('content')
+  {{-- ... tu contenido del perfil público ... --}}
+@endsection
+
+@php
+  // Asegura tener el slug disponible en la vista
+  $slug = $slug ?? ($pet->qrCode->slug ?? null);
+@endphp
+
+
+ @push('scripts')
+<script>
+(function autoPing(){
+  // ⚠️ URL RELATIVA (sin http/https) para evitar mixed content en cualquier escenario
+  const url  = @json(route('public.pet.ping', ['slug' => $slug], false));
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  function send(body){
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type':'application/json',
+        'X-CSRF-TOKEN': csrf,
+        'Accept':'application/json'
+      },
+      body: JSON.stringify(body)
+    }).catch(()=>{});
+  }
+
+  // Intentamos GPS; si se bloquea o falla → IP
+  if (navigator.geolocation && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    let done = false;
+    const timer = setTimeout(() => { if (!done) { done = true; send({ method: 'ip' }); } }, 6000);
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        if (done) return; done = true; clearTimeout(timer);
+        const c = pos.coords || {};
+        send({ method:'gps', lat:c.latitude, lng:c.longitude, accuracy: Math.round(c.accuracy || 0) });
+      },
+      _ => { if (done) return; done = true; clearTimeout(timer); send({ method:'ip' }); },
+      { enableHighAccuracy:true, timeout:5500, maximumAge:0 }
+    );
+  } else {
+    // En LAN/celular (http sin https), los navegadores no dan GPS → usamos IP
+    send({ method:'ip' });
+  }
+})();
+</script>
+@endpush
+
+
+
+

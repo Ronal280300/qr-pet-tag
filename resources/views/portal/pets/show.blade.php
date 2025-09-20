@@ -778,15 +778,16 @@ $sexLabel = [
 
   async function publishToFacebook(event) {
     const btn = event.currentTarget || event.target;
-    const baseUrl = btn.dataset.url;
+    const url = btn.dataset.url; // ruta a portal.pets.share.facebook
     const petName = btn.dataset.name || 'la mascota';
+    const pageId = btn.dataset.page || ''; // opcional, para armar el link del post
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-    if (!baseUrl) return;
-    if (btn.dataset.loading === '1') return;
+    if (!url) return;
+    if (btn.dataset.loading === '1') return; // anti-doble click
 
-    // 1) Confirmación previa
-    const c1 = await Swal.fire({
+    // Confirmación
+    const confirm = await Swal.fire({
       title: '¿Publicar en Facebook?',
       html: `Se publicará la ficha de <b>${petName}</b> en tu Página.`,
       icon: 'question',
@@ -794,21 +795,24 @@ $sexLabel = [
       confirmButtonText: 'Sí, publicar',
       cancelButtonText: 'Cancelar'
     });
-    if (!c1.isConfirmed) return;
+    if (!confirm.isConfirmed) return;
 
     btn.dataset.loading = '1';
     btn.disabled = true;
 
+    // Timeout de seguridad (25s)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+
     try {
-      // 2) Pedimos encolar el trabajo
       Swal.fire({
         title: 'Publicando…',
-        html: 'Se encoló la publicación. Procesando en segundo plano.',
+        html: 'Enviando la publicación a Facebook',
+        allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
-        allowOutsideClick: false
       });
 
-      const res = await fetch(baseUrl, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
           'X-CSRF-TOKEN': csrf,
@@ -816,61 +820,61 @@ $sexLabel = [
           'Accept': 'application/json'
         },
         credentials: 'same-origin',
+        signal: controller.signal
       });
-      const data = await res.json().catch(() => null);
+
+      const raw = await res.text();
+      let data = null;
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch {
+        /* cuerpo no JSON */ }
+
+      clearTimeout(timeoutId);
       Swal.close();
 
-      // ¿Contenido duplicado?
-      if (data && data.duplicate) {
-        const r = await Swal.fire({
-          icon: 'info',
-          title: 'Este contenido ya se publicó recientemente',
-          html: `¿Quieres <b>forzar</b> una nueva publicación?<br><small>Ventana anti-duplicados: ${data.cooldown_minutes} min.</small>`,
-          showCancelButton: true,
-          confirmButtonText: 'Forzar',
-          cancelButtonText: 'Cancelar'
-        });
-        if (!r.isConfirmed) return;
-
-        // volvemos a llamar con ?force=1
-        const forced = await fetch(baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'force=1', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': csrf,
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-          },
-          credentials: 'same-origin',
-        }).then(r => r.json()).catch(() => null);
-
-        if (!forced || !forced.ok) {
-          return Swal.fire({
-            icon: 'error',
-            title: 'No se pudo encolar la publicación',
-            text: (forced && forced.error) || 'Error inesperado.'
-          });
-        }
-        return pollPublication(forced.status_url, petName);
-      }
-
-      if (!res.ok || !data || !data.ok) {
-        const msg = (data && data.error) || `HTTP ${res.status}`;
+      if (!res.ok || !data || data.ok !== true) {
+        const msg = (data && data.error) ||
+          `HTTP ${res.status} ${res.statusText}${raw ? ' – ' + raw.slice(0, 200) : ''}`;
         return Swal.fire({
           icon: 'error',
-          title: 'No se pudo encolar la publicación',
-          text: msg
+          title: 'No se pudo publicar en Facebook.',
+          text: msg,
+          confirmButtonText: 'Aceptar'
         });
       }
 
-      // 3) Hacemos polling del estado
-      return pollPublication(data.status_url, petName);
+      // Construir link a la publicación (si viene post_id)
+      let fbUrl = '';
+      const postId = data?.result?.post_id || data?.result?.id || '';
+      if (postId && postId.includes('_')) {
+        const [pid, suffix] = postId.split('_');
+        fbUrl = `https://www.facebook.com/${pid}/posts/${suffix}`;
+      } else if (postId && pageId) {
+        const suffix = postId.split('_').pop();
+        fbUrl = `https://www.facebook.com/${pageId}/posts/${suffix}`;
+      }
 
-    } catch (e) {
+      return Swal.fire({
+        icon: 'success',
+        title: `¡Publicado ${petName} en Facebook!`,
+        html: fbUrl ?
+          `Ver publicación:<br><a href="${fbUrl}" target="_blank" rel="noopener">${fbUrl}</a>` :
+          'Se publicó correctamente.',
+        confirmButtonText: 'Aceptar'
+      });
+
+    } catch (err) {
+      clearTimeout(timeoutId);
       Swal.close();
+      const msg = (err?.name === 'AbortError') ?
+        'Se agotó el tiempo de espera. Inténtalo de nuevo.' :
+        (err?.message || 'Error de red o de servidor.');
       return Swal.fire({
         icon: 'error',
-        title: 'Error de red',
-        text: e?.message || 'Inténtalo de nuevo.'
+        title: 'No se pudo publicar en Facebook.',
+        text: msg,
+        confirmButtonText: 'Aceptar'
       });
     } finally {
       btn.dataset.loading = '';
@@ -878,52 +882,7 @@ $sexLabel = [
     }
   }
 
-  // Polling de estado (cada 3s, máx 2 min)
-  async function pollPublication(statusUrl, petName) {
-    const endAt = Date.now() + 120000;
-    Swal.fire({
-      title: 'Publicando…',
-      html: 'Tu publicación está en proceso.',
-      didOpen: () => Swal.showLoading(),
-      allowOutsideClick: false
-    });
-
-    while (Date.now() < endAt) {
-      await new Promise(r => setTimeout(r, 3000));
-      const s = await fetch(statusUrl, {
-        headers: {
-          'Accept': 'application/json'
-        }
-      }).then(r => r.json()).catch(() => null);
-      if (!s || !s.ok) continue;
-
-      if (s.status === 'success') {
-        Swal.close();
-        return Swal.fire({
-          icon: 'success',
-          title: `¡Publicado ${petName} en Facebook!`,
-          html: s.facebook_url ? `Ver publicación:<br><a href="${s.facebook_url}" target="_blank" rel="noopener">${s.facebook_url}</a>` : 'Se publicó correctamente.',
-        });
-      }
-      if (s.status === 'failed') {
-        Swal.close();
-        return Swal.fire({
-          icon: 'error',
-          title: 'Falló la publicación',
-          text: s.error || 'Error desconocido.'
-        });
-      }
-      // queued / processing => seguimos
-    }
-
-    Swal.close();
-    return Swal.fire({
-      icon: 'info',
-      title: 'Publicación en proceso',
-      text: 'Sigue encolada o procesándose. Puedes revisar más tarde.',
-    });
-  }
-
+  // si usas onclick="publishToFacebook(event)"
   window.publishToFacebook = publishToFacebook;
 
 
