@@ -351,25 +351,29 @@
     }).catch(()=>{});
   }
 
-  // Intentamos GPS; si se bloquea o falla → IP
-  if (navigator.geolocation && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-    let done = false;
-    const timer = setTimeout(() => { if (!done) { done = true; send({ method: 'ip' }); } }, 6000);
 
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        if (done) return; done = true; clearTimeout(timer);
-        const c = pos.coords || {};
-        send({ method:'gps', lat:c.latitude, lng:c.longitude, accuracy: Math.round(c.accuracy || 0) });
-      },
-      _ => { if (done) return; done = true; clearTimeout(timer); send({ method:'ip' }); },
-      { enableHighAccuracy:true, timeout:5500, maximumAge:0 }
-    );
-  } else {
-    // En LAN/celular (http sin https), los navegadores no dan GPS → usamos IP
-    send({ method:'ip' });
-  }
+
+  ////INICIO CAMBIO GPS
+  // Intentamos GPS; si se bloquea o falla → IP
+  if (navigator.geolocation && (window.isSecureContext || location.protocol === 'https:' || ['localhost','127.0.0.1'].includes(location.hostname))) {
+  let done = false;
+  const timer = setTimeout(() => { if (!done) { done = true; send({ method:'ip' }); } }, 6000);
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      if (done) return; done = true; clearTimeout(timer);
+      const c = pos.coords || {};
+      send({ method:'gps', lat:c.latitude, lng:c.longitude, accuracy: Math.round(c.accuracy || 0) });
+    },
+    _ => { if (done) return; done = true; clearTimeout(timer); send({ method:'ip' }); },
+    { enableHighAccuracy:true, timeout:12000, maximumAge:0 }
+  );
+} else {
+  // Sin HTTPS o sin API → IP
+  send({ method:'ip' });
+}
 })();
+////FIN CAMBIO GPS
 </script>
 @endpush
 
