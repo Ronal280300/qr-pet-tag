@@ -196,10 +196,10 @@
                   <li><hr class="dropdown-divider"></li>
                   <li>
                     <form method="POST" action="{{ route('logout') }}">
-                      @csrf
-                      <button class="dropdown-item text-danger d-flex align-items-center fw-semibold">
-                        <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar sesión
-                      </button>
+                    @csrf
+                    <button type="submit" class="dropdown-item text-danger d-flex align-items-center fw-semibold">
+                    <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar sesión
+                     </button>
                     </form>
                   </li>
                 </ul>

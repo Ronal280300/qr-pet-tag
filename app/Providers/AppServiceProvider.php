@@ -22,5 +22,6 @@ class AppServiceProvider extends ServiceProvider
     {
         // Forzar a Laravel a usar las vistas de paginación de Bootstrap 5
         Paginator::useBootstrapFive();
+
     }
 }

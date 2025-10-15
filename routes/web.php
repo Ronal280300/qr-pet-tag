@@ -60,6 +60,7 @@ Route::get('password/reset/{token}', [\App\Http\Controllers\Auth\ResetPasswordCo
 
 Route::post('password/reset', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])
     ->name('password.update');
+    
 
 
 //Ubicación
@@ -119,9 +120,11 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
     Route::post('pets/{pet}/regen-code',  [PetController::class, 'regenCode'])->name('pets.regen-code');
 
     // Generar imagen (share-card) desde el portal
-    Route::post('pets/{pet}/share-card', [PetController::class, 'shareCard'])
+   // Route::post('pets/{pet}/share-card', [PetController::class, 'shareCard'])
+       // ->name('pets.share-card');
+       
+  Route::match(['GET','POST'], 'pets/{pet}/share-card', [PetController::class, 'shareCard'])
         ->name('pets.share-card');
-
     /*
     |--------------------------------------------------------------------------
     | Botón: Publicar en Facebook (detalle de mascota)

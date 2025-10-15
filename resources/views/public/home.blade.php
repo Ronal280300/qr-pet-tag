@@ -98,12 +98,451 @@
   .testimonial{ background:#fff; border-radius:16px; padding:1.4rem; box-shadow:0 8px 22px rgba(0,0,0,.06); position:relative; }
   .testimonial::before{ content:"❝"; position:absolute; top:-10px; left:-6px; font-size:1.8rem; color:var(--primary) }
   .testimonial small{ color:var(--muted) }
-  .faq .accordion-button{ font-weight:600 }
-  .faq .accordion-button:not(.collapsed){ color:var(--brand-900) }
-  .cta{ position:relative; overflow:hidden; color:#fff;
-        background:linear-gradient(rgba(30,124,242,.94),rgba(14,97,198,.94)),
-                   url("https://images.unsplash.com/photo-1558788353-f76d92427f16?q=80&w=1920&auto=format&fit=crop") center/cover fixed;
-        padding:90px 0; }
+  .faq-modern {
+  background: linear-gradient(135deg, 
+    rgba(79, 137, 232, 0.02) 0%, 
+    rgba(30, 124, 242, 0.05) 50%, 
+    rgba(14, 97, 198, 0.02) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.faq-modern::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(79, 137, 232, 0.03) 0%, transparent 70%);
+  animation: faqFloat 20s ease-in-out infinite;
+}
+
+/* Header */
+.faq-header {
+  position: relative;
+  z-index: 2;
+}
+
+.faq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(79, 137, 232, 0.1), rgba(30, 124, 242, 0.15));
+  border: 1px solid rgba(79, 137, 232, 0.2);
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(79, 137, 232, 0.1);
+  animation: badgePulse 3s ease-in-out infinite;
+}
+
+.faq-badge-icon {
+  font-size: 18px;
+  animation: iconRotate 4s ease-in-out infinite;
+}
+
+.faq-title {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.faq-highlight {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+}
+
+.faq-subtitle {
+  font-size: 18px;
+  color: var(--muted);
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Container */
+.faq-container {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* Items */
+.faq-item {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.faq-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(79, 137, 232, 0.2);
+}
+
+.faq-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.faq-item:hover::before {
+  transform: scaleX(1);
+}
+
+/* Question */
+.faq-question {
+  display: flex;
+  align-items: center;
+  padding: 24px 28px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.faq-question:hover {
+  background: rgba(79, 137, 232, 0.03);
+}
+
+.faq-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary), var(--brand-900));
+  color: white;
+  font-size: 20px;
+  margin-right: 20px;
+  box-shadow: 0 8px 20px rgba(79, 137, 232, 0.3);
+  transition: all 0.3s ease;
+}
+
+.faq-question:hover .faq-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.faq-text {
+  flex: 1;
+}
+
+.faq-text h5 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.faq-text p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+  opacity: 0.8;
+}
+
+.faq-arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(79, 137, 232, 0.08);
+  color: var(--primary);
+  font-size: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-question[aria-expanded="true"] .faq-arrow {
+  transform: rotate(180deg);
+  background: var(--primary);
+  color: white;
+}
+
+/* Answer */
+.faq-answer {
+  border-top: 1px solid rgba(79, 137, 232, 0.1);
+}
+
+.faq-content {
+  padding: 28px;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.faq-content p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0 0 20px 0;
+}
+
+/* Lists y features */
+.faq-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.faq-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 15px;
+  color: #374151;
+}
+
+.faq-list i {
+  color: #10b981;
+  font-size: 14px;
+  width: 16px;
+}
+
+.faq-features {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.faq-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(79, 137, 232, 0.05);
+  border-radius: 12px;
+  font-size: 14px;
+  color: #374151;
+  transition: all 0.3s ease;
+}
+
+.faq-feature:hover {
+  background: rgba(79, 137, 232, 0.1);
+  transform: translateX(4px);
+}
+
+.faq-feature i {
+  color: var(--primary);
+  font-size: 16px;
+  width: 20px;
+}
+
+/* Tips y warnings */
+.faq-tip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.12));
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #059669;
+}
+
+.faq-tip i {
+  color: #10b981;
+  font-size: 16px;
+}
+
+.faq-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(217, 119, 6, 0.12));
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 12px;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #d97706;
+}
+
+.faq-warning i {
+  color: #f59e0b;
+  font-size: 16px;
+}
+
+/* Call to Action */
+.faq-cta-content {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.faq-cta-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(79, 137, 232, 0.1), transparent);
+  animation: shimmer 3s infinite;
+}
+
+.faq-cta h4 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px 0;
+}
+
+.faq-cta p {
+  color: var(--muted);
+  margin: 0 0 24px 0;
+  font-size: 16px;
+}
+
+.faq-contact-options {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.faq-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.faq-contact-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.faq-contact-btn:hover::before {
+  left: 100%;
+}
+
+.faq-contact-btn.whatsapp {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: white;
+  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+}
+
+.faq-contact-btn.whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.4);
+  color: white;
+}
+
+.faq-contact-btn.email {
+  background: linear-gradient(135deg, var(--primary), var(--brand-900));
+  color: white;
+  box-shadow: 0 8px 20px rgba(79, 137, 232, 0.3);
+}
+
+.faq-contact-btn.email:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(79, 137, 232, 0.4);
+  color: white;
+}
+
+/* Animaciones */
+@keyframes faqFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-20px, -20px) rotate(1deg); }
+  66% { transform: translate(20px, -10px) rotate(-1deg); }
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes iconRotate {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .faq-question {
+    padding: 20px 16px;
+  }
+  
+  .faq-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 16px;
+    font-size: 18px;
+  }
+  
+  .faq-text h5 {
+    font-size: 16px;
+  }
+  
+  .faq-content {
+    padding: 20px 16px;
+  }
+  
+  .faq-cta-content {
+    padding: 32px 20px;
+  }
+  
+  .faq-contact-options {
+    flex-direction: column;
+  }
+}
+
   .cta h2{ font-weight:800; letter-spacing:.3px; animation:pulse 2.5s infinite }
 
   /* reveal */
@@ -127,6 +566,12 @@
   .social-cta .tt{ background:linear-gradient(135deg,#000000,#111827) }
   .social-cta .tt i{ color:#fff }
   .social-cta i{ font-size:1.2rem }
+  
+   .cta{ position:relative; overflow:hidden; color:#fff;
+        background:linear-gradient(rgba(30,124,242,.94),rgba(14,97,198,.94)),
+                   url("https://images.unsplash.com/photo-1558788353-f76d92427f16?q=80&w=1920&auto=format&fit=crop") center/cover fixed;
+        padding:90px 0; }
+  .cta h2{ font-weight:800; letter-spacing:.3px; animation:pulse 2.5s infinite }
 </style>
 @endpush
 
@@ -288,35 +733,115 @@
 </section>
 
 
-<section class="py-5">
-  <div class="container container-narrow faq">
-    <div class="text-center mb-4 reveal"><h2 class="section-title">Preguntas frecuentes</h2></div>
-    <div class="accordion" id="faqAcc">
-      <div class="accordion-item reveal">
-        <h2 class="accordion-header" id="q1">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#a1">¿Necesito una app para escanear?</button>
-        </h2>
-        <div id="a1" class="accordion-collapse collapse show" data-bs-parent="#faqAcc">
-          <div class="accordion-body">No. Cualquier cámara moderna lee el QR y abre el perfil público de tu mascota.</div>
-        </div>
+<!-- REEMPLAZA ESTA SECCIÓN COMPLETA EN TU ARCHIVO -->
+<section class="py-5 faq-modern">
+  <div class="container container-narrow">
+    
+    <!-- Header mejorado -->
+    <div class="faq-header text-center mb-5 reveal">
+      <div class="faq-badge">
+        <span class="faq-badge-icon">❓</span>
+        <span>FAQ</span>
       </div>
-      <div class="accordion-item reveal">
-        <h2 class="accordion-header" id="q2">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a2">¿Qué datos son públicos?</button>
-        </h2>
-        <div id="a2" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
-          <div class="accordion-body">Solo el nombre de la mascota, tu nombre, un teléfono y la zona. Nunca tu dirección exacta.</div>
-        </div>
-      </div>
-      <div class="accordion-item reveal">
-        <h2 class="accordion-header" id="q3">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a3">¿Puedo activar una recompensa?</button>
-        </h2>
-        <div id="a3" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
-          <div class="accordion-body">Sí, desde tu portal puedes activar/desactivar una recompensa y poner el monto.</div>
-        </div>
-      </div>
+      <h2 class="faq-title">
+        Preguntas <span class="faq-highlight">frecuentes</span>
+      </h2>
+      <p class="faq-subtitle">Todo lo que necesitas saber sobre QR-Pet Tag</p>
     </div>
+
+    <!-- Accordion mejorado -->
+    <div class="faq-container" id="faqModern">
+      
+      <div class="faq-item reveal" data-aos="fade-up" data-aos-delay="100">
+        <div class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="true">
+          <div class="faq-icon">
+            <i class="fa-solid fa-mobile-screen"></i>
+          </div>
+          <div class="faq-text">
+            <h5>¿Necesito una app para escanear?</h5>
+            <p>Compatibilidad con dispositivos</p>
+          </div>
+          <div class="faq-arrow">
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+        </div>
+        <div id="faq1" class="collapse show faq-answer" data-bs-parent="#faqModern">
+          <div class="faq-content">
+            <p>No necesitas descargar ninguna aplicación. Cualquier cámara moderna (iPhone, Android, tablets) puede leer el código QR y abrir automáticamente el perfil público de tu mascota en el navegador.</p>
+            <div class="faq-tip">
+              <i class="fa-solid fa-lightbulb"></i>
+              <span>Funciona incluso con cámaras básicas de teléfonos de hace 5+ años</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item reveal" data-aos="fade-up" data-aos-delay="200">
+        <div class="faq-question collapsed" data-bs-toggle="collapse" data-bs-target="#faq2">
+          <div class="faq-icon">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <div class="faq-text">
+            <h5>¿Qué datos son públicos?</h5>
+            <p>Privacidad y seguridad</p>
+          </div>
+          <div class="faq-arrow">
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+        </div>
+        <div id="faq2" class="collapse faq-answer" data-bs-parent="#faqModern">
+          <div class="faq-content">
+            <p>Solo compartimos la información mínima necesaria para el reencuentro:</p>
+            <ul class="faq-list">
+              <li><i class="fa-solid fa-check"></i> Nombre y foto de la mascota</li>
+              <li><i class="fa-solid fa-check"></i> Tu nombre de contacto</li>
+              <li><i class="fa-solid fa-check"></i> Teléfono principal</li>
+              <li><i class="fa-solid fa-check"></i> Zona general (no dirección exacta)</li>
+            </ul>
+            <div class="faq-warning">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>Nunca compartimos tu dirección exacta, email o datos personales adicionales</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item reveal" data-aos="fade-up" data-aos-delay="300">
+        <div class="faq-question collapsed" data-bs-toggle="collapse" data-bs-target="#faq3">
+          <div class="faq-icon">
+            <i class="fa-solid fa-gift"></i>
+          </div>
+          <div class="faq-text">
+            <h5>¿Puedo activar una recompensa?</h5>
+            <p>Incentivos para el rescate</p>
+          </div>
+          <div class="faq-arrow">
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+        </div>
+        <div id="faq3" class="collapse faq-answer" data-bs-parent="#faqModern">
+          <div class="faq-content">
+            <p>¡Por supuesto! Desde tu panel de control puedes:</p>
+            <div class="faq-features">
+              <div class="faq-feature">
+                <i class="fa-solid fa-toggle-on"></i>
+                <span>Activar/desactivar recompensa cuando quieras</span>
+              </div>
+              <div class="faq-feature">
+                <i class="fa-solid fa-coins"></i>
+                <span>Establecer el monto que consideres apropiado</span>
+              </div>
+              <div class="faq-feature">
+                <i class="fa-solid fa-eye"></i>
+                <span>La recompensa aparece destacada en el perfil público</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 </section>
 

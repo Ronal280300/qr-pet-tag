@@ -319,12 +319,30 @@ class PetShareCardService
         return $p;
     }
 
-    private function fallbackFont(bool $bold): string
-    {
-        $win   = $bold ? 'C:\Windows\Fonts\arialbd.ttf' : 'C:\Windows\Fonts\arial.ttf';
-        $linux = $bold ? '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' : '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
-        return is_file($win) ? $win : $linux;
+   private function fallbackFont(bool $bold): string
+{
+    // 1) Busca primero dentro del proyecto (lo único 100% portable)
+    $basename = 'DejaVuSans' . ($bold ? '-Bold' : '') . '.ttf';
+    $candidates = [
+        resource_path('fonts/' . $basename),     // resources/fonts/DejaVuSans(-Bold).ttf
+        public_path('fonts/' . $basename),       // public/fonts/...  (por si las pones públicas)
+        storage_path('app/fonts/' . $basename),  // storage/app/fonts/... (otra opción)
+        // 2) Fallbacks comunes del sistema (por si existen)
+        '/usr/share/fonts/truetype/dejavu/' . $basename,
+        '/usr/share/fonts/dejavu/' . $basename,
+        'C:\Windows\Fonts\\' . ($bold ? 'arialbd.ttf' : 'arial.ttf'),
+    ];
+
+    foreach ($candidates as $p) {
+        if ($p && is_file($p)) {
+            return $p;
+        }
     }
+
+    // Si llegamos aquí, no hay fuente disponible => lanzamos un error legible
+    throw new \RuntimeException('No se encontró ninguna fuente TTF. Copia DejaVuSans.ttf y DejaVuSans-Bold.ttf en resources/fonts/');
+}
+
 
     /**
      * Devuelve SIEMPRE un número formateado.

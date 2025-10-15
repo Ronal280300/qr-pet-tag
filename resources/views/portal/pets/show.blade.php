@@ -180,16 +180,17 @@ $sexLabel = [
             </button>
           </form>
 
-          {{-- Botón para generar la publicación (si está perdida/robada) --}}
-          @if($pet->is_lost)
-          <form action="{{ route('portal.pets.share-card', $pet) }}" method="POST" class="d-inline">
-            @csrf
-            <button class="btn btn-outline-danger btn-sm btn-compact">
-              <i class="fa-solid fa-bullhorn me-1"></i>
-              <span class="d-none d-sm-inline">Generar </span>publicación
-            </button>
-          </form>
-          @endif
+         {{-- Generar publicación (solo si está marcada como perdida) --}}
+@if($pet->is_lost)
+  <form action="{{ route('portal.pets.share-card', $pet) }}" method="POST" class="d-inline">
+    @csrf
+    <button type="submit" class="btn btn-outline-danger btn-sm">
+      <i class="fa-solid fa-bullhorn me-1"></i>
+      Generar publicación
+    </button>
+  </form>
+@endif
+
         </div>
       </div>
     </div>

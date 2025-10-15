@@ -13,7 +13,9 @@
         "laravel/tinker": "^2.10.1",
         "laravel/ui": "^4.6",
         "simplesoftwareio/simple-qrcode": "4.2",
-        "spatie/browsershot": "^5.0"
+        "spatie/browsershot": "^5.0",
+        "spatie/image": "^3.8",
+        "spatie/image-optimizer": "^1.8"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

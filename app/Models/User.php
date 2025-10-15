@@ -23,6 +23,9 @@ class User extends Authenticatable
         'emergency_contact',
         'is_admin',
         'google_id',
+        'avatar',
+        'avatar_original',
+
     ];
 
     /**
