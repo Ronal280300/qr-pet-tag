@@ -4,6 +4,10 @@
 @push('styles')
 {{-- Fuente moderna --}}
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
 
 <style>
   :root{
@@ -572,6 +576,81 @@
                    url("https://images.unsplash.com/photo-1558788353-f76d92427f16?q=80&w=1920&auto=format&fit=crop") center/cover fixed;
         padding:90px 0; }
   .cta h2{ font-weight:800; letter-spacing:.3px; animation:pulse 2.5s infinite }
+
+
+/* ===== BOTÓN FLOTANTE DE WHATSAPP ===== */
+.whatsapp-float {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 65px;
+  height: 65px;
+  background: linear-gradient(145deg, #25d366, #20b358);
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 34px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  overflow: visible;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.12);
+  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+  background: linear-gradient(145deg, #20b358, #25d366);
+}
+
+.whatsapp-float i {
+  margin-top: 15px;
+}
+
+/* ===== EFECTO DE BRILLO ===== */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+
+.whatsapp-float {
+  animation: pulse 2.5s infinite;
+}
+
+/* ===== TOOLTIP ===== */
+.whatsapp-tooltip {
+  position: absolute;
+  right: 80px;
+  bottom: 18px;
+  background: #2f2f2f;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
+.whatsapp-float:hover .whatsapp-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.whatsapp-tooltip::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent transparent #2f2f2f;
+}
+
+
 </style>
 @endpush
 
@@ -879,6 +958,22 @@
 <section class="py-4 text-center text-muted">
   <div class="container small">© {{ date('Y') }} QR-Pet Tag — Todos los derechos reservados</div>
 </section>
+
+@php
+    $whatsappNumber = config('app.whatsapp_number');
+    $message = "¡Hola! Me gustaría obtener más información sobre los tags";
+    $encodedMessage = str_replace('+', '%20', urlencode($message));
+@endphp
+
+<!-- Botón flotante de WhatsApp -->
+<a href="https://wa.me/{{ $whatsappNumber }}?text={{ $encodedMessage }}" 
+   class="whatsapp-float" 
+   target="_blank" 
+   title="Chatea con nosotros 💬">
+  <i class="fa-brands fa-whatsapp"></i>
+  <span class="whatsapp-tooltip">¿Necesitas ayuda? 💬</span>
+</a>
+
 
 @endsection
 

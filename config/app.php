@@ -41,6 +41,9 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    'whatsapp_number' => env('WHATSAPP_NUMBER', '50685307943'),
+
+
     /*
     |--------------------------------------------------------------------------
     | Application URL
