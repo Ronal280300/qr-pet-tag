@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\FacebookShareController; // <-- agregado
 use App\Http\Controllers\PublicPetPingController;
+use App\Http\Controllers\Admin\ClientController; // <-- NUEVO
 
 // Middleware
 use App\Http\Middleware\AdminOnly;
@@ -60,7 +61,6 @@ Route::get('password/reset/{token}', [\App\Http\Controllers\Auth\ResetPasswordCo
 
 Route::post('password/reset', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])
     ->name('password.update');
-    
 
 
 //Ubicación
@@ -101,30 +101,47 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
 
     // Recompensa de mascota (update - PUT)
     Route::put('/pets/{pet}/reward', [PetController::class, 'updateReward'])
-        ->name('pets.reward.update');
+        ->name('pets.reward.update')
+        ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
 
     /*
     |--------------------------------------------------------------------------
     | Gestión de mascotas del usuario
     |--------------------------------------------------------------------------
     */
-    Route::resource('pets', PetController::class);
+    Route::resource('pets', PetController::class)
+        ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
 
     // Acciones sobre mascota
-    Route::post('pets/{pet}/toggle-lost', [PetController::class, 'toggleLost'])->name('pets.toggle-lost');
-    Route::post('pets/{pet}/reward',      [PetController::class, 'updateReward'])->name('pets.update-reward');
+    Route::post('pets/{pet}/toggle-lost', [PetController::class, 'toggleLost'])
+        ->name('pets.toggle-lost')
+        ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
+
+    Route::post('pets/{pet}/reward', [PetController::class, 'updateReward'])
+        ->name('pets.update-reward')
+        ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
 
     // QR de la mascota
-    Route::post('pets/{pet}/generate-qr', [PetController::class, 'generateQR'])->name('pets.generate-qr');
-    Route::get('pets/{pet}/download-qr',  [PetController::class, 'downloadQr'])->name('pets.download-qr');
-    Route::post('pets/{pet}/regen-code',  [PetController::class, 'regenCode'])->name('pets.regen-code');
+    Route::post('pets/{pet}/generate-qr', [PetController::class, 'generateQR'])
+        ->name('pets.generate-qr')
+        ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
+
+    Route::get('pets/{pet}/download-qr',  [PetController::class, 'downloadQr'])
+        ->name('pets.download-qr')
+        ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
+
+    Route::post('pets/{pet}/regen-code',  [PetController::class, 'regenCode'])
+        ->name('pets.regen-code')
+        ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
 
     // Generar imagen (share-card) desde el portal
    // Route::post('pets/{pet}/share-card', [PetController::class, 'shareCard'])
        // ->name('pets.share-card');
        
-  Route::match(['GET','POST'], 'pets/{pet}/share-card', [PetController::class, 'shareCard'])
-        ->name('pets.share-card');
+    Route::match(['GET','POST'], 'pets/{pet}/share-card', [PetController::class, 'shareCard'])
+        ->name('pets.share-card')
+        ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
+
     /*
     |--------------------------------------------------------------------------
     | Botón: Publicar en Facebook (detalle de mascota)
@@ -167,5 +184,14 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
 
             // Dashboard Admin (atajo directo dentro del portal)
             Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+            // 👉 NUEVO: Gestión de Clientes
+            Route::get('clients', [ClientController::class, 'index'])->name('clients.index');        // listado + filtros
+            Route::get('clients/{user}', [ClientController::class, 'show'])->name('clients.show');   // detalle/edición
+            Route::put('clients/{user}', [ClientController::class, 'update'])->name('clients.update'); // guardar cambios
+            Route::delete('clients/{user}/pets/{pet}', [ClientController::class, 'detachPet'])->name('clients.pets.detach'); // desenlazar mascota
+            Route::delete('clients/{user}', [ClientController::class, 'destroy'])->name('clients.destroy');
+            // 👉 Exportar clientes (CSV) preservando filtros ?q=&status=
+            Route::get('clients-export', [ClientController::class, 'exportCsv'])->name('clients.export');
         });
 });

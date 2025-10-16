@@ -73,5 +73,8 @@ class Kernel extends HttpKernel
 
         // 🔒 Solo administradores (tu middleware)
         'admin' => \App\Http\Middleware\AdminOnly::class,
+
+        // 🐾 Nuevo: bloqueo de gestión de mascotas para cuentas inactivas
+        'can.manage.pets' => \App\Http\Middleware\EnsureClientCanManagePets::class,
     ];
 }
