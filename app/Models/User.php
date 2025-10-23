@@ -44,11 +44,21 @@ class User extends Authenticatable
         'status',             // active|pending|inactive
         'pending_since',      // datetime|null (marca cuándo entró a pending)
         'status_changed_at',  // datetime|null (último cambio de estado)
+
+        // — módulo de planes —
+        'current_plan_id',
+        'current_order_id',
+        'pets_limit',
+        'plan_started_at',
+        'plan_expires_at',
+        'plan_is_active',
+=======
         'notes',
         'tags',
         'status',
         'pending_since',
         'status_changed_at',
+
     ];
 
     /**
@@ -72,10 +82,16 @@ class User extends Authenticatable
             // — módulo de clientes —
             'pending_since'     => 'datetime',
             'status_changed_at' => 'datetime',
+
+            // — módulo de planes —
+            'pets_limit'        => 'integer',
+            'plan_started_at'   => 'datetime',
+            'plan_expires_at'   => 'datetime',
+            'plan_is_active'    => 'boolean',
+=======
             'tags'              => 'array',
             'status_changed_at' => 'datetime',
             'pending_since'     => 'datetime',
-
         ];
     }
 
@@ -85,6 +101,30 @@ class User extends Authenticatable
     public function pets()
     {
         return $this->hasMany(Pet::class);
+    }
+
+    /**
+     * Relación: plan actual del usuario
+     */
+    public function currentPlan()
+    {
+        return $this->belongsTo(Plan::class, 'current_plan_id');
+    }
+
+    /**
+     * Relación: pedido actual del usuario
+     */
+    public function currentOrder()
+    {
+        return $this->belongsTo(Order::class, 'current_order_id');
+    }
+
+    /**
+     * Relación: todos los pedidos del usuario
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 
     /**
@@ -120,6 +160,41 @@ class User extends Authenticatable
     public function canManagePets(): bool
     {
         return !$this->isInactive();
+    }
+
+    /**
+     * Verificar si el usuario tiene un plan activo
+     */
+    public function hasActivePlan(): bool
+    {
+        return $this->plan_is_active &&
+               $this->current_plan_id &&
+               (!$this->plan_expires_at || $this->plan_expires_at->isFuture());
+    }
+
+    /**
+     * Verificar si el usuario ha alcanzado el límite de mascotas
+     */
+    public function hasReachedPetsLimit(): bool
+    {
+        if (!$this->hasActivePlan()) {
+            return false;
+        }
+
+        return $this->pets()->count() >= $this->pets_limit;
+    }
+
+    /**
+     * Obtener mascotas disponibles restantes
+     */
+    public function getRemainingPetsCount(): int
+    {
+        if (!$this->hasActivePlan()) {
+            return 0;
+        }
+
+        $used = $this->pets()->count();
+        return max(0, $this->pets_limit - $used);
     }
 
     /**

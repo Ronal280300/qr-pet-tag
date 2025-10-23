@@ -790,6 +790,9 @@
   </div>
 </section>
 
+{{-- ===== SECCIÓN DE PLANES ===== --}}
+@include('public.partials.plans-section')
+
 <section class="py-5">
   <div class="container container-narrow">
     <div class="mockstripe p-3 reveal">
