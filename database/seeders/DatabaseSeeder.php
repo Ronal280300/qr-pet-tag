@@ -19,5 +19,11 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Seeders del sistema de planes
+        $this->call([
+            PlansSeeder::class,
+            SettingsSeeder::class,
+        ]);
     }
 }

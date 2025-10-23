@@ -8,6 +8,8 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\Portal\DashboardController;
 use App\Http\Controllers\Portal\PetController;
 use App\Http\Controllers\Portal\ActivateTagController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\CheckoutController;
 
 // Controladores de administración
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -15,6 +17,9 @@ use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\FacebookShareController; // <-- agregado
 use App\Http\Controllers\PublicPetPingController;
 use App\Http\Controllers\Admin\ClientController; // <-- NUEVO
+use App\Http\Controllers\Admin\PlanManagementController;
+use App\Http\Controllers\Admin\OrderManagementController;
+use App\Http\Controllers\Admin\NotificationController;
 
 // Middleware
 use App\Http\Middleware\AdminOnly;
@@ -66,6 +71,26 @@ Route::post('password/reset', [\App\Http\Controllers\Auth\ResetPasswordControlle
 //Ubicación
 Route::post('/p/{slug}/ping', [PublicPetPingController::class, 'store'])
     ->name('public.pet.ping');
+
+/*
+|--------------------------------------------------------------------------
+| Rutas de Planes y Checkout (públicas/auth)
+|--------------------------------------------------------------------------
+*/
+
+// Mostrar planes (público)
+Route::get('/planes', [PlanController::class, 'index'])->name('plans.index');
+Route::get('/planes/{plan}', [PlanController::class, 'show'])->name('plans.show');
+
+// Checkout (requiere autenticación)
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout/{plan}', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout/{plan}', [CheckoutController::class, 'createOrder'])->name('checkout.create');
+    Route::get('/checkout/payment/{order}', [CheckoutController::class, 'payment'])->name('checkout.payment');
+    Route::post('/checkout/payment/{order}', [CheckoutController::class, 'uploadPayment'])->name('checkout.upload');
+    Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Auth scaffolding
@@ -193,5 +218,30 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::delete('clients/{user}', [ClientController::class, 'destroy'])->name('clients.destroy');
             // 👉 Exportar clientes (CSV) preservando filtros ?q=&status=
             Route::get('clients-export', [ClientController::class, 'exportCsv'])->name('clients.export');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sistema de Planes y Pedidos (Admin)
+            |--------------------------------------------------------------------------
+            */
+
+            // Gestión de configuración de planes
+            Route::get('plan-settings', [PlanManagementController::class, 'index'])->name('plan-settings.index');
+            Route::put('plans/{plan}', [PlanManagementController::class, 'update'])->name('plans.update');
+            Route::post('plans/{plan}/toggle', [PlanManagementController::class, 'toggleActive'])->name('plans.toggle');
+            Route::post('settings', [PlanManagementController::class, 'updateSettings'])->name('settings.update');
+
+            // Gestión de pedidos
+            Route::get('orders', [OrderManagementController::class, 'index'])->name('orders.index');
+            Route::get('orders/{order}', [OrderManagementController::class, 'show'])->name('orders.show');
+            Route::post('orders/{order}/verify', [OrderManagementController::class, 'verify'])->name('orders.verify');
+            Route::post('orders/{order}/reject', [OrderManagementController::class, 'reject'])->name('orders.reject');
+            Route::post('orders/{order}/complete', [OrderManagementController::class, 'complete'])->name('orders.complete');
+
+            // Notificaciones
+            Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+            Route::get('notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
+            Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+            Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
         });
 });
