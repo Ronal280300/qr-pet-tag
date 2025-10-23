@@ -44,6 +44,11 @@ class User extends Authenticatable
         'status',             // active|pending|inactive
         'pending_since',      // datetime|null (marca cuándo entró a pending)
         'status_changed_at',  // datetime|null (último cambio de estado)
+        'notes',
+        'tags',
+        'status',
+        'pending_since',
+        'status_changed_at',
     ];
 
     /**
@@ -67,6 +72,10 @@ class User extends Authenticatable
             // — módulo de clientes —
             'pending_since'     => 'datetime',
             'status_changed_at' => 'datetime',
+            'tags'              => 'array',
+            'status_changed_at' => 'datetime',
+            'pending_since'     => 'datetime',
+
         ];
     }
 
