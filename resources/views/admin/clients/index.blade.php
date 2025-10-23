@@ -144,174 +144,277 @@
     </div>
   </form>
 
-  {{-- Tabla moderna --}}
-  <div class="table-card">
-    <div class="table-card-header">
-      <div class="d-flex align-items-center justify-content-between">
-        <div class="table-title">
-          <i class="fa-solid fa-table me-2"></i>
-          Lista de Clientes
-          <span class="table-count">({{ $clients->total() }})</span>
+ {{-- =====================  LISTA DE CLIENTES (con Acciones masivas)  ===================== --}}
+<div class="card shadow-card card-modern mt-4">
+
+    {{-- Encabezado de la tarjeta --}}
+    <div class="card-header-modern d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-table-cells-large me-2"></i>
+            <h5 class="mb-0 fw-bold">Lista de Clientes</h5>
+            <small class="text-muted ms-2">({{ $clients->total() }})</small>
         </div>
-        <div class="table-actions">
-          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Exportar" id="jsExportClients" title="Descargar CSV" data-export-url="{{ route('portal.admin.clients.export') }}">
-            <i class="fa-solid fa-download"></i>
-          </button>
+
+        <div class="d-flex align-items-center gap-2">
+            {{-- Refrescar (recarga conservando filtros) --}}
+            <a href="{{ route('portal.admin.clients.index', request()->query()) }}"
+               class="btn btn-light btn-sm" title="Refrescar">
+                <i class="fa-solid fa-rotate-right"></i>
+            </a>
+
+            {{-- Exportar CSV --}}
+            <a href="{{ route('portal.admin.clients.export') }}"
+               class="btn btn-outline-secondary btn-sm" title="Descargar CSV">
+                <i class="fa-solid fa-download me-1"></i> Exportar
+            </a>
         </div>
-      </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-modern-clients">
-        <thead>
-          <tr>
-            <th style="width:30%">
-              <div class="th-content">
-                <i class="fa-solid fa-user me-2"></i>Cliente
-              </div>
-            </th>
-            <th style="width:25%">
-              <div class="th-content">
-                <i class="fa-solid fa-envelope me-2"></i>Email
-              </div>
-            </th>
-            <th style="width:15%">
-              <div class="th-content">
-                <i class="fa-solid fa-phone me-2"></i>Teléfono
-              </div>
-            </th>
-            <th style="width:12%">
-              <div class="th-content">
-                <i class="fa-solid fa-circle-dot me-2"></i>Estado
-              </div>
-            </th>
-            <th style="width:10%" class="text-center">
-              <div class="th-content justify-content-center">
-                <i class="fa-solid fa-paw me-2"></i>Mascotas
-              </div>
-            </th>
-            <th style="width:8%" class="text-end">
-              <div class="th-content justify-content-end">
-                Acciones
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          @forelse($clients as $c)
-          <tr class="client-row" data-client-id="{{ $c->id }}">
-            <td>
-              <a class="row-link-overlay" href="{{ route('portal.admin.clients.show',$c) }}"></a>
-              <div class="client-info">
-                <div class="client-avatar">
-                  <span class="avatar-text">
-                    {{ Str::of($c->name)->explode(' ')->map(fn($p)=>Str::substr($p,0,1))->take(2)->implode('') }}
-                  </span>
-                  <div class="avatar-status status-{{ $c->status }}"></div>
-                </div>
-                <div class="client-details">
-                  <div class="client-name">{{ $c->name }}</div>
-                  <div class="client-id">ID: {{ $c->id }}</div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <a href="mailto:{{ $c->email }}" class="contact-link email-link" onclick="event.stopPropagation()">
-                <i class="fa-solid fa-envelope me-2"></i>
-                <span>{{ $c->email }}</span>
-              </a>
-            </td>
-            <td>
-              @if($c->phone)
-              <a href="tel:{{ preg_replace('/\s+/','',$c->phone) }}" class="contact-link phone-link" onclick="event.stopPropagation()">
-                <i class="fa-solid fa-phone me-2"></i>
-                <span>{{ $c->phone }}</span>
-              </a>
-              @else
-              <span class="text-muted-modern">—</span>
-              @endif
-            </td>
-            <td>
-              <div class="dropdown status-dropdown" onclick="event.stopPropagation()">
-                <button class="status-badge status-badge-{{ $c->status }} dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  @if($c->status==='active')
-                  <i class="fa-solid fa-circle-check me-1"></i>Activo
-                  @elseif($c->status==='pending')
-                  <i class="fa-solid fa-hourglass-half me-1"></i>Pendiente
-                  @else
-                  <i class="fa-solid fa-circle-xmark me-1"></i>Inactivo
-                  @endif
-                </button>
-                <ul class="dropdown-menu dropdown-menu-status">
-                  <li>
-                    <a class="dropdown-item status-set-modern" href="#"
-                      data-url="{{ route('portal.admin.clients.update',$c) }}"
-                      data-status="active"
-                      data-client-name="{{ $c->name }}">
-                      <i class="fa-solid fa-circle-check me-2 text-success"></i>
-                      Activo
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item status-set-modern" href="#"
-                      data-url="{{ route('portal.admin.clients.update',$c) }}"
-                      data-status="pending"
-                      data-client-name="{{ $c->name }}">
-                      <i class="fa-solid fa-hourglass-half me-2 text-warning"></i>
-                      Pendiente
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item status-set-modern" href="#"
-                      data-url="{{ route('portal.admin.clients.update',$c) }}"
-                      data-status="inactive"
-                      data-client-name="{{ $c->name }}">
-                      <i class="fa-solid fa-circle-xmark me-2 text-secondary"></i>
-                      Inactivo
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </td>
-            <td class="text-center">
-              <div class="pets-badge">
-                <i class="fa-solid fa-paw me-1"></i>
-                <span>{{ $c->pets_count }}</span>
-              </div>
-            </td>
-            <td class="text-end">
-              <a class="btn btn-action-table"
-                href="{{ route('portal.admin.clients.show',$c) }}"
-                onclick="event.stopPropagation()">
-                <i class="fa-solid fa-pen-to-square me-1"></i>
-                <span class="d-none d-lg-inline">Editar</span>
-              </a>
-            </td>
-          </tr>
-          @empty
-          <tr>
-            <td colspan="6">
-              <div class="empty-state-modern">
-                <div class="empty-icon">
-                  <i class="fa-regular fa-folder-open"></i>
-                </div>
-                <div class="empty-title">No hay clientes</div>
-                <div class="empty-description">
-                  No se encontraron clientes con los filtros actuales
-                </div>
-                <a href="{{ route('portal.admin.clients.index') }}" class="btn btn-sm btn-outline-primary mt-3">
-                  <i class="fa-solid fa-rotate-left me-2"></i>Limpiar filtros
-                </a>
-              </div>
-            </td>
-          </tr>
-          @endforelse
-        </tbody>
-      </table>
+    {{-- Barra de acciones masivas (aparece al seleccionar) --}}
+    <div id="bulkBar" class="bulkbar d-none">
+        <div class="bulkbar-left">
+            <i class="fa-solid fa-check-double me-2"></i>
+            <strong id="bulkCount">0</strong> seleccionados
+        </div>
+        <div class="bulkbar-actions">
+            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#bulkStatusModal">
+                <i class="fa-solid fa-circle-dot me-1"></i> Cambiar estado
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#bulkTagsModal">
+                <i class="fa-solid fa-tags me-1"></i> Notas / Tags
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bulkTransferModal">
+                <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> Transferir mascotas
+            </button>
+            <button type="button" id="bulkDeleteBtn" class="btn btn-sm btn-danger">
+                <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+            </button>
+        </div>
     </div>
+
+    {{-- Cuerpo de la tarjeta / Tabla --}}
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-modern-clients mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th style="width:30%">
+                        <div class="th-content d-flex align-items-center gap-2">
+                            {{-- ✅ Master checkbox (dentro de “Cliente”, NO agrega columna extra) --}}
+                            <input type="checkbox" id="chkAll" class="form-check-input me-1" />
+                            <label for="chkAll" class="mb-0 cursor-pointer">
+                                <i class="fa-solid fa-user me-2"></i>Cliente
+                            </label>
+                        </div>
+                    </th>
+                    <th style="width:25%">
+                        <div class="th-content">
+                            <i class="fa-solid fa-envelope me-2"></i>Email
+                        </div>
+                    </th>
+                    <th style="width:15%">
+                        <div class="th-content">
+                            <i class="fa-solid fa-phone me-2"></i>Teléfono
+                        </div>
+                    </th>
+                    <th style="width:12%">
+                        <div class="th-content">
+                            <i class="fa-solid fa-circle-dot me-2"></i>Estado
+                        </div>
+                    </th>
+                    <th style="width:10%" class="text-center">
+                        <div class="th-content justify-content-center">
+                            <i class="fa-solid fa-paw me-2"></i>Mascotas
+                        </div>
+                    </th>
+                    <th style="width:8%" class="text-end">
+                        <div class="th-content justify-content-end">Acciones</div>
+                    </th>
+                </tr>
+                </thead>
+
+                <tbody>
+                @forelse($clients as $c)
+                    <tr class="client-row">
+                        <td>
+                            {{-- 🔘 Checkbox por fila (dentro de la columna Cliente) --}}
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="checkbox"
+                                       class="form-check-input row-check"
+                                       value="{{ $c->id }}"
+                                       aria-label="Seleccionar {{ $c->name }}" />
+
+                                {{-- Avatar + nombre/ID --}}
+                                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                    <div class="avatar-initials-modern" style="width:48px;height:48px;border-radius:14px;">
+                                        <span class="avatar-text" style="font-size:1rem;">
+                                            {{ \Illuminate\Support\Str::of($c->name)->explode(' ')->map(fn($p)=>\Illuminate\Support\Str::substr($p,0,1))->take(2)->implode('') }}
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="fw-semibold text-truncate" title="{{ $c->name }}">
+                                            {{ $c->name }}
+                                        </div>
+                                        <div class="text-muted small">ID: {{ $c->id }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="text-truncate">
+                            <i class="fa-solid fa-envelope text-danger me-2"></i>
+                            {{ $c->email }}
+                        </td>
+
+                        <td class="text-truncate">
+                            <i class="fa-solid fa-phone text-success me-2"></i>
+                            {{ $c->phone ?: '—' }}
+                        </td>
+
+                        <td>
+                            @php
+                                $stateMap = [
+                                    'active' => ['label'=>'Activo','class'=>'bg-success-subtle text-success border-success'],
+                                    'pending' => ['label'=>'Pendiente','class'=>'bg-warning-subtle text-warning border-warning'],
+                                    'inactive' => ['label'=>'Inactivo','class'=>'bg-secondary-subtle text-secondary border-secondary'],
+                                ];
+                                $st = $stateMap[$c->status] ?? $stateMap['active'];
+                            @endphp
+                            <span class="badge px-3 py-2 border {{ $st['class'] }}">
+                                <i class="fa-solid fa-circle-check me-1"></i>{{ $st['label'] }}
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="badge rounded-pill bg-light border text-primary px-3 py-2">
+                                <i class="fa-solid fa-paw me-1"></i>{{ $c->pets_count ?? 0 }}
+                            </span>
+                        </td>
+
+                        <td class="text-end">
+                            <a href="{{ route('portal.admin.clients.show', $c) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fa-regular fa-pen-to-square me-1"></i> Editar
+                            </a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="fa-regular fa-folder-open fa-2x mb-2"></i>
+                            <div>No hay clientes que coincidan con el filtro.</div>
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Paginación --}}
+        <div class="p-3">
+            {{ $clients->withQueryString()->links() }}
+        </div>
+    </div>
+</div>
+{{-- =====================  /LISTA DE CLIENTES  ===================== --}}
+
+{{-- Cambiar estado --}}
+<div class="modal fade" id="bulkStatusModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="bulkStatusForm" method="POST" action="{{ route('portal.admin.clients.bulk.status') }}" class="modal-content">
+      @csrf
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-circle-dot me-2"></i>Cambiar estado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Aplica el estado seleccionado a todos los clientes marcados.</p>
+        <div class="mb-3">
+          <label class="form-label">Estado</label>
+          <select name="status" class="form-select" required>
+            <option value="active">Activo</option>
+            <option value="pending">Pendiente</option>
+            <option value="inactive">Inactivo</option>
+          </select>
+        </div>
+        <div id="bulkStatusIds"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Aplicar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Notas / Tags --}}
+<div class="modal fade" id="bulkTagsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="bulkTagsForm" method="POST" action="{{ route('portal.admin.clients.bulk.tags') }}" class="modal-content">
+      @csrf
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-tags me-2"></i>Notas / Tags</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Añade o quita una etiqueta a los clientes seleccionados.</p>
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label">Etiqueta</label>
+            <input type="text" name="tag" class="form-control" placeholder="p.ej., vip, moroso, mayorista" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Acción</label>
+            <select name="mode" class="form-select">
+              <option value="add">Añadir</option>
+              <option value="remove">Quitar</option>
+            </select>
+          </div>
+        </div>
+        <div id="bulkTagsIds"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Aplicar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Transferir mascotas --}}
+<div class="modal fade" id="bulkTransferModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="bulkTransferForm" method="POST" action="{{ route('portal.admin.clients.bulk.transfer') }}" class="modal-content">
+      @csrf
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-arrow-right-arrow-left me-2"></i>Transferir mascotas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Mover todas las mascotas de los clientes seleccionados a otro cliente.</p>
+        <div class="mb-3">
+          <label class="form-label">Destino (ID o Email del cliente)</label>
+          <input type="text" name="to" class="form-control" placeholder="ID o correo del cliente destino" required>
+        </div>
+        <div id="bulkTransferIds"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Transferir</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- Form eliminación masiva (invisible) --}}
+<form id="bulkDeleteForm" method="POST" action="{{ route('portal.admin.clients.bulk.delete') }}" class="d-none">
+  @csrf
+  <div id="bulkDeleteIds"></div>
+</form>
+
+
+    
+{{-- DUPLICATE table removed --}}
+
 
     @if($clients->hasPages())
     <div class="table-card-footer">
@@ -1576,5 +1679,114 @@
     }
   })();
 </script>
+
+@push('styles')
+<style>
+  .bulkbar{
+    position: sticky; bottom: 0; z-index: 30;
+    background: #f8fafc; border-top: 1px solid #e9ecef;
+    padding: 10px 14px; display:flex; align-items:center; justify-content:space-between;
+    gap: 12px;
+  }
+  .bulkbar-left{ display:flex; align-items:center; }
+  .bulkbar-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .cursor-pointer{ cursor:pointer; }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+(function(){
+  const chkAll   = document.getElementById('chkAll');
+  const bulkBar  = document.getElementById('bulkBar');
+  const cntEl    = document.getElementById('bulkCount');
+  const rows     = Array.from(document.querySelectorAll('.row-check'));
+
+  const forms = {
+    status:   { form: document.getElementById('bulkStatusForm'),   ids: document.getElementById('bulkStatusIds')   },
+    tags:     { form: document.getElementById('bulkTagsForm'),     ids: document.getElementById('bulkTagsIds')     },
+    transfer: { form: document.getElementById('bulkTransferForm'), ids: document.getElementById('bulkTransferIds') },
+    delete:   { form: document.getElementById('bulkDeleteForm'),   ids: document.getElementById('bulkDeleteIds')   },
+  };
+
+  function selectedIds(){
+    return rows.filter(r => r.checked).map(r => r.value);
+  }
+
+  function renderBulk(){
+    const ids = selectedIds();
+    const has = ids.length > 0;
+    cntEl.textContent = ids.length.toString();
+    bulkBar.classList.toggle('d-none', !has);
+    if(!has){ chkAll.checked = false; }
+  }
+
+  function fillHidden(container, ids){
+    container.innerHTML = '';
+    ids.forEach(id => {
+      const i = document.createElement('input');
+      i.type = 'hidden'; i.name = 'ids[]'; i.value = id;
+      container.appendChild(i);
+    });
+  }
+
+  // Master
+  chkAll?.addEventListener('change', () => {
+    rows.forEach(r => r.checked = chkAll.checked);
+    renderBulk();
+  });
+
+  // Por fila
+  rows.forEach(r => r.addEventListener('change', renderBulk));
+
+  // Modales: cargar IDs seleccionados
+  const statusModal   = document.getElementById('bulkStatusModal');
+  const tagsModal     = document.getElementById('bulkTagsModal');
+  const transferModal = document.getElementById('bulkTransferModal');
+
+  statusModal?.addEventListener('show.bs.modal', () => {
+    fillHidden(forms.status.ids, selectedIds());
+  });
+  tagsModal?.addEventListener('show.bs.modal', () => {
+    fillHidden(forms.tags.ids, selectedIds());
+  });
+  transferModal?.addEventListener('show.bs.modal', () => {
+    fillHidden(forms.transfer.ids, selectedIds());
+  });
+
+  // Eliminar
+  const delBtn = document.getElementById('bulkDeleteBtn');
+  delBtn?.addEventListener('click', () => {
+    const ids = selectedIds();
+    if(ids.length === 0) return;
+
+    if(window.Swal){
+      Swal.fire({
+        title: '¿Eliminar clientes seleccionados?',
+        html: 'Esta acción <b>no se puede deshacer</b>.<br>Los clientes no deben tener mascotas vinculadas.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then(res => {
+        if(res.isConfirmed){
+          fillHidden(forms.delete.ids, ids);
+          forms.delete.form.submit();
+        }
+      });
+    }else{
+      if(confirm('¿Eliminar los clientes seleccionados?')){
+        fillHidden(forms.delete.ids, ids);
+        forms.delete.form.submit();
+      }
+    }
+  });
+
+  // Inicial
+  renderBulk();
+})();
+</script>
+@endpush
 
 @endsection

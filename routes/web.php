@@ -160,10 +160,10 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
         ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
 
     // Generar imagen (share-card) desde el portal
-   // Route::post('pets/{pet}/share-card', [PetController::class, 'shareCard'])
-       // ->name('pets.share-card');
-       
-    Route::match(['GET','POST'], 'pets/{pet}/share-card', [PetController::class, 'shareCard'])
+    // Route::post('pets/{pet}/share-card', [PetController::class, 'shareCard'])
+    // ->name('pets.share-card');
+
+    Route::match(['GET', 'POST'], 'pets/{pet}/share-card', [PetController::class, 'shareCard'])
         ->name('pets.share-card')
         ->middleware(\App\Http\Middleware\EnsureClientCanManagePets::class); // Opción A
 
@@ -243,5 +243,17 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::get('notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
             Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
             Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+=======
+            // 👉 Acciones masivas
+            Route::post('clients/bulk', [ClientController::class, 'bulk'])->name('clients.bulk');
+
+            // 👉 Transferir mascota
+            Route::post('clients/{user}/pets/{pet}/transfer', [ClientController::class, 'transferPet'])
+                ->name('clients.pets.transfer');
+
+            Route::post('clients/bulk/status',   [ClientController::class, 'bulkStatus'])->name('clients.bulk.status');
+            Route::post('clients/bulk/tags',     [ClientController::class, 'bulkTags'])->name('clients.bulk.tags');
+            Route::post('clients/bulk/transfer', [ClientController::class, 'bulkTransfer'])->name('clients.bulk.transfer');
+            Route::post('clients/bulk/delete',   [ClientController::class, 'bulkDelete'])->name('clients.bulk.delete');
         });
 });

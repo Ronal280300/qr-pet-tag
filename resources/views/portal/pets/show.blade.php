@@ -6,368 +6,341 @@
 @section('content')
 @php
 $isAdmin = (bool) (auth()->user()->is_admin ?? false);
-
 $qr = $pet->qrCode;
-
 $slug = $qr->slug ?? null;
 $publicUrl = $slug ? route('public.pet.show', $slug) : null;
-
-$qrImageUrl = ($qr && $qr->image && Storage::disk('public')->exists($qr->image))
-? Storage::url($qr->image)
-: null;
-
+$qrImageUrl = ($qr && $qr->image && Storage::disk('public')->exists($qr->image)) ? Storage::url($qr->image) : null;
 $canDownloadQr = $qrImageUrl && (auth()->id() === $pet->user_id || $isAdmin);
-
 $photos = $pet->photos;
 $mainPhotoUrl = $pet->main_photo_url;
-
-// helpers visuales
-$sexLabel = [
-'male' => 'Macho',
-'female' => 'Hembra',
-'unknown' => 'Desconocido',
-][$pet->sex ?? 'unknown'];
+$sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'][$pet->sex ?? 'unknown'];
 @endphp
 
-<div class="row g-4">
-  {{-- Columna izquierda: hero + ficha --}}
-  <div class="col-12 col-lg-8">
-    <div class="card card-elevated mb-3 overflow-hidden">
-
-      {{-- HERO / carrusel (sin recortes) --}}
-      <div class="position-relative">
-        <div id="petPhotosCarousel" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-inner">
-            @if($photos->isEmpty())
-            <div class="carousel-item active">
-              <div class="ratio ratio-16x9 js-skel">
-                <img
-                  src="{{ $mainPhotoUrl }}"
-                  alt="Mascota"
-                  class="w-100 h-100 object-contain"
-                  loading="lazy">
+<div class="pet-show-container">
+  <div class="row g-4">
+    {{-- Columna izquierda --}}
+    <div class="col-12 col-xl-8">
+      {{-- Hero Card con Carousel --}}
+      <div class="hero-card">
+        <div class="carousel-wrapper">
+          <div id="petPhotosCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
+            <div class="carousel-inner">
+              @if($photos->isEmpty())
+              <div class="carousel-item active">
+                <div class="hero-image-container js-skel">
+                  <img src="{{ $mainPhotoUrl }}" alt="Mascota" class="hero-image" loading="lazy">
+                </div>
               </div>
-            </div>
-            @else
-            @foreach($photos as $i => $ph)
-            <div class="carousel-item {{ $i === 0 ? 'active' : '' }}">
-              <div class="ratio ratio-16x9 js-skel">
-                <img
-                  src="{{ asset('storage/'.$ph->path) }}"
-                  alt="Mascota {{ $i+1 }}"
-                  class="w-100 h-100 object-contain"
-                  loading="lazy">
+              @else
+              @foreach($photos as $i => $ph)
+              <div class="carousel-item {{ $i === 0 ? 'active' : '' }}">
+                <div class="hero-image-container js-skel">
+                  <img src="{{ asset('storage/'.$ph->path) }}" alt="Mascota {{ $i+1 }}" class="hero-image" loading="lazy">
+                </div>
               </div>
-            </div>
-
-            @endforeach
-            @endif
-          </div>
-
-          @if($photos->count() > 1)
-          <button class="carousel-control-prev" type="button" data-bs-target="#petPhotosCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Anterior</span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#petPhotosCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Siguiente</span>
-          </button>
-          @endif
-        </div>
-
-        {{-- Cinta con título y acciones (marcadas como .no-swipe para no disparar el slide) --}}
-        <div class="hero-bar no-swipe">
-          <div class="container-fluid px-3 d-flex align-items-center justify-content-between gap-2">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-              <h2 class="hero-title mb-0">{{ $pet->name }}</h2>
-              @if($pet->is_lost)
-              <span class="chip chip-warn"><i class="fa-solid fa-triangle-exclamation me-1"></i> Reportada perdida</span>
+              @endforeach
               @endif
             </div>
 
-            <div class="d-flex gap-2 no-swipe flex-wrap hero-actions">
-              <a href="{{ route('portal.pets.edit',$pet) }}"
-                class="btn btn-light btn-sm btn-compact">
-                <i class="fa-solid fa-pen-to-square me-1"></i>
-                <span>Editar</span>
-              </a>
+            @if($photos->count() > 1)
+            <button class="carousel-control-prev" type="button" data-bs-target="#petPhotosCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#petPhotosCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+            
+            <div class="carousel-indicators-modern">
+              @foreach($photos as $i => $ph)
+              <button type="button" data-bs-target="#petPhotosCarousel" data-bs-slide-to="{{ $i }}" class="{{ $i === 0 ? 'active' : '' }}"></button>
+              @endforeach
+            </div>
+            @endif
+          </div>
 
-              @if($isAdmin)
-              <form action="{{ route('portal.pets.destroy',$pet) }}" method="POST" class="pet-delete-form m-0 p-0">
-                @csrf @method('DELETE')
-                <button type="submit" class="btn btn-danger btn-sm btn-compact">
-                  <i class="fa-solid fa-trash-can me-1"></i>
-                  <span>Eliminar</span>
+          {{-- Overlay con nombre y acciones --}}
+          <div class="hero-overlay no-swipe">
+            <div class="hero-content">
+              <div class="hero-header">
+                <h1 class="pet-name-hero">
+                  @if(($pet->sex ?? 'unknown') === 'male')
+                  <i class="fa-solid fa-mars gender-icon male"></i>
+                  @elseif(($pet->sex ?? 'unknown') === 'female')
+                  <i class="fa-solid fa-venus gender-icon female"></i>
+                  @else
+                  <i class="fa-solid fa-circle-question gender-icon"></i>
+                  @endif
+                  {{ $pet->name }}
+                </h1>
+                @if($pet->is_lost)
+                <span class="status-badge lost"><i class="fa-solid fa-triangle-exclamation"></i> Perdida</span>
+                @endif
+              </div>
+              
+              <div class="hero-actions">
+                <a href="{{ route('portal.pets.edit',$pet) }}" class="btn-modern btn-light">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  <span>Editar</span>
+                </a>
+
+                @if($isAdmin)
+                <form action="{{ route('portal.pets.destroy',$pet) }}" method="POST" class="pet-delete-form">
+                  @csrf @method('DELETE')
+                  <button type="submit" class="btn-modern btn-danger">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Eliminar</span>
+                  </button>
+                </form>
+
+                <button type="button" class="btn-modern btn-primary" data-url="{{ route('portal.pets.share.facebook', $pet) }}" data-name="{{ $pet->name }}" data-page="{{ config('services.facebook.page_id') }}" onclick="publishToFacebook(event)">
+                  <i class="fa-brands fa-facebook"></i>
+                  <span class="d-none d-lg-inline">Facebook</span>
                 </button>
-              </form>
-
-              <button
-                type="button"
-                class="btn btn-primary btn-sm btn-compact"
-                data-url="{{ route('portal.pets.share.facebook', $pet) }}"
-                data-name="{{ $pet->name }}"
-                data-page="{{ config('services.facebook.page_id') }}"
-                onclick="publishToFacebook(event)">
-                <i class="fa-brands fa-facebook me-1"></i> Publicar en Facebook
-              </button>
-              @endif
+                @endif
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {{-- Ficha / meta + observaciones + estado --}}
-      <div class="card-body">
-        {{-- Chips meta --}}
-        <div class="meta mb-3">
-          <span class="chip">
-            <i class="fa-solid fa-dog me-1"></i>
-            {{ $pet->breed ?: 'Sin raza' }}
-          </span>
+        {{-- Info Cards Grid --}}
+        <div class="info-grid">
+          <div class="info-card">
+            <i class="fa-solid fa-dog info-icon"></i>
+            <div class="info-content">
+              <div class="info-label">Raza</div>
+              <div class="info-value">{{ $pet->breed ?: 'Sin raza' }}</div>
+            </div>
+          </div>
 
-          {{-- sexo --}}
-          <span class="chip">
-            @if(($pet->sex ?? 'unknown') === 'male')
-            <i class="fa-solid fa-mars me-1"></i> Macho
-            @elseif(($pet->sex ?? 'unknown') === 'female')
-            <i class="fa-solid fa-venus me-1"></i> Hembra
-            @else
-            <i class="fa-solid fa-circle-question me-1"></i> Desconocido
-            @endif
-          </span>
-
-          {{-- estado de salud --}}
-          <span class="chip">
-            <i class="fa-solid fa-syringe me-1"></i>
-            Antirrábica: {{ $pet->rabies_vaccine ? 'Sí' : 'No' }}
-          </span>
-          <span class="chip">
-            <i class="fa-solid fa-scissors me-1"></i>
-            Esterilizado: {{ $pet->is_neutered ? 'Sí' : 'No' }}
-          </span>
-
-          @if($pet->zone)
-          <span class="chip"><i class="fa-solid fa-location-dot me-1"></i> {{ $pet->zone }}</span>
-          @endif
+          <div class="info-card">
+            <i class="fa-solid fa-{{ ($pet->sex ?? 'unknown') === 'male' ? 'mars' : (($pet->sex ?? 'unknown') === 'female' ? 'venus' : 'circle-question') }} info-icon"></i>
+            <div class="info-content">
+              <div class="info-label">Sexo</div>
+              <div class="info-value">{{ $sexLabel }}</div>
+            </div>
+          </div>
 
           @if(!is_null($pet->age))
-          <span class="chip"><i class="fa-solid fa-cake-candles me-1"></i> {{ $pet->age }} {{ Str::plural('año',$pet->age) }}</span>
+          <div class="info-card">
+            <i class="fa-solid fa-cake-candles info-icon"></i>
+            <div class="info-content">
+              <div class="info-label">Edad</div>
+              <div class="info-value">{{ $pet->age }} {{ Str::plural('año', $pet->age) }}</div>
+            </div>
+          </div>
           @endif
 
-          <span class="chip"><i class="fa-solid fa-user me-1"></i> {{ optional($pet->user)->name ?: 'Sin dueño' }}</span>
+          @if($pet->zone)
+          <div class="info-card">
+            <i class="fa-solid fa-location-dot info-icon"></i>
+            <div class="info-content">
+              <div class="info-label">Ubicación</div>
+              <div class="info-value">{{ $pet->zone }}</div>
+            </div>
+          </div>
+          @endif
+
+          <div class="info-card">
+            <i class="fa-solid fa-syringe info-icon"></i>
+            <div class="info-content">
+              <div class="info-label">Antirrábica</div>
+              <div class="info-value">{{ $pet->rabies_vaccine ? 'Sí' : 'No' }}</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <i class="fa-solid fa-scissors info-icon"></i>
+            <div class="info-content">
+              <div class="info-label">Esterilizado</div>
+              <div class="info-value">{{ $pet->is_neutered ? 'Sí' : 'No' }}</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <i class="fa-solid fa-user info-icon"></i>
+            <div class="info-content">
+              <div class="info-label">Dueño</div>
+              <div class="info-value">{{ optional($pet->user)->name ?: 'Sin dueño' }}</div>
+            </div>
+          </div>
         </div>
 
         {{-- Observaciones --}}
-        <div class="card card-soft">
-          <div class="card-body">
-            <div class="fw-semibold mb-1">
-              <i class="fa-solid fa-notes-medical me-1"></i> Observaciones
-            </div>
-            <div class="text-muted">
-              {{ $pet->medical_conditions ?: 'No tiene observaciones registradas.' }}
-            </div>
+        <div class="observations-card">
+          <div class="observations-header">
+            <i class="fa-solid fa-notes-medical"></i>
+            <h3>Observaciones Médicas</h3>
           </div>
+          <p class="observations-text">{{ $pet->medical_conditions ?: 'No tiene observaciones registradas.' }}</p>
         </div>
 
-        {{-- Estado perdida/robada --}}
-        <div class="mt-3 d-flex flex-wrap gap-2">
+        {{-- Acciones Principales --}}
+        <div class="main-actions">
           <form action="{{ route('portal.pets.toggle-lost', $pet) }}" method="POST" id="toggleLostForm">
             @csrf
-            <button type="submit" class="btn btn-warning btn-sm btn-compact" id="toggleLostBtn">
-              <i class="fa-solid fa-triangle-exclamation me-1"></i>
-              <span class="d-none d-sm-inline">Marcar como </span>{{ $pet->is_lost ? 'Quitar pérdida' : 'Perdida/robada' }}
+            <button type="submit" class="btn-action {{ $pet->is_lost ? 'btn-action-warning' : 'btn-action-danger' }}" id="toggleLostBtn">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>{{ $pet->is_lost ? 'Quitar estado de pérdida' : 'Marcar como perdida/robada' }}</span>
             </button>
           </form>
-
-         {{-- Generar publicación (solo si está marcada como perdida) --}}
-@if($pet->is_lost)
-  <form action="{{ route('portal.pets.share-card', $pet) }}" method="POST" class="d-inline">
-    @csrf
-    <button type="submit" class="btn btn-outline-danger btn-sm">
-      <i class="fa-solid fa-bullhorn me-1"></i>
-      Generar publicación
-    </button>
-  </form>
-@endif
-
+          @if($pet->is_lost)
+          <form action="{{ route('portal.pets.share-card', $pet) }}" method="POST">
+            @csrf
+            <button type="submit" class="btn-action btn-action-info">
+              <i class="fa-solid fa-bullhorn"></i>
+              <span>Generar publicación para redes</span>
+            </button>
+          </form>
+          @endif
         </div>
       </div>
     </div>
-  </div>
 
-  {{-- Columna derecha: QR + recompensa --}}
-  <div class="col-12 col-lg-4">
-    {{-- PREVIEW “Publicación para redes” (después de generar) --}}
-    @if (session('share_card_url'))
-    <div class="card card-elevated mb-3" id="shareCardPreview">
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-          <h5 class="mb-0">
-            <i class="fa-solid fa-bullhorn me-2 text-danger"></i>
-            Publicación lista para redes
-          </h5>
-          <div class="d-flex gap-2">
-            <a class="btn btn-primary btn-sm btn-compact"
-              href="{{ session('share_card_url') }}"
-              download="qr-pet-{{ $pet->id }}.png">
-              <i class="fa-solid fa-download me-1"></i><span class="d-none d-sm-inline">Descargar</span><span class="d-sm-none">Descargar</span>
+    {{-- Columna derecha --}}
+    <div class="col-12 col-xl-4">
+      {{-- Preview Compartir --}}
+      @if (session('share_card_url'))
+      <div class="side-card share-preview-card" id="shareCardPreview">
+        <div class="card-header-modern">
+          <div class="card-title-group">
+            <i class="fa-solid fa-bullhorn card-icon"></i>
+            <h3>Publicación Lista</h3>
+          </div>
+          <div class="card-actions-group">
+            <a href="{{ session('share_card_url') }}" download="qr-pet-{{ $pet->id }}.png" class="btn-icon" title="Descargar">
+              <i class="fa-solid fa-download"></i>
             </a>
-            <button type="button" class="btn btn-outline-primary btn-sm btn-compact" id="btnShareCard" "
-              data-url=" {{ session('share_card_url') }}"
-              data-title="Mascota perdida: {{ $pet->name }}">
-              <i class="fa-solid fa-share-nodes me-1"></i> Compartir
+            <button type="button" id="btnShareCard" data-url="{{ session('share_card_url') }}" data-title="Mascota perdida: {{ $pet->name }}" class="btn-icon" title="Compartir">
+              <i class="fa-solid fa-share-nodes"></i>
             </button>
           </div>
         </div>
-        <div class="ratio ratio-4x5 bg-light rounded js-skel" style="max-width:420px">
-          <img
-            src="{{ session('share_card_url') }}"
-            alt="Publicación de {{ $pet->name }}"
-            class="w-100 h-100 object-fit-contain rounded"
-            loading="lazy">
+        <div class="share-image-wrapper js-skel">
+          <img src="{{ session('share_card_url') }}" alt="Publicación" class="share-image" loading="lazy">
         </div>
-        <small class="text-muted d-block mt-2">
-          Formato 1080×1350 optimizado para historias y publicaciones.
-        </small>
+        <p class="share-note">Formato optimizado 1080×1350 para redes sociales</p>
       </div>
-    </div>
-    @endif
+      @endif
 
-    {{-- QR --}}
-    <div class="card card-elevated mb-3">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <h5 class="card-title mb-0">QR de la mascota</h5>
-
-          {{-- TAG visible solo para admin --}}
+      {{-- QR Card --}}
+      <div class="side-card qr-card">
+        <div class="card-header-modern">
+          <div class="card-title-group">
+            <i class="fa-solid fa-qrcode card-icon"></i>
+            <h3>Código QR</h3>
+          </div>
           @if($isAdmin && $qr && $qr->activation_code)
-          <span class="badge rounded-pill text-bg-light fw-semibold">
-            TAG: <span class="text-primary ms-1">{{ $qr->activation_code }}</span>
-          </span>
-          @endif
-        </div>
-
-        <div class="qr-preview mb-2 d-flex justify-content-center js-skel">
-          @if($qrImageUrl)
-          <img src="{{ $qrImageUrl }}" alt="QR" class="qr-img" loading="lazy">
-          @else
-          <div class="qr-placeholder text-muted small text-center w-100">
-            <i class="fa-solid fa-qrcode fa-2x mb-2"></i>
-            <div>Aún no se ha generado el QR.</div>
+          <div class="tag-badge-wrapper">
+            <span class="tag-badge" id="tagCode" data-tag="{{ $qr->activation_code }}">
+              <span class="tag-label">TAG:</span>
+              <span class="tag-value">{{ $qr->activation_code }}</span>
+            </span>
+            <button type="button" class="btn-copy-tag" onclick="copyTag()" title="Copiar TAG">
+              <i class="fa-solid fa-copy"></i>
+            </button>
           </div>
           @endif
         </div>
 
-
-        <div class="small text-muted mb-2" style="word-break: break-all;">
-          @if($publicUrl)
-          {{ $publicUrl }}
+        <div class="qr-display js-skel">
+          @if($qrImageUrl)
+          <img src="{{ $qrImageUrl }}" alt="QR" class="qr-image" loading="lazy">
           @else
-          <em>Genera el QR para obtener la URL pública.</em>
+          <div class="qr-empty">
+            <i class="fa-solid fa-qrcode"></i>
+            <p>QR no generado</p>
+          </div>
           @endif
         </div>
 
-        <div class="vstack gap-2">
+        @if($publicUrl)
+        <div class="qr-url-box">
+          <input type="text" value="{{ $publicUrl }}" readonly class="qr-url-input" id="qrUrlInput">
+          <button type="button" class="btn-copy-url" onclick="copyQrUrl()" title="Copiar URL">
+            <i class="fa-solid fa-copy"></i>
+          </button>
+        </div>
+        @else
+        <p class="qr-note">Genera el QR para obtener la URL pública</p>
+        @endif
+
+        <div class="qr-actions">
           @if($isAdmin)
           <form action="{{ route('portal.pets.generate-qr',$pet) }}" method="POST" class="no-swipe" data-confirm="¿Quieres generar o regenerar el QR de esta mascota?">
             @csrf
-            <button class="btn btn-primary w-100 btn-compact btn-center">
-              <i class="fa-solid fa-bolt me-2"></i><span class="d-none d-sm-inline">Generar / Regenerar</span><span class="d-sm-none">Generar</span> QR
+            <button class="btn-qr btn-qr-primary">
+              <i class="fa-solid fa-bolt"></i>
+              <span>Generar QR</span>
             </button>
           </form>
           @endif
 
-          <a class="btn btn-outline-secondary w-100 btn-compact btn-center {{ $canDownloadQr ? '' : 'disabled opacity-50' }}"
-            href="{{ $canDownloadQr ? route('portal.pets.download-qr', $pet) : '#' }}">
-            <i class="fa-solid fa-download me-2"></i> Descargar QR
+          <a href="{{ $canDownloadQr ? route('portal.pets.download-qr', $pet) : '#' }}" class="btn-qr btn-qr-secondary {{ $canDownloadQr ? '' : 'disabled' }}">
+            <i class="fa-solid fa-download"></i>
+            <span>Descargar</span>
           </a>
 
-          <a class="btn btn-outline-info w-100 btn-compact btn-center {{ $publicUrl ? '' : 'disabled opacity-50' }}"
-            href="{{ $publicUrl ?: '#' }}" target="_blank" rel="noopener">
-            <i class="fa-solid fa-up-right-from-square me-2"></i> Ver perfil público
+          <a href="{{ $publicUrl ?: '#' }}" target="_blank" class="btn-qr btn-qr-secondary {{ $publicUrl ? '' : 'disabled' }}">
+            <i class="fa-solid fa-up-right-from-square"></i>
+            <span>Ver Público</span>
           </a>
-
-          <button type="button"
-            class="btn btn-outline-secondary w-100 btn-compact btn-center copy-url {{ $publicUrl ? '' : 'disabled opacity-50' }}"
-            data-url="{{ $publicUrl ?? '' }}">
-            <i class="fa-solid fa-link me-2"></i> Copiar URL
-          </button>
 
           @if($isAdmin && $qr)
           <form action="{{ route('portal.pets.regen-code', $pet) }}" method="POST" class="no-swipe" data-confirm="¿Quieres regenerar el TAG de esta mascota?">
             @csrf
-            <button class="btn btn-outline-warning w-100 btn-compact btn-center">
-              <i class="fa-solid fa-rotate me-2"></i> Regenerar código (TAG)
+            <button class="btn-qr btn-qr-warning">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Regenerar TAG</span>
             </button>
           </form>
           @endif
         </div>
       </div>
-    </div>
 
-    {{-- RECOMPENSA --}}
-    <div class="card card-elevated">
-      <div class="card-body">
-        <h5 class="card-title mb-3 d-flex align-items-center gap-2">
-          Recompensa
-          <i class="fa-solid fa-circle-info text-muted"
-            style="cursor:pointer;"
-            data-bs-toggle="tooltip"
-            title="Activa la recompensa, define un monto mayor a 0 y un mensaje opcional."></i>
-        </h5>
+      {{-- Recompensa Card --}}
+      <div class="side-card reward-card">
+        <div class="card-header-modern">
+          <div class="card-title-group">
+            <i class="fa-solid fa-medal card-icon"></i>
+            <h3>Recompensa</h3>
+          </div>
+          <i class="fa-solid fa-circle-info help-icon" data-bs-toggle="tooltip" title="Activa la recompensa y define un monto mayor a 0"></i>
+        </div>
 
         <form action="{{ route('portal.pets.reward.update', $pet) }}" method="POST" id="rewardForm" class="no-swipe">
           @csrf @method('PUT')
-
           @php($activeVal = (int) (optional($pet->reward)->active ?? 0))
           <input type="hidden" name="active" id="rwActive" value="{{ $activeVal }}">
 
-          <div class="d-flex align-items-center justify-content-between mb-2">
-            <div class="text-muted">Mostrar recompensa en el perfil público</div>
-            <div id="rwSwitch" class="switch {{ $activeVal ? 'on':'' }}" role="button" aria-pressed="{{ $activeVal ? 'true':'false' }}"></div>
+          <div class="reward-toggle">
+            <span class="toggle-label">Mostrar en perfil público</span>
+            <div id="rwSwitch" class="modern-switch {{ $activeVal ? 'active' : '' }}" role="button" aria-pressed="{{ $activeVal ? 'true':'false' }}">
+              <span class="switch-slider"></span>
+            </div>
           </div>
 
-          <div class="row g-3 align-items-end">
-            <div class="col-12 col-sm-5">
-              <label class="form-label">Monto</label>
-              <div class="input-group-modern">
-                <span class="prefix">₡</span>
-                <input
-                  type="text"
-                  inputmode="decimal"
-                  pattern="[0-9.,]*"
-                  name="amount"
-                  id="rwAmount"
-                  class="form-control modern"
-                  value="{{ number_format((float) (optional($pet->reward)->amount ?? 0), 2, '.', '') }}"
-                  placeholder="0.00">
+          <div class="reward-inputs">
+            <div class="input-group-reward">
+              <label class="input-label">Monto</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₡</span>
+                <input type="text" inputmode="decimal" pattern="[0-9.,]*" name="amount" id="rwAmount" class="reward-input" value="{{ number_format((float) (optional($pet->reward)->amount ?? 0), 2, '.', '') }}" placeholder="0.00">
               </div>
-              <div class="form-text">Se requiere un monto mayor a 0 cuando está activo.</div>
             </div>
 
-            <div class="col-12 col-sm-7" style="min-width:0">
-              <label class="form-label">Mensaje</label>
-              <input
-                type="text"
-                name="message"
-                id="rwMessage"
-                class="form-control modern w-100"
-                maxlength="200"
-                value="{{ optional($pet->reward)->message ?? 'Gracias por tu ayuda 🙏' }}"
-                placeholder="Gracias por tu ayuda 🙏">
-            </div>
-
-            <div class="col-12 mt-1">
-              <button type="submit" id="rwSave" class="btn btn-success w-100 btn-compact btn-center">
-                <i class="fa-solid fa-floppy-disk me-1"></i> Guardar recompensa
-              </button>
+            <div class="input-group-reward">
+              <label class="input-label">Mensaje</label>
+              <input type="text" name="message" id="rwMessage" class="reward-input" maxlength="200" value="{{ optional($pet->reward)->message ?? 'Gracias por tu ayuda 🙏' }}" placeholder="Mensaje opcional">
             </div>
           </div>
+
+          <button type="submit" id="rwSave" class="btn-reward-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Guardar Recompensa</span>
+          </button>
         </form>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -376,573 +349,360 @@ $sexLabel = [
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/portal.css') }}">
 <style>
-  .card-elevated {
-    border: 0;
-    box-shadow: 0 18px 50px rgba(31, 41, 55, .08);
-    border-radius: 18px
-  }
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes shimmer{0%{background-position:-1000px 0}100%{background-position:1000px 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(102,126,234,.3)}50%{box-shadow:0 0 30px rgba(102,126,234,.6)}}
 
-  /* Botón compacto (evita “tarjeta alta”) */
-  .btn-compact {
-    display: inline-flex;
-    align-items: center;
-    gap: .35rem;
-    padding: .35rem .6rem !important;
-    font-size: .875rem !important;
-    line-height: 1.2 !important;
-    border-radius: 10px !important;
-    white-space: nowrap;
-    /* que no rompa palabras */
-  }
+.pet-show-container{animation:fadeInUp .6s ease-out;padding:1rem 0}
 
-  /* Contenedor de acciones en la hero */
-  .hero-actions {
-    justify-content: flex-end;
-  }
+/* Hero Card */
+.hero-card{background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.08);margin-bottom:1.5rem;animation:scaleIn .6s ease-out}
 
-  /* En móviles: título arriba, acciones debajo en fila compacta */
-  @media (max-width: 576px) {
-    .hero-bar .container-fluid {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: .5rem;
-    }
+.carousel-wrapper{position:relative;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.05)}
 
-    .hero-actions {
-      width: 100%;
-      justify-content: flex-start;
-      gap: .4rem;
-      flex-wrap: wrap;
-    }
+.hero-image-container{aspect-ratio:4/3;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f8fafc}
 
-    .hero-actions .btn-compact {
-      padding: .32rem .5rem !important;
-      font-size: .82rem !important;
-    }
-  }
+.hero-image{width:100%;height:100%;object-fit:contain;transition:transform .6s ease;padding:1rem}
 
-  .card-soft {
-    border: 1px solid #eef1f5;
-    border-radius: 14px
-  }
+.carousel-item.active .hero-image{animation:scaleIn .6s ease-out}
 
-  .hero-bar {
-    z-index: 30 !important;
-  }
+.carousel-control-prev,.carousel-control-next{width:40px;height:40px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.98);border-radius:12px;opacity:0;transition:all .3s ease;backdrop-filter:blur(10px);box-shadow:0 3px 15px rgba(0,0,0,.2)}
 
+.carousel:hover .carousel-control-prev,.carousel:hover .carousel-control-next{opacity:1}
 
-  .hero-bar {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .55) 70%);
-    color: #fff;
-    padding: 16px 0;
-  }
+.carousel-control-prev:hover,.carousel-control-next:hover{background:#fff;transform:translateY(-50%) scale(1.08);box-shadow:0 4px 20px rgba(0,0,0,.25)}
 
-  .hero-title {
-    font-weight: 900;
-    letter-spacing: .2px
-  }
+.carousel-control-prev{left:15px}
+.carousel-control-next{right:15px}
 
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: .45rem;
-    padding: .38rem .7rem;
-    background: #f5f7fb;
-    border-radius: 999px;
-    margin: .15rem .35rem .15rem 0;
-    font-weight: 600;
-    color: #263143;
-    border: 1px solid #eef1f5
-  }
+.carousel-control-prev-icon,.carousel-control-next-icon{width:20px;height:20px;background-size:20px;filter:invert(.1)}
 
-  .chip-warn {
-    background: #fff7ed;
-    color: #9a3412;
-    border-color: #fde7c7
-  }
+.carousel-indicators-modern{position:absolute;bottom:15px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:20}
 
-  .object-contain {
-    object-fit: contain
-  }
+.carousel-indicators-modern button{width:8px;height:8px;border-radius:50%;border:2px solid rgba(255,255,255,.95);background:rgba(255,255,255,.6);padding:0;transition:all .3s ease;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 
-  :root {
-    --qr-size: 200px;
-  }
+.carousel-indicators-modern button.active{background:#fff;width:24px;border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.35)}
 
-  @media (max-width: 576px) {
-    :root {
-      --qr-size: 170px
-    }
-  }
+.carousel-indicators-modern button:hover{background:rgba(255,255,255,.9);transform:scale(1.2)}
 
-  .qr-preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f6f8ff;
-    border: 1px dashed #e3e8ef;
-    border-radius: 14px;
-    min-height: calc(var(--qr-size) + 26px);
-    padding: .85rem
-  }
+/* Hero Overlay */
+.hero-overlay{position:absolute;left:0;right:0;bottom:0;background:#fff;padding:1.25rem 1.5rem;z-index:25;border-top:1px solid #e5e7eb}
 
-  .qr-img {
-    width: var(--qr-size);
-    height: var(--qr-size);
-    object-fit: contain;
-    image-rendering: crisp-edges;
-    image-rendering: pixelated
-  }
+.hero-content{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
 
-  .input-group-modern {
-    display: flex;
-    align-items: center;
-    width: 100%
-  }
+.hero-header{flex:1;min-width:200px}
 
-  .input-group-modern .prefix {
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-right: 0;
-    height: 48px;
-    min-width: 48px;
-    display: grid;
-    place-items: center;
-    border-radius: 12px 0 0 12px;
-    font-weight: 900;
-    color: #111827
-  }
+.pet-name-hero{font-size:1.75rem;font-weight:900;color:#111827;margin:0;display:flex;align-items:center;gap:.6rem;animation:fadeInUp .6s ease-out}
 
-  .form-control.modern {
-    height: 48px;
-    border: 1px solid #e5e7eb;
-    border-radius: 0 12px 12px 0;
-    padding: 0 14px;
-    width: 100%;
-  }
+.gender-icon{font-size:1.5rem;animation:float 3s ease-in-out infinite}
 
-  .form-control.modern:focus {
-    border-color: #c7d2fe;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, .16)
-  }
+.gender-icon.male{color:#60a5fa}
+.gender-icon.female{color:#f472b6}
 
-  .form-control.modern:disabled {
-    background: #f5f5f7;
-    opacity: .7
-  }
+.status-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .8rem;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);border-radius:999px;font-size:.8rem;font-weight:700;color:#fff;margin-top:.5rem;animation:pulse 2s ease-in-out infinite;box-shadow:0 4px 15px rgba(239,68,68,.4)}
 
-  .switch {
-    --h: 28px;
-    position: relative;
-    width: 56px;
-    height: var(--h);
-    border-radius: 999px;
-    background: #e5e7eb;
-    cursor: pointer;
-    transition: .2s
-  }
+.hero-actions{display:flex;gap:.6rem;flex-wrap:wrap;animation:fadeInUp .6s ease-out .2s both}
 
-  .switch::after {
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 22px;
-    height: 22px;
-    background: #fff;
-    border-radius: 50%;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
-    transition: .2s
-  }
+.btn-modern{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .9rem;font-size:.85rem;font-weight:700;border-radius:10px;border:none;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.1)}
 
-  .switch.on {
-    background: #22c55e
-  }
+.btn-modern::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.3);transform:translate(-50%,-50%);transition:width .5s,height .5s}
 
-  .switch.on::after {
-    transform: translateX(28px)
-  }
+.btn-modern:hover::before{width:300px;height:300px}
 
-  /* ===== Skeleton (shimmer) ===== */
-  .js-skel {
-    position: relative;
-    overflow: hidden;
-    background: #f2f4f7;
-    /* color base */
-  }
+.btn-modern:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.15)}
 
-  /* capa de brillo */
-  .js-skel::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(110deg, #f2f4f7 8%, #e8ebf1 18%, #f2f4f7 33%);
-    background-size: 200% 100%;
-    animation: skel-shimmer 1.1s linear infinite;
-  }
+.btn-light{background:#f3f4f6;color:#374151}
+.btn-danger{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff}
+.btn-primary{background:linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%);color:#fff}
 
-  /* ocultar imagen hasta que esté lista */
-  .js-skel>img {
-    opacity: 0;
-    transition: opacity .25s ease;
-  }
+/* Info Grid */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.85rem;padding:1.25rem}
 
-  /* cuando se carga, se muestra img y se apaga el shimmer */
-  .js-skel.is-loaded::after {
-    opacity: 0;
-    pointer-events: none;
-    animation: none;
-  }
+.info-card{background:linear-gradient(135deg,#f8fafc 0%,#fff 100%);border:2px solid #e8ecf4;border-radius:14px;padding:1rem;display:flex;align-items:center;gap:.75rem;transition:all .3s ease;animation:scaleIn .5s ease-out}
 
-  .js-skel.is-loaded>img {
-    opacity: 1;
-  }
+.info-card:hover{border-color:#667eea;transform:translateY(-3px);box-shadow:0 6px 20px rgba(102,126,234,.12)}
 
-  @keyframes skel-shimmer {
-    0% {
-      background-position-x: 200%;
-    }
+.info-icon{font-size:1.4rem;color:#667eea;min-width:32px;text-align:center;transition:transform .3s ease}
 
-    100% {
-      background-position-x: -200%;
-    }
-  }
+.info-card:hover .info-icon{transform:scale(1.1) rotate(5deg)}
+
+.info-content{flex:1;min-width:0}
+
+.info-label{font-size:.7rem;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem}
+
+.info-value{font-size:.9rem;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Observaciones */
+.observations-card{margin:0 1.5rem 1.5rem;padding:1.5rem;background:linear-gradient(135deg,#fff 0%,#f8f9fa 100%);border:2px solid #e8ecf4;border-radius:16px;transition:all .3s ease;animation:fadeInUp .6s ease-out .3s both}
+
+.observations-card:hover{border-color:#667eea;box-shadow:0 8px 25px rgba(102,126,234,.1)}
+
+.observations-header{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem}
+
+.observations-header i{font-size:1.5rem;color:#667eea}
+
+.observations-header h3{font-size:1.1rem;font-weight:700;color:#111827;margin:0}
+
+.observations-text{color:#6b7280;line-height:1.6;margin:0}
+
+/* Main Actions */
+.main-actions{display:flex;flex-direction:column;gap:1rem;padding:0 1.5rem 1.5rem;animation:fadeInUp .6s ease-out .4s both}
+
+.btn-action{width:100%;display:flex;align-items:center;justify-content:center;gap:.8rem;padding:1rem 1.5rem;font-size:1rem;font-weight:700;border-radius:14px;border:none;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 15px rgba(0,0,0,.1)}
+
+.btn-action:hover{transform:translateY(-3px);box-shadow:0 6px 25px rgba(0,0,0,.2)}
+
+.btn-action-warning{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%);color:#fff}
+.btn-action-danger{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff}
+.btn-action-info{background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);color:#fff}
+
+/* Side Cards */
+.side-card{background:#fff;border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 8px 30px rgba(0,0,0,.08);transition:all .3s ease;animation:slideInRight .6s ease-out}
+
+.side-card:hover{box-shadow:0 12px 40px rgba(0,0,0,.12);transform:translateY(-4px)}
+
+@media (max-width:768px){
+.side-card{border-radius:16px;padding:1.2rem;margin-bottom:1rem;box-shadow:0 4px 15px rgba(0,0,0,.06)}
+.side-card:hover{transform:translateY(-2px)}
+}
+
+@media (max-width:576px){
+.side-card{border-radius:0;padding:1rem;margin-bottom:.75rem;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+}
+
+.card-header-modern{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+
+.card-title-group{display:flex;align-items:center;gap:.8rem}
+
+.card-icon{font-size:1.5rem;color:#667eea}
+
+.card-title-group h3{font-size:1.25rem;font-weight:800;color:#111827;margin:0}
+
+.card-actions-group{display:flex;gap:.5rem}
+
+.btn-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%);border:none;color:#374151;cursor:pointer;transition:all .3s ease}
+
+.btn-icon:hover{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;transform:scale(1.1)}
+
+.help-icon{color:#9ca3af;cursor:help;transition:all .3s ease}
+
+.help-icon:hover{color:#667eea;transform:scale(1.15)}
+
+/* TAG Badge con botón */
+.tag-badge-wrapper{display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,#f0f4ff 0%,#e8ecf4 100%);padding:.5rem .75rem;border-radius:12px;border:2px solid #c7d2fe}
+
+.tag-badge{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.9rem}
+
+.tag-label{color:#6b7280}
+.tag-value{color:#667eea}
+
+.btn-copy-tag{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;border-radius:8px;color:#fff;cursor:pointer;transition:all .3s ease}
+
+.btn-copy-tag:hover{transform:scale(1.1);box-shadow:0 4px 15px rgba(102,126,234,.4)}
+
+/* Share Preview */
+.share-image-wrapper{aspect-ratio:4/5;border-radius:14px;overflow:hidden;margin-bottom:1rem;background:linear-gradient(135deg,#f8fafc 0%,#e8ecf4 100%)}
+
+.share-image{width:100%;height:100%;object-fit:contain}
+
+.share-note{font-size:.85rem;color:#6b7280;margin:0;text-align:center}
+
+/* QR Display */
+.qr-display{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f6f8ff 0%,#e8ecf4 100%);border:3px dashed #c7d2fe;border-radius:16px;padding:2rem;min-height:280px;margin-bottom:1.5rem;transition:all .3s ease}
+
+.qr-display:hover{border-color:#667eea;background:linear-gradient(135deg,#e8ecf4 0%,#f6f8ff 100%);box-shadow:0 8px 25px rgba(102,126,234,.15)}
+
+.qr-image{width:240px;height:240px;object-fit:contain;image-rendering:crisp-edges;image-rendering:pixelated;transition:transform .4s ease}
+
+.qr-display:hover .qr-image{transform:scale(1.08) rotate(2deg)}
+
+.qr-empty{text-align:center;color:#9ca3af}
+
+.qr-empty i{font-size:4rem;margin-bottom:1rem;opacity:.5;animation:float 3s ease-in-out infinite}
+
+.qr-empty p{font-size:1rem;font-weight:600}
+
+.qr-url-box{display:flex;gap:.5rem;background:#f8f9fa;border:2px solid #e5e7eb;border-radius:12px;padding:.5rem;margin-bottom:1rem;transition:all .3s ease}
+
+.qr-url-box:focus-within{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.15)}
+
+.qr-url-input{flex:1;border:none;background:transparent;padding:.5rem;font-size:.85rem;color:#374151;font-weight:600}
+
+.qr-url-input:focus{outline:none}
+
+.btn-copy-url{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;border-radius:8px;color:#fff;cursor:pointer;transition:all .3s ease}
+
+.btn-copy-url:hover{transform:scale(1.1);box-shadow:0 4px 15px rgba(102,126,234,.4)}
+
+.qr-note{font-size:.85rem;color:#6b7280;text-align:center;margin-bottom:1rem}
+
+.qr-actions{display:flex;flex-direction:column;gap:.75rem}
+
+.btn-qr{width:100%;display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.85rem 1rem;font-size:.95rem;font-weight:700;border-radius:12px;border:none;cursor:pointer;transition:all .3s ease}
+
+.btn-qr:hover:not(.disabled){transform:translateY(-2px)}
+
+.btn-qr.disabled{opacity:.5;cursor:not-allowed}
+
+.btn-qr-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;box-shadow:0 4px 15px rgba(102,126,234,.3)}
+
+.btn-qr-primary:hover{box-shadow:0 6px 20px rgba(102,126,234,.4)}
+
+.btn-qr-secondary{background:linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%);color:#374151;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+
+.btn-qr-secondary:hover:not(.disabled){background:linear-gradient(135deg,#e5e7eb 0%,#d1d5db 100%);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+
+.btn-qr-warning{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%);color:#fff;box-shadow:0 4px 15px rgba(251,191,36,.3)}
+
+.btn-qr-warning:hover{box-shadow:0 6px 20px rgba(251,191,36,.4)}
+
+/* Reward Card */
+.reward-toggle{display:flex;justify-content:space-between;align-items:center;padding:1rem;background:linear-gradient(135deg,#f8f9fa 0%,#f3f4f6 100%);border-radius:12px;margin-bottom:1.5rem}
+
+.toggle-label{font-size:.95rem;font-weight:600;color:#374151}
+
+.modern-switch{width:60px;height:32px;background:linear-gradient(135deg,#e5e7eb 0%,#d1d5db 100%);border-radius:999px;position:relative;cursor:pointer;transition:all .3s ease;box-shadow:inset 0 2px 6px rgba(0,0,0,.1)}
+
+.modern-switch:hover{transform:scale(1.05)}
+
+.switch-slider{position:absolute;width:24px;height:24px;background:linear-gradient(135deg,#fff 0%,#f3f4f6 100%);border-radius:50%;top:4px;left:4px;transition:all .3s cubic-bezier(.4,0,.2,1);box-shadow:0 3px 8px rgba(0,0,0,.2)}
+
+.modern-switch.active{background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);box-shadow:0 4px 15px rgba(34,197,94,.3)}
+
+.modern-switch.active .switch-slider{transform:translateX(28px);background:linear-gradient(135deg,#fff 0%,#f0fdf4 100%)}
+
+.reward-inputs{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem}
+
+.input-group-reward{display:flex;flex-direction:column;gap:.5rem}
+
+.input-label{font-size:.85rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px}
+
+.input-with-prefix{display:flex;align-items:center;background:#f8f9fa;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;transition:all .3s ease}
+
+.input-with-prefix:focus-within{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.15);transform:translateY(-2px)}
+
+.input-prefix{padding:0 1rem;font-size:1.1rem;font-weight:900;color:#667eea;background:linear-gradient(135deg,#f0f4ff 0%,#e8ecf4 100%);height:50px;display:flex;align-items:center}
+
+.reward-input{flex:1;border:none;background:transparent;padding:0 1rem;height:50px;font-size:.95rem;font-weight:600;color:#111827}
+
+.reward-input:focus{outline:none}
+
+.reward-input:disabled{opacity:.5;cursor:not-allowed}
+
+.btn-reward-save{width:100%;display:flex;align-items:center;justify-content:center;gap:.6rem;padding:1rem;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:#fff;border:none;border-radius:12px;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 15px rgba(34,197,94,.3)}
+
+.btn-reward-save:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(34,197,94,.4)}
+
+/* Skeleton */
+.js-skel{position:relative;overflow:hidden;background:linear-gradient(135deg,#f2f4f7 0%,#e8ebf1 100%)}
+
+.js-skel::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.8) 50%,transparent 100%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}
+
+.js-skel>img{opacity:0;transition:opacity .4s ease}
+
+.js-skel.is-loaded::after{opacity:0;pointer-events:none;animation:none}
+
+.js-skel.is-loaded>img{opacity:1}
+
+/* Responsive */
+@media (max-width:1200px){
+.pet-name-hero{font-size:1.65rem}
+.info-grid{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}
+}
+
+@media (max-width:768px){
+.hero-image-container{aspect-ratio:1/1;border-radius:0}
+.hero-image{padding:.5rem}
+.carousel-wrapper{border-radius:0;box-shadow:none}
+.hero-overlay{position:relative;padding:1rem;border-top:1px solid #e5e7eb}
+.hero-content{gap:.8rem}
+.hero-actions{width:100%;justify-content:flex-start;gap:.5rem}
+.btn-modern{padding:.5rem .8rem;font-size:.8rem;flex:1;justify-content:center;min-width:0}
+.btn-modern span{font-size:.75rem}
+.info-grid{grid-template-columns:1fr 1fr;gap:.6rem;padding:.75rem}
+.pet-name-hero{font-size:1.4rem}
+.gender-icon{font-size:1.2rem}
+.info-card{padding:.75rem .65rem;gap:.5rem}
+.info-icon{font-size:1.1rem;min-width:26px}
+.info-label{font-size:.62rem}
+.info-value{font-size:.8rem}
+.observations-card{margin:0 .75rem .75rem;padding:1rem}
+.observations-header h3{font-size:.95rem}
+.observations-text{font-size:.85rem}
+.main-actions{padding:0 .75rem .75rem;gap:.6rem}
+.btn-action{padding:.85rem 1rem;font-size:.9rem}
+}
+
+@media (max-width:576px){
+.hero-card{border-radius:0;margin-bottom:1rem;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.carousel-control-prev,.carousel-control-next{width:34px;height:34px}
+.carousel-control-prev-icon,.carousel-control-next-icon{width:16px;height:16px}
+.pet-name-hero{font-size:1.25rem}
+.gender-icon{font-size:1.1rem}
+.status-badge{font-size:.75rem;padding:.35rem .7rem}
+.btn-modern{padding:.45rem .6rem;font-size:.72rem;gap:.25rem}
+.info-grid{padding:.6rem}
+.info-card{padding:.65rem .55rem}
+.info-icon{font-size:1rem;min-width:24px}
+.info-label{font-size:.6rem}
+.info-value{font-size:.75rem}
+.hero-overlay{padding:.85rem}
+.observations-card{margin:0 .6rem .6rem;padding:.85rem}
+.observations-header{margin-bottom:.6rem}
+.observations-header i{font-size:1.2rem}
+.observations-header h3{font-size:.9rem}
+.observations-text{font-size:.8rem;line-height:1.5}
+.main-actions{padding:0 .6rem .6rem;gap:.5rem}
+.btn-action{padding:.75rem .85rem;font-size:.85rem;gap:.6rem}
+.carousel-indicators-modern{bottom:10px;gap:6px}
+.carousel-indicators-modern button{width:6px;height:6px}
+.carousel-indicators-modern button.active{width:18px}
+}
 </style>
 @endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  // Copiar URL
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.copy-url');
-    if (!btn || btn.classList.contains('disabled')) return;
-    const url = btn.dataset.url || '';
-    if (!url) return;
+// Copiar TAG
+function copyTag(){const tag=document.getElementById('tagCode').dataset.tag;navigator.clipboard.writeText(tag).then(()=>{const btn=event.target.closest('.btn-copy-tag');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch(()=>alert('No se pudo copiar: '+tag))}
 
-    (navigator.clipboard?.writeText(url) || Promise.resolve()).then(() => {
-      const original = btn.innerHTML;
-      btn.classList.remove('btn-outline-secondary');
-      btn.classList.add('btn-success');
-      btn.innerHTML = '<i class="fa-solid fa-check me-2"></i> Copiada';
-      setTimeout(() => {
-        btn.classList.remove('btn-success');
-        btn.classList.add('btn-outline-secondary');
-        btn.innerHTML = original;
-      }, 1400);
-    }).catch(() => {
-      alert('No se pudo copiar la URL. Copiala manualmente:\n' + url);
-    });
-  });
+// Copiar URL QR
+function copyQrUrl(){const input=document.getElementById('qrUrlInput');const url=input.value;navigator.clipboard.writeText(url).then(()=>{const btn=event.target.closest('.btn-copy-url');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch(()=>alert('No se pudo copiar: '+url))}
 
-  // Tooltips Bootstrap
-  (function() {
-    const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    list.forEach(el => new bootstrap.Tooltip(el));
-  })();
+// Tooltips
+(function(){const list=[].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));list.forEach(el=>new bootstrap.Tooltip(el))})();
 
-  // Recompensa: switch + habilitar campos + formateo
-  (function() {
-    const sw = document.getElementById('rwSwitch');
-    const act = document.getElementById('rwActive');
-    const amt = document.getElementById('rwAmount');
-    const msg = document.getElementById('rwMessage');
-    const save = document.getElementById('rwSave');
-    const form = document.getElementById('rewardForm');
+// Recompensa switch
+(function(){const sw=document.getElementById('rwSwitch');const act=document.getElementById('rwActive');const amt=document.getElementById('rwAmount');const msg=document.getElementById('rwMessage');const form=document.getElementById('rewardForm');if(!sw||!act)return;function isOn(){return act.value==='1'}function setOn(on){sw.classList.toggle('active',on);sw.setAttribute('aria-pressed',on?'true':'false');act.value=on?'1':'0';setEnabled(on);if(on){if(!parseFloat((amt.value||'').replace(',','.')))amt.value='';amt.focus()}}function normalizeMoney(v){v=(v||'').toString().replace(/[^\d.,]/g,'').replace(',','.');const n=parseFloat(v);return isNaN(n)?'':n.toFixed(2)}function amountOk(){const n=parseFloat((amt.value||'').toString().replace(',','.'));return!isNaN(n)&&n>0}function setEnabled(enabled){[amt,msg].forEach(el=>{el.disabled=!enabled;el.style.opacity=enabled?1:.5})}setEnabled(isOn());sw.addEventListener('click',()=>setOn(!isOn()));amt.addEventListener('focus',e=>{const raw=(e.target.value||'').replace(',','.');const n=parseFloat(raw);if(!raw||isNaN(n)||n===0)e.target.value='';else e.target.select()});amt.addEventListener('blur',e=>{const v=normalizeMoney(e.target.value);e.target.value=v||'0.00'});form.addEventListener('submit',(e)=>{if(isOn()&&!amountOk()){e.preventDefault();amt.focus()}})})();
 
-    if (!sw || !act) return;
+// Evitar swipe en botones
+(function(){const stopSwipeZone=document.querySelectorAll('.no-swipe, .no-swipe *');const stopEvts=['click','mousedown','mouseup','touchstart','touchmove','touchend','pointerdown','pointerup'];stopSwipeZone.forEach(el=>{stopEvts.forEach(evt=>{el.addEventListener(evt,e=>{e.stopPropagation()},{passive:false})})})})();
 
-    function isOn() {
-      return act.value === '1';
-    }
+// Confirmar eliminación
+(function(){const forms=document.querySelectorAll('.pet-delete-form');forms.forEach(form=>{form.addEventListener('submit',function(e){e.preventDefault();Swal.fire({title:'¿Eliminar mascota?',text:'Esta acción no se puede deshacer.',icon:'warning',showCancelButton:true,confirmButtonText:'Sí, eliminar',cancelButtonText:'Cancelar',confirmButtonColor:'#dc3545'}).then(res=>{if(res.isConfirmed)form.submit()})})})})();
 
-    function setOn(on) {
-      sw.classList.toggle('on', on);
-      sw.setAttribute('aria-pressed', on ? 'true' : 'false');
-      act.value = on ? '1' : '0';
-      setEnabled(on);
-      if (on) {
-        if (!parseFloat((amt.value || '').replace(',', '.'))) amt.value = '';
-        amt.focus();
-      }
-    }
+// Compartir
+(function(){const btn=document.getElementById('btnShareCard');if(!btn)return;const url=btn.dataset.url;const title=btn.dataset.title||document.title;btn.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title,url})}catch(e){}}else{try{await navigator.clipboard.writeText(url);const prev=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';setTimeout(()=>btn.innerHTML=prev,1300)}catch{alert('Copia este enlace:\n'+url)}}})})();
 
-    function normalizeMoney(v) {
-      v = (v || '').toString().replace(/[^\d.,]/g, '').replace(',', '.');
-      const n = parseFloat(v);
-      return isNaN(n) ? '' : n.toFixed(2);
-    }
+// Publicar Facebook
+async function publishToFacebook(event){const btn=event.currentTarget||event.target;const url=btn.dataset.url;const petName=btn.dataset.name||'la mascota';const pageId=btn.dataset.page||'';const csrf=document.querySelector('meta[name="csrf-token"]')?.content||'';if(!url)return;if(btn.dataset.loading==='1')return;const confirm=await Swal.fire({title:'¿Publicar en Facebook?',html:`Se publicará <b>${petName}</b> en tu Página.`,icon:'question',showCancelButton:true,confirmButtonText:'Sí, publicar',cancelButtonText:'Cancelar'});if(!confirm.isConfirmed)return;btn.dataset.loading='1';btn.disabled=true;const controller=new AbortController();const timeoutId=setTimeout(()=>controller.abort(),25000);try{Swal.fire({title:'Publicando…',html:'Enviando a Facebook',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});const res=await fetch(url,{method:'POST',headers:{'X-CSRF-TOKEN':csrf,'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},credentials:'same-origin',signal:controller.signal});const raw=await res.text();let data=null;try{data=raw?JSON.parse(raw):null}catch{}clearTimeout(timeoutId);Swal.close();if(!res.ok||!data||data.ok!==true){const msg=(data&&data.error)||`HTTP ${res.status}`;return Swal.fire({icon:'error',title:'Error al publicar',text:msg,confirmButtonText:'Aceptar'})}let fbUrl='';const postId=data?.result?.post_id||data?.result?.id||'';if(postId&&postId.includes('_')){const[pid,suffix]=postId.split('_');fbUrl=`https://www.facebook.com/${pid}/posts/${suffix}`}else if(postId&&pageId){const suffix=postId.split('_').pop();fbUrl=`https://www.facebook.com/${pageId}/posts/${suffix}`}return Swal.fire({icon:'success',title:`¡Publicado en Facebook!`,html:fbUrl?`<a href="${fbUrl}" target="_blank">${fbUrl}</a>`:'Publicación exitosa',confirmButtonText:'Aceptar'})}catch(err){clearTimeout(timeoutId);Swal.close();const msg=(err?.name==='AbortError')?'Tiempo agotado':(err?.message||'Error de red');return Swal.fire({icon:'error',title:'Error',text:msg,confirmButtonText:'Aceptar'})}finally{btn.dataset.loading='';btn.disabled=false}}
+window.publishToFacebook=publishToFacebook;
 
-    function amountOk() {
-      const n = parseFloat((amt.value || '').toString().replace(',', '.'));
-      return !isNaN(n) && n > 0;
-    }
+// Skeleton
+(function(){const containers=document.querySelectorAll('.js-skel');containers.forEach(c=>{const img=c.querySelector('img');if(!img){c.classList.add('is-loaded');return}const markLoaded=()=>c.classList.add('is-loaded');if(img.complete&&img.naturalWidth>0){markLoaded()}else{img.addEventListener('load',markLoaded,{once:true});img.addEventListener('error',markLoaded,{once:true});setTimeout(()=>c.classList.add('is-loaded'),10000)}})})();
 
-    function setEnabled(enabled) {
-      [amt, msg].forEach(el => {
-        el.disabled = !enabled;
-        el.style.opacity = enabled ? 1 : .65;
-      });
-      save.disabled = false; // permitimos desactivar
-    }
+// Confirmar formularios
+(function(){const forms=document.querySelectorAll('form[data-confirm]');forms.forEach(form=>{form.addEventListener('submit',async(e)=>{e.stopPropagation();e.preventDefault();const msg=form.getAttribute('data-confirm')||'¿Confirmar?';const res=await Swal.fire({title:'Confirmar',text:msg,icon:'question',showCancelButton:true,confirmButtonText:'Sí',cancelButtonText:'Cancelar'});if(res.isConfirmed)form.submit()},{passive:false})})})();
 
-    setEnabled(isOn());
-    sw.addEventListener('click', () => setOn(!isOn()));
-    amt.addEventListener('focus', e => {
-      const raw = (e.target.value || '').replace(',', '.');
-      const n = parseFloat(raw);
-      if (!raw || isNaN(n) || n === 0) e.target.value = '';
-      else e.target.select();
-    });
-    amt.addEventListener('blur', e => {
-      const v = normalizeMoney(e.target.value);
-      e.target.value = v || '0.00';
-    });
-    form.addEventListener('submit', (e) => {
-      if (isOn() && !amountOk()) {
-        e.preventDefault();
-        amt.focus();
-      }
-    });
-  })();
+// Copiar TAG
+function copyTag(event){const tag=document.getElementById('tagCode')?.dataset?.tag;if(!tag){Swal.fire({icon:'error',title:'Error',text:'No se encontró el TAG',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(tag).then(()=>{const btn=event.target.closest('.btn-copy-tag');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar el TAG: '+tag,confirmButtonText:'Aceptar'})})}
 
-  // ====== Evitar que el carrusel deslice al interactuar con botones (Editar/Eliminar/etc) ======
-  (function() {
-    const stopSwipeZone = document.querySelectorAll('.no-swipe, .no-swipe *');
-    const stopEvts = ['click', 'mousedown', 'mouseup', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'pointerup'];
-    stopSwipeZone.forEach(el => {
-      stopEvts.forEach(evt => {
-        el.addEventListener(evt, e => {
-          e.stopPropagation();
-        }, {
-          passive: false
-        });
-      });
-    });
-  })();
-
-  // ====== Confirmar eliminación con SweetAlert ======
-  (function() {
-    const forms = document.querySelectorAll('.pet-delete-form');
-    forms.forEach(form => {
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        Swal.fire({
-          title: '¿Eliminar la mascota?',
-          text: 'Esta acción no se puede deshacer.',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Sí, eliminar',
-          cancelButtonText: 'Cancelar',
-          confirmButtonColor: '#dc3545',
-        }).then(res => {
-          if (res.isConfirmed) form.submit();
-        });
-      });
-    });
-  })();
-
-  (function() {
-    const btn = document.getElementById('btnShareCard');
-    if (!btn) return;
-    const url = btn.dataset.url;
-    const title = btn.dataset.title || document.title;
-
-    btn.addEventListener('click', async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title,
-            url
-          });
-        } catch (e) {
-          /* cancelado */
-        }
-      } else {
-        try {
-          await navigator.clipboard.writeText(url);
-          const prev = btn.innerHTML;
-          btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Enlace copiado';
-          setTimeout(() => btn.innerHTML = prev, 1300);
-        } catch {
-          alert('Copia este enlace:\n' + url);
-        }
-      }
-    });
-  })();
-
-
-
-  async function publishToFacebook(event) {
-    const btn = event.currentTarget || event.target;
-    const url = btn.dataset.url; // ruta a portal.pets.share.facebook
-    const petName = btn.dataset.name || 'la mascota';
-    const pageId = btn.dataset.page || ''; // opcional, para armar el link del post
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
-
-    if (!url) return;
-    if (btn.dataset.loading === '1') return; // anti-doble click
-
-    // Confirmación
-    const confirm = await Swal.fire({
-      title: '¿Publicar en Facebook?',
-      html: `Se publicará la ficha de <b>${petName}</b> en tu Página.`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, publicar',
-      cancelButtonText: 'Cancelar'
-    });
-    if (!confirm.isConfirmed) return;
-
-    btn.dataset.loading = '1';
-    btn.disabled = true;
-
-    // Timeout de seguridad (25s)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
-
-    try {
-      Swal.fire({
-        title: 'Publicando…',
-        html: 'Enviando la publicación a Facebook',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'X-CSRF-TOKEN': csrf,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json'
-        },
-        credentials: 'same-origin',
-        signal: controller.signal
-      });
-
-      const raw = await res.text();
-      let data = null;
-      try {
-        data = raw ? JSON.parse(raw) : null;
-      } catch {
-        /* cuerpo no JSON */ }
-
-      clearTimeout(timeoutId);
-      Swal.close();
-
-      if (!res.ok || !data || data.ok !== true) {
-        const msg = (data && data.error) ||
-          `HTTP ${res.status} ${res.statusText}${raw ? ' – ' + raw.slice(0, 200) : ''}`;
-        return Swal.fire({
-          icon: 'error',
-          title: 'No se pudo publicar en Facebook.',
-          text: msg,
-          confirmButtonText: 'Aceptar'
-        });
-      }
-
-      // Construir link a la publicación (si viene post_id)
-      let fbUrl = '';
-      const postId = data?.result?.post_id || data?.result?.id || '';
-      if (postId && postId.includes('_')) {
-        const [pid, suffix] = postId.split('_');
-        fbUrl = `https://www.facebook.com/${pid}/posts/${suffix}`;
-      } else if (postId && pageId) {
-        const suffix = postId.split('_').pop();
-        fbUrl = `https://www.facebook.com/${pageId}/posts/${suffix}`;
-      }
-
-      return Swal.fire({
-        icon: 'success',
-        title: `¡Publicado ${petName} en Facebook!`,
-        html: fbUrl ?
-          `Ver publicación:<br><a href="${fbUrl}" target="_blank" rel="noopener">${fbUrl}</a>` :
-          'Se publicó correctamente.',
-        confirmButtonText: 'Aceptar'
-      });
-
-    } catch (err) {
-      clearTimeout(timeoutId);
-      Swal.close();
-      const msg = (err?.name === 'AbortError') ?
-        'Se agotó el tiempo de espera. Inténtalo de nuevo.' :
-        (err?.message || 'Error de red o de servidor.');
-      return Swal.fire({
-        icon: 'error',
-        title: 'No se pudo publicar en Facebook.',
-        text: msg,
-        confirmButtonText: 'Aceptar'
-      });
-    } finally {
-      btn.dataset.loading = '';
-      btn.disabled = false;
-    }
-  }
-
-  // si usas onclick="publishToFacebook(event)"
-  window.publishToFacebook = publishToFacebook;
-
-
-
-
-
-  // Inicializa skeletons: cuando la imagen carga, marcamos is-loaded
-  (function initSkeletons() {
-    const containers = document.querySelectorAll('.js-skel');
-    containers.forEach(c => {
-      const img = c.querySelector('img');
-      if (!img) {
-        c.classList.add('is-loaded');
-        return;
-      }
-
-      const markLoaded = () => c.classList.add('is-loaded');
-      const markError = () => c.classList.add('is-loaded'); // en error, también apaga el shimmer
-
-      // Si ya está en caché y con dimensiones, no mostramos shimmer
-      if (img.complete && img.naturalWidth > 0) {
-        markLoaded();
-      } else {
-        img.addEventListener('load', markLoaded, {
-          once: true
-        });
-        img.addEventListener('error', markError, {
-          once: true
-        });
-
-        // Fallback por si el navegador no dispara eventos (muy raro)
-        setTimeout(() => c.classList.add('is-loaded'), 10000);
-      }
-    });
-  })();
-
-  (function() {
-    const forms = document.querySelectorAll('form[data-confirm]');
-    forms.forEach(form => {
-      form.addEventListener('submit', async (e) => {
-        // evitar que el carousel “captura” el gesto
-        e.stopPropagation();
-        e.preventDefault();
-
-        const msg = form.getAttribute('data-confirm') || '¿Confirmas la acción?';
-        const res = await Swal.fire({
-          title: 'Confirmar',
-          text: msg,
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'Sí, continuar',
-          cancelButtonText: 'Cancelar'
-        });
-        if (res.isConfirmed) form.submit();
-      }, {
-        passive: false
-      });
-    });
-  })();
+// Copiar URL QR
+function copyQrUrl(event){const input=document.getElementById('qrUrlInput');const url=input?.value;if(!url){Swal.fire({icon:'error',title:'Error',text:'No se encontró la URL',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(url).then(()=>{const btn=event.target.closest('.btn-copy-url');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar la URL',confirmButtonText:'Aceptar'})})}
 </script>
-
 @endpush
