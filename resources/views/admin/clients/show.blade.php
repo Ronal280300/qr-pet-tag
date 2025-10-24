@@ -49,13 +49,23 @@
                                     <i class="fa-solid fa-ellipsis-vertical"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-modern" aria-labelledby="dropdownMenuButton">
+                                    @if($user->currentPlan && $user->plan_is_active && $user->plan_expires_at)
+                                    <li>
+                                        <form method="POST" action="{{ route('portal.admin.clients.send-reminder', $user) }}" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fa-solid fa-bell me-2 text-warning"></i>
+                                                Enviar recordatorio de pago
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    @endif
                                     <li>
                                         <button type="button" class="dropdown-item js-delete-client">
                                             <i class="fa-solid fa-trash-can me-2 text-danger"></i>
                                             Eliminar cliente
                                         </button>
-
-
                                     </li>
                                 </ul>
                             </div>

@@ -256,6 +256,21 @@
                                             {{ $c->name }}
                                         </div>
                                         <div class="text-muted small">ID: {{ $c->id }}</div>
+                                        @if($c->currentPlan && $c->plan_is_active)
+                                        <div class="small mt-1">
+                                            <span class="badge bg-info-subtle text-info border border-info" style="font-size: 0.7rem;">
+                                                <i class="fa-solid fa-badge-check me-1"></i>{{ $c->currentPlan->name }}
+                                                @if($c->plan_expires_at)
+                                                    - Vence: {{ $c->plan_expires_at->format('d/m/Y') }}
+                                                    @if($c->plan_expires_at->isPast())
+                                                        <i class="fa-solid fa-exclamation-triangle text-danger ms-1"></i>
+                                                    @elseif($c->plan_expires_at->diffInDays(now()) <= 3)
+                                                        <i class="fa-solid fa-clock text-warning ms-1"></i>
+                                                    @endif
+                                                @endif
+                                            </span>
+                                        </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

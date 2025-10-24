@@ -13,6 +13,12 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('clients:enforce-status')->dailyAt('00:30');
+
+        // Enviar recordatorios de pago 1 día antes del vencimiento
+        $schedule->command('payments:send-reminders')->dailyAt('09:00');
+
+        // Bloquear cuentas con más de 3 días de vencimiento
+        $schedule->command('accounts:block-expired')->dailyAt('01:00');
     }
 
     /**

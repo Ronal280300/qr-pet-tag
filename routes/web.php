@@ -214,6 +214,7 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::get('clients', [ClientController::class, 'index'])->name('clients.index');        // listado + filtros
             Route::get('clients/{user}', [ClientController::class, 'show'])->name('clients.show');   // detalle/edición
             Route::put('clients/{user}', [ClientController::class, 'update'])->name('clients.update'); // guardar cambios
+            Route::post('clients/{user}/send-reminder', [ClientController::class, 'sendPaymentReminder'])->name('clients.send-reminder'); // recordatorio manual
             Route::delete('clients/{user}/pets/{pet}', [ClientController::class, 'detachPet'])->name('clients.pets.detach'); // desenlazar mascota
             Route::delete('clients/{user}', [ClientController::class, 'destroy'])->name('clients.destroy');
             // 👉 Exportar clientes (CSV) preservando filtros ?q=&status=
