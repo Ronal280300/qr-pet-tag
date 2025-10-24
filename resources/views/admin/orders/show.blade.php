@@ -88,17 +88,29 @@
                     </p>
 
                     @if(Str::endsWith($order->payment_proof, '.pdf'))
-                        <a href="{{ Storage::url($order->payment_proof) }}" target="_blank" class="btn btn-lg btn-primary">
-                            <i class="fa-solid fa-file-pdf"></i> Ver PDF
-                        </a>
+                        <div class="mb-3">
+                            <i class="fa-solid fa-file-pdf text-danger" style="font-size: 80px;"></i>
+                            <p class="mt-3"><strong>Archivo PDF</strong></p>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="{{ Storage::url($order->payment_proof) }}" target="_blank" class="btn btn-lg btn-primary">
+                                <i class="fa-solid fa-eye"></i> Ver PDF
+                            </a>
+                            <a href="{{ Storage::url($order->payment_proof) }}" download="comprobante-{{ $order->order_number }}.pdf" class="btn btn-lg btn-success">
+                                <i class="fa-solid fa-download"></i> Descargar
+                            </a>
+                        </div>
                     @else
                         <img src="{{ Storage::url($order->payment_proof) }}"
                              alt="Comprobante"
-                             class="img-fluid border rounded"
+                             class="img-fluid border rounded shadow-sm"
                              style="max-height: 600px; cursor: pointer;"
                              onclick="window.open(this.src, '_blank')">
-                        <p class="mt-2">
-                            <small class="text-muted">Click para ampliar</small>
+                        <p class="mt-3">
+                            <small class="text-muted d-block mb-2">Click en la imagen para ampliar</small>
+                            <a href="{{ Storage::url($order->payment_proof) }}" download="comprobante-{{ $order->order_number }}.{{ pathinfo($order->payment_proof, PATHINFO_EXTENSION) }}" class="btn btn-success">
+                                <i class="fa-solid fa-download"></i> Descargar Imagen
+                            </a>
                         </p>
                     @endif
                 </div>

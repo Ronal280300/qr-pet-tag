@@ -7,20 +7,57 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Gestión de Pedidos</h1>
 
-        <!-- Filtros -->
-        <form method="GET" class="d-flex gap-2">
-            <select name="status" class="form-select" onchange="this.form.submit()">
-                <option value="">Todos los estados</option>
-                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pendiente</option>
-                <option value="payment_uploaded" {{ request('status') == 'payment_uploaded' ? 'selected' : '' }}>Pago Subido</option>
-                <option value="verified" {{ request('status') == 'verified' ? 'selected' : '' }}>Verificado</option>
-                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completado</option>
-                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rechazado</option>
-            </select>
+        <!-- Botón para mostrar/ocultar filtros -->
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+            <i class="fa-solid fa-filter"></i> Filtros
+        </button>
+    </div>
 
-            <input type="text" name="search" class="form-control" placeholder="Buscar..." value="{{ request('search') }}">
-            <button type="submit" class="btn btn-primary">Buscar</button>
-        </form>
+    <!-- Filtros expandibles -->
+    <div class="collapse {{ request()->hasAny(['status', 'search', 'date_from', 'date_to']) ? 'show' : '' }} mb-4" id="filterCollapse">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Estado</label>
+                        <select name="status" class="form-select">
+                            <option value="">Todos los estados</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pendiente</option>
+                            <option value="payment_uploaded" {{ request('status') == 'payment_uploaded' ? 'selected' : '' }}>Pago Subido</option>
+                            <option value="verified" {{ request('status') == 'verified' ? 'selected' : '' }}>Verificado</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completado</option>
+                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rechazado</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Buscar</label>
+                        <input type="text" name="search" class="form-control" placeholder="Pedido, cliente o email..." value="{{ request('search') }}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Desde</label>
+                        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Hasta</label>
+                        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            <i class="fa-solid fa-search"></i> Buscar
+                        </button>
+                        @if(request()->hasAny(['status', 'search', 'date_from', 'date_to']))
+                        <a href="{{ route('portal.admin.orders.index') }}" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-times"></i>
+                        </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Estadísticas -->

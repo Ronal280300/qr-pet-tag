@@ -36,6 +36,16 @@ class OrderManagementController extends Controller
             });
         }
 
+        // Filtro por fecha desde
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        // Filtro por fecha hasta
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
         $orders = $query->paginate(20)->withQueryString();
 
         $stats = [
