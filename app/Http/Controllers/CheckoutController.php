@@ -49,9 +49,9 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Crear pedido inicial
+     * Proceder a la página de pago (sin crear pedido todavía)
      */
-    public function createOrder(Request $request, Plan $plan)
+    public function proceedToPayment(Request $request, Plan $plan)
     {
         $request->validate([
             'pets_quantity' => 'required|integer|min:1',
@@ -62,74 +62,87 @@ class CheckoutController extends Controller
         }
 
         $petsQuantity = $request->input('pets_quantity');
-        $additionalPets = max(0, $petsQuantity - $plan->pets_included);
-        $additionalCost = $additionalPets * $plan->additional_pet_price;
-        $total = $plan->calculateTotal($petsQuantity);
 
-        // Crear el pedido
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'plan_id' => $plan->id,
-            'pets_quantity' => $petsQuantity,
-            'subtotal' => $plan->price,
-            'additional_pets_cost' => $additionalCost,
-            'total' => $total,
-            'status' => 'pending',
-            'expires_at' => $plan->type === 'subscription'
-                ? now()->addMonths($plan->duration_months)
-                : null,
+        // Redirigir a la página de pago con los datos del plan
+        return redirect()->route('checkout.payment', [
+            'plan' => $plan->id,
+            'pets_quantity' => $petsQuantity
         ]);
-
-        // Crear notificación para admin
-        AdminNotification::createNewOrderNotification($order);
-
-        return redirect()->route('checkout.payment', $order)
-            ->with('success', 'Pedido creado exitosamente');
     }
 
     /**
      * Mostrar página para subir comprobante de pago
      */
-    public function payment(Order $order)
+    public function payment(Request $request)
     {
-        // Verificar que el pedido pertenezca al usuario autenticado
-        if ($order->user_id !== Auth::id()) {
-            abort(403, 'No autorizado');
+        $request->validate([
+            'plan' => 'required|exists:plans,id',
+            'pets_quantity' => 'required|integer|min:1',
+        ]);
+
+        $plan = Plan::findOrFail($request->input('plan'));
+
+        if (!$plan->is_active) {
+            return redirect()->route('home')
+                ->with('error', 'El plan seleccionado no está disponible');
         }
 
-        return view('public.checkout-payment', compact('order'));
+        $petsQuantity = $request->input('pets_quantity');
+        $additionalPets = max(0, $petsQuantity - $plan->pets_included);
+        $additionalCost = $additionalPets * $plan->additional_pet_price;
+        $total = $plan->calculateTotal($petsQuantity);
+
+        return view('public.checkout-payment', compact(
+            'plan',
+            'petsQuantity',
+            'total',
+            'additionalPets',
+            'additionalCost'
+        ));
     }
 
     /**
-     * Procesar upload de comprobante de pago
+     * Procesar upload de comprobante de pago y crear el pedido
      */
-    public function uploadPayment(Request $request, Order $order)
+    public function uploadPayment(Request $request)
     {
-        // Verificar que el pedido pertenezca al usuario autenticado
-        if ($order->user_id !== Auth::id()) {
-            abort(403, 'No autorizado');
-        }
-
         $request->validate([
-            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,pdf|max:5120', // 5MB max
+            'plan_id' => 'required|exists:plans,id',
+            'pets_quantity' => 'required|integer|min:1',
+            'payment_proof' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120', // 5MB max
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Eliminar comprobante anterior si existe
-            if ($order->payment_proof && Storage::disk('public')->exists($order->payment_proof)) {
-                Storage::disk('public')->delete($order->payment_proof);
+            $plan = Plan::findOrFail($request->input('plan_id'));
+
+            if (!$plan->is_active) {
+                return back()->with('error', 'El plan seleccionado no está disponible');
             }
 
-            // Guardar nuevo comprobante
+            $petsQuantity = $request->input('pets_quantity');
+            $additionalPets = max(0, $petsQuantity - $plan->pets_included);
+            $additionalCost = $additionalPets * $plan->additional_pet_price;
+            $total = $plan->calculateTotal($petsQuantity);
+
+            // Guardar comprobante de pago
             $path = $request->file('payment_proof')->store('payment-proofs', 'public');
 
-            // Actualizar pedido
-            $order->update([
+            // Crear el pedido con el comprobante ya incluido
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'plan_id' => $plan->id,
+                'pets_quantity' => $petsQuantity,
+                'subtotal' => $plan->price,
+                'additional_pets_cost' => $additionalCost,
+                'total' => $total,
+                'status' => 'payment_uploaded',
                 'payment_proof' => $path,
                 'payment_uploaded_at' => now(),
-                'status' => 'payment_uploaded',
+                'expires_at' => $plan->type === 'subscription'
+                    ? now()->addMonths($plan->duration_months)
+                    : null,
             ]);
 
             // Crear notificación para admin
@@ -149,8 +162,13 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            // Eliminar archivo si se subió pero falló la creación del pedido
+            if (isset($path) && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+
             return back()
-                ->with('error', 'Error al subir el comprobante: ' . $e->getMessage())
+                ->with('error', 'Error al procesar el pago: ' . $e->getMessage())
                 ->withInput();
         }
     }

@@ -85,9 +85,9 @@ Route::get('/planes/{plan}', [PlanController::class, 'show'])->name('plans.show'
 // Checkout (requiere autenticación)
 Route::middleware('auth')->group(function () {
     Route::get('/checkout/{plan}', [CheckoutController::class, 'show'])->name('checkout.show');
-    Route::post('/checkout/{plan}', [CheckoutController::class, 'createOrder'])->name('checkout.create');
-    Route::get('/checkout/payment/{order}', [CheckoutController::class, 'payment'])->name('checkout.payment');
-    Route::post('/checkout/payment/{order}', [CheckoutController::class, 'uploadPayment'])->name('checkout.upload');
+    Route::post('/checkout/{plan}', [CheckoutController::class, 'proceedToPayment'])->name('checkout.create');
+    Route::get('/checkout/payment', [CheckoutController::class, 'payment'])->name('checkout.payment');
+    Route::post('/checkout/payment', [CheckoutController::class, 'uploadPayment'])->name('checkout.upload');
     Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
 });
 
