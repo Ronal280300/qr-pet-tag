@@ -85,9 +85,9 @@ Route::get('/planes/{plan}', [PlanController::class, 'show'])->name('plans.show'
 // Checkout (requiere autenticación)
 Route::middleware('auth')->group(function () {
     Route::get('/checkout/{plan}', [CheckoutController::class, 'show'])->name('checkout.show');
-    Route::post('/checkout/{plan}', [CheckoutController::class, 'createOrder'])->name('checkout.create');
-    Route::get('/checkout/payment/{order}', [CheckoutController::class, 'payment'])->name('checkout.payment');
-    Route::post('/checkout/payment/{order}', [CheckoutController::class, 'uploadPayment'])->name('checkout.upload');
+    Route::post('/checkout/{plan}', [CheckoutController::class, 'proceedToPayment'])->name('checkout.create');
+    Route::get('/checkout/payment', [CheckoutController::class, 'payment'])->name('checkout.payment');
+    Route::post('/checkout/payment', [CheckoutController::class, 'uploadPayment'])->name('checkout.upload');
     Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
 });
 
@@ -214,6 +214,7 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::get('clients', [ClientController::class, 'index'])->name('clients.index');        // listado + filtros
             Route::get('clients/{user}', [ClientController::class, 'show'])->name('clients.show');   // detalle/edición
             Route::put('clients/{user}', [ClientController::class, 'update'])->name('clients.update'); // guardar cambios
+            Route::post('clients/{user}/send-reminder', [ClientController::class, 'sendPaymentReminder'])->name('clients.send-reminder'); // recordatorio manual
             Route::delete('clients/{user}/pets/{pet}', [ClientController::class, 'detachPet'])->name('clients.pets.detach'); // desenlazar mascota
             Route::delete('clients/{user}', [ClientController::class, 'destroy'])->name('clients.destroy');
             // 👉 Exportar clientes (CSV) preservando filtros ?q=&status=

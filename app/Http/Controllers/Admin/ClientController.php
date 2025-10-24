@@ -26,6 +26,7 @@ class ClientController extends Controller
                     ->orWhere('phone', 'like', "%$q%");
             }))
             ->when($status, fn($qq) => $qq->where('status', $status))
+            ->with('currentPlan') // Incluir plan actual
             ->withCount('pets')
             ->orderBy('name')
             ->paginate(20)
@@ -393,5 +394,50 @@ class ClientController extends Controller
         });
 
         return back()->with('success', 'Notas/etiquetas aplicadas a ' . count($ids) . ' cliente(s).');
+    }
+
+    /**
+     * Enviar recordatorio manual de pago a un cliente
+     */
+    public function sendPaymentReminder(User $user)
+    {
+        abort_unless(!$user->is_admin, 403);
+
+        if (!$user->currentPlan || !$user->plan_is_active) {
+            return back()->with('error', 'El cliente no tiene un plan activo.');
+        }
+
+        try {
+            \Illuminate\Support\Facades\Mail::send('emails.client.payment-reminder', [
+                'user' => $user,
+                'plan' => $user->currentPlan,
+                'expiresAt' => $user->plan_expires_at,
+            ], function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Recordatorio de Pago - ' . config('app.name'));
+            });
+
+            \App\Models\EmailLog::logEmail(
+                recipient: $user->email,
+                subject: 'Recordatorio de Pago',
+                type: 'payment_reminder',
+                userId: $user->id,
+                status: 'sent'
+            );
+
+            return back()->with('success', 'Recordatorio enviado a ' . $user->name);
+
+        } catch (\Exception $e) {
+            \App\Models\EmailLog::logEmail(
+                recipient: $user->email,
+                subject: 'Recordatorio de Pago',
+                type: 'payment_reminder',
+                userId: $user->id,
+                status: 'failed',
+                errorMessage: $e->getMessage()
+            );
+
+            return back()->with('error', 'Error al enviar recordatorio: ' . $e->getMessage());
+        }
     }
 }
