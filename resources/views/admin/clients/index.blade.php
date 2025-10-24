@@ -293,7 +293,7 @@
 
                         <td class="text-end">
                             <a href="{{ route('portal.admin.clients.show', $c) }}" class="btn btn-outline-primary btn-sm">
-                                <i class="fa-regular fa-pen-to-square me-1"></i> Editar
+                                <i class="fa-regular fa-pen-to-square me-1"></i><span> Editar</span>
                             </a>
                         </td>
                     </tr>
@@ -1347,6 +1347,12 @@
     .table-card-footer {
       padding: 1rem;
     }
+
+    /* Ocultar columna de teléfono en tablet */
+    .table-modern-clients th:nth-child(3),
+    .table-modern-clients td:nth-child(3) {
+      display: none;
+    }
   }
 
   @media (max-width: 767px) {
@@ -1397,6 +1403,70 @@
       flex-direction: column;
       align-items: flex-start;
     }
+
+    /* Ocultar columnas de email y teléfono en móvil */
+    .table-modern-clients th:nth-child(2),
+    .table-modern-clients td:nth-child(2),
+    .table-modern-clients th:nth-child(3),
+    .table-modern-clients td:nth-child(3) {
+      display: none;
+    }
+
+    /* Ajustar anchos de columnas restantes */
+    .table-modern-clients th:nth-child(1),
+    .table-modern-clients td:nth-child(1) {
+      width: 45%;
+    }
+
+    .table-modern-clients th:nth-child(4),
+    .table-modern-clients td:nth-child(4) {
+      width: 25%;
+    }
+
+    .table-modern-clients th:nth-child(5),
+    .table-modern-clients td:nth-child(5) {
+      width: 15%;
+    }
+
+    .table-modern-clients th:nth-child(6),
+    .table-modern-clients td:nth-child(6) {
+      width: 15%;
+    }
+
+    /* Reducir padding de celdas */
+    .table-modern-clients th,
+    .table-modern-clients td {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    /* Hacer badges más pequeños */
+    .table-modern-clients .badge {
+      font-size: 0.75rem;
+      padding: 6px 10px;
+    }
+
+    /* Botón editar más compacto */
+    .btn-action-table,
+    .table-modern-clients .btn-outline-primary {
+      padding: 6px 10px;
+      font-size: 0.75rem;
+    }
+
+    /* Ocultar texto "Editar", solo mostrar ícono */
+    .table-modern-clients .btn-outline-primary span {
+      display: none;
+    }
+
+    /* Avatar más pequeño */
+    .avatar-initials-modern {
+      width: 36px !important;
+      height: 36px !important;
+    }
+
+    .avatar-initials-modern .avatar-text {
+      font-size: 0.85rem !important;
+    }
   }
 
   @media (max-width: 576px) {
@@ -1421,6 +1491,37 @@
 
     .contact-link span {
       font-size: 0.85rem;
+    }
+
+    /* Hacer aún más compacto en móviles pequeños */
+    .table-modern-clients th,
+    .table-modern-clients td {
+      padding: 0.5rem 0.35rem;
+    }
+
+    .client-name {
+      font-size: 0.9rem;
+    }
+
+    .client-id {
+      font-size: 0.75rem;
+    }
+
+    /* Bulkbar responsive */
+    .bulkbar {
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .bulkbar-actions {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .bulkbar-actions .btn {
+      font-size: 0.75rem;
+      padding: 6px 10px;
     }
   }
 </style>

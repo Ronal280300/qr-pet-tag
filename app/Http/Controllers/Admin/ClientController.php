@@ -26,6 +26,7 @@ class ClientController extends Controller
                     ->orWhere('phone', 'like', "%$q%");
             }))
             ->when($status, fn($qq) => $qq->where('status', $status))
+            ->with('currentPlan') // Incluir plan actual
             ->withCount('pets')
             ->orderBy('name')
             ->paginate(20)
