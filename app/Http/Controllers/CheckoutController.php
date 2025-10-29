@@ -191,8 +191,9 @@ class CheckoutController extends Controller
 
     /**
      * Crear mascota desde el checkout (pendiente de activación)
+     * MISMO PROCESO que PetController@store pero sin enlazar a usuario
      */
-    public function storePetFromCheckout(Request $request, Order $order)
+    public function storePetFromCheckout(Request $request, Order $order, \App\Services\PetQrService $qrService)
     {
         // Verificar que el pedido pertenezca al usuario autenticado
         if ($order->user_id !== Auth::id()) {
@@ -204,39 +205,60 @@ class CheckoutController extends Controller
             return back()->with('error', 'No puedes agregar mascotas a esta orden en su estado actual.');
         }
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'species' => 'required|in:dog,cat,other',
-            'breed' => 'nullable|string|max:255',
-            'age' => 'nullable|integer|min:0',
-            'sex' => 'nullable|in:male,female,unknown',
-            'size' => 'nullable|in:small,medium,large',
-            'color' => 'nullable|string|max:255',
-            'is_neutered' => 'nullable|boolean',
-            'rabies_vaccine' => 'nullable|boolean',
-            'medical_conditions' => 'nullable|string',
+        // Validación exacta al formulario del admin
+        $data = $request->validate([
+            'name'               => ['required', 'string', 'max:120'],
+            'breed'              => ['nullable', 'string', 'max:120'],
+            'zone'               => ['nullable', 'string', 'max:255'],
+            'age'                => ['nullable', 'integer', 'min:0', 'max:50'],
+            'medical_conditions' => ['nullable', 'string', 'max:500'],
+            'photo'              => ['nullable', 'image', 'max:4096'],
+            'photos.*'           => ['nullable', 'image', 'max:6144'],
+            'sex'                => 'nullable|in:male,female,unknown',
+            'is_neutered'        => 'nullable|boolean',
+            'rabies_vaccine'     => 'nullable|boolean',
         ]);
 
         try {
             DB::beginTransaction();
 
+            // Guardar foto principal si existe
+            if ($request->hasFile('photo')) {
+                $data['photo'] = $request->file('photo')->store('pets', 'public');
+            }
+
             // Crear mascota sin enlazar (user_id = null), marcada como pendiente
-            $pet = \App\Models\Pet::create([
-                'user_id' => null, // No se enlaza hasta que admin verifique
-                'order_id' => $order->id,
-                'pending_activation' => true,
-                'name' => $request->name,
-                'species' => $request->species,
-                'breed' => $request->breed,
-                'age' => $request->age,
-                'sex' => $request->sex,
-                'size' => $request->size,
-                'color' => $request->color,
-                'is_neutered' => $request->boolean('is_neutered'),
-                'rabies_vaccine' => $request->boolean('rabies_vaccine'),
-                'medical_conditions' => $request->medical_conditions,
-                'is_lost' => false,
-            ]);
+            $data['user_id'] = null; // No se enlaza hasta que admin verifique
+            $data['order_id'] = $order->id;
+            $data['pending_activation'] = true;
+            $data['is_lost'] = false;
+
+            $pet = \App\Models\Pet::create($data);
+
+            // Guardar fotos múltiples
+            $sort = 1;
+            foreach ($request->file('photos', []) as $file) {
+                if (!$file || !$file->isValid()) continue;
+                $path = $file->store('pets/photos', 'public');
+                \App\Models\PetPhoto::create([
+                    'pet_id'     => $pet->id,
+                    'path'       => $path,
+                    'sort_order' => $sort++,
+                ]);
+            }
+
+            // Si no subieron fotos múltiples pero sí 'photo' legacy, usarla como primera
+            if ($sort === 1 && !empty($data['photo'])) {
+                \App\Models\PetPhoto::create([
+                    'pet_id'     => $pet->id,
+                    'path'       => $data['photo'],
+                    'sort_order' => $sort++,
+                ]);
+            }
+
+            // Generar QR code (mismo proceso que el admin)
+            $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $pet->id]);
+            $qrService->ensureSlugAndImage($qr, $pet);
 
             DB::commit();
 
@@ -244,6 +266,11 @@ class CheckoutController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Error al crear mascota desde checkout', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->with('error', 'Error al registrar mascota: ' . $e->getMessage());
         }
     }

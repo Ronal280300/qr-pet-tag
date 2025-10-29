@@ -130,6 +130,13 @@
                                     <textarea name="description" class="form-control" rows="2">{{ $plan->description }}</textarea>
                                 </div>
 
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="allows_additional_pets" value="1" id="allowsAdditional{{ $plan->id }}" {{ $plan->allows_additional_pets ? 'checked' : '' }}>
+                                    <label class="form-check-label small" for="allowsAdditional{{ $plan->id }}">
+                                        Permitir mascotas adicionales
+                                    </label>
+                                </div>
+
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn btn-primary flex-grow-1">
                                         <i class="fa-solid fa-save me-2"></i>Guardar Cambios
@@ -212,6 +219,13 @@
                                 <div class="mb-3">
                                     <label class="form-label">Descripción</label>
                                     <textarea name="description" class="form-control" rows="2">{{ $plan->description }}</textarea>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="allows_additional_pets" value="1" id="allowsAdditionalSub{{ $plan->id }}" {{ $plan->allows_additional_pets ? 'checked' : '' }}>
+                                    <label class="form-check-label small" for="allowsAdditionalSub{{ $plan->id }}">
+                                        Permitir mascotas adicionales
+                                    </label>
                                 </div>
 
                                 <div class="d-flex gap-2">
@@ -340,6 +354,14 @@
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>
                         <textarea name="description" class="form-control" rows="3" placeholder="Describe las características del plan..."></textarea>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="allows_additional_pets" value="1" id="allowsAdditionalPets" checked>
+                        <label class="form-check-label" for="allowsAdditionalPets">
+                            Permitir agregar mascotas adicionales
+                        </label>
+                        <small class="d-block text-muted ms-4">Si está activado, los clientes podrán comprar más mascotas del número incluido en el plan</small>
                     </div>
 
                     <div class="form-check">
