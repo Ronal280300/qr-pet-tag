@@ -18,21 +18,21 @@ class PlanManagementController extends Controller
         $plans = Plan::orderBy('type')->orderBy('sort_order')->get();
 
         $settings = [
-            'whatsapp_number' => Setting::get('whatsapp_number', '50670000000'),
-            'whatsapp_message' => Setting::get('whatsapp_message', 'Hola, necesito ayuda con QR Pet Tag'),
+            'support_whatsapp' => Setting::get('support_whatsapp', '+50670000000'),
+            'support_email' => Setting::get('support_email', 'soporte@qrpettag.com'),
             'email_monthly_limit' => Setting::get('email_monthly_limit', 500),
-            'admin_email' => Setting::get('admin_email', config('mail.from.address')),
+            'grace_days_before_block' => Setting::get('grace_days_before_block', 3),
         ];
 
         // Estadísticas de emails
+        $currentMonth = EmailLog::whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->count();
+
         $emailStats = [
-            'monthly_count' => EmailLog::getMonthlyCount(),
-            'daily_count' => EmailLog::getDailyCount(),
-            'monthly_limit' => $settings['email_monthly_limit'],
-            'percentage_used' => ($settings['email_monthly_limit'] > 0)
-                ? round((EmailLog::getMonthlyCount() / $settings['email_monthly_limit']) * 100, 2)
-                : 0,
-            'is_near_limit' => EmailLog::isNearLimit($settings['email_monthly_limit']),
+            'current_month' => $currentMonth,
+            'sent' => EmailLog::where('status', 'sent')->count(),
+            'failed' => EmailLog::where('status', 'failed')->count(),
         ];
 
         return view('admin.plans.index', compact('plans', 'settings', 'emailStats'));
@@ -49,19 +49,23 @@ class PlanManagementController extends Controller
             'price' => 'required|numeric|min:0',
             'additional_pet_price' => 'required|numeric|min:0',
             'is_active' => 'required|boolean',
-            'allows_additional_pets' => 'nullable|boolean',
+            'allows_additional_pets' => 'required|boolean',
             'description' => 'nullable|string',
         ]);
 
-        $plan->update($request->only([
+        $data = $request->only([
             'name',
             'pets_included',
             'price',
             'additional_pet_price',
             'is_active',
-            'allows_additional_pets',
             'description',
-        ]));
+        ]);
+
+        // Convertir explícitamente allows_additional_pets a booleano
+        $data['allows_additional_pets'] = $request->boolean('allows_additional_pets');
+
+        $plan->update($data);
 
         return back()->with('success', 'Plan actualizado exitosamente');
     }
@@ -74,25 +78,15 @@ class PlanManagementController extends Controller
         $request->validate([
             'support_whatsapp' => 'nullable|string|max:20',
             'support_email' => 'nullable|email|max:255',
-            'email_monthly_limit' => 'nullable|integer|min:1',
-            'grace_days_before_block' => 'nullable|integer|min:0',
+            'email_monthly_limit' => 'required|integer|min:1',
+            'grace_days_before_block' => 'required|integer|min:0',
         ]);
 
-        if ($request->filled('support_whatsapp')) {
-            Setting::set('support_whatsapp', $request->support_whatsapp, 'string', 'contact');
-        }
-
-        if ($request->filled('support_email')) {
-            Setting::set('support_email', $request->support_email, 'string', 'contact');
-        }
-
-        if ($request->filled('email_monthly_limit')) {
-            Setting::set('email_monthly_limit', $request->email_monthly_limit, 'integer', 'email');
-        }
-
-        if ($request->filled('grace_days_before_block')) {
-            Setting::set('grace_days_before_block', $request->grace_days_before_block, 'integer', 'system');
-        }
+        // Siempre guardar todos los campos (incluso si están vacíos)
+        Setting::set('support_whatsapp', $request->support_whatsapp ?? '', 'string', 'contact');
+        Setting::set('support_email', $request->support_email ?? '', 'string', 'contact');
+        Setting::set('email_monthly_limit', $request->email_monthly_limit, 'integer', 'email');
+        Setting::set('grace_days_before_block', $request->grace_days_before_block, 'integer', 'system');
 
         return back()->with('success', 'Configuración actualizada exitosamente');
     }

@@ -131,6 +131,7 @@
                                 </div>
 
                                 <div class="form-check mb-3">
+                                    <input type="hidden" name="allows_additional_pets" value="0">
                                     <input class="form-check-input" type="checkbox" name="allows_additional_pets" value="1" id="allowsAdditional{{ $plan->id }}" {{ $plan->allows_additional_pets ? 'checked' : '' }}>
                                     <label class="form-check-label small" for="allowsAdditional{{ $plan->id }}">
                                         Permitir mascotas adicionales
@@ -222,6 +223,7 @@
                                 </div>
 
                                 <div class="form-check mb-3">
+                                    <input type="hidden" name="allows_additional_pets" value="0">
                                     <input class="form-check-input" type="checkbox" name="allows_additional_pets" value="1" id="allowsAdditionalSub{{ $plan->id }}" {{ $plan->allows_additional_pets ? 'checked' : '' }}>
                                     <label class="form-check-label small" for="allowsAdditionalSub{{ $plan->id }}">
                                         Permitir mascotas adicionales
