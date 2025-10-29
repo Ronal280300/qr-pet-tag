@@ -105,12 +105,32 @@ class OrderManagementController extends Controller
                 'plan_is_active' => true,
             ]);
 
+            // Enlazar mascotas pendientes creadas desde el checkout
+            $pendingPets = \App\Models\Pet::where('order_id', $order->id)
+                ->where('pending_activation', true)
+                ->whereNull('user_id')
+                ->get();
+
+            $linkedPetsCount = 0;
+            foreach ($pendingPets as $pet) {
+                $pet->update([
+                    'user_id' => $user->id,
+                    'pending_activation' => false,
+                ]);
+                $linkedPetsCount++;
+            }
+
             // Enviar email al cliente
             $this->sendVerificationEmail($order);
 
             DB::commit();
 
-            return back()->with('success', 'Pago verificado y plan activado exitosamente');
+            $message = 'Pago verificado y plan activado exitosamente';
+            if ($linkedPetsCount > 0) {
+                $message .= ". Se enlazaron automáticamente {$linkedPetsCount} mascota(s) registrada(s) desde el checkout";
+            }
+
+            return back()->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();

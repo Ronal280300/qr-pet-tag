@@ -17,6 +17,8 @@ class Pet extends Model
      */
     protected $fillable = [
         'user_id',
+        'order_id',       // orden asociada cuando se crea desde checkout
+        'pending_activation', // mascota pendiente de enlazar
         'name',
         'breed',
         'zone',
@@ -49,6 +51,7 @@ class Pet extends Model
             // ===== NUEVOS CASTS =====
             'is_neutered'    => 'boolean',
             'rabies_vaccine' => 'boolean',
+            'pending_activation' => 'boolean',
             'last_fb_posted_at' => 'datetime',
         ];
     }
@@ -79,6 +82,11 @@ class Pet extends Model
     public function province() { return $this->belongsTo(Province::class); }
     public function city()     { return $this->belongsTo(City::class); }
     public function district() { return $this->belongsTo(District::class); }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 
     /* ===================== Fotos múltiples ===================== */
 
