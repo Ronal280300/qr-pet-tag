@@ -50,7 +50,23 @@ class ClientController extends Controller
             ->orderBy('pets.name')
             ->get();
 
-        return view('admin.clients.show', compact('user', 'pets'));
+        // Órdenes del cliente (latest first)
+        $orders = $user->orders()
+            ->with('plan')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Estadísticas básicas
+        $stats = [
+            'total_orders' => $user->orders()->count(),
+            'total_spent' => $user->orders()->where('payment_verified', true)->sum('total_amount'),
+            'pending_orders' => $user->orders()->where('payment_verified', false)->count(),
+            'total_pets' => $pets->count(),
+            'active_pets' => $pets->where('is_activated', true)->count(),
+        ];
+
+        return view('admin.clients.show', compact('user', 'pets', 'orders', 'stats'));
     }
 
     public function update(Request $request, User $user)

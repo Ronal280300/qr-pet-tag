@@ -181,10 +181,10 @@
                 <i class="fa-solid fa-circle-dot me-1"></i> Cambiar estado
             </button>
             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#bulkTagsModal">
-                <i class="fa-solid fa-tags me-1"></i> Notas / Tags
+                <i class="fa-solid fa-tags me-1"></i> Notas / Etiquetas
             </button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bulkTransferModal">
-                <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> Transferir mascotas
+            <button type="button" id="bulkExportBtn" class="btn btn-sm btn-outline-success">
+                <i class="fa-solid fa-file-export me-1"></i> Exportar CSV
             </button>
             <button type="button" id="bulkDeleteBtn" class="btn btn-sm btn-danger">
                 <i class="fa-solid fa-trash-can me-1"></i> Eliminar
@@ -335,8 +335,9 @@
 {{-- Cambiar estado --}}
 <div class="modal fade" id="bulkStatusModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
-    <form id="bulkStatusForm" method="POST" action="{{ route('portal.admin.clients.bulk.status') }}" class="modal-content">
+    <form id="bulkStatusForm" method="POST" action="{{ route('portal.admin.clients.bulk') }}" class="modal-content">
       @csrf
+      <input type="hidden" name="action" value="">
       <div class="modal-header">
         <h5 class="modal-title"><i class="fa-solid fa-circle-dot me-2"></i>Cambiar estado</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -367,23 +368,27 @@
     <form id="bulkTagsForm" method="POST" action="{{ route('portal.admin.clients.bulk.tags') }}" class="modal-content">
       @csrf
       <div class="modal-header">
-        <h5 class="modal-title"><i class="fa-solid fa-tags me-2"></i>Notas / Tags</h5>
+        <h5 class="modal-title"><i class="fa-solid fa-tags me-2"></i>Notas / Etiquetas</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <p class="text-muted">Añade o quita una etiqueta a los clientes seleccionados.</p>
-        <div class="row g-3">
-          <div class="col-md-8">
-            <label class="form-label">Etiqueta</label>
-            <input type="text" name="tag" class="form-control" placeholder="p.ej., vip, moroso, mayorista" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Acción</label>
-            <select name="mode" class="form-select">
-              <option value="add">Añadir</option>
-              <option value="remove">Quitar</option>
-            </select>
-          </div>
+        <p class="text-muted small">Aplica notas o etiquetas a los clientes seleccionados.</p>
+        <div class="mb-3">
+          <label class="form-label">Nota (opcional)</label>
+          <textarea name="note" class="form-control" rows="2" placeholder="Añadir una nota a los clientes seleccionados..."></textarea>
+          <small class="text-muted">Se agregará con fecha y hora automáticamente</small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Etiquetas (opcional)</label>
+          <input type="text" name="tags" class="form-control" placeholder="vip, moroso, mayorista (separadas por comas)">
+          <small class="text-muted">Escribe varias etiquetas separadas por comas</small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Modo de etiquetas</label>
+          <select name="mode" class="form-select">
+            <option value="append">Añadir a las existentes</option>
+            <option value="replace">Reemplazar todas</option>
+          </select>
         </div>
         <div id="bulkTagsIds"></div>
       </div>
@@ -395,34 +400,10 @@
   </div>
 </div>
 
-{{-- Transferir mascotas --}}
-<div class="modal fade" id="bulkTransferModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="bulkTransferForm" method="POST" action="{{ route('portal.admin.clients.bulk.transfer') }}" class="modal-content">
-      @csrf
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="fa-solid fa-arrow-right-arrow-left me-2"></i>Transferir mascotas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <p class="text-muted">Mover todas las mascotas de los clientes seleccionados a otro cliente.</p>
-        <div class="mb-3">
-          <label class="form-label">Destino (ID o Email del cliente)</label>
-          <input type="text" name="to" class="form-control" placeholder="ID o correo del cliente destino" required>
-        </div>
-        <div id="bulkTransferIds"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Transferir</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 {{-- Form eliminación masiva (invisible) --}}
-<form id="bulkDeleteForm" method="POST" action="{{ route('portal.admin.clients.bulk.delete') }}" class="d-none">
+<form id="bulkDeleteForm" method="POST" action="{{ route('portal.admin.clients.bulk') }}" class="d-none">
   @csrf
+  <input type="hidden" name="action" value="delete">
   <div id="bulkDeleteIds"></div>
 </form>
 
@@ -1821,7 +1802,6 @@
   const forms = {
     status:   { form: document.getElementById('bulkStatusForm'),   ids: document.getElementById('bulkStatusIds')   },
     tags:     { form: document.getElementById('bulkTagsForm'),     ids: document.getElementById('bulkTagsIds')     },
-    transfer: { form: document.getElementById('bulkTransferForm'), ids: document.getElementById('bulkTransferIds') },
     delete:   { form: document.getElementById('bulkDeleteForm'),   ids: document.getElementById('bulkDeleteIds')   },
   };
 
@@ -1858,16 +1838,64 @@
   // Modales: cargar IDs seleccionados
   const statusModal   = document.getElementById('bulkStatusModal');
   const tagsModal     = document.getElementById('bulkTagsModal');
-  const transferModal = document.getElementById('bulkTransferModal');
 
   statusModal?.addEventListener('show.bs.modal', () => {
     fillHidden(forms.status.ids, selectedIds());
   });
+
   tagsModal?.addEventListener('show.bs.modal', () => {
     fillHidden(forms.tags.ids, selectedIds());
   });
-  transferModal?.addEventListener('show.bs.modal', () => {
-    fillHidden(forms.transfer.ids, selectedIds());
+
+  // Submit de estado: configurar action
+  forms.status.form?.addEventListener('submit', (e) => {
+    const statusValue = forms.status.form.querySelector('select[name="status"]').value;
+    const actionMap = {
+      'active': 'status_active',
+      'pending': 'status_pending',
+      'inactive': 'status_inactive'
+    };
+    forms.status.form.querySelector('input[name="action"]').value = actionMap[statusValue] || 'status_active';
+  });
+
+  // Exportar CSV con seleccionados
+  const bulkExportBtn = document.getElementById('bulkExportBtn');
+  bulkExportBtn?.addEventListener('click', () => {
+    const ids = selectedIds();
+    if(ids.length === 0) return;
+
+    // Crear formulario temporal para exportar
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("portal.admin.clients.bulk") }}';
+    form.style.display = 'none';
+
+    // Token CSRF
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = '_token';
+    csrfInput.value = '{{ csrf_token() }}';
+    form.appendChild(csrfInput);
+
+    // Action
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = 'export';
+    form.appendChild(actionInput);
+
+    // IDs
+    ids.forEach(id => {
+      const idInput = document.createElement('input');
+      idInput.type = 'hidden';
+      idInput.name = 'ids[]';
+      idInput.value = id;
+      form.appendChild(idInput);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   });
 
   // Eliminar

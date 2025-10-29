@@ -339,6 +339,163 @@
         </div>
         {{-- ========= /Columna derecha ========= --}}
     </div>
+
+    {{-- ========= Estadísticas y Órdenes ========= --}}
+    <div class="row g-4 mt-2">
+        {{-- Estadísticas --}}
+        <div class="col-12">
+            <div class="card shadow-card card-modern">
+                <div class="card-header-modern">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="header-icon">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Estadísticas del cliente</h5>
+                            <small class="text-muted">Resumen de actividad</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-box">
+                                <div class="stat-icon-sm bg-primary-subtle">
+                                    <i class="fa-solid fa-shopping-cart text-primary"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-value-sm">{{ $stats['total_orders'] }}</div>
+                                    <div class="stat-label-sm">Órdenes totales</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-box">
+                                <div class="stat-icon-sm bg-success-subtle">
+                                    <i class="fa-solid fa-dollar-sign text-success"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-value-sm">₡{{ number_format($stats['total_spent'], 0, ',', '.') }}</div>
+                                    <div class="stat-label-sm">Total gastado</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-box">
+                                <div class="stat-icon-sm bg-warning-subtle">
+                                    <i class="fa-solid fa-clock text-warning"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-value-sm">{{ $stats['pending_orders'] }}</div>
+                                    <div class="stat-label-sm">Órdenes pendientes</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-box">
+                                <div class="stat-icon-sm bg-info-subtle">
+                                    <i class="fa-solid fa-paw text-info"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-value-sm">{{ $stats['active_pets'] }}/{{ $stats['total_pets'] }}</div>
+                                    <div class="stat-label-sm">Mascotas activas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Órdenes --}}
+        <div class="col-12">
+            <div class="card shadow-card card-modern">
+                <div class="card-header-modern">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="header-icon">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Historial de órdenes</h5>
+                                <small class="text-muted">Últimas 10 órdenes</small>
+                            </div>
+                        </div>
+                        @if($orders->count() > 0)
+                        <a href="{{ route('portal.admin.orders.index', ['user_id' => $user->id]) }}" class="btn btn-sm btn-outline-primary">
+                            Ver todas <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                        @endif
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if($orders->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-modern mb-0">
+                            <thead>
+                                <tr>
+                                    <th><div class="th-content"><i class="fa-solid fa-hashtag me-2"></i>Orden</div></th>
+                                    <th><div class="th-content"><i class="fa-solid fa-box me-2"></i>Plan</div></th>
+                                    <th><div class="th-content"><i class="fa-solid fa-dollar-sign me-2"></i>Monto</div></th>
+                                    <th><div class="th-content"><i class="fa-solid fa-circle-check me-2"></i>Estado</div></th>
+                                    <th><div class="th-content"><i class="fa-regular fa-calendar me-2"></i>Fecha</div></th>
+                                    <th class="text-end"><div class="th-content justify-content-end">Acciones</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($orders as $order)
+                                <tr>
+                                    <td><span class="fw-semibold">#{{ $order->order_number }}</span></td>
+                                    <td>
+                                        @if($order->plan)
+                                        <span class="badge bg-primary-subtle text-primary border border-primary">
+                                            {{ $order->plan->name }}
+                                        </span>
+                                        @else
+                                        <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
+                                    <td><span class="fw-semibold">₡{{ number_format($order->total_amount, 0, ',', '.') }}</span></td>
+                                    <td>
+                                        @if($order->payment_verified)
+                                        <span class="status-badge status-active">
+                                            <i class="fa-solid fa-circle-check me-1"></i>Verificado
+                                        </span>
+                                        @else
+                                        <span class="status-badge status-inactive">
+                                            <i class="fa-solid fa-clock me-1"></i>Pendiente
+                                        </span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="date-badge">
+                                            <i class="fa-regular fa-calendar me-1"></i>
+                                            {{ $order->created_at->format('d/m/Y H:i') }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ route('portal.admin.orders.show', $order) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa-regular fa-eye me-1"></i>Ver
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <div class="empty-state">
+                        <div class="empty-content">
+                            <i class="fa-solid fa-inbox fa-3x mb-3 text-muted"></i>
+                            <p class="mb-0 text-muted">No hay órdenes registradas</p>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- ========= /Estadísticas y Órdenes ========= --}}
 </div>
 
 {{-- Formulario oculto para eliminar cliente --}}
@@ -1161,6 +1318,54 @@
             padding: 10px 14px;
             font-size: 0.9rem;
         }
+    }
+
+    /* ===== ESTADÍSTICAS ===== */
+    .stat-box {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: white;
+        border: 2px solid #f0f0f0;
+        border-radius: var(--border-radius-sm);
+        transition: var(--transition);
+    }
+
+    .stat-box:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1);
+    }
+
+    .stat-icon-sm {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .stat-details {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .stat-value-sm {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--dark);
+    }
+
+    .stat-label-sm {
+        font-size: 0.8rem;
+        color: var(--secondary);
+        font-weight: 500;
+        margin-top: 0.25rem;
     }
 </style>
 
