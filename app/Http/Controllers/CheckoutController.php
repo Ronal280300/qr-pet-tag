@@ -183,7 +183,69 @@ class CheckoutController extends Controller
             abort(403, 'No autorizado');
         }
 
+        // Cargar mascotas asociadas a esta orden
+        $order->load('pets');
+
         return view('public.checkout-confirmation', compact('order'));
+    }
+
+    /**
+     * Crear mascota desde el checkout (pendiente de activación)
+     */
+    public function storePetFromCheckout(Request $request, Order $order)
+    {
+        // Verificar que el pedido pertenezca al usuario autenticado
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'No autorizado');
+        }
+
+        // Verificar que la orden esté en estado correcto
+        if (!in_array($order->status, ['payment_uploaded', 'pending'])) {
+            return back()->with('error', 'No puedes agregar mascotas a esta orden en su estado actual.');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'species' => 'required|in:dog,cat,other',
+            'breed' => 'nullable|string|max:255',
+            'age' => 'nullable|integer|min:0',
+            'sex' => 'nullable|in:male,female,unknown',
+            'size' => 'nullable|in:small,medium,large',
+            'color' => 'nullable|string|max:255',
+            'is_neutered' => 'nullable|boolean',
+            'rabies_vaccine' => 'nullable|boolean',
+            'medical_conditions' => 'nullable|string',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Crear mascota sin enlazar (user_id = null), marcada como pendiente
+            $pet = \App\Models\Pet::create([
+                'user_id' => null, // No se enlaza hasta que admin verifique
+                'order_id' => $order->id,
+                'pending_activation' => true,
+                'name' => $request->name,
+                'species' => $request->species,
+                'breed' => $request->breed,
+                'age' => $request->age,
+                'sex' => $request->sex,
+                'size' => $request->size,
+                'color' => $request->color,
+                'is_neutered' => $request->boolean('is_neutered'),
+                'rabies_vaccine' => $request->boolean('rabies_vaccine'),
+                'medical_conditions' => $request->medical_conditions,
+                'is_lost' => false,
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', "Mascota '{$pet->name}' registrada exitosamente. Será enlazada a tu cuenta cuando tu pago sea verificado.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error al registrar mascota: ' . $e->getMessage());
+        }
     }
 
     /**

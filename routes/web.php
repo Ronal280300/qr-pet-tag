@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/payment', [CheckoutController::class, 'payment'])->name('checkout.payment');
     Route::post('/checkout/payment', [CheckoutController::class, 'uploadPayment'])->name('checkout.upload');
     Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
+    Route::post('/checkout/confirmation/{order}/pet', [CheckoutController::class, 'storePetFromCheckout'])->name('checkout.store-pet');
 
     // Rutas con parámetros dinámicos al final
     Route::get('/checkout/{plan}', [CheckoutController::class, 'show'])->name('checkout.show');

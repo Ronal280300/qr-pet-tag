@@ -101,6 +101,14 @@ class Order extends Model
     }
 
     /**
+     * Relación con mascotas creadas desde el checkout
+     */
+    public function pets()
+    {
+        return $this->hasMany(Pet::class, 'order_id');
+    }
+
+    /**
      * Scopes
      */
     public function scopePending($query)

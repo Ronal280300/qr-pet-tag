@@ -116,6 +116,80 @@
                 </div>
             </div>
             @endif
+
+            <!-- Mascotas Pendientes de Activación -->
+            @php
+                $pendingPets = $order->pets()->where('pending_activation', true)->get();
+            @endphp
+
+            @if($pendingPets->count() > 0)
+            <div class="card mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-paw me-2"></i>
+                        Mascotas Registradas desde Checkout (Pendientes)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        El cliente registró {{ $pendingPets->count() }} mascota(s) durante el checkout.
+                        Se enlazarán automáticamente a su cuenta cuando verifiques este pago.
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Especie</th>
+                                    <th>Raza</th>
+                                    <th>Edad</th>
+                                    <th>Sexo</th>
+                                    <th>Tamaño</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($pendingPets as $pet)
+                                <tr>
+                                    <td><strong>{{ $pet->name }}</strong></td>
+                                    <td>
+                                        @if($pet->species === 'dog')
+                                            <i class="fa-solid fa-dog me-1"></i>Perro
+                                        @elseif($pet->species === 'cat')
+                                            <i class="fa-solid fa-cat me-1"></i>Gato
+                                        @else
+                                            Otro
+                                        @endif
+                                    </td>
+                                    <td>{{ $pet->breed ?? '-' }}</td>
+                                    <td>{{ $pet->age ? $pet->age . ' años' : '-' }}</td>
+                                    <td>
+                                        @if($pet->sex === 'male') Macho
+                                        @elseif($pet->sex === 'female') Hembra
+                                        @else - @endif
+                                    </td>
+                                    <td>
+                                        @if($pet->size === 'small') Pequeño
+                                        @elseif($pet->size === 'medium') Mediano
+                                        @elseif($pet->size === 'large') Grande
+                                        @else - @endif
+                                    </td>
+                                </tr>
+                                @if($pet->medical_conditions)
+                                <tr>
+                                    <td colspan="6" class="bg-light">
+                                        <small><strong>Condiciones médicas:</strong> {{ $pet->medical_conditions }}</small>
+                                    </td>
+                                </tr>
+                                @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Columna derecha: Acciones -->

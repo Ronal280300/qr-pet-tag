@@ -94,6 +94,32 @@
                         para agilizar el proceso de personalización de las placas.
                     </p>
 
+                    @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fa-solid fa-circle-check me-2"></i>{{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    @endif
+
+                    @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>{{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    @endif
+
+                    <!-- Mostrar mascotas ya registradas para esta orden -->
+                    @if($order->pets && $order->pets->count() > 0)
+                    <div class="alert alert-info mb-4">
+                        <strong><i class="fa-solid fa-check-circle me-2"></i>Mascotas registradas:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach($order->pets as $pet)
+                            <li>{{ $pet->name }} ({{ $pet->species }})</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="option-card h-100">
@@ -102,11 +128,11 @@
                                 </div>
                                 <h6 class="fw-bold mb-2">Registrar ahora</h6>
                                 <p class="text-muted small mb-3">
-                                    Llena el formulario con los datos de tus mascotas desde tu panel
+                                    Llena el formulario con los datos de tu mascota
                                 </p>
-                                <a href="{{ route('portal.pets.create') }}" class="btn btn-primary w-100">
+                                <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#registerPetModal">
                                     <i class="fa-solid fa-plus me-2"></i> Registrar mascota
-                                </a>
+                                </button>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -193,6 +219,113 @@
                     Volver al inicio
                 </a>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para registrar mascota -->
+<div class="modal fade" id="registerPetModal" tabindex="-1" aria-labelledby="registerPetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="registerPetModalLabel">
+                    <i class="fa-solid fa-paw me-2"></i>Registrar Mascota
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('checkout.store-pet', $order) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        Los datos de tu mascota serán guardados y se enlazarán a tu cuenta una vez que verifiquemos tu pago.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre de la mascota <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" required placeholder="ej: Max">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Especie <span class="text-danger">*</span></label>
+                            <select name="species" class="form-select" required>
+                                <option value="">Seleccione...</option>
+                                <option value="dog">Perro</option>
+                                <option value="cat">Gato</option>
+                                <option value="other">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Raza</label>
+                            <input type="text" name="breed" class="form-control" placeholder="ej: Labrador">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Edad (años)</label>
+                            <input type="number" name="age" class="form-control" min="0" placeholder="ej: 3">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Sexo</label>
+                            <select name="sex" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <option value="male">Macho</option>
+                                <option value="female">Hembra</option>
+                                <option value="unknown">Desconocido</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Tamaño</label>
+                            <select name="size" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <option value="small">Pequeño</option>
+                                <option value="medium">Mediano</option>
+                                <option value="large">Grande</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Color</label>
+                            <input type="text" name="color" class="form-control" placeholder="ej: Café">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_neutered" value="1" id="isNeutered">
+                                <label class="form-check-label" for="isNeutered">
+                                    ¿Está esterilizado/castrado?
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="rabies_vaccine" value="1" id="rabiesVaccine">
+                                <label class="form-check-label" for="rabiesVaccine">
+                                    ¿Tiene vacuna antirrábica?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Condiciones médicas o alergias</label>
+                        <textarea name="medical_conditions" class="form-control" rows="3" placeholder="Describe cualquier condición médica, alergia o tratamiento especial"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-save me-2"></i>Guardar Mascota
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
