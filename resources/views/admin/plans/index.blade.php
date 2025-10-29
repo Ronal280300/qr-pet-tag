@@ -57,18 +57,23 @@
     </div>
 
     <!-- Tabs de Planes -->
-    <ul class="nav nav-tabs mb-4" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="one-time-tab" data-bs-toggle="tab" data-bs-target="#one-time" type="button">
-                <i class="fa-solid fa-tag me-2"></i>Pago Único
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="subscription-tab" data-bs-toggle="tab" data-bs-target="#subscription" type="button">
-                <i class="fa-solid fa-repeat me-2"></i>Suscripciones
-            </button>
-        </li>
-    </ul>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <ul class="nav nav-tabs mb-0" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="one-time-tab" data-bs-toggle="tab" data-bs-target="#one-time" type="button">
+                    <i class="fa-solid fa-tag me-2"></i>Pago Único
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="subscription-tab" data-bs-toggle="tab" data-bs-target="#subscription" type="button">
+                    <i class="fa-solid fa-repeat me-2"></i>Suscripciones
+                </button>
+            </li>
+        </ul>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPlanModal">
+            <i class="fa-solid fa-plus me-2"></i>Crear Nuevo Plan
+        </button>
+    </div>
 
     <div class="tab-content">
         <!-- Pago Único -->
@@ -94,6 +99,13 @@
                             <form action="{{ route('portal.admin.plans.update', $plan) }}" method="POST">
                                 @csrf
                                 @method('PUT')
+                                <input type="hidden" name="is_active" value="{{ $plan->is_active ? 1 : 0 }}">
+
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre del Plan</label>
+                                    <input type="text" name="name" class="form-control"
+                                           value="{{ $plan->name }}" required>
+                                </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Mascotas Incluidas</label>
@@ -118,9 +130,18 @@
                                     <textarea name="description" class="form-control" rows="2">{{ $plan->description }}</textarea>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fa-solid fa-save me-2"></i>Guardar Cambios
-                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                        <i class="fa-solid fa-save me-2"></i>Guardar Cambios
+                                    </button>
+                                    <button type="button" class="btn btn-danger" onclick="confirmDelete({{ $plan->id }}, '{{ $plan->name }}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            <form id="delete-form-{{ $plan->id }}" action="{{ route('portal.admin.plans.destroy', $plan) }}" method="POST" style="display: none;">
+                                @csrf
+                                @method('DELETE')
                             </form>
                         </div>
                         <div class="card-footer text-muted small">
@@ -156,6 +177,13 @@
                             <form action="{{ route('portal.admin.plans.update', $plan) }}" method="POST">
                                 @csrf
                                 @method('PUT')
+                                <input type="hidden" name="is_active" value="{{ $plan->is_active ? 1 : 0 }}">
+
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre del Plan</label>
+                                    <input type="text" name="name" class="form-control"
+                                           value="{{ $plan->name }}" required>
+                                </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Duración (Meses)</label>
@@ -186,9 +214,18 @@
                                     <textarea name="description" class="form-control" rows="2">{{ $plan->description }}</textarea>
                                 </div>
 
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="fa-solid fa-save me-2"></i>Guardar Cambios
-                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success flex-grow-1">
+                                        <i class="fa-solid fa-save me-2"></i>Guardar Cambios
+                                    </button>
+                                    <button type="button" class="btn btn-danger" onclick="confirmDelete({{ $plan->id }}, '{{ $plan->name }}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            <form id="delete-form-{{ $plan->id }}" action="{{ route('portal.admin.plans.destroy', $plan) }}" method="POST" style="display: none;">
+                                @csrf
+                                @method('DELETE')
                             </form>
                         </div>
                         <div class="card-footer text-muted small">
@@ -249,6 +286,102 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para Crear Nuevo Plan -->
+<div class="modal fade" id="createPlanModal" tabindex="-1" aria-labelledby="createPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="createPlanModalLabel">
+                    <i class="fa-solid fa-plus-circle me-2"></i>Crear Nuevo Plan
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('portal.admin.plans.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre del Plan <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" placeholder="ej: Plan Básico" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tipo de Plan <span class="text-danger">*</span></label>
+                            <select name="type" class="form-select" id="planType" required>
+                                <option value="">Seleccione...</option>
+                                <option value="one_time">Pago Único</option>
+                                <option value="subscription">Suscripción</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row" id="subscriptionFields" style="display: none;">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Duración (Meses)</label>
+                            <input type="number" name="duration_months" class="form-control" placeholder="ej: 12" min="1">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Mascotas Incluidas <span class="text-danger">*</span></label>
+                            <input type="number" name="pets_included" class="form-control" value="1" min="1" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Precio Base (₡) <span class="text-danger">*</span></label>
+                            <input type="number" name="price" class="form-control" placeholder="5000" min="0" step="100" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Precio Mascota Extra (₡) <span class="text-danger">*</span></label>
+                            <input type="number" name="additional_pet_price" class="form-control" placeholder="2000" min="0" step="100" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Describe las características del plan..."></textarea>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_active" value="1" id="isActive" checked>
+                        <label class="form-check-label" for="isActive">
+                            Activar plan inmediatamente
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa-solid fa-save me-2"></i>Crear Plan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Mostrar/ocultar campo de duración según tipo de plan
+document.getElementById('planType')?.addEventListener('change', function() {
+    const subscriptionFields = document.getElementById('subscriptionFields');
+    if (this.value === 'subscription') {
+        subscriptionFields.style.display = 'block';
+        subscriptionFields.querySelector('input').required = true;
+    } else {
+        subscriptionFields.style.display = 'none';
+        subscriptionFields.querySelector('input').required = false;
+    }
+});
+
+// Confirmación antes de eliminar
+function confirmDelete(planId, planName) {
+    if (confirm(`¿Estás seguro de que deseas eliminar el plan "${planName}"?\n\nEsta acción no se puede deshacer. Si el plan tiene órdenes o usuarios activos, no se podrá eliminar.`)) {
+        document.getElementById('delete-form-' + planId).submit();
+    }
+}
+</script>
 
 <style>
 .card {
