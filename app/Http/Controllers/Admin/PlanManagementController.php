@@ -49,6 +49,7 @@ class PlanManagementController extends Controller
             'price' => 'required|numeric|min:0',
             'additional_pet_price' => 'required|numeric|min:0',
             'is_active' => 'required|boolean',
+            'allows_additional_pets' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
 
@@ -58,6 +59,7 @@ class PlanManagementController extends Controller
             'price',
             'additional_pet_price',
             'is_active',
+            'allows_additional_pets',
             'description',
         ]));
 
@@ -70,16 +72,27 @@ class PlanManagementController extends Controller
     public function updateSettings(Request $request)
     {
         $request->validate([
-            'whatsapp_number' => 'required|string|max:20',
-            'whatsapp_message' => 'required|string|max:500',
-            'email_monthly_limit' => 'required|integer|min:1',
-            'admin_email' => 'required|email',
+            'support_whatsapp' => 'nullable|string|max:20',
+            'support_email' => 'nullable|email|max:255',
+            'email_monthly_limit' => 'nullable|integer|min:1',
+            'grace_days_before_block' => 'nullable|integer|min:0',
         ]);
 
-        Setting::set('whatsapp_number', $request->whatsapp_number, 'string', 'contact');
-        Setting::set('whatsapp_message', $request->whatsapp_message, 'string', 'contact');
-        Setting::set('email_monthly_limit', $request->email_monthly_limit, 'integer', 'email');
-        Setting::set('admin_email', $request->admin_email, 'string', 'general');
+        if ($request->filled('support_whatsapp')) {
+            Setting::set('support_whatsapp', $request->support_whatsapp, 'string', 'contact');
+        }
+
+        if ($request->filled('support_email')) {
+            Setting::set('support_email', $request->support_email, 'string', 'contact');
+        }
+
+        if ($request->filled('email_monthly_limit')) {
+            Setting::set('email_monthly_limit', $request->email_monthly_limit, 'integer', 'email');
+        }
+
+        if ($request->filled('grace_days_before_block')) {
+            Setting::set('grace_days_before_block', $request->grace_days_before_block, 'integer', 'system');
+        }
 
         return back()->with('success', 'Configuración actualizada exitosamente');
     }
@@ -110,6 +123,7 @@ class PlanManagementController extends Controller
             'price' => 'required|numeric|min:0',
             'additional_pet_price' => 'required|numeric|min:0',
             'duration_months' => 'nullable|integer|min:1',
+            'allows_additional_pets' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
 
@@ -123,7 +137,8 @@ class PlanManagementController extends Controller
             'description',
         ]);
 
-        $data['is_active'] = $request->boolean('is_active', true);
+        $data['is_active'] = $request->boolean('is_active', false);
+        $data['allows_additional_pets'] = $request->boolean('allows_additional_pets', true);
 
         // Obtener el último sort_order para este tipo
         $maxSortOrder = Plan::where('type', $data['type'])->max('sort_order') ?? 0;

@@ -17,6 +17,7 @@ class Plan extends Model
         'price',
         'additional_pet_price',
         'is_active',
+        'allows_additional_pets',
         'description',
         'sort_order',
     ];
@@ -29,6 +30,7 @@ class Plan extends Model
             'price' => 'decimal:2',
             'additional_pet_price' => 'decimal:2',
             'is_active' => 'boolean',
+            'allows_additional_pets' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
