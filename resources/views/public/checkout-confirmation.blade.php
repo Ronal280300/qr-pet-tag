@@ -628,6 +628,20 @@
     gap: 10px;
     flex-wrap: wrap;
 }
+
+/* Fix modal scroll */
+#registerPetModal .modal-dialog.modal-dialog-scrollable .modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+#registerPetModal .modal-dialog.modal-dialog-scrollable {
+    max-height: calc(100vh - 3.5rem);
+}
+
+#registerPetModal .modal-content {
+    height: 100%;
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -873,7 +887,10 @@
 
 // ===== Auto-abrir modal si hay mascotas pendientes y se acaba de registrar una
 (() => {
-    @if(session('success') && !$allPetsRegistered)
+    @php
+        $justRegisteredPet = session('success') && str_contains(session('success'), 'registrada exitosamente');
+    @endphp
+    @if($justRegisteredPet && !$allPetsRegistered)
         // Pequeño delay para que el usuario vea el mensaje de éxito primero
         setTimeout(() => {
             const modal = new bootstrap.Modal(document.getElementById('registerPetModal'));
