@@ -228,8 +228,10 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
 
             // Gestión de configuración de planes
             Route::get('plan-settings', [PlanManagementController::class, 'index'])->name('plan-settings.index');
+            Route::post('plans', [PlanManagementController::class, 'store'])->name('plans.store');
             Route::put('plans/{plan}', [PlanManagementController::class, 'update'])->name('plans.update');
             Route::post('plans/{plan}/toggle', [PlanManagementController::class, 'toggleActive'])->name('plans.toggle');
+            Route::delete('plans/{plan}', [PlanManagementController::class, 'destroy'])->name('plans.destroy');
             Route::post('settings', [PlanManagementController::class, 'updateSettings'])->name('settings.update');
 
             // Gestión de pedidos

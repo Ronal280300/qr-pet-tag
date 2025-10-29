@@ -97,4 +97,67 @@ class PlanManagementController extends Controller
 
         return back()->with('success', "Plan {$status} exitosamente");
     }
+
+    /**
+     * Crear un nuevo plan
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:one_time,subscription',
+            'pets_included' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'additional_pet_price' => 'required|numeric|min:0',
+            'duration_months' => 'nullable|integer|min:1',
+            'description' => 'nullable|string',
+        ]);
+
+        $data = $request->only([
+            'name',
+            'type',
+            'pets_included',
+            'price',
+            'additional_pet_price',
+            'duration_months',
+            'description',
+        ]);
+
+        $data['is_active'] = $request->boolean('is_active', true);
+
+        // Obtener el último sort_order para este tipo
+        $maxSortOrder = Plan::where('type', $data['type'])->max('sort_order') ?? 0;
+        $data['sort_order'] = $maxSortOrder + 1;
+
+        Plan::create($data);
+
+        return back()->with('success', 'Plan creado exitosamente');
+    }
+
+    /**
+     * Eliminar un plan
+     */
+    public function destroy(Plan $plan)
+    {
+        // Verificar si el plan tiene órdenes asociadas
+        $ordersCount = $plan->orders()->count();
+
+        if ($ordersCount > 0) {
+            return back()->with('error', "No se puede eliminar el plan porque tiene {$ordersCount} órdenes asociadas. Puedes desactivarlo en su lugar.");
+        }
+
+        // Verificar si hay usuarios actualmente usando este plan
+        $activeUsersCount = \App\Models\User::where('current_plan_id', $plan->id)
+            ->where('plan_is_active', true)
+            ->count();
+
+        if ($activeUsersCount > 0) {
+            return back()->with('error', "No se puede eliminar el plan porque {$activeUsersCount} usuarios lo están usando actualmente. Puedes desactivarlo en su lugar.");
+        }
+
+        $planName = $plan->name;
+        $plan->delete();
+
+        return back()->with('success', "Plan '{$planName}' eliminado exitosamente");
+    }
 }

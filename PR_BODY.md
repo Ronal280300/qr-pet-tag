@@ -27,12 +27,15 @@ Implementación completa del sistema de planes y pagos con gestión automática 
 - ✅ Botones de descarga para comprobantes (PDF e imágenes)
 - ✅ Preview mejorado de archivos
 
-**Vista de Configuración de Planes (`admin/plans`):**
-- ✅ Tabs para Pago Único y Suscripciones
+**Vista de Configuración de Planes (`admin/plans`):** ⭐ **NUEVO - CRUD COMPLETO**
+- ✅ **Crear nuevos planes** con modal interactivo
+- ✅ **Editar planes existentes** (nombre, precios, mascotas, descripción)
+- ✅ **Eliminar planes** con validaciones de seguridad
 - ✅ Toggle on/off para activar/desactivar planes
-- ✅ Edición de precios, mascotas incluidas y características
+- ✅ Tabs para Pago Único y Suscripciones
 - ✅ Estadísticas de emails enviados
 - ✅ Configuración general del sistema
+- ✅ Validaciones para evitar eliminar planes con órdenes o usuarios activos
 
 ### 3️⃣ Gestión de Clientes con Planes Activos
 
@@ -133,10 +136,12 @@ $schedule->command('accounts:block-expired')->dailyAt('01:00');
 ## 🎯 Rutas Nuevas
 
 ```php
-// Gestión de Planes
+// Gestión de Planes ⭐ ACTUALIZADO
 Route::get('plan-settings', [PlanManagementController::class, 'index']);
+Route::post('plans', [PlanManagementController::class, 'store']); // NUEVO - Crear planes
 Route::put('plans/{plan}', [PlanManagementController::class, 'update']);
 Route::post('plans/{plan}/toggle', [PlanManagementController::class, 'toggleActive']);
+Route::delete('plans/{plan}', [PlanManagementController::class, 'destroy']); // NUEVO - Eliminar planes
 
 // Gestión de Órdenes
 Route::get('orders', [OrderManagementController::class, 'index']);
@@ -197,6 +202,9 @@ Route::post('clients/{user}/send-reminder', [ClientController::class, 'sendPayme
 3. `cc4314c` - Arreglar vistas faltantes y mejorar diseño responsive
 4. `d202406` - Implementar sistema completo de planes y pagos
 5. `d4cc326` - Agregar vista de configuración de planes para admin
+6. `753c208` - Add PR body documentation
+7. `bf9570f` - Make artisan executable
+8. `97b742b` - Agregar CRUD completo de planes: crear, editar y eliminar ⭐ **NUEVO**
 
 ---
 
