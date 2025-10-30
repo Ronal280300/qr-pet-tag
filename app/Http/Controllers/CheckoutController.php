@@ -282,7 +282,7 @@ class CheckoutController extends Controller
     protected function sendAdminNotificationEmail(Order $order)
     {
         try {
-            $adminEmail = config('mail.from.address');
+            $adminEmail = setting('admin_email') ?: setting('contact_email') ?: config('mail.from.address');
 
             Mail::send('emails.admin.new-payment', ['order' => $order], function ($message) use ($adminEmail, $order) {
                 $message->to($adminEmail)

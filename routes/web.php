@@ -250,6 +250,11 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::get('notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
             Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
             Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+            // 👉 Configuración del Sistema
+            Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
+            Route::put('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+            Route::post('settings/clear-cache', [\App\Http\Controllers\Admin\SettingsController::class, 'clearCache'])->name('settings.clear-cache');
+            Route::post('settings/reset', [\App\Http\Controllers\Admin\SettingsController::class, 'reset'])->name('settings.reset');
             // 👉 Acciones masivas
             Route::post('clients/bulk', [ClientController::class, 'bulk'])->name('clients.bulk');
 

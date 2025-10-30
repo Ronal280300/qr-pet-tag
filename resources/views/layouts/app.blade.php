@@ -182,6 +182,8 @@
                     <li><a class="dropdown-item" href="{{ route('portal.admin.tags.index') }}"><i class="fa-solid fa-tags"></i> Inventario de TAGs</a></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.activate-tag') }}"><i class="fa-solid fa-bolt"></i> Activar TAG</a></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.tags.export') }}"><i class="fa-solid fa-file-csv"></i> Exportar TAGs (CSV)</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ route('portal.admin.settings.index') }}"><i class="fa-solid fa-cog"></i> Configuración</a></li>
                   </ul>
                 </li>
               @endif

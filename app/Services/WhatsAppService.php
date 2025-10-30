@@ -15,9 +15,10 @@ class WhatsAppService
 
     public function __construct()
     {
-        $sid = config('services.twilio.sid');
-        $token = config('services.twilio.token');
-        $this->from = config('services.twilio.whatsapp_from');
+        // Primero intentar obtener de settings, luego fallback a config
+        $sid = setting('twilio_sid') ?: config('services.twilio.sid');
+        $token = setting('twilio_token') ?: config('services.twilio.token');
+        $this->from = setting('twilio_whatsapp_from') ?: config('services.twilio.whatsapp_from');
 
         if ($sid && $token) {
             $this->client = new Client($sid, $token);
@@ -29,6 +30,12 @@ class WhatsAppService
      */
     public function send(string $to, string $message, string $type = 'general', ?int $orderId = null, ?int $userId = null): bool
     {
+        // Verificar si WhatsApp está habilitado en configuración
+        if (!setting('twilio_enabled', true) || !setting('notifications_whatsapp_enabled', true)) {
+            Log::info('WhatsApp notifications disabled in settings');
+            return false;
+        }
+
         if (!$this->client) {
             Log::warning('WhatsApp service not configured');
             return false;
@@ -127,7 +134,7 @@ class WhatsAppService
      */
     public function sendPaymentUploadedToAdmin(Order $order): bool
     {
-        $adminPhone = config('services.twilio.admin_phone');
+        $adminPhone = setting('twilio_admin_phone') ?: config('services.twilio.admin_phone');
         if (!$adminPhone) {
             return false;
         }
