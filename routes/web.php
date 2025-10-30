@@ -250,7 +250,6 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::get('notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
             Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
             Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
-=======
             // 👉 Acciones masivas
             Route::post('clients/bulk', [ClientController::class, 'bulk'])->name('clients.bulk');
 
