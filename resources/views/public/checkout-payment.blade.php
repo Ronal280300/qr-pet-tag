@@ -9,33 +9,38 @@
         margin: 0 auto;
     }
 
+    /* Progress Steps Modernizado */
     .progress-steps {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 40px;
+        margin-bottom: 50px;
         position: relative;
+        padding: 0 20px;
     }
 
     .progress-steps::before {
         content: '';
         position: absolute;
-        top: 20px;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: #e5e7eb;
+        top: 22px;
+        left: 20px;
+        right: 20px;
+        height: 3px;
+        background: linear-gradient(to right, #e5e7eb, #f3f4f6);
         z-index: 0;
+        border-radius: 10px;
     }
 
     .progress-line {
         position: absolute;
-        top: 20px;
-        left: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #4e89e8, #10b981);
-        width: 66%;
+        top: 22px;
+        left: 20px;
+        height: 3px;
+        background: linear-gradient(90deg, #10b981 0%, #4e89e8 100%);
+        width: 50%;
         z-index: 1;
-        transition: width 0.5s ease;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(78, 137, 232, 0.4);
     }
 
     .step {
@@ -46,41 +51,52 @@
     }
 
     .step-circle {
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         background: white;
-        border: 4px solid #e5e7eb;
-        margin: 0 auto 10px;
+        border: 3px solid #e5e7eb;
+        margin: 0 auto 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
-        transition: all 0.3s ease;
+        font-weight: 700;
+        font-size: 1.125rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .step.completed .step-circle {
-        background: linear-gradient(135deg, #10b981, #059669);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         border-color: #10b981;
         color: white;
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
     }
 
     .step.active .step-circle {
-        background: linear-gradient(135deg, #4e89e8, #0e61c6);
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
         border-color: #4e89e8;
         color: white;
-        animation: pulse 2s infinite;
+        animation: pulse-glow 2s ease-in-out infinite;
+        transform: scale(1.1);
+        box-shadow: 0 6px 24px rgba(78, 137, 232, 0.4);
     }
 
-    @keyframes pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(78, 137, 232, 0.4); }
-        50% { box-shadow: 0 0 0 10px rgba(78, 137, 232, 0); }
+    @keyframes pulse-glow {
+        0%, 100% { 
+            box-shadow: 0 6px 24px rgba(78, 137, 232, 0.4), 0 0 0 0 rgba(78, 137, 232, 0.4);
+        }
+        50% { 
+            box-shadow: 0 6px 24px rgba(78, 137, 232, 0.4), 0 0 0 12px rgba(78, 137, 232, 0);
+        }
     }
 
     .step-label {
-        font-size: 14px;
+        font-size: 0.875rem;
         font-weight: 600;
-        color: #6b7280;
+        color: #9ca3af;
+        transition: color 0.3s ease;
     }
 
     .step.completed .step-label,
@@ -88,37 +104,159 @@
         color: #1f2937;
     }
 
+    /* Cards Modernizadas */
     .payment-card {
         background: white;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
         overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .payment-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
     }
 
     .payment-header {
-        background: linear-gradient(135deg, #4e89e8 0%, #0e61c6 100%);
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
         color: white;
-        padding: 30px;
+        padding: 36px;
         text-align: center;
+        position: relative;
+        overflow: hidden;
     }
 
+    .payment-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .payment-header h2 {
+        position: relative;
+        z-index: 1;
+        font-weight: 800;
+        font-size: 1.75rem;
+        margin: 0;
+    }
+
+    /* Alert Modernizado */
+    .modern-alert {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 2px solid #93c5fd;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        align-items: start;
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .modern-alert.warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-color: #fbbf24;
+    }
+
+    .modern-alert-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.5rem;
+    }
+
+    .modern-alert .modern-alert-icon {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .modern-alert.warning .modern-alert-icon {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .modern-alert-content {
+        flex: 1;
+        color: #1e40af;
+        line-height: 1.6;
+    }
+
+    .modern-alert.warning .modern-alert-content {
+        color: #92400e;
+    }
+
+    /* Bank Info Box Mejorado */
     .bank-info-box {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 24px;
+        border: 2px solid #e2e8f0;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 24px;
+        color: #1a202c;
+    }
+
+    .section-title i {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+        color: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
     }
 
     .bank-detail {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px dashed #dee2e6;
+        padding: 16px 20px;
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
     }
 
     .bank-detail:last-child {
-        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .bank-detail:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(78, 137, 232, 0.15);
+        border-color: #93c5fd;
+    }
+
+    .bank-detail-label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.9375rem;
     }
 
     .bank-detail-value {
@@ -127,6 +265,7 @@
         user-select: all;
         cursor: pointer;
         transition: color 0.3s ease;
+        font-size: 1rem;
     }
 
     .bank-detail-value:hover {
@@ -134,123 +273,274 @@
     }
 
     .amount-highlight {
-        font-size: 2rem;
-        color: #4e89e8;
+        font-size: 2.25rem;
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
+        letter-spacing: -0.5px;
     }
 
+    /* Upload Zone Mejorada */
     .upload-zone {
         border: 3px dashed #cbd5e1;
-        border-radius: 15px;
-        padding: 40px 20px;
+        border-radius: 20px;
+        padding: 50px 30px;
         text-align: center;
-        background: #f8fafc;
-        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .upload-zone::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(78, 137, 232, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
     }
 
     .upload-zone:hover {
         border-color: #4e89e8;
-        background: #eff6ff;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(78, 137, 232, 0.15);
+    }
+
+    .upload-zone:hover::before {
+        opacity: 1;
     }
 
     .upload-zone.active {
         border-color: #10b981;
-        background: #ecfdf5;
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border-style: solid;
     }
 
     .upload-icon {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 20px;
-        background: linear-gradient(135deg, #4e89e8, #0e61c6);
-        border-radius: 50%;
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 24px;
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 36px;
+        font-size: 2.5rem;
+        box-shadow: 0 10px 30px rgba(78, 137, 232, 0.3);
+        transition: transform 0.3s ease;
     }
 
+    .upload-zone:hover .upload-icon {
+        transform: scale(1.1) rotateZ(5deg);
+    }
+
+    .upload-zone.active .upload-icon {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    /* Preview Mejorado */
     .preview-container {
-        border-radius: 15px;
+        border-radius: 20px;
         overflow: hidden;
-        background: #f8fafc;
-        padding: 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 30px;
+        border: 2px solid #e2e8f0;
     }
 
     .preview-image {
         max-width: 100%;
-        border-radius: 10px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     }
 
+    .preview-pdf-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Order Summary Mejorado */
     .order-summary {
         background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        border-radius: 15px;
-        padding: 25px;
+        border-radius: 20px;
+        padding: 32px;
+        border: 2px solid #93c5fd;
     }
 
     .summary-row {
         display: flex;
         justify-content: space-between;
-        padding: 10px 0;
+        align-items: center;
+        padding: 16px 0;
         border-bottom: 1px solid rgba(78, 137, 232, 0.2);
+        color: #1e40af;
+        font-weight: 500;
     }
 
     .summary-row:last-child {
         border-bottom: none;
-        padding-top: 15px;
-        margin-top: 10px;
-        border-top: 2px solid #4e89e8;
+        padding-top: 24px;
+        margin-top: 16px;
+        border-top: 3px solid #60a5fa;
     }
 
     .summary-total {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #4e89e8;
+        font-size: 2.25rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
     }
 
+    /* Info Card Mejorada */
     .info-card {
         background: white;
-        border-left: 4px solid #4e89e8;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-left: 5px solid #4e89e8;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     }
 
+    .info-card ol li {
+        padding: 10px 0;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .info-card ol li strong {
+        color: #1e293b;
+    }
+
+    /* Help Buttons Mejorados */
     .help-buttons {
         display: flex;
-        gap: 15px;
+        gap: 16px;
         flex-wrap: wrap;
     }
 
     .help-btn {
         flex: 1;
-        min-width: 200px;
-        padding: 15px 25px;
-        border-radius: 12px;
-        font-weight: 600;
+        min-width: 180px;
+        padding: 18px 28px;
+        border-radius: 16px;
+        font-weight: 700;
         text-decoration: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
-        transition: all 0.3s ease;
+        gap: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 1rem;
     }
 
     .help-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
     }
 
     .btn-whatsapp {
-        background: linear-gradient(135deg, #25d366, #128c7e);
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
         color: white;
+        box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-whatsapp:hover {
+        box-shadow: 0 15px 35px rgba(37, 211, 102, 0.4);
     }
 
     .btn-email {
-        background: linear-gradient(135deg, #4e89e8, #0e61c6);
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
         color: white;
+        box-shadow: 0 8px 24px rgba(78, 137, 232, 0.3);
+    }
+
+    .btn-email:hover {
+        box-shadow: 0 15px 35px rgba(78, 137, 232, 0.4);
+    }
+
+    /* Botones Principales */
+    .btn-submit {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        padding: 20px;
+        font-weight: 700;
+        font-size: 1.125rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-cancel {
+        background: white;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 18px;
+        font-weight: 700;
+        font-size: 1.125rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-cancel:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (max-width: 768px) {
+        .progress-steps {
+            padding: 0 10px;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .help-buttons {
+            flex-direction: column;
+        }
+
+        .help-btn {
+            min-width: 100%;
+        }
     }
 </style>
 @endpush
@@ -282,44 +572,51 @@
         <div class="col-lg-7">
             <div class="payment-card">
                 <div class="payment-header">
-                    <h2 class="mb-0"><i class="fa-solid fa-credit-card me-2"></i>Información de Pago</h2>
+                    <h2><i class="fa-solid fa-credit-card me-2"></i>Información de Pago</h2>
                 </div>
                 <div class="p-4">
-                    <div class="alert alert-info d-flex align-items-center mb-4">
-                        <i class="fa-solid fa-circle-info fs-4 me-3"></i>
-                        <div>
-                            Realiza la transferencia por el monto exacto y luego sube tu comprobante.
-                            Te contactaremos en menos de 24 horas.
+                    <div class="modern-alert">
+                        <div class="modern-alert-icon">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                        <div class="modern-alert-content">
+                            <strong>Importante:</strong> Realiza la transferencia por el monto exacto y luego sube tu comprobante. Te contactaremos en menos de 24 horas.
                         </div>
                     </div>
 
-                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-building-columns me-2 text-primary"></i>Datos Bancarios</h5>
+                    <div class="section-title">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <span>Datos Bancarios</span>
+                    </div>
+
                     <div class="bank-info-box">
                         <div class="bank-detail">
-                            <span class="text-muted">Banco:</span>
+                            <span class="bank-detail-label">Banco:</span>
                             <span class="bank-detail-value">Banco Nacional de Costa Rica</span>
                         </div>
                         <div class="bank-detail">
-                            <span class="text-muted">Cuenta IBAN:</span>
+                            <span class="bank-detail-label">Cuenta IBAN:</span>
                             <span class="bank-detail-value" title="Click para copiar">CR00 0000 0000 0000 0000</span>
                         </div>
                         <div class="bank-detail">
-                            <span class="text-muted">Titular:</span>
+                            <span class="bank-detail-label">Titular:</span>
                             <span class="bank-detail-value">QR Pet Tag S.A.</span>
                         </div>
                         <div class="bank-detail">
-                            <span class="text-muted">Cédula:</span>
+                            <span class="bank-detail-label">Cédula:</span>
                             <span class="bank-detail-value">3-101-XXXXXX</span>
                         </div>
                         <div class="bank-detail">
-                            <span class="text-muted">Monto a transferir:</span>
+                            <span class="bank-detail-label">Monto a transferir:</span>
                             <span class="bank-detail-value amount-highlight">₡{{ number_format($total, 0, ',', '.') }}</span>
                         </div>
                     </div>
 
-                    <div class="alert alert-warning d-flex align-items-center">
-                        <i class="fa-solid fa-mobile-screen fs-4 me-3"></i>
-                        <div>
+                    <div class="modern-alert warning">
+                        <div class="modern-alert-icon">
+                            <i class="fa-solid fa-mobile-screen"></i>
+                        </div>
+                        <div class="modern-alert-content">
                             <strong>SINPE Móvil:</strong> También puedes usar el número <strong>8888-8888</strong>
                         </div>
                     </div>
@@ -334,7 +631,10 @@
 
                 <div class="payment-card">
                     <div class="p-4">
-                        <h5 class="fw-bold mb-4"><i class="fa-solid fa-cloud-arrow-up me-2 text-success"></i>Subir Comprobante</h5>
+                        <div class="section-title">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Subir Comprobante</span>
+                        </div>
 
                         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('payment_proof').click()">
                             <div class="upload-icon">
@@ -342,6 +642,7 @@
                             </div>
                             <h5 class="fw-bold mb-2">Click para seleccionar archivo</h5>
                             <p class="text-muted mb-0">JPG, PNG o PDF (máx. 5MB)</p>
+                            <p class="text-muted mt-2 mb-0"><small>O arrastra tu archivo aquí</small></p>
                         </div>
 
                         <input type="file"
@@ -362,19 +663,24 @@
                             <div class="preview-container text-center">
                                 <img id="previewImage" src="" class="preview-image" style="display: none;">
                                 <div id="previewPDF" style="display: none;">
-                                    <i class="fa-solid fa-file-pdf text-danger" style="font-size: 80px;"></i>
-                                    <p class="mt-3 fw-bold" id="pdfName"></p>
+                                    <div class="preview-pdf-icon">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </div>
+                                    <p class="fw-bold mb-0" id="pdfName"></p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Información de qué sigue -->
                         <div class="info-card mt-4">
-                            <h6 class="fw-bold mb-3"><i class="fa-solid fa-list-check me-2 text-primary"></i>¿Qué sigue después?</h6>
+                            <h6 class="fw-bold mb-3">
+                                <i class="fa-solid fa-list-check me-2 text-primary"></i>
+                                ¿Qué sigue después?
+                            </h6>
                             <ol class="mb-0 ps-3">
-                                <li class="mb-2">Verificaremos tu pago en <strong>máximo 24 horas</strong></li>
-                                <li class="mb-2">Te contactaremos para coordinar tus placas personalizadas</li>
-                                <li class="mb-2">Podrás registrar la información de tus mascotas</li>
+                                <li>Verificaremos tu pago en <strong>máximo 24 horas</strong></li>
+                                <li>Te contactaremos para coordinar tus placas personalizadas</li>
+                                <li>Podrás registrar la información de tus mascotas</li>
                                 <li>Recibirás tus placas en 3-5 días hábiles</li>
                             </ol>
                         </div>
@@ -383,13 +689,12 @@
                         <div class="d-grid gap-3 mt-4">
                             <button type="submit"
                                     id="submitBtn"
-                                    class="btn btn-success btn-lg"
-                                    style="border-radius: 12px; padding: 16px;"
+                                    class="btn btn-submit"
                                     disabled>
-                                <i class="fa-solid fa-paper-plane me-2"></i>
-                                Enviar Comprobante
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Enviar Comprobante</span>
                             </button>
-                            <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-lg" style="border-radius: 12px;">
+                            <a href="{{ route('home') }}" class="btn btn-cancel text-center">
                                 Cancelar
                             </a>
                         </div>
@@ -408,7 +713,10 @@
             <!-- Order Summary -->
             <div class="payment-card mb-4">
                 <div class="p-4">
-                    <h5 class="fw-bold mb-4"><i class="fa-solid fa-receipt me-2 text-primary"></i>Resumen del Pedido</h5>
+                    <div class="section-title">
+                        <i class="fa-solid fa-receipt"></i>
+                        <span>Resumen del Pedido</span>
+                    </div>
 
                     <div class="order-summary">
                         <div class="summary-row">
@@ -430,7 +738,7 @@
                         </div>
                         @endif
                         <div class="summary-row">
-                            <span class="h5 mb-0">TOTAL:</span>
+                            <span class="h5 mb-0 fw-bold">TOTAL:</span>
                             <span class="summary-total">₡{{ number_format($total, 0, ',', '.') }}</span>
                         </div>
                     </div>
@@ -440,7 +748,10 @@
             <!-- Help Section -->
             <div class="payment-card">
                 <div class="p-4">
-                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-headset me-2 text-primary"></i>¿Necesitas Ayuda?</h5>
+                    <div class="section-title">
+                        <i class="fa-solid fa-headset"></i>
+                        <span>¿Necesitas Ayuda?</span>
+                    </div>
                     <p class="text-muted mb-4">Estamos aquí para ayudarte en cada paso</p>
 
                     <div class="help-buttons">
