@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pet;
 use App\Models\QrCode;
 use App\Models\PetPing;
+use App\Services\WhatsAppService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -195,6 +196,11 @@ class PublicPetPingController extends Controller
                     $this->markNotified($pet->id, $ownerId, $ping->lat, $ping->lng);
                     $mailed = true;
                     Log::info('Ping mailed', ['pet_id' => $pet->id, 'email' => $pet->user->email]);
+
+                    // Enviar WhatsApp al dueño
+                    $whatsapp = app(WhatsAppService::class);
+                    $whatsapp->sendQrScanned($pet->user, $pet->name, $locationHuman, $mapsUrl);
+
                 } catch (\Throwable $e) {
                     $why = 'mail_error';
                     Log::error('Ping mail failed', ['pet_id' => $pet->id, 'err' => $e->getMessage()]);

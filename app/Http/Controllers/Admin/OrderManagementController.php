@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\EmailLog;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
@@ -192,6 +193,10 @@ class OrderManagementController extends Controller
                 status: 'sent'
             );
 
+            // Enviar WhatsApp al cliente
+            $whatsapp = app(WhatsAppService::class);
+            $whatsapp->sendPaymentVerified($order);
+
         } catch (\Exception $e) {
             EmailLog::logEmail(
                 recipient: $order->user->email,
@@ -224,6 +229,10 @@ class OrderManagementController extends Controller
                 userId: $order->user_id,
                 status: 'sent'
             );
+
+            // Enviar WhatsApp al cliente
+            $whatsapp = app(WhatsAppService::class);
+            $whatsapp->sendPaymentRejected($order);
 
         } catch (\Exception $e) {
             EmailLog::logEmail(

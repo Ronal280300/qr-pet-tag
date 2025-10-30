@@ -46,4 +46,11 @@ return [
         'version'           => env('FB_GRAPH_VERSION', 'v23.0'),
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'), // Formato: +14155238886
+        'admin_phone' => env('ADMIN_WHATSAPP_PHONE'), // Formato: +50688888888
+    ],
+
 ];
