@@ -4,494 +4,1129 @@
 @section('title', 'Nueva Mascota')
 
 @section('content')
-<div class="container my-4">
-  <h1 class="h3 mb-3 fw-bold">Nueva Mascota</h1>
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      
+      <!-- Header -->
+      <div class="page-header mb-4">
+        <div class="header-icon">
+          <i class="fa-solid fa-paw"></i>
+        </div>
+        <div>
+          <h1 class="page-title">Nueva Mascota</h1>
+          <p class="page-subtitle">Completa la información de tu mejor amigo</p>
+        </div>
+      </div>
 
-  <div class="card card-elevated">
-    <div class="card-body">
       <form action="{{ route('portal.pets.store') }}" method="POST" enctype="multipart/form-data" id="pet-form">
         @csrf
 
         {{-- ======================= DATOS BÁSICOS ======================= --}}
-        <div class="section-card">
+        <div class="form-section">
           <div class="section-header">
-            <div class="section-icon bg-primary-subtle text-primary"><i class="fa-solid fa-paw"></i></div>
-            <div>
-              <h2 class="section-title">Datos básicos</h2>
-              <div class="section-sub">Nombre, raza y sexo de tu mascota.</div>
+            <div class="section-icon-wrapper">
+              <div class="section-icon primary">
+                <i class="fa-solid fa-id-card"></i>
+              </div>
+              <div class="section-info">
+                <h2 class="section-title">Datos básicos</h2>
+                <p class="section-description">Nombre, raza y sexo de tu mascota</p>
+              </div>
             </div>
           </div>
 
-          <div class="row g-3">
-            <div class="col-12 col-lg-6">
-              <label class="form-label">Nombre *</label>
-              <input type="text" name="name" class="form-control" required>
-            </div>
-            <div class="col-12 col-lg-6">
-              <label class="form-label">Raza</label>
-              <input type="text" name="breed" class="form-control" placeholder="Labrador, Poodle, etc.">
-            </div>
+          <div class="section-content">
+            <div class="row g-4">
+              <div class="col-12 col-lg-6">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-tag label-icon"></i>
+                    Nombre *
+                  </label>
+                  <input type="text" name="name" class="form-input" placeholder="Ej: Max, Luna..." required>
+                </div>
+              </div>
 
-            {{-- Sexo (segmented) --}}
-            <div class="col-12">
-              <label class="form-label d-block mb-2">Sexo</label>
-              <div class="segmented">
-                <input type="radio" id="sex_m" name="sex" value="male" class="seg" checked>
-                <label for="sex_m"><i class="fa-solid fa-mars me-1"></i> Macho</label>
+              <div class="col-12 col-lg-6">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-dna label-icon"></i>
+                    Raza
+                  </label>
+                  <input type="text" name="breed" class="form-input" placeholder="Ej: Labrador, Poodle...">
+                </div>
+              </div>
 
-                <input type="radio" id="sex_f" name="sex" value="female" class="seg">
-                <label for="sex_f"><i class="fa-solid fa-venus me-1"></i> Hembra</label>
+              <div class="col-12">
+                <label class="form-label mb-3">
+                  <i class="fa-solid fa-venus-mars label-icon"></i>
+                  Sexo
+                </label>
+                <div class="gender-selector">
+                  <input type="radio" id="sex_m" name="sex" value="male" class="gender-input" checked>
+                  <label for="sex_m" class="gender-option">
+                    <i class="fa-solid fa-mars"></i>
+                    <span>Macho</span>
+                  </label>
 
-                <input type="radio" id="sex_u" name="sex" value="unknown" class="seg">
-                <label for="sex_u"><i class="fa-solid fa-circle-question me-1"></i> Desconocido</label>
+                  <input type="radio" id="sex_f" name="sex" value="female" class="gender-input">
+                  <label for="sex_f" class="gender-option">
+                    <i class="fa-solid fa-venus"></i>
+                    <span>Hembra</span>
+                  </label>
+
+                  <input type="radio" id="sex_u" name="sex" value="unknown" class="gender-input">
+                  <label for="sex_u" class="gender-option">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span>Desconocido</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {{-- ======================= SALUD ======================= --}}
-        <div class="section-card">
+        <div class="form-section">
           <div class="section-header">
-            <div class="section-icon bg-success-subtle text-success"><i class="fa-solid fa-stethoscope"></i></div>
-            <div>
-              <h2 class="section-title">Salud</h2>
-              <div class="section-sub">Esterilización, vacunas y edad.</div>
-            </div>
-          </div>
-
-          <div class="row g-3">
-            {{-- Esterilizado --}}
-            <div class="col-12 col-sm-6">
-              <div class="form-row">
-                <label class="mb-0" for="is_neutered">Esterilizado</label>
-
-                {{-- Fallback para enviar "0" cuando el toggle está apagado --}}
-                <input type="hidden" name="is_neutered" value="0">
-
-                <label class="ft-switch" aria-label="Esterilizado">
-                  <input id="is_neutered" type="checkbox" name="is_neutered" value="1"
-                    {{ old('is_neutered') ? 'checked' : '' }}>
-                  <span class="track"><span class="thumb"></span></span>
-                </label>
+            <div class="section-icon-wrapper">
+              <div class="section-icon success">
+                <i class="fa-solid fa-heart-pulse"></i>
               </div>
-            </div>
-
-            {{-- Vacuna antirrábica --}}
-            <div class="col-12 col-sm-6">
-              <div class="form-row">
-                <label class="mb-0" for="rabies_vaccine">Vacuna antirrábica</label>
-
-                {{-- Fallback para enviar "0" cuando el toggle está apagado --}}
-                <input type="hidden" name="rabies_vaccine" value="0">
-
-                <label class="ft-switch" aria-label="Vacuna antirrábica">
-                  <input id="rabies_vaccine" type="checkbox" name="rabies_vaccine" value="1"
-                    {{ old('rabies_vaccine') ? 'checked' : '' }}>
-                  <span class="track"><span class="thumb"></span></span>
-                </label>
+              <div class="section-info">
+                <h2 class="section-title">Salud</h2>
+                <p class="section-description">Esterilización, vacunas y edad</p>
               </div>
             </div>
           </div>
-        </div>
 
+          <div class="section-content">
+            <div class="row g-4">
+              <div class="col-12 col-md-6">
+                <div class="toggle-card">
+                  <div class="toggle-info">
+                    <div class="toggle-icon">
+                      <i class="fa-solid fa-scissors"></i>
+                    </div>
+                    <div>
+                      <label class="toggle-label" for="is_neutered">Esterilizado</label>
+                      <p class="toggle-description">¿Está esterilizada tu mascota?</p>
+                    </div>
+                  </div>
+                  <input type="hidden" name="is_neutered" value="0">
+                  <label class="modern-switch">
+                    <input id="is_neutered" type="checkbox" name="is_neutered" value="1" {{ old('is_neutered') ? 'checked' : '' }}>
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
 
-        {{-- Edad --}}
-        <div class="col-12 col-sm-6">
-          <label class="form-label">Edad</label>
-          <div class="input-icon">
-            <i class="fa-solid fa-cake-candles"></i>
-            <input type="number" name="age" min="0" max="50" class="form-control" placeholder="0">
+              <div class="col-12 col-md-6">
+                <div class="toggle-card">
+                  <div class="toggle-info">
+                    <div class="toggle-icon">
+                      <i class="fa-solid fa-syringe"></i>
+                    </div>
+                    <div>
+                      <label class="toggle-label" for="rabies_vaccine">Vacuna antirrábica</label>
+                      <p class="toggle-description">¿Tiene la vacuna al día?</p>
+                    </div>
+                  </div>
+                  <input type="hidden" name="rabies_vaccine" value="0">
+                  <label class="modern-switch">
+                    <input id="rabies_vaccine" type="checkbox" name="rabies_vaccine" value="1" {{ old('rabies_vaccine') ? 'checked' : '' }}>
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-cake-candles label-icon"></i>
+                    Edad (años)
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-calendar-days input-icon"></i>
+                    <input type="number" name="age" min="0" max="50" class="form-input" placeholder="0">
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-    </div>
-  </div>
 
-  {{-- ======================= UBICACIÓN ======================= --}}
-  <div class="section-card">
-    <div class="section-header">
-      <div class="section-icon bg-info-subtle text-info"><i class="fa-solid fa-location-dot"></i></div>
-      <div>
-        <h2 class="section-title">Ubicación</h2>
-        <div class="section-sub">Se utiliza para mostrar la zona en el perfil público.</div>
-      </div>
-    </div>
+        {{-- ======================= UBICACIÓN ======================= --}}
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon-wrapper">
+              <div class="section-icon info">
+                <i class="fa-solid fa-map-location-dot"></i>
+              </div>
+              <div class="section-info">
+                <h2 class="section-title">Ubicación</h2>
+                <p class="section-description">Se utiliza para mostrar la zona en el perfil público</p>
+              </div>
+            </div>
+          </div>
 
-    <div class="row g-3" id="cr-geo"
-      data-current-province=""
-      data-current-canton=""
-      data-current-district="">
-      <div class="col-12">
-        <label class="form-label">Provincia</label>
-        <div class="input-icon">
-          <i class="fa-solid fa-map"></i>
-          <select id="cr-province" class="form-select" aria-label="Provincia" disabled>
-            <option value="">Provincia</option>
-          </select>
+          <div class="section-content">
+            <div class="row g-4" id="cr-geo" data-current-province="" data-current-canton="" data-current-district="">
+              <div class="col-12 col-md-4">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-map label-icon"></i>
+                    Provincia
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-location-dot input-icon"></i>
+                    <select id="cr-province" class="form-input" disabled>
+                      <option value="">Selecciona provincia</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-city label-icon"></i>
+                    Cantón
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-building input-icon"></i>
+                    <select id="cr-canton" class="form-input" disabled>
+                      <option value="">Selecciona cantón</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-house label-icon"></i>
+                    Distrito
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-map-pin input-icon"></i>
+                    <select id="cr-district" class="form-input" disabled>
+                      <option value="">Selecciona distrito</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <input type="hidden" name="zone" id="zone" value="">
+              
+              <div class="col-12">
+                <div class="zone-preview">
+                  <i class="fa-solid fa-location-crosshairs"></i>
+                  <span>Ubicación seleccionada:</span>
+                  <code id="zone-preview">No seleccionada</code>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col-12">
-        <label class="form-label">Cantón</label>
-        <div class="input-icon">
-          <i class="fa-solid fa-map"></i>
-          <select id="cr-canton" class="form-select" aria-label="Cantón" disabled>
-            <option value="">Cantón</option>
-          </select>
+
+        {{-- ======================= OBSERVACIONES ======================= --}}
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon-wrapper">
+              <div class="section-icon warning">
+                <i class="fa-solid fa-notes-medical"></i>
+              </div>
+              <div class="section-info">
+                <h2 class="section-title">Observaciones médicas</h2>
+                <p class="section-description">Alergias, medicación, comportamiento especial</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <div class="toggle-card mb-3">
+              <div class="toggle-info">
+                <div class="toggle-icon">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                  <label class="toggle-label" for="no-medical">Sin observaciones</label>
+                  <p class="toggle-description">Mi mascota no tiene condiciones especiales</p>
+                </div>
+              </div>
+              <label class="modern-switch">
+                <input id="no-medical" type="checkbox">
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <textarea name="medical_conditions" id="medical_conditions" rows="5" class="form-textarea"
+                placeholder="Ej: Alérgica a pollo. Toma medicamento para el corazón 2 veces al día. Puede ser nerviosa con extraños."></textarea>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col-12">
-        <label class="form-label">Distrito</label>
-        <div class="input-icon">
-          <i class="fa-solid fa-map"></i>
-          <select id="cr-district" class="form-select" aria-label="Distrito" disabled>
-            <option value="">Distrito</option>
-          </select>
+
+        {{-- ======================= FOTOS MÚLTIPLES ======================= --}}
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon-wrapper">
+              <div class="section-icon purple">
+                <i class="fa-solid fa-images"></i>
+              </div>
+              <div class="section-info">
+                <h2 class="section-title">Galería de fotos</h2>
+                <p class="section-description">Puedes seleccionar hasta 3 fotos adicionales</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <div class="upload-area">
+              <input type="file" id="photos" name="photos[]" class="d-none" multiple accept="image/*">
+              <label for="photos" class="upload-label">
+                <div class="upload-icon">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div class="upload-text">
+                  <span class="upload-title">Haz clic para seleccionar fotos</span>
+                  <span class="upload-subtitle">JPG, PNG · Máx. 6 MB por imagen · Hasta 3 fotos</span>
+                </div>
+              </label>
+            </div>
+
+            <div id="photosPreviewGrid" class="photos-grid d-none"></div>
+            
+            <button type="button" id="btnClearPhotos" class="btn-clear-photos d-none">
+              <i class="fa-solid fa-trash"></i>
+              Eliminar todas las fotos
+            </button>
+          </div>
         </div>
-      </div>
 
-      <input type="hidden" name="zone" id="zone" value="">
-      <div class="col-12">
-        <div class="d-flex align-items-center justify-content-between gap-3">
-          <small class="text-muted">Se guardará como:</small>
-          <code id="zone-preview">—</code>
+        {{-- ======================= FOTO PRINCIPAL ======================= --}}
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon-wrapper">
+              <div class="section-icon orange">
+                <i class="fa-solid fa-image"></i>
+              </div>
+              <div class="section-info">
+                <h2 class="section-title">Foto principal *</h2>
+                <p class="section-description">Esta será la foto de perfil de tu mascota</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <div class="main-photo-uploader">
+              <div class="photo-preview-area" id="photoDrop">
+                <img id="photoPreview" src="" alt="Vista previa" class="d-none">
+                <div class="photo-placeholder">
+                  <i class="fa-solid fa-image"></i>
+                  <p>Arrastra una imagen aquí o haz clic en "Seleccionar imagen"</p>
+                  <span>JPG, PNG · Máx. 4 MB</span>
+                </div>
+              </div>
+              
+              <div class="photo-actions">
+                <input id="photo" name="photo" type="file" accept="image/*" class="d-none" required>
+                <label for="photo" class="btn-photo-action primary">
+                  <i class="fa-solid fa-image"></i>
+                  Seleccionar imagen
+                </label>
+                <button type="button" id="btnClearPhoto" class="btn-photo-action secondary">
+                  <i class="fa-solid fa-xmark"></i>
+                  Quitar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        {{-- Botones de acción --}}
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">
+            <i class="fa-solid fa-check"></i>
+            <span>Guardar mascota</span>
+          </button>
+          <a href="{{ route('portal.pets.index') }}" class="btn-cancel">
+            <i class="fa-solid fa-xmark"></i>
+            Cancelar
+          </a>
+        </div>
+      </form>
     </div>
   </div>
-
-  {{-- ======================= OBSERVACIONES ======================= --}}
-  <div class="section-card">
-    <div class="section-header">
-      <div class="section-icon bg-secondary-subtle text-secondary"><i class="fa-solid fa-notes-medical"></i></div>
-      <div>
-        <h2 class="section-title">Observaciones</h2>
-        <div class="section-sub">Alergias, medicación, comportamiento, etc.</div>
-      </div>
-    </div>
-
-    <div class="form-row mb-2">
-      <label class="mb-0" for="no-medical">Sin observaciones</label>
-      <label class="ft-switch" aria-label="Sin observaciones">
-        <input id="no-medical" type="checkbox">
-        <span class="track"><span class="thumb"></span></span>
-      </label>
-    </div>
-
-    <textarea name="medical_conditions" id="medical_conditions" rows="4" class="form-control"
-      placeholder="Ej: Alérgica a pollo. Toma medicamento 2 veces al día."></textarea>
-  </div>
-
-  {{-- ======================= FOTOS (múltiples) ======================= --}}
-  <div class="section-card">
-    <div class="section-header">
-      <div class="section-icon bg-warning-subtle text-warning"><i class="fa-solid fa-images"></i></div>
-      <div>
-        <h2 class="section-title">Fotos</h2>
-        <div class="section-sub">Puedes seleccionar varias (máx. 3 adicionales).</div>
-      </div>
-    </div>
-
-    <input type="file" id="photos" name="photos[]" class="form-control" multiple accept="image/*">
-    <div class="form-text">Formatos: JPG/PNG. Tamaño máx. 6 MB por imagen.</div>
-
-    {{-- Previews en cuadrícula --}}
-    <div id="photosPreviewGrid" class="mt-3 photos-grid d-none"></div>
-    <button type="button" id="btnClearPhotos" class="btn btn-outline-danger btn-sm mt-2 d-none">
-      <i class="fa-solid fa-xmark me-1"></i> Quitar todas
-    </button>
-  </div>
-
-  {{-- ======================= FOTO PRINCIPAL (legacy) ======================= --}}
-  <div class="section-card">
-    <div class="section-header">
-      <div class="section-icon bg-light text-body-tertiary"><i class="fa-regular fa-image"></i></div>
-      <div>
-        <h2 class="section-title">Foto principal (sistema antiguo)</h2>
-        <div class="section-sub">Opcional. El recorte es solo de vista previa.</div>
-      </div>
-    </div>
-
-    <div class="photo-uploader">
-      <div class="photo-uploader__preview" id="photoDrop">
-        <img id="photoPreview" src="" alt="Vista previa" class="d-none">
-        <div class="photo-uploader__overlay">Arrastra una imagen o haz clic en “Seleccionar imagen”.</div>
-      </div>
-      <div class="photo-uploader__actions">
-        <label for="photo" class="btn btn-outline-primary">
-          <i class="fa-solid fa-image me-1"></i> Seleccionar imagen
-        </label>
-        <input id="photo" name="photo" type="file" accept="image/*" class="d-none" required>
-        <button type="button" id="btnClearPhoto" class="btn btn-outline-danger">
-          <i class="fa-solid fa-xmark me-1"></i> Quitar
-        </button>
-      </div>
-    </div>
-    <small class="text-muted d-block mt-2">
-      Formatos: JPG/PNG. Tamaño máx. 4 MB.
-    </small>
-  </div>
-
-  <div class="mt-4 d-flex gap-2">
-    <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar</button>
-    <a href="{{ route('portal.pets.index') }}" class="btn btn-outline-secondary">Cancelar</a>
-  </div>
-  </form>
 </div>
-</div>
-</div>
-@endsection
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/portal.css') }}">
 <style>
-  /* ===== Cards/secciones ===== */
-  .card-elevated {
-    border: 0;
-    box-shadow: 0 10px 30px rgba(31, 41, 55, .06);
+:root {
+  --primary: #667eea;
+  --primary-dark: #5568d3;
+  --success: #10b981;
+  --info: #3b82f6;
+  --warning: #f59e0b;
+  --orange: #f97316;
+  --purple: #a855f7;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+}
+
+/* ===== Header ===== */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 32px;
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.page-subtitle {
+  color: var(--gray-500);
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+
+/* ===== Form Sections ===== */
+.form-section {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 40px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--gray-100);
+  transition: all 0.3s ease;
+}
+
+.form-section:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 20px 50px rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
+}
+
+.section-header {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--gray-100);
+}
+
+.section-icon-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.section-icon.primary {
+  background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+}
+
+.section-icon.success {
+  background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+}
+
+.section-icon.info {
+  background: linear-gradient(135deg, var(--info) 0%, #2563eb 100%);
+}
+
+.section-icon.warning {
+  background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+}
+
+.section-icon.purple {
+  background: linear-gradient(135deg, var(--purple) 0%, #9333ea 100%);
+}
+
+.section-icon.orange {
+  background: linear-gradient(135deg, var(--orange) 0%, #ea580c 100%);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.section-description {
+  color: var(--gray-500);
+  font-size: 14px;
+  margin: 4px 0 0;
+}
+
+.section-content {
+  padding-top: 4px;
+}
+
+/* ===== Form Inputs ===== */
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.label-icon {
+  color: var(--gray-400);
+  font-size: 14px;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--gray-900);
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--gray-400);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.input-with-icon .form-input {
+  padding-left: 48px;
+}
+
+/* ===== Gender Selector ===== */
+.gender-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.gender-input {
+  display: none;
+}
+
+.gender-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 16px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.gender-option i {
+  font-size: 32px;
+  color: var(--gray-400);
+  transition: all 0.3s ease;
+}
+
+.gender-option span {
+  font-weight: 600;
+  color: var(--gray-600);
+  font-size: 14px;
+}
+
+.gender-input:checked + .gender-option {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.gender-input:checked + .gender-option i {
+  color: var(--primary);
+  transform: scale(1.1);
+}
+
+.gender-input:checked + .gender-option span {
+  color: var(--primary);
+}
+
+/* ===== Toggle Cards ===== */
+.toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  border: 2px solid var(--gray-200);
+  border-radius: 16px;
+  background: var(--gray-50);
+  transition: all 0.3s ease;
+}
+
+.toggle-card:hover {
+  border-color: var(--gray-300);
+  background: white;
+}
+
+.toggle-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.toggle-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.toggle-label {
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.toggle-description {
+  color: var(--gray-500);
+  font-size: 13px;
+  margin: 2px 0 0;
+}
+
+/* ===== Modern Switch ===== */
+.modern-switch {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 32px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.modern-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gray-300);
+  border-radius: 34px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.switch-slider:before {
+  content: "";
+  position: absolute;
+  height: 26px;
+  width: 26px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modern-switch input:checked + .switch-slider {
+  background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+}
+
+.modern-switch input:checked + .switch-slider:before {
+  transform: translateX(24px);
+}
+
+/* ===== Zone Preview ===== */
+.zone-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+  border: 2px dashed var(--gray-300);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.zone-preview i {
+  color: var(--info);
+  font-size: 18px;
+}
+
+.zone-preview code {
+  font-family: 'Courier New', monospace;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: var(--primary);
+  font-weight: 600;
+  border: 1px solid var(--gray-200);
+}
+
+/* ===== Upload Area ===== */
+.upload-area {
+  border: 3px dashed var(--gray-300);
+  border-radius: 20px;
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--gray-50);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.upload-area:hover {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.02), rgba(118, 75, 162, 0.02));
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.upload-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 32px;
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+}
+
+.upload-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.upload-title {
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: 16px;
+}
+
+.upload-subtitle {
+  color: var(--gray-500);
+  font-size: 13px;
+}
+
+/* ===== Photos Grid ===== */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.photos-grid .ph {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--gray-100);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.photos-grid .ph:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.photos-grid .ph img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photos-grid .ph .ph-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.photos-grid .ph .ph-remove:hover {
+  background: #ef4444;
+  transform: scale(1.1);
+}
+
+.btn-clear-photos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  background: white;
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-clear-photos:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+  transform: translateY(-2px);
+}
+
+/* ===== Main Photo Uploader ===== */
+.main-photo-uploader {
+  display: grid;
+  gap: 20px;
+}
+
+.photo-preview-area {
+  position: relative;
+  min-height: 280px;
+  border: 3px dashed var(--gray-300);
+  border-radius: 20px;
+  background: var(--gray-50);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.photo-preview-area.is-dragover {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.photo-preview-area img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.photo-placeholder i {
+  font-size: 48px;
+  color: var(--gray-400);
+}
+
+.photo-placeholder p {
+  color: var(--gray-600);
+  font-weight: 500;
+  margin: 0;
+  font-size: 15px;
+}
+
+.photo-placeholder span {
+  color: var(--gray-500);
+  font-size: 13px;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-photo-action {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-photo-action.primary {
+  background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-photo-action.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-photo-action.secondary {
+  background: white;
+  color: #ef4444;
+  border: 2px solid var(--gray-200);
+}
+
+.btn-photo-action.secondary:hover {
+  border-color: #ef4444;
+  background: #fef2f2;
+  transform: translateY(-2px);
+}
+
+/* ===== Form Actions ===== */
+.form-actions {
+  display: flex;
+  gap: 16px;
+  padding: 32px 0;
+  flex-wrap: wrap;
+}
+
+.btn-submit,
+.btn-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-submit {
+  flex: 1;
+  min-width: 200px;
+  background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-cancel {
+  background: white;
+  color: var(--gray-700);
+  border: 2px solid var(--gray-300);
+}
+
+.btn-cancel:hover {
+  border-color: var(--gray-400);
+  background: var(--gray-50);
+  transform: translateY(-2px);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
   }
 
-  .section-card {
-    border: 1px solid #eef1f5;
-    border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 18px;
-    background: #fff;
+  .header-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
   }
 
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+  .page-title {
+    font-size: 24px;
+  }
+
+  .form-section {
+    padding: 24px 20px;
+    border-radius: 20px;
+  }
+
+  .section-icon-wrapper {
+    flex-direction: column;
+    text-align: center;
   }
 
   .section-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    font-size: 18px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
   }
 
   .section-title {
-    font-weight: 800;
-    margin: 0
+    font-size: 18px;
   }
 
-  .section-sub {
-    color: #6b7280;
-    font-size: .95rem
+  .gender-selector {
+    grid-template-columns: 1fr;
   }
 
-  /* ===== Alineación label + toggle (móvil-friendly) ===== */
-  .form-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 0;
+  .photo-actions {
+    flex-direction: column;
   }
 
-  /* ===== Switch accesible y responsive ===== */
-  .ft-switch {
-    position: relative;
-    display: inline-flex;
-    width: 52px;
-    height: 30px;
-    flex: 0 0 auto;
-    cursor: pointer;
+  .btn-photo-action {
+    width: 100%;
   }
 
-  .ft-switch input {
-    position: absolute;
-    inline-size: 100%;
-    block-size: 100%;
-    opacity: 0;
-    margin: 0;
-    cursor: pointer;
+  .form-actions {
+    flex-direction: column;
   }
 
-  .ft-switch .track {
-    position: relative;
-    inline-size: 100%;
-    block-size: 100%;
-    background: #e5e7eb;
-    border-radius: 999px;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .12);
-    transition: background .2s ease;
+  .btn-submit,
+  .btn-cancel {
+    width: 100%;
   }
 
-  .ft-switch .thumb {
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 3px;
-    transform: translateY(-50%);
-    inline-size: 24px;
-    block-size: 24px;
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
-    transition: left .2s ease, inset-inline-start .2s ease;
-  }
-
-  .ft-switch input:checked+.track {
-    background: #2563eb;
-  }
-
-  .ft-switch input:checked+.track .thumb {
-    inset-inline-start: calc(100% - 27px);
-  }
-
-  /* Compactar un poco en pantallas muy pequeñas */
-  @media (max-width: 480px) {
-    .ft-switch {
-      width: 46px;
-      height: 26px;
-    }
-
-    .ft-switch .thumb {
-      inline-size: 20px;
-      block-size: 20px;
-      inset-inline-start: 3px;
-    }
-
-    .ft-switch input:checked+.track .thumb {
-      inset-inline-start: calc(100% - 23px);
-    }
-  }
-
-  /* ===== Segmented control (sexo) ===== */
-  .segmented {
-    display: inline-grid;
-    grid-auto-flow: column;
-    gap: 6px;
-    background: #f6f7fb;
-    padding: 6px;
-    border-radius: 12px;
-    border: 1px solid #eef1f5;
-  }
-
-  .segmented .seg {
-    display: none;
-  }
-
-  .segmented label {
-    padding: .45rem .8rem;
-    border-radius: 10px;
-    cursor: pointer;
-    user-select: none;
-    color: #374151;
-    background: transparent;
-  }
-
-  .segmented .seg:checked+label {
-    background: #115DFC;
-    color: #fff;
-    font-weight: 700;
-  }
-
-  /* ===== Inputs con icono ===== */
-  .input-icon {
-    position: relative
-  }
-
-  .input-icon>i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9aa0aa;
-  }
-
-  .input-icon>.form-control,
-  .input-icon>.form-select {
-    padding-left: 40px
-  }
-
-  /* ===== Previews grid de fotos múltiples ===== */
   .photos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: .75rem;
-  }
-
-  .photos-grid .ph {
-    position: relative;
-    border: 1px solid #e5e7eb;
-    border-radius: .5rem;
-    overflow: hidden;
-    background: #f8fafc;
-    aspect-ratio: 1 / 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .photos-grid .ph img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .photos-grid .ph .ph-remove {
-    position: absolute;
-    top: .35rem;
-    right: .35rem;
-    border: 0;
-    border-radius: 999px;
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, .55);
-    color: #fff;
-  }
-
-  /* ===== Uploader principal (legacy) ===== */
-  .photo-uploader {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 12px;
-    align-items: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .toggle-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
-  .photo-uploader__preview {
-    border: 1px dashed #e5e7eb;
-    border-radius: 12px;
-    background: #f8fafc;
-    min-height: 160px;
-    display: grid;
-    place-items: center;
-    position: relative;
-    overflow: hidden;
+  .modern-switch {
+    margin-left: auto;
   }
 
-  .photo-uploader__preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover
+  .upload-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
   }
 
-  .photo-uploader__preview.is-dragover {
-    outline: 2px dashed #2563eb;
-    outline-offset: -8px
+  .photo-preview-area {
+    min-height: 220px;
   }
-
-  .photo-uploader__overlay {
-    color: #9aa0aa;
-    font-size: .95rem;
-    padding: 6px 10px;
-    text-align: center
-  }
-
-  .photo-uploader__actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap
-  }
+}
 </style>
-@endpush
+@endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -506,12 +1141,14 @@
       if ($noMedical.checked) {
         $medical.value = '';
         $medical.setAttribute('disabled', 'disabled');
+        $medical.style.opacity = '0.5';
       } else {
         $medical.removeAttribute('disabled');
+        $medical.style.opacity = '1';
       }
     }
     $noMedical.addEventListener('change', toggleMedical);
-    toggleMedical(); // estado inicial
+    toggleMedical();
   })();
 </script>
 
@@ -551,23 +1188,31 @@
         $zonePreview.textContent = z;
       } else {
         $zone.value = '';
-        $zonePreview.textContent = '—';
+        $zonePreview.textContent = 'No seleccionada';
       }
     }
 
     (async () => {
       try {
         const provincias = await getJSON('/provincias.json');
-        fillSelect($prov, provincias, 'Provincia');
+        fillSelect($prov, provincias, 'Selecciona provincia');
         $prov.disabled = false;
       } catch (e) {
-        // Fallback manual si no hay internet
         const wrap = $prov.closest('.row');
         wrap.outerHTML = `
         <div class="col-12">
-          <div class="alert alert-warning small mb-2">No se pudo cargar la lista de ubicaciones. Ingresa manualmente la zona.</div>
-          <input class="form-control" placeholder="Ej: San Juan, Grecia, Alajuela"
-                 oninput="document.getElementById('zone').value=this.value;document.getElementById('zone-preview').textContent=this.value;">
+          <div class="alert alert-warning" style="border-radius: 12px; border: 2px solid #fbbf24; background: #fef3c7; color: #92400e; padding: 16px;">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <strong>No se pudo cargar la lista de ubicaciones.</strong> Ingresa manualmente la zona.
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fa-solid fa-map-location-dot label-icon"></i>
+              Ubicación manual
+            </label>
+            <input class="form-input" placeholder="Ej: San Juan, Grecia, Alajuela"
+                   oninput="document.getElementById('zone').value=this.value;document.getElementById('zone-preview').textContent=this.value;">
+          </div>
         </div>`;
       }
     })();
@@ -575,24 +1220,24 @@
     $prov.addEventListener('change', async () => {
       $cant.disabled = true;
       $dist.disabled = true;
-      $dist.innerHTML = `<option value="">Distrito</option>`;
+      $dist.innerHTML = `<option value="">Selecciona distrito</option>`;
       setZone();
       if (!$prov.value) {
-        $cant.innerHTML = `<option value="">Cantón</option>`;
+        $cant.innerHTML = `<option value="">Selecciona cantón</option>`;
         return;
       }
       const cantones = await getJSON(`/provincia/${$prov.value}/cantones.json`);
-      fillSelect($cant, cantones, 'Cantón');
+      fillSelect($cant, cantones, 'Selecciona cantón');
       $cant.disabled = false;
     });
 
     $cant.addEventListener('change', async () => {
       $dist.disabled = true;
-      $dist.innerHTML = `<option value="">Distrito</option>`;
+      $dist.innerHTML = `<option value="">Selecciona distrito</option>`;
       setZone();
       if (!$prov.value || !$cant.value) return;
       const distritos = await getJSON(`/provincia/${$prov.value}/canton/${$cant.value}/distritos.json`);
-      fillSelect($dist, distritos, 'Distrito');
+      fillSelect($dist, distritos, 'Selecciona distrito');
       $dist.disabled = false;
     });
 
@@ -608,7 +1253,7 @@
     const drop = document.getElementById('photoDrop');
     const clear = document.getElementById('btnClearPhoto');
     const form = document.getElementById('pet-form');
-    const submit = form.querySelector('button[type="submit"]') || form.querySelector('.btn-primary');
+    const submit = form.querySelector('button[type="submit"]') || form.querySelector('.btn-submit');
 
     function hasMain() {
       return !!preview.src && !preview.classList.contains('d-none');
@@ -627,19 +1272,23 @@
       const url = URL.createObjectURL(file);
       preview.src = url;
       preview.classList.remove('d-none');
+      drop.querySelector('.photo-placeholder').style.display = 'none';
       drop.classList.remove('is-dragover');
       syncSubmit();
     }
 
     input.addEventListener('change', e => show(e.target.files[0]));
+    
     ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => {
       e.preventDefault();
       drop.classList.add('is-dragover');
     }));
+    
     ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => {
       e.preventDefault();
       drop.classList.remove('is-dragover');
     }));
+    
     drop.addEventListener('drop', e => {
       const f = e.dataTransfer.files && e.dataTransfer.files[0];
       if (f) {
@@ -647,9 +1296,11 @@
         show(f);
       }
     });
+    
     clear.addEventListener('click', () => {
       preview.src = '';
       preview.classList.add('d-none');
+      drop.querySelector('.photo-placeholder').style.display = 'flex';
       input.value = '';
       syncSubmit();
     });
@@ -657,14 +1308,22 @@
     form.addEventListener('submit', (e) => {
       if (!hasMain()) {
         e.preventDefault();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Foto principal requerida',
+          text: 'Por favor selecciona una foto principal para tu mascota.',
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#667eea'
+        });
       }
     });
+    
     syncSubmit();
   })();
 </script>
 
 <script>
-  /* Previews de fotos múltiples + LÍMITE 3 (principal NO cuenta) */
+  /* Previews de fotos múltiples + LÍMITE 3 */
   (function() {
     const MAX = 3;
     const input = document.getElementById('photos');
@@ -721,7 +1380,8 @@
           icon: 'warning',
           title: 'Máximo 3 fotos adicionales',
           text: `Puedes añadir ${allowed} foto(s) más.`,
-          confirmButtonText: 'Entendido'
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#667eea'
         });
         if (allowed > 0) filesBuffer = filesBuffer.concat(incoming.slice(0, allowed));
       } else {
@@ -733,9 +1393,22 @@
     });
 
     btnClear.addEventListener('click', () => {
-      filesBuffer = [];
-      input.value = '';
-      refreshGrid();
+      Swal.fire({
+        title: '¿Eliminar todas las fotos?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          filesBuffer = [];
+          input.value = '';
+          refreshGrid();
+        }
+      });
     });
 
     document.getElementById('pet-form').addEventListener('submit', (e) => {
