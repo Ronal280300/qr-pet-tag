@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Pet;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -60,8 +61,8 @@ class ClientController extends Controller
         // Estadísticas básicas
         $stats = [
             'total_orders' => $user->orders()->count(),
-            'total_spent' => $user->orders()->where('payment_verified', true)->sum('total_amount'),
-            'pending_orders' => $user->orders()->where('payment_verified', false)->count(),
+            'total_spent' => $user->orders()->whereIn('status', ['verified', 'completed'])->sum('total'),
+            'pending_orders' => $user->orders()->whereNotIn('status', ['verified', 'completed'])->count(),
             'total_pets' => $pets->count(),
             'active_pets' => $pets->where('is_activated', true)->count(),
         ];
@@ -440,6 +441,10 @@ class ClientController extends Controller
                 userId: $user->id,
                 status: 'sent'
             );
+
+            // Enviar WhatsApp al cliente
+            $whatsapp = app(WhatsAppService::class);
+            $whatsapp->sendPaymentReminder($user, false);
 
             return back()->with('success', 'Recordatorio enviado a ' . $user->name);
 

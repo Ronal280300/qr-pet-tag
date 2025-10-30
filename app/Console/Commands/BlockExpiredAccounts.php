@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use App\Models\EmailLog;
+use App\Services\WhatsAppService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -76,6 +77,10 @@ class BlockExpiredAccounts extends Command
                     userId: $user->id,
                     status: 'sent'
                 );
+
+                // Enviar WhatsApp al cliente
+                $whatsapp = app(WhatsAppService::class);
+                $whatsapp->sendAccountBlocked($user);
 
                 $blocked++;
                 $this->info("✓ Cuenta bloqueada: {$user->name} ({$user->email})");

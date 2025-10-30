@@ -6,6 +6,7 @@ use App\Models\Plan;
 use App\Models\Order;
 use App\Models\AdminNotification;
 use App\Models\EmailLog;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -297,6 +298,10 @@ class CheckoutController extends Controller
                 status: 'sent'
             );
 
+            // Enviar WhatsApp al admin
+            $whatsapp = app(WhatsAppService::class);
+            $whatsapp->sendPaymentUploadedToAdmin($order);
+
         } catch (\Exception $e) {
             EmailLog::logEmail(
                 recipient: $adminEmail ?? 'unknown',
@@ -329,6 +334,10 @@ class CheckoutController extends Controller
                 userId: $order->user_id,
                 status: 'sent'
             );
+
+            // Enviar WhatsApp al cliente
+            $whatsapp = app(WhatsAppService::class);
+            $whatsapp->sendPaymentReceived($order);
 
         } catch (\Exception $e) {
             EmailLog::logEmail(
