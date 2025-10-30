@@ -15,8 +15,26 @@ class Setting extends Model
         'value',
         'type',
         'group',
+        'label',
         'description',
+        'order',
     ];
+
+    /**
+     * Boot del modelo - limpiar cache cuando se actualiza
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saved(function () {
+            Cache::forget('settings.all');
+        });
+
+        static::deleted(function () {
+            Cache::forget('settings.all');
+        });
+    }
 
     /**
      * Obtener un setting por su clave
@@ -86,5 +104,21 @@ class Setting extends Model
     public static function clearCache(): void
     {
         Cache::flush();
+    }
+
+    /**
+     * Obtener settings por grupo ordenados
+     */
+    public static function getByGroup(string $group)
+    {
+        return self::where('group', $group)->orderBy('order')->orderBy('label')->get();
+    }
+
+    /**
+     * Scope por grupo
+     */
+    public function scopeGroup($query, string $group)
+    {
+        return $query->where('group', $group);
     }
 }
