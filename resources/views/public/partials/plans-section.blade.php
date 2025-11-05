@@ -622,13 +622,183 @@
         width: 100%;
     }
 
+    /* MODERN Mobile Toggle Design */
+    .plan-toggle-wrapper {
+        padding: 0 16px;
+    }
+
     .plan-toggle-container {
         flex-direction: column;
-        gap: 20px;
+        gap: 16px;
+        padding: 20px 16px;
+        border-radius: 20px;
+        max-width: 400px;
+        margin: 0 auto;
     }
 
     .plan-toggle-option {
         width: 100%;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: rgba(79, 137, 232, 0.03);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .plan-toggle-option.active {
+        background: linear-gradient(135deg, rgba(79, 137, 232, 0.12), rgba(30, 124, 242, 0.18));
+        border-color: rgba(79, 137, 232, 0.3);
+        box-shadow: 0 4px 16px rgba(79, 137, 232, 0.15);
+    }
+
+    .plan-toggle-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+        border-radius: 12px;
+    }
+
+    .plan-toggle-text h5 {
+        font-size: 16px;
+    }
+
+    .plan-toggle-text p {
+        font-size: 12px;
+    }
+
+    /* Hide switch on mobile for cleaner look */
+    .plan-toggle-switch {
+        order: -1;
+        width: 100%;
+        height: 50px;
+        border-radius: 16px;
+        background: white;
+        border: 2px solid rgba(79, 137, 232, 0.1);
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+        gap: 6px;
+    }
+
+    .plan-toggle-switch::before {
+        content: 'Pago Único';
+        position: absolute;
+        left: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: white;
+        transition: all 0.3s ease;
+        z-index: 1;
+    }
+
+    .plan-toggle-switch::after {
+        content: 'Suscripción';
+        position: absolute;
+        right: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        transition: all 0.3s ease;
+        z-index: 1;
+    }
+
+    .plan-toggle-switch.active::before {
+        color: var(--muted);
+    }
+
+    .plan-toggle-switch.active::after {
+        color: white;
+    }
+
+    .plan-toggle-slider {
+        position: absolute;
+        width: calc(50% - 6px);
+        height: calc(100% - 12px);
+        background: linear-gradient(135deg, var(--primary), var(--brand-900));
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        left: 6px;
+        top: 6px;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .plan-toggle-switch.active .plan-toggle-slider {
+        transform: translateX(calc(100% + 6px));
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    /* MODERN Horizontal Scroll for Plans */
+    .tab-pane .row {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        gap: 16px;
+        padding: 20px 16px;
+        margin: 0 -16px;
+    }
+
+    .tab-pane .row > [class*="col-"] {
+        flex: 0 0 85%;
+        max-width: 85%;
+        scroll-snap-align: center;
+    }
+
+    /* Hide scrollbar but keep functionality */
+    .tab-pane .row::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-pane .row {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Scroll indicator dots */
+    .tab-pane {
+        position: relative;
+    }
+
+    /* Add visual hint for horizontal scroll */
+    .tab-pane .row::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 40px;
+        background: linear-gradient(to left, rgba(248, 250, 252, 0.95), transparent);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-4px);
+    }
+
+    /* Duration tabs for subscriptions - also horizontal scroll */
+    .duration-tabs {
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex-wrap: nowrap;
+        padding: 8px 16px;
+        margin: 0 -16px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .duration-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .duration-tab {
+        flex-shrink: 0;
+        white-space: nowrap;
     }
 }
 </style>
@@ -687,6 +857,91 @@ document.addEventListener('DOMContentLoaded', () => {
     toggle.addEventListener('click', () => {
         const newType = currentType === 'oneTime' ? 'subscription' : 'oneTime';
         switchPlanType(newType);
+    });
+
+    /* ========= ENHANCED SWIPE SUPPORT FOR HORIZONTAL SCROLL ========= */
+    // Add swipe support for plan cards on mobile
+    const planRows = document.querySelectorAll('.tab-pane .row');
+
+    planRows.forEach(row => {
+        let startX = 0;
+        let scrollLeft = 0;
+        let isDown = false;
+        let hasMoved = false;
+
+        row.addEventListener('mousedown', (e) => {
+            isDown = true;
+            hasMoved = false;
+            row.style.cursor = 'grabbing';
+            startX = e.pageX - row.offsetLeft;
+            scrollLeft = row.scrollLeft;
+        });
+
+        row.addEventListener('mouseleave', () => {
+            isDown = false;
+            row.style.cursor = 'grab';
+        });
+
+        row.addEventListener('mouseup', () => {
+            isDown = false;
+            row.style.cursor = 'grab';
+        });
+
+        row.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            hasMoved = true;
+            const x = e.pageX - row.offsetLeft;
+            const walk = (x - startX) * 2;
+            row.scrollLeft = scrollLeft - walk;
+        });
+
+        // Touch events for mobile
+        let touchStartX = 0;
+        let touchScrollLeft = 0;
+
+        row.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].pageX - row.offsetLeft;
+            touchScrollLeft = row.scrollLeft;
+        }, { passive: true });
+
+        row.addEventListener('touchmove', (e) => {
+            const x = e.touches[0].pageX - row.offsetLeft;
+            const walk = (x - touchStartX) * 2;
+            row.scrollLeft = touchScrollLeft - walk;
+        }, { passive: true });
+
+        // Add snap to center on scroll end
+        let scrollTimeout;
+        row.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const cards = row.querySelectorAll('[class*="col-"]');
+                const rowWidth = row.offsetWidth;
+                const scrollPosition = row.scrollLeft + rowWidth / 2;
+
+                let closestCard = null;
+                let closestDistance = Infinity;
+
+                cards.forEach(card => {
+                    const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                    const distance = Math.abs(scrollPosition - cardCenter);
+
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestCard = card;
+                    }
+                });
+
+                if (closestCard) {
+                    const targetScroll = closestCard.offsetLeft - (rowWidth - closestCard.offsetWidth) / 2;
+                    row.scrollTo({
+                        left: targetScroll,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
+        });
     });
 });
 </script>
