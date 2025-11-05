@@ -1118,6 +1118,9 @@
 {{-- Incluir modal con formulario completo de mascota (mismo que admin) --}}
 @include('public._pet-form-modal')
 
+{{-- Driver.js para guiar al usuario --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 (() => {
@@ -1358,6 +1361,45 @@
         if (filesBuffer.length > MAX) e.preventDefault();
     });
 })();
+
+// ===== Driver.js - Guía para registrar mascotas
+@if(!$allPetsRegistered)
+(() => {
+    // Verificar si el usuario ya vio la guía
+    const hasSeenGuide = sessionStorage.getItem('hasSeenCheckoutGuide');
+
+    if (!hasSeenGuide) {
+        setTimeout(() => {
+            const driver = window.driver({
+                showProgress: true,
+                steps: [
+                    {
+                        element: '#btnRegisterPet',
+                        popover: {
+                            title: '🐾 ¡Registra tus mascotas ahora!',
+                            description: 'Según tu plan, puedes registrar {{ $totalPets }} mascota(s). Haz clic aquí para comenzar el registro y agilizar tu proceso.',
+                            side: "top",
+                            align: 'center'
+                        }
+                    },
+                    {
+                        popover: {
+                            title: '✨ También puedes hacerlo después',
+                            description: 'No te preocupes si prefieres registrarlas más tarde. Te enviaremos un recordatorio por correo y podrás contactarnos por WhatsApp cuando estés listo.'
+                        }
+                    }
+                ],
+                onDestroyed: () => {
+                    // Marcar como visto
+                    sessionStorage.setItem('hasSeenCheckoutGuide', 'true');
+                }
+            });
+
+            driver.drive();
+        }, 1500);
+    }
+})();
+@endif
 
 // ===== Auto-abrir modal si hay mascotas pendientes y se acaba de registrar una
 (() => {

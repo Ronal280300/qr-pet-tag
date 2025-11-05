@@ -64,11 +64,15 @@ class CheckoutController extends Controller
 
         $petsQuantity = $request->input('pets_quantity');
 
-        // Redirigir a la página de pago con los datos del plan
-        return redirect()->route('checkout.payment', [
-            'plan' => $plan->id,
-            'pets_quantity' => $petsQuantity
+        // Guardar datos en sesión para evitar manipulación de URL
+        session([
+            'checkout_plan_id' => $plan->id,
+            'checkout_pets_quantity' => $petsQuantity,
+            'checkout_timestamp' => now()->timestamp
         ]);
+
+        // Redirigir a la página de pago sin parámetros en URL
+        return redirect()->route('checkout.payment');
     }
 
     /**
@@ -76,19 +80,25 @@ class CheckoutController extends Controller
      */
     public function payment(Request $request)
     {
-        $request->validate([
-            'plan' => 'required|exists:plans,id',
-            'pets_quantity' => 'required|integer|min:1',
-        ]);
+        // Leer desde sesión en lugar de query parameters
+        $planId = session('checkout_plan_id');
+        $petsQuantity = session('checkout_pets_quantity');
+        $timestamp = session('checkout_timestamp');
 
-        $plan = Plan::findOrFail($request->input('plan'));
+        // Validar que existan datos en sesión y no sean muy antiguos (30 minutos)
+        if (!$planId || !$petsQuantity || !$timestamp || (now()->timestamp - $timestamp) > 1800) {
+            return redirect()->route('plans.index')
+                ->with('error', 'Tu sesión expiró. Por favor, selecciona un plan nuevamente.');
+        }
 
-        if (!$plan->is_active) {
+        $plan = Plan::find($planId);
+
+        if (!$plan || !$plan->is_active) {
+            session()->forget(['checkout_plan_id', 'checkout_pets_quantity', 'checkout_timestamp']);
             return redirect()->route('home')
                 ->with('error', 'El plan seleccionado no está disponible');
         }
 
-        $petsQuantity = $request->input('pets_quantity');
         $additionalPets = max(0, $petsQuantity - $plan->pets_included);
         $additionalCost = $additionalPets * $plan->additional_pet_price;
         $total = $plan->calculateTotal($petsQuantity);
@@ -108,21 +118,26 @@ class CheckoutController extends Controller
     public function uploadPayment(Request $request)
     {
         $request->validate([
-            'plan_id' => 'required|exists:plans,id',
-            'pets_quantity' => 'required|integer|min:1',
             'payment_proof' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120', // 5MB max
         ]);
+
+        // Leer datos desde sesión para mayor seguridad
+        $planId = session('checkout_plan_id');
+        $petsQuantity = session('checkout_pets_quantity');
+
+        if (!$planId || !$petsQuantity) {
+            return redirect()->route('plans.index')
+                ->with('error', 'Tu sesión expiró. Por favor, selecciona un plan nuevamente.');
+        }
 
         try {
             DB::beginTransaction();
 
-            $plan = Plan::findOrFail($request->input('plan_id'));
+            $plan = Plan::findOrFail($planId);
 
             if (!$plan->is_active) {
                 return back()->with('error', 'El plan seleccionado no está disponible');
             }
-
-            $petsQuantity = $request->input('pets_quantity');
             $additionalPets = max(0, $petsQuantity - $plan->pets_included);
             $additionalCost = $additionalPets * $plan->additional_pet_price;
             $total = $plan->calculateTotal($petsQuantity);
@@ -156,6 +171,9 @@ class CheckoutController extends Controller
             $this->sendClientConfirmationEmail($order);
 
             DB::commit();
+
+            // Limpiar sesión de checkout
+            session()->forget(['checkout_plan_id', 'checkout_pets_quantity', 'checkout_timestamp']);
 
             return redirect()->route('checkout.confirmation', $order)
                 ->with('success', 'Comprobante subido exitosamente. Te contactaremos pronto.');
