@@ -1117,11 +1117,12 @@
 
 {{-- Incluir modal con formulario completo de mascota (mismo que admin) --}}
 @include('public._pet-form-modal')
+@endsection
 
-{{-- Driver.js para guiar al usuario --}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
-<script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+@push('scripts')
+{{-- SweetAlert2 para guía interactiva --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 (() => {
     // ===== Observaciones toggle
@@ -1362,43 +1363,151 @@
     });
 })();
 
-// ===== Driver.js - Guía para registrar mascotas
+// ===== GUÍA INTERACTIVA CON SWEETALERT2 - Simple y efectiva
 @if(!$allPetsRegistered)
-(() => {
+window.addEventListener('load', function() {
     // Verificar si el usuario ya vio la guía
     const hasSeenGuide = sessionStorage.getItem('hasSeenCheckoutGuide');
 
-    if (!hasSeenGuide) {
-        setTimeout(() => {
-            const driver = window.driver({
-                showProgress: true,
-                steps: [
-                    {
-                        element: '#btnRegisterPet',
-                        popover: {
-                            title: '🐾 ¡Registra tus mascotas ahora!',
-                            description: 'Según tu plan, puedes registrar {{ $totalPets }} mascota(s). Haz clic aquí para comenzar el registro y agilizar tu proceso.',
-                            side: "top",
-                            align: 'center'
-                        }
-                    },
-                    {
-                        popover: {
-                            title: '✨ También puedes hacerlo después',
-                            description: 'No te preocupes si prefieres registrarlas más tarde. Te enviaremos un recordatorio por correo y podrás contactarnos por WhatsApp cuando estés listo.'
-                        }
-                    }
-                ],
-                onDestroyed: () => {
-                    // Marcar como visto
-                    sessionStorage.setItem('hasSeenCheckoutGuide', 'true');
-                }
-            });
-
-            driver.drive();
-        }, 1500);
+    if (hasSeenGuide) {
+        console.log('Usuario ya vio la guía anteriormente');
+        return;
     }
-})();
+
+    // Esperar 1.5 segundos después de cargar para mejor UX
+    setTimeout(function() {
+        // Animar el botón antes de mostrar el tour
+        const btnRegisterPet = document.getElementById('btnRegisterPet');
+        if (!btnRegisterPet) return;
+
+        // Añadir animación de pulso al botón
+        btnRegisterPet.style.animation = 'pulse 1.5s infinite';
+        btnRegisterPet.style.boxShadow = '0 0 0 0 rgba(78, 137, 232, 0.7)';
+
+        // Crear estilo de animación si no existe
+        if (!document.getElementById('pulse-animation')) {
+            const style = document.createElement('style');
+            style.id = 'pulse-animation';
+            style.textContent = `
+                @keyframes pulse {
+                    0% {
+                        box-shadow: 0 0 0 0 rgba(78, 137, 232, 0.7);
+                    }
+                    70% {
+                        box-shadow: 0 0 0 25px rgba(78, 137, 232, 0);
+                    }
+                    100% {
+                        box-shadow: 0 0 0 0 rgba(78, 137, 232, 0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // PASO 1: Bienvenida y explicación
+        Swal.fire({
+            title: '🐾 ¡Registra tus mascotas!',
+            html: `
+                <div style="text-align: left; padding: 10px;">
+                    <p style="font-size: 16px; margin-bottom: 16px;">
+                        Según tu plan, puedes registrar <strong>{{ $totalPets }} mascota(s)</strong>.
+                    </p>
+                    <p style="font-size: 15px; color: #64748b; margin-bottom: 16px;">
+                        💡 Mientras verificamos tu pago, puedes adelantar el proceso registrando
+                        la información de tus mascotas ahora.
+                    </p>
+                    <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+                                border-radius: 12px; padding: 16px; border: 2px solid #93c5fd;">
+                        <p style="margin: 0; font-size: 14px; color: #1e40af;">
+                            <strong>⚡ Beneficio:</strong> Agiliza la personalización de tus placas QR
+                        </p>
+                    </div>
+                </div>
+            `,
+            icon: 'info',
+            confirmButtonText: 'Ver dónde registrar',
+            showCancelButton: true,
+            cancelButtonText: 'Lo haré después',
+            confirmButtonColor: '#4e89e8',
+            cancelButtonColor: '#94a3b8',
+            customClass: {
+                popup: 'animated-popup',
+                confirmButton: 'btn-modern',
+                cancelButton: 'btn-modern'
+            },
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // PASO 2: Mostrar dónde está el botón
+                btnRegisterPet.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                setTimeout(function() {
+                    Swal.fire({
+                        title: '👆 ¡Aquí está!',
+                        html: `
+                            <div style="text-align: left; padding: 10px;">
+                                <p style="font-size: 15px; margin-bottom: 16px;">
+                                    Haz clic en el botón <strong style="color: #4e89e8;">"Registrar mascota"</strong>
+                                    para comenzar.
+                                </p>
+                                <p style="font-size: 14px; color: #64748b; margin-bottom: 12px;">
+                                    📝 Te pediremos información como:
+                                </p>
+                                <ul style="text-align: left; font-size: 14px; color: #64748b; padding-left: 20px;">
+                                    <li>Nombre y raza</li>
+                                    <li>Edad y sexo</li>
+                                    <li>Condiciones médicas</li>
+                                    <li>Foto de tu mascota</li>
+                                    <li>Ubicación (zona)</li>
+                                </ul>
+                                <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+                                            border-radius: 12px; padding: 12px; border: 2px solid #6ee7b7; margin-top: 12px;">
+                                    <p style="margin: 0; font-size: 13px; color: #065f46;">
+                                        <strong>✨ Tranquilo:</strong> También puedes registrarlas más tarde por WhatsApp
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#10b981',
+                        customClass: {
+                            popup: 'animated-popup'
+                        },
+                        showClass: {
+                            popup: 'animate__animated animate__bounceIn'
+                        },
+                        didOpen: () => {
+                            // Hacer que el botón pulse más fuerte
+                            btnRegisterPet.style.animation = 'pulse 0.8s infinite';
+                        },
+                        didClose: () => {
+                            // Quitar animación después del tour
+                            setTimeout(() => {
+                                btnRegisterPet.style.animation = '';
+                                btnRegisterPet.style.boxShadow = '';
+                            }, 3000);
+                        }
+                    }).then(() => {
+                        // Marcar como visto
+                        sessionStorage.setItem('hasSeenCheckoutGuide', 'true');
+                    });
+                }, 800);
+            } else {
+                // Si cancela, quitar animación
+                btnRegisterPet.style.animation = '';
+                btnRegisterPet.style.boxShadow = '';
+                // Marcar como visto igual
+                sessionStorage.setItem('hasSeenCheckoutGuide', 'true');
+            }
+        });
+    }, 1500);
+});
 @endif
 
 // ===== Auto-abrir modal si hay mascotas pendientes y se acaba de registrar una
@@ -1453,4 +1562,4 @@
     });
 })();
 </script>
-@endsection
+@endpush
