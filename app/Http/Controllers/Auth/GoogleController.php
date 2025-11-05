@@ -57,7 +57,13 @@ class GoogleController extends Controller
 
         Auth::login($user, remember: true);
 
-        // Llévalo a tu dashboard/portal
-        return redirect()->intended(route('portal.dashboard'));
+        // Si el usuario no tiene teléfono, redirigir al onboarding
+        if (!$user->phone) {
+            return redirect()->route('onboarding.show')
+                ->with('info', 'Por favor, completa tu perfil para continuar.');
+        }
+
+        // Llévalo a planes
+        return redirect()->intended(route('plans.index'));
     }
 }

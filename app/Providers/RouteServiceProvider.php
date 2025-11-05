@@ -11,7 +11,7 @@ class RouteServiceProvider extends ServiceProvider
      * Dónde redirigir después de login/registro.
      * Ajusta a donde quieras, por ejemplo al dashboard del portal.
      */
-    public const HOME = '/portal/dashboard';
+    public const HOME = '/planes';
 
     /**
      * Define tus rutas aquí si las usas,

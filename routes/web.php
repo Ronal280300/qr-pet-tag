@@ -43,6 +43,12 @@ Route::get('auth/google/redirect', [GoogleController::class, 'redirect'])
 Route::get('auth/google/callback', [GoogleController::class, 'callback'])
     ->name('google.callback');
 
+// Onboarding para usuarios sin teléfono
+Route::middleware('auth')->group(function () {
+    Route::get('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.show');
+    Route::post('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
 // Perfil público por SLUG (URL impresa en el TAG/QR)
 Route::get('/p/{slug}', [PublicController::class, 'showPet'])->name('public.pet.show');
 
@@ -85,7 +91,7 @@ Route::get('/planes/{plan}', [PlanController::class, 'show'])->name('plans.show'
 // Checkout (requiere autenticación)
 Route::middleware('auth')->group(function () {
     // IMPORTANTE: Rutas específicas ANTES de rutas con parámetros dinámicos
-    Route::get('/checkout/payment', [CheckoutController::class, 'payment'])->name('checkout.payment');
+    Route::get('/checkout/payment', [CheckoutController::class, 'payment'])->name('checkout.payment'); // Sin query params
     Route::post('/checkout/payment', [CheckoutController::class, 'uploadPayment'])->name('checkout.upload');
     Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
     Route::post('/checkout/confirmation/{order}/pet', [CheckoutController::class, 'storePetFromCheckout'])->name('checkout.store-pet');

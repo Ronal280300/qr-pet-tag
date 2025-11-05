@@ -152,13 +152,20 @@
         <div id="topnav" class="collapse navbar-collapse">
           <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
 
+            {{-- Link a Planes (siempre visible) --}}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('plans.index') }}">
+                <i class="fa-solid fa-tags me-1"></i> Planes
+              </a>
+            </li>
+
             @guest
               <li class="nav-item"><a class="nav-link" href="{{ route('login') }}"><i class="fa-solid fa-right-to-bracket me-1"></i> Ingresar</a></li>
               <li class="nav-item ms-lg-1">
                 <a class="btn btn-cta btn-sm ms-lg-1" href="{{ route('register') }}"><i class="fa-solid fa-user-plus me-1"></i> Crear cuenta</a>
               </li>
             @else
-             <li class="nav-item ms-lg-2"><a href="{{ route('login') }}" class="btn btn-cta"><i class="fa-solid fa-paw me-2"></i>Mi Portal</a></li>
+             <li class="nav-item ms-lg-2"><a href="{{ route('portal.dashboard') }}" class="btn btn-cta"><i class="fa-solid fa-paw me-2"></i>Mi Portal</a></li>
 
               <li class="nav-item">
                 <a class="nav-link" href="{{ route('portal.pets.index') }}">

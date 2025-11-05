@@ -1353,17 +1353,17 @@
 
         <div class="hero-cta">
           @guest
-            <a href="{{ route('register') }}" class="btn-hero btn-primary will-change-transform">
-              <i class="fa-solid fa-paw"></i>
-              Comenzar gratis
+            <a href="{{ route('plans.index') }}" class="btn-hero btn-primary will-change-transform">
+              <i class="fa-solid fa-tags"></i>
+              Ver Planes
             </a>
           @else
-            <a href="{{ route('portal.pets.create') }}" class="btn-hero btn-primary will-change-transform">
-              <i class="fa-solid fa-plus"></i>
-              Registrar mascota
+            <a href="{{ route('plans.index') }}" class="btn-hero btn-primary will-change-transform">
+              <i class="fa-solid fa-tags"></i>
+              Ver Planes
             </a>
           @endguest
-          
+
           <a href="#como-funciona" class="btn-hero btn-secondary will-change-transform">
             <i class="fa-solid fa-circle-play"></i>
             Ver cómo funciona
@@ -1837,12 +1837,12 @@
     <h2>Protege a tu mascota hoy mismo</h2>
     <p>Regístrate y crea su QR-Pet Tag en minutos. Protección 24/7 para tu mejor amigo.</p>
     @guest
-      <a href="{{ route('register') }}" class="btn-cta-final will-change-transform">
-        <i class="fa-solid fa-paw"></i> Comenzar ahora
+      <a href="{{ route('plans.index') }}" class="btn-cta-final will-change-transform">
+        <i class="fa-solid fa-tags"></i> Ver Planes
       </a>
     @else
-      <a href="{{ route('portal.pets.create') }}" class="btn-cta-final will-change-transform">
-        <i class="fa-solid fa-plus"></i> Registrar mascota
+      <a href="{{ route('plans.index') }}" class="btn-cta-final will-change-transform">
+        <i class="fa-solid fa-tags"></i> Ver Planes
       </a>
     @endguest
   </div>

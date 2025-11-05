@@ -626,8 +626,7 @@
             <!-- Upload Form -->
             <form action="{{ route('checkout.upload') }}" method="POST" enctype="multipart/form-data" id="paymentForm" class="mt-4">
                 @csrf
-                <input type="hidden" name="plan_id" value="{{ $plan->id }}">
-                <input type="hidden" name="pets_quantity" value="{{ $petsQuantity }}">
+                {{-- Los datos del plan y cantidad ahora se manejan en sesión para mayor seguridad --}}
 
                 <div class="payment-card">
                     <div class="p-4">
@@ -773,6 +772,41 @@
     </div>
 </div>
 
+{{-- Loading Overlay Moderno --}}
+<div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+    <div style="text-align: center; color: white;">
+        <div style="width: 120px; height: 120px; margin: 0 auto 32px; position: relative;">
+            <div style="width: 120px; height: 120px; border: 6px solid rgba(78, 137, 232, 0.2); border-radius: 50%; position: absolute;"></div>
+            <div style="width: 120px; height: 120px; border: 6px solid transparent; border-top-color: #4e89e8; border-radius: 50%; animation: spin 1s linear infinite; position: absolute;"></div>
+            <div style="width: 90px; height: 90px; border: 4px solid transparent; border-top-color: #10b981; border-radius: 50%; animation: spin 1.5s linear infinite reverse; position: absolute; top: 15px; left: 15px;"></div>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px;">
+                <i class="fa-solid fa-cloud-arrow-up" style="animation: pulse 2s ease-in-out infinite;"></i>
+            </div>
+        </div>
+        <h3 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">Subiendo tu comprobante...</h3>
+        <p style="font-size: 16px; color: rgba(255, 255, 255, 0.7); margin: 0;">Por favor espera, esto tomará solo unos segundos</p>
+        <div style="margin-top: 24px;">
+            <div style="width: 200px; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; margin: 0 auto; overflow: hidden;">
+                <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #4e89e8, #10b981); animation: progress 2s ease-in-out infinite;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+@keyframes progress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+</style>
+
 <script>
 function previewFile(event) {
     const file = event.target.files[0];
@@ -831,6 +865,19 @@ uploadZone.addEventListener('drop', (e) => {
         document.getElementById('payment_proof').files = files;
         previewFile({ target: { files: files } });
     }
+});
+
+// Loading Overlay cuando se envía el formulario
+const paymentForm = document.getElementById('paymentForm');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+paymentForm.addEventListener('submit', function(e) {
+    // Mostrar el overlay de carga
+    loadingOverlay.style.display = 'flex';
+
+    // Deshabilitar el botón de submit
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Subiendo...';
 });
 </script>
 @endsection

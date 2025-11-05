@@ -11,7 +11,7 @@ class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
-    protected $redirectTo = '/portal/dashboard';
+    protected $redirectTo = '/planes';
 
     public function __construct()
     {

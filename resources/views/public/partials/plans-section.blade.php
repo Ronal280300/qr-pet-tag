@@ -18,29 +18,32 @@
             <p class="text-muted-2">Protege a tus mascotas con el plan que mejor se adapte a tus necesidades</p>
         </div>
 
-        <!-- Pestañas: Pago Único vs Suscripción -->
-        <ul class="nav nav-pills plan-tabs justify-content-center mb-4 reveal" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active plan-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#oneTime"
-                        type="button"
-                        role="tab">
-                    <i class="fa-solid fa-money-bill-1-wave me-2"></i>
-                    Pago Único
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link plan-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#subscription"
-                        type="button"
-                        role="tab">
-                    <i class="fa-solid fa-calendar-days me-2"></i>
-                    Suscripciones
-                </button>
-            </li>
-        </ul>
+        <!-- Toggle Moderno: Pago Único vs Suscripción -->
+        <div class="plan-toggle-wrapper reveal">
+            <div class="plan-toggle-container">
+                <div class="plan-toggle-option" data-plan-type="oneTime">
+                    <div class="plan-toggle-icon">
+                        <i class="fa-solid fa-money-bill-1-wave"></i>
+                    </div>
+                    <div class="plan-toggle-text">
+                        <h5>Pago Único</h5>
+                        <p>Compra una vez, úsalo siempre</p>
+                    </div>
+                </div>
+                <div class="plan-toggle-switch" id="planToggle">
+                    <div class="plan-toggle-slider"></div>
+                </div>
+                <div class="plan-toggle-option" data-plan-type="subscription">
+                    <div class="plan-toggle-icon">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <div class="plan-toggle-text">
+                        <h5>Suscripción</h5>
+                        <p>Renueva automáticamente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Contenido de las pestañas -->
         <div class="tab-content">
@@ -246,30 +249,126 @@
     -webkit-text-fill-color: transparent;
 }
 
-/* Tabs principales */
-.plan-tabs {
-    gap: 12px;
+/* Toggle Moderno */
+.plan-toggle-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 48px;
+    padding: 0 20px;
 }
 
-.plan-tab {
-    border-radius: 14px !important;
-    padding: 12px 28px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border: 2px solid rgba(79, 137, 232, 0.1);
+.plan-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 24px;
     background: white;
+    border-radius: 24px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(79, 137, 232, 0.15);
+}
+
+.plan-toggle-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    padding: 16px 20px;
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.plan-toggle-option:hover {
+    background: rgba(79, 137, 232, 0.05);
+    transform: translateY(-2px);
+}
+
+.plan-toggle-option.active {
+    background: linear-gradient(135deg, rgba(79, 137, 232, 0.1), rgba(30, 124, 242, 0.15));
+    box-shadow: 0 8px 24px rgba(79, 137, 232, 0.2);
+}
+
+.plan-toggle-option.active .plan-toggle-icon {
+    background: linear-gradient(135deg, var(--primary), var(--brand-900));
+    color: white;
+    transform: scale(1.1) rotate(-5deg);
+    box-shadow: 0 8px 24px rgba(79, 137, 232, 0.4);
+}
+
+.plan-toggle-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: rgba(79, 137, 232, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--primary);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plan-toggle-text {
+    text-align: left;
+}
+
+.plan-toggle-text h5 {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
     color: var(--ink);
 }
 
-.plan-tab:hover {
-    background: rgba(79, 137, 232, 0.05);
-    border-color: rgba(79, 137, 232, 0.2);
+.plan-toggle-text p {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
 }
 
-.plan-tab.active {
-    background: linear-gradient(135deg, var(--primary), var(--brand-900));
-    border-color: transparent;
-    color: white !important;
+.plan-toggle-switch {
+    position: relative;
+    width: 80px;
+    height: 40px;
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.plan-toggle-switch.active {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.plan-toggle-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.plan-toggle-switch.active .plan-toggle-slider {
+    transform: translateX(40px);
+}
+
+/* Animación de aparición */
+@keyframes togglePulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(79, 137, 232, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 15px rgba(79, 137, 232, 0);
+    }
+}
+
+.plan-toggle-container {
+    animation: togglePulse 2s ease-in-out infinite;
 }
 
 /* Duration tabs (subtabs para suscripciones) */
@@ -522,5 +621,72 @@
     .plan-tab {
         width: 100%;
     }
+
+    .plan-toggle-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .plan-toggle-option {
+        width: 100%;
+    }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('planToggle');
+    const options = document.querySelectorAll('.plan-toggle-option');
+    const oneTimeTab = document.getElementById('oneTime');
+    const subscriptionTab = document.getElementById('subscription');
+
+    let currentType = 'oneTime'; // Estado inicial
+
+    // Marcar la opción inicial como activa
+    document.querySelector('[data-plan-type="oneTime"]').classList.add('active');
+
+    // Función para cambiar el tipo de plan
+    function switchPlanType(type) {
+        currentType = type;
+
+        // Actualizar clases de las opciones
+        options.forEach(option => {
+            if (option.dataset.planType === type) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
+
+        // Actualizar toggle switch
+        if (type === 'subscription') {
+            toggle.classList.add('active');
+        } else {
+            toggle.classList.remove('active');
+        }
+
+        // Cambiar tabs
+        if (type === 'oneTime') {
+            oneTimeTab.classList.add('show', 'active');
+            subscriptionTab.classList.remove('show', 'active');
+        } else {
+            oneTimeTab.classList.remove('show', 'active');
+            subscriptionTab.classList.add('show', 'active');
+        }
+    }
+
+    // Event listeners para las opciones
+    options.forEach(option => {
+        option.addEventListener('click', () => {
+            const type = option.dataset.planType;
+            switchPlanType(type);
+        });
+    });
+
+    // Event listener para el switch
+    toggle.addEventListener('click', () => {
+        const newType = currentType === 'oneTime' ? 'subscription' : 'oneTime';
+        switchPlanType(newType);
+    });
+});
+</script>
