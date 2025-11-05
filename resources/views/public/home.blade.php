@@ -153,7 +153,7 @@
     letter-spacing: -0.02em;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    hyphens: auto;
+    hyphens: none;
   }
 
   .hero-title-animated {
@@ -280,12 +280,22 @@
 
   .hero-image-wrapper {
     position: relative;
-    animation: floatImage 6s ease-in-out infinite;
+    animation: floatImage 8s ease-in-out infinite;
   }
 
   @keyframes floatImage {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+    0%, 100% {
+      transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+    }
+    25% {
+      transform: translateY(-15px) translateX(10px) rotate(2deg) scale(1.02);
+    }
+    50% {
+      transform: translateY(-25px) translateX(-5px) rotate(-1deg) scale(1.05);
+    }
+    75% {
+      transform: translateY(-15px) translateX(10px) rotate(2deg) scale(1.02);
+    }
   }
 
   .hero-image-inner {
@@ -1089,7 +1099,7 @@
     .hero-title {
       font-size: clamp(1.75rem, 6vw, 2.5rem);
       line-height: 1.2;
-      word-break: break-word;
+      hyphens: none;
     }
 
     .hero-title-animated {
