@@ -84,11 +84,10 @@ Route::post('/p/{slug}/ping', [PublicPetPingController::class, 'store'])
 |--------------------------------------------------------------------------
 */
 
-// Mostrar planes (público con verificación de mantenimiento)
-Route::middleware('maintenance')->group(function () {
-    Route::get('/planes', [PlanController::class, 'index'])->name('plans.index');
-    Route::get('/planes/{plan}', [PlanController::class, 'show'])->name('plans.show');
-});
+// Mostrar planes (público - middleware deshabilitado temporalmente por error en producción)
+// TODO: Rehabilitar middleware 'maintenance' después de ejecutar composer dump-autoload en producción
+Route::get('/planes', [PlanController::class, 'index'])->name('plans.index');
+Route::get('/planes/{plan}', [PlanController::class, 'show'])->name('plans.show');
 
 // Checkout (requiere autenticación)
 Route::middleware('auth')->group(function () {

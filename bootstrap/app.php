@@ -11,9 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias([
-            'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
-        ]);
+        // TODO: Rehabilitar después de ejecutar composer dump-autoload en producción
+        // $middleware->alias([
+        //     'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
