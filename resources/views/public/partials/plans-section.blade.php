@@ -86,12 +86,14 @@
                                 <a href="{{ route('checkout.show', $plan->id) }}" class="btn btn-plan">
                                     <i class="fa-solid fa-cart-shopping me-2"></i> Elegir plan
                                 </a>
+                                @if($plan->pets_included >= 3)
                                 <p class="plan-additional">
                                     <small>
                                         <i class="fa-solid fa-plus"></i>
                                         Mascota adicional: ₡{{ number_format($plan->additional_pet_price, 0, ',', '.') }}
                                     </small>
                                 </p>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -164,12 +166,14 @@
                                         <a href="{{ route('checkout.show', $plan->id) }}" class="btn btn-plan">
                                             <i class="fa-solid fa-cart-shopping me-2"></i> Elegir plan
                                         </a>
+                                        @if($plan->pets_included >= 3)
                                         <p class="plan-additional">
                                             <small>
                                                 <i class="fa-solid fa-plus"></i>
                                                 Mascota adicional: ₡{{ number_format($plan->additional_pet_price, 0, ',', '.') }}
                                             </small>
                                         </p>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
