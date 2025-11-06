@@ -6,6 +6,7 @@ use App\Models\Plan;
 use App\Models\Order;
 use App\Models\AdminNotification;
 use App\Models\EmailLog;
+use App\Models\Setting;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -300,7 +301,7 @@ class CheckoutController extends Controller
     protected function sendAdminNotificationEmail(Order $order)
     {
         try {
-            $adminEmail = setting('admin_email') ?: setting('contact_email') ?: config('mail.from.address');
+            $adminEmail = Setting::get('admin_email') ?: Setting::get('contact_email') ?: config('mail.from.address');
 
             Mail::send('emails.admin.new-payment', ['order' => $order], function ($message) use ($adminEmail, $order) {
                 $message->to($adminEmail)
