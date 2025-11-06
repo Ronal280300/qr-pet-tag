@@ -733,52 +733,75 @@
         background: linear-gradient(135deg, #10b981, #059669);
     }
 
-    /* MODERN Horizontal Scroll for Plans */
+    /* MODERN Horizontal Scroll for Plans - IMPROVED */
     .tab-pane .row {
         display: flex;
         flex-wrap: nowrap;
         overflow-x: auto;
         overflow-y: hidden;
-        scroll-snap-type: x mandatory;
+        scroll-snap-type: x proximity; /* Changed from mandatory to proximity for smoother UX */
         scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
         gap: 16px;
-        padding: 20px 16px;
+        padding: 24px 20px 24px 16px; /* More padding for better visual */
         margin: 0 -16px;
+        scroll-padding: 0 16px;
     }
 
     .tab-pane .row > [class*="col-"] {
-        flex: 0 0 85%;
-        max-width: 85%;
-        scroll-snap-align: center;
+        flex: 0 0 280px; /* Fixed width for better consistency */
+        max-width: 280px;
+        scroll-snap-align: start; /* Changed to start for better control */
     }
 
-    /* Hide scrollbar but keep functionality */
+    /* Custom scrollbar for better UX */
     .tab-pane .row::-webkit-scrollbar {
-        display: none;
+        height: 6px;
+        margin-top: 8px;
     }
 
-    .tab-pane .row {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .tab-pane .row::-webkit-scrollbar-track {
+        background: rgba(79, 137, 232, 0.08);
+        border-radius: 10px;
+        margin: 0 20px;
     }
 
-    /* Scroll indicator dots */
+    .tab-pane .row::-webkit-scrollbar-thumb {
+        background: linear-gradient(90deg, var(--primary), var(--brand-900));
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .tab-pane .row::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(90deg, var(--brand-900), var(--primary));
+    }
+
+    /* Scroll indicator */
     .tab-pane {
         position: relative;
     }
 
-    /* Add visual hint for horizontal scroll */
+    /* Improved gradient hints on both sides */
+    .tab-pane .row::before,
     .tab-pane .row::after {
         content: '';
         position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        width: 40px;
-        background: linear-gradient(to left, rgba(248, 250, 252, 0.95), transparent);
+        top: 24px;
+        bottom: 30px;
+        width: 30px;
         pointer-events: none;
-        z-index: 1;
+        z-index: 2;
+        transition: opacity 0.3s ease;
+    }
+
+    .tab-pane .row::before {
+        left: 0;
+        background: linear-gradient(to right, rgba(248, 250, 252, 0.98), transparent);
+    }
+
+    .tab-pane .row::after {
+        right: 0;
+        background: linear-gradient(to left, rgba(248, 250, 252, 0.98), transparent);
     }
 
     .plan-card:hover {

@@ -11,9 +11,9 @@ class Scan extends Model
 
     protected $fillable = [
         'qr_code_id',
-        'ip',
+        'ip_address',
         'user_agent',
-        'referrer',
+        'location',
     ];
 
     public function qrCode()

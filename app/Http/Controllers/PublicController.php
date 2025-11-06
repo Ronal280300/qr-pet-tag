@@ -19,9 +19,9 @@ class PublicController extends Controller
         // Registrar el escaneo del QR
         Scan::create([
             'qr_code_id' => $qr->id,
-            'ip'         => request()->ip(),
+            'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'referrer'   => request()->header('referer'),
+            'location'   => null, // Se puede agregar geolocalización después
         ]);
 
         // Si el TAG no tiene mascota asociada, mostrar vista especial
