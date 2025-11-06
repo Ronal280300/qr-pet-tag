@@ -76,5 +76,8 @@ class Kernel extends HttpKernel
 
         // 🐾 Nuevo: bloqueo de gestión de mascotas para cuentas inactivas
         'can.manage.pets' => \App\Http\Middleware\EnsureClientCanManagePets::class,
+
+        // 🔧 Modo mantenimiento para planes
+        'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
     ];
 }

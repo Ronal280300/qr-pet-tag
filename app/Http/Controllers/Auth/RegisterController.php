@@ -19,9 +19,8 @@ class RegisterController extends Controller
     use RegistersUsers;
 
     /**
-     * A dónde redirigir tras registro.
+     * Removed static $redirectTo - using dynamic redirectTo() method instead
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
 
     public function __construct()
     {

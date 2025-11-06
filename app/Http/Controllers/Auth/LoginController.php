@@ -13,7 +13,7 @@ class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
-    protected $redirectTo = '/planes';
+    // Removed static $redirectTo - using dynamic redirectTo() method instead
 
     public function __construct()
     {

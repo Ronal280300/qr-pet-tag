@@ -84,9 +84,11 @@ Route::post('/p/{slug}/ping', [PublicPetPingController::class, 'store'])
 |--------------------------------------------------------------------------
 */
 
-// Mostrar planes (público)
-Route::get('/planes', [PlanController::class, 'index'])->name('plans.index');
-Route::get('/planes/{plan}', [PlanController::class, 'show'])->name('plans.show');
+// Mostrar planes (público con verificación de mantenimiento)
+Route::middleware('maintenance')->group(function () {
+    Route::get('/planes', [PlanController::class, 'index'])->name('plans.index');
+    Route::get('/planes/{plan}', [PlanController::class, 'show'])->name('plans.show');
+});
 
 // Checkout (requiere autenticación)
 Route::middleware('auth')->group(function () {
