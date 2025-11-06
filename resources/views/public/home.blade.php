@@ -109,7 +109,7 @@
 
   .hero-content {
     position: relative;
-    z-index: 2;
+    z-index: 10;
   }
 
   .hero-badge {
@@ -262,7 +262,7 @@
 
   .hero-image {
     position: relative;
-    z-index: 2;
+    z-index: 1;
     opacity: 0;
     animation: fadeInScale 1s ease-out 0.4s forwards;
   }
@@ -1094,6 +1094,16 @@
     .hero-modern {
       min-height: auto;
       padding: 80px 0 60px;
+    }
+
+    .hero-content {
+      margin-bottom: 40px;
+      z-index: 10;
+    }
+
+    .hero-image {
+      z-index: 1;
+      margin-top: 40px;
     }
 
     .hero-title {

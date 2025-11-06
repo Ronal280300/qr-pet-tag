@@ -559,7 +559,7 @@
 
     {{-- ================== KPIs PERSONALES (usuarios normales) ================== --}}
     <div class="row g-3 mb-4">
-      <div class="col-12 col-sm-6 col-lg-4">
+      <div class="col-12 col-sm-6 col-lg-3">
         <div class="card kpi">
           <div class="kpi-content">
             <div class="kpi-info">
@@ -572,7 +572,7 @@
           </div>
         </div>
       </div>
-      <div class="col-12 col-sm-6 col-lg-4">
+      <div class="col-12 col-sm-6 col-lg-3">
         <div class="card kpi">
           <div class="kpi-content">
             <div class="kpi-info">
@@ -585,15 +585,28 @@
           </div>
         </div>
       </div>
-      <div class="col-12 col-sm-6 col-lg-4">
+      <div class="col-12 col-sm-6 col-lg-3">
         <div class="card kpi">
           <div class="kpi-content">
             <div class="kpi-info">
-              <div class="lbl">Recompensas activas</div>
-              <div class="big">{{ $my['rewards'] ?? 0 }}</div>
+              <div class="lbl">Escaneos (Total)</div>
+              <div class="big">{{ $my['scans_total'] ?? 0 }}</div>
             </div>
             <div class="kpi-icon">
-              <i class="fa-solid fa-gift"></i>
+              <i class="fa-solid fa-qrcode"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card kpi">
+          <div class="kpi-content">
+            <div class="kpi-info">
+              <div class="lbl">Escaneos (7 días)</div>
+              <div class="big">{{ $my['scans_week'] ?? 0 }}</div>
+            </div>
+            <div class="kpi-icon">
+              <i class="fa-solid fa-chart-line"></i>
             </div>
           </div>
         </div>
@@ -745,6 +758,29 @@
       </div>
     @endif
 
+    {{-- ================== MASCOTA MÁS POPULAR ================== --}}
+    @if($topScannedPet)
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="card card-elev p-4" style="background: linear-gradient(135deg, rgba(78, 137, 232, 0.05), rgba(16, 185, 129, 0.05));">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #4e89e8, #10b981); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; box-shadow: 0 8px 20px rgba(78, 137, 232, 0.3);">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div class="flex-grow-1">
+              <div style="font-size: 0.875rem; color: #6c7a89; font-weight: 600; margin-bottom: 4px;">🏆 MASCOTA MÁS POPULAR</div>
+              <h5 class="mb-0" style="color: #0f1419; font-weight: 800;">{{ $topScannedPet['name'] }}</h5>
+              <div style="color: #5f6c7b; font-size: 0.95rem; margin-top: 4px;">
+                <i class="fa-solid fa-qrcode me-1"></i>
+                <strong style="color: #3466ff;">{{ $topScannedPet['scans'] }}</strong> {{ Str::plural('escaneo', $topScannedPet['scans']) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
+
     {{-- ================== ÚLTIMOS ESCANEOS DEL USUARIO ================== --}}
     <div class="row g-3">
       <div class="col-12 col-lg-8">
@@ -757,6 +793,7 @@
             <div class="empty-state">
               <i class="fa-solid fa-inbox"></i>
               <div>Aún no hay escaneos recientes.</div>
+              <small style="color: #94a3b8; margin-top: 8px;">Los escaneos aparecerán aquí cuando alguien escanee el QR de tus mascotas.</small>
             </div>
           @else
             <div class="table-responsive">
@@ -771,7 +808,7 @@
                 <tbody>
                   @foreach($myRecentScans as $s)
                     <tr>
-                      <td>{{ $s->created_at->format('Y-m-d H:i') }}</td>
+                      <td>{{ $s->created_at->format('d/m/Y H:i') }}</td>
                       <td><strong>{{ optional($s->qrCode->pet)->name ?: '—' }}</strong></td>
                       <td><code>#{{ $s->qr_code_id }}</code></td>
                     </tr>

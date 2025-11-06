@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pet;
+use App\Models\Order;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +18,27 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    /**
+     * Redirect inteligente: nuevos usuarios → planes, existentes → dashboard
+     */
+    protected function redirectTo()
+    {
+        $user = Auth::user();
+
+        // Si el usuario tiene mascotas o pedidos confirmados, ir al dashboard
+        $hasPets = Pet::where('user_id', $user->id)->exists();
+        $hasOrders = Order::where('user_id', $user->id)
+            ->whereIn('status', ['confirmed', 'payment_uploaded'])
+            ->exists();
+
+        if ($hasPets || $hasOrders) {
+            return route('portal.dashboard');
+        }
+
+        // Usuarios nuevos van a planes
+        return route('plans.index');
     }
 
     /**
