@@ -30,10 +30,9 @@
 
           {{-- Teléfono (código + local) --}}
           @php
-            // Estos valores los prepara tu controlador al cargar la vista
-            // $phoneCode y $phoneLocal vienen “separados” del E.164 guardado
-            $phoneCode  = $phoneCode  ?? '506';
-            $phoneLocal = $phoneLocal ?? '';
+            // Valores del controlador: $code y $local
+            $phoneCode  = $code  ?? '506';
+            $phoneLocal = $local ?? '';
           @endphp
 
           <div class="mb-1">
@@ -41,7 +40,6 @@
             <div class="input-group">
               {{-- Código de país --}}
               <select class="form-select" name="phone_code" id="phone_code" style="max-width:220px">
-                {{-- Agrega los que necesites; dejo CR + algunos ejemplos --}}
                 <option value="506"  {{ $phoneCode=='506'  ? 'selected':'' }}>Costa Rica (+506)</option>
                 <option value="502"  {{ $phoneCode=='502'  ? 'selected':'' }}>Guatemala (+502)</option>
                 <option value="503"  {{ $phoneCode=='503'  ? 'selected':'' }}>El Salvador (+503)</option>
@@ -52,12 +50,14 @@
                 <option value="1"    {{ $phoneCode=='1'    ? 'selected':'' }}>Estados Unidos (+1)</option>
               </select>
 
-              {{-- Número local (sin +, solo dígitos) --}}
+              {{-- Número local (sin +, solo dígitos) - Muestra el valor actual --}}
               <input type="text" class="form-control" id="phone_local" name="phone_local"
-                     value="{{ old('phone_local', $phoneLocal) }}" placeholder="85307943">
+                     value="{{ old('phone_local', $phoneLocal) }}"
+                     placeholder="{{ $phoneLocal ? $phoneLocal : '85307943' }}">
             </div>
           </div>
           <div class="form-text mb-3">
+            <i class="fa-solid fa-info-circle me-1"></i>
             Se guardará como <span id="e164Preview" class="fw-semibold">+{{ $phoneCode }}{{ preg_replace('/\D+/','',$phoneLocal) }}</span>
             (formato E.164). WhatsApp requiere el prefijo del país.
           </div>
