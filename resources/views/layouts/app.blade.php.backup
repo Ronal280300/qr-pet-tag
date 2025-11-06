@@ -14,7 +14,6 @@
     :root{
       --brand:#1e7cf2;
       --brand-900:#0e61c6;
-      --brand-light:#3b8cff;
       --ink:#0f172a;
       --muted:#6b7a90;
       --bg:#f7f9fc;
@@ -26,186 +25,92 @@
       color:#1b2430;
     }
 
-    /* ====== NAVBAR MODERNA ====== */
+    /* ====== NAVBAR NUEVA ====== */
     .nav-shell{
       position: sticky;
       top: 0;
-      z-index: 1030;
-      background: #ffffff;
-      border-bottom: 1px solid rgba(15,23,42,.08);
-      transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1020;
+      backdrop-filter: saturate(140%) blur(10px);
+      background: linear-gradient(90deg,rgba(30,124,242,.92),rgba(14,97,198,.92));
+      transition: all .25s ease;
     }
     .nav-shell.scrolled{
-      box-shadow: 0 4px 24px rgba(15,23,42,.08);
-      border-bottom-color: transparent;
+      box-shadow: 0 10px 30px rgba(15,23,42,.08);
+      transform: translateY(-2px);
     }
-
     .navbar{
-      --bs-navbar-color:#334155;
-      --bs-navbar-hover-color:#0e61c6;
-      --bs-navbar-active-color:#0e61c6;
-      padding: 1rem 0;
-      transition: padding .3s ease;
+      --bs-navbar-color:#eef6ff;
+      --bs-navbar-hover-color:#fff;
+      --bs-navbar-active-color:#fff;
+      padding: .85rem 0;
+      transition: padding .25s ease;
     }
-    .nav-shell.scrolled .navbar{ padding: .75rem 0; }
+    .nav-shell.scrolled .navbar{ padding: .55rem 0; }
 
     .container-narrow{ max-width: 1120px; }
 
-    /* Brand con paw icon */
     .navbar-brand{
-      display:flex; align-items:center; gap:.65rem;
-      font-weight:800; font-size:1.25rem; letter-spacing:-.02em;
-      color:#0f172a !important;
-      transition: transform .2s ease;
+      display:flex; align-items:center; gap:.55rem;
+      font-weight:800; letter-spacing:.2px; color:#fff !important;
+      transform: translateZ(0);
     }
-    .navbar-brand:hover{ transform: translateY(-1px); }
+    .navbar-brand .logo-badge{
+      width:34px;height:34px;display:grid;place-items:center;
+      background: rgba(255,255,255,.15);
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:10px;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,.15);
+      transition: transform .25s ease;
+    }
+    .navbar-brand:hover .logo-badge{ transform: rotate(-8deg) scale(1.06); }
 
-    .navbar-brand .logo-icon{
-      width:40px; height:40px;
-      display:grid; place-items:center;
-      background: linear-gradient(135deg, #1e7cf2, #0e61c6);
-      border-radius:12px;
-      color:#fff; font-size:1.15rem;
-      box-shadow: 0 2px 8px rgba(30,124,242,.25);
-      transition: all .3s ease;
-    }
-    .navbar-brand:hover .logo-icon{
-      transform: rotate(-5deg) scale(1.05);
-      box-shadow: 0 4px 12px rgba(30,124,242,.35);
-    }
-
-    /* Nav links modernos */
+    /* Links con subrayado animado */
     .nav-link{
       position:relative;
       font-weight:600;
-      font-size:.95rem;
-      color:#475569 !important;
-      padding: .5rem 1rem !important;
-      border-radius:10px;
-      transition: all .2s ease;
+      color:#eaf3ff !important;
+      opacity:.95;
     }
-    .nav-link:hover{
-      color:#0e61c6 !important;
-      background: rgba(30,124,242,.06);
+    .nav-link:hover{ opacity:1; }
+    .nav-link::after{
+      content:""; position:absolute; left:10%; right:10%; bottom:.35rem;
+      height:2px; background:rgba(255,255,255,.85);
+      transform:scaleX(0); transform-origin: center;
+      transition: transform .25s ease;
+      border-radius:2px;
     }
-    .nav-link.active{
-      color:#0e61c6 !important;
-      background: rgba(30,124,242,.1);
-    }
+    .nav-link:hover::after,.nav-link.active::after{ transform:scaleX(1); }
 
-    /* Mi Portal - estilo destacado pero elegante */
-    .nav-link-portal{
-      position:relative;
-      font-weight:700;
-      font-size:.95rem;
-      color:#0e61c6 !important;
-      padding: .5rem 1.25rem !important;
-      background: linear-gradient(135deg, rgba(30,124,242,.08), rgba(14,97,198,.08));
-      border: 1.5px solid rgba(30,124,242,.2);
-      border-radius:10px;
-      transition: all .25s ease;
-    }
-    .nav-link-portal:hover{
-      background: linear-gradient(135deg, rgba(30,124,242,.14), rgba(14,97,198,.14));
-      border-color: rgba(30,124,242,.35);
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(30,124,242,.15);
-    }
-
-    /* Botón CTA para invitados */
+    /* Botón call-to-action */
     .btn-cta{
-      font-weight:700;
-      font-size:.95rem;
-      padding: .5rem 1.25rem;
-      background: linear-gradient(135deg, #1e7cf2, #0e61c6);
-      border:0;
-      color:#fff !important;
-      border-radius:10px;
-      box-shadow: 0 2px 8px rgba(30,124,242,.25);
-      transition: all .25s ease;
-    }
-    .btn-cta:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(30,124,242,.35);
+      --bs-btn-bg:#ffffff; --bs-btn-border-color:#ffffff;
+      --bs-btn-color:#0e61c6; --bs-btn-hover-color:#0e61c6;
+      font-weight:700; box-shadow:0 6px 18px rgba(255,255,255,.18);
     }
 
-    /* Dropdown elegante */
+    /* Dropdown más elegante */
     .dropdown-menu{
-      border:0;
-      border-radius:12px;
-      padding:.5rem;
-      box-shadow:0 8px 32px rgba(15,23,42,.12);
-      margin-top:.5rem !important;
-      animation: menuSlide .2s ease-out;
+      border:0; border-radius:14px; padding:.4rem;
+      box-shadow:0 12px 40px rgba(15,23,42,.18);
+      transform-origin: top right;
+      animation: menuFade .16s ease-out;
     }
-    @keyframes menuSlide{
-      from{ opacity:0; transform:translateY(-8px); }
-      to{   opacity:1; transform:translateY(0); }
+    @keyframes menuFade{
+      from{ opacity:0; transform:translateY(-4px) scale(.98); }
+      to{   opacity:1; transform:translateY(0)    scale(1); }
     }
     .dropdown-item{
-      border-radius:8px;
-      padding:.65rem 1rem;
-      font-weight:600;
-      font-size:.9rem;
-      transition: all .15s ease;
+      border-radius:10px; padding:.55rem .8rem; font-weight:600;
     }
-    .dropdown-item i{
-      width:20px;
-      text-align:center;
-      margin-right:.65rem;
-      opacity:.75;
-    }
-    .dropdown-item:hover{
-      background:#f1f5ff;
-      color:#0e61c6;
-    }
-    .dropdown-item:hover i{ opacity:1; }
+    .dropdown-item i{ width:18px; text-align:center; margin-right:.5rem; }
+    .dropdown-item:hover{ background:#f1f5ff; color:#0e61c6; }
 
-    /* Avatar del usuario */
+    /* Avatar */
     .avatar{
-      width:36px; height:36px;
-      border-radius:50%;
-      background: linear-gradient(135deg, rgba(30,124,242,.12), rgba(14,97,198,.12));
-      border:2px solid rgba(30,124,242,.2);
-      display:grid; place-items:center;
-      color:#0e61c6;
-      font-size:.9rem;
-      transition: all .2s ease;
-    }
-    .nav-link.dropdown-toggle:hover .avatar{
-      border-color: rgba(30,124,242,.4);
-      transform: scale(1.05);
-    }
-
-    /* Navbar toggler para fondo blanco */
-    .navbar-toggler{
-      border: 2px solid rgba(30,124,242,.2);
-      border-radius:8px;
-      padding: .35rem .65rem;
-      transition: all .2s ease;
-    }
-    .navbar-toggler:hover{
-      border-color: rgba(30,124,242,.4);
-      background: rgba(30,124,242,.05);
-    }
-    .navbar-toggler:focus{
-      box-shadow: 0 0 0 3px rgba(30,124,242,.15);
-    }
-    .navbar-toggler-icon{
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%230e61c6' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-      width:22px;
-      height:22px;
-    }
-
-    /* Mobile menu spacing */
-    @media (max-width: 991px) {
-      #topnav .navbar-nav{
-        padding-top: 1rem;
-        gap: .35rem;
-      }
-      #topnav .nav-item{
-        margin-bottom: .25rem;
-      }
+      width:32px;height:32px;border-radius:50%;flex:0 0 32px;
+      background:rgba(255,255,255,.2);
+      display:grid; place-items:center; color:#fff;
+      border:1px solid rgba(255,255,255,.35);
     }
 
     /* Tarjetas y botones generales */
@@ -229,14 +134,14 @@
   @stack('styles')
 </head>
 <body>
-  {{-- ===== NAVBAR MODERNA ===== --}}
+  {{-- ===== NAVBAR ===== --}}
   <div class="nav-shell" id="navShell">
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg navbar-dark">
       <div class="container container-narrow">
 
-        {{-- Brand con paw icon --}}
+        {{-- Brand (mantiene tu logo actual) --}}
         <a class="navbar-brand" href="{{ url('/') }}">
-          <span class="logo-icon"><i class="fa-solid fa-paw"></i></span>
+          <span class="logo-badge"><i class="fa-solid fa-paw"></i></span>
           <span>QR-Pet Tag</span>
         </a>
 
@@ -267,27 +172,27 @@
               {{-- Usuarios autenticados: Inicio (móvil) + Mi Portal + Planes + Mascotas --}}
               <li class="nav-item d-lg-none">
                 <a class="nav-link" href="{{ url('/') }}">
-                  <i class="fa-solid fa-home me-2"></i>Inicio
+                  <i class="fa-solid fa-home me-1"></i> Inicio
                 </a>
               </li>
 
-              {{-- Mi Portal - SIEMPRE PRIMERO con estilo especial --}}
+              {{-- Mi Portal - SIEMPRE PRIMERO --}}
               <li class="nav-item">
-                <a href="{{ route('portal.dashboard') }}" class="nav-link nav-link-portal">
-                  <i class="fa-solid fa-paw me-2"></i>Mi Portal
+                <a href="{{ route('portal.dashboard') }}" class="btn btn-cta btn-sm">
+                  <i class="fa-solid fa-gauge-high me-2"></i>Mi Portal
                 </a>
               </li>
 
               {{-- Planes - DESPUÉS DE MI PORTAL --}}
               <li class="nav-item">
                 <a class="nav-link" href="{{ route('plans.index') }}">
-                  <i class="fa-solid fa-tags me-2"></i>Planes
+                  <i class="fa-solid fa-tags me-1"></i> Planes
                 </a>
               </li>
 
               <li class="nav-item">
                 <a class="nav-link" href="{{ route('portal.pets.index') }}">
-                  <i class="fa-solid fa-dog me-2"></i>Mascotas
+                  <i class="fa-solid fa-dog me-1"></i> Mascotas
                 </a>
               </li>
 
