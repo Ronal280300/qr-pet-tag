@@ -40,7 +40,9 @@
                                 <li><i class="fa-solid fa-check text-success"></i> Actualizaciones ilimitadas</li>
                             </ul>
                             <a href="{{ route('checkout.show', $plan) }}" class="btn btn-primary w-100">Elegir Plan</a>
+                            @if($plan->pets_included >= 3)
                             <small class="text-muted d-block mt-2">Mascota adicional: ₡{{ number_format($plan->additional_pet_price, 0, ',', '.') }}</small>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -66,7 +68,9 @@
                                 <li><i class="fa-solid fa-check text-success"></i> Renovación automática</li>
                             </ul>
                             <a href="{{ route('checkout.show', $plan) }}" class="btn btn-primary w-100">Elegir Plan</a>
+                            @if($plan->pets_included >= 3)
                             <small class="text-muted d-block mt-2">Mascota adicional: ₡{{ number_format($plan->additional_pet_price, 0, ',', '.') }}</small>
+                            @endif
                         </div>
                     </div>
                 </div>
