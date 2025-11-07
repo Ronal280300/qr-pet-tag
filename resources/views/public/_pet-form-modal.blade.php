@@ -989,16 +989,40 @@
         <div class="modal-content">
             <!-- HEADER -->
             <div class="modal-header">
-                <h5 class="modal-title" id="registerPetModalLabel">
-                    <i class="fa-solid fa-paw"></i>
-                    <span>Registrar Mascota</span>
-                    @php
-                        $currentPetNumber = ($order->pets ? $order->pets->count() : 0) + 1;
-                    @endphp
-                    @if($order->pets_quantity > 1)
-                        <span class="badge">{{ $currentPetNumber }} de {{ $order->pets_quantity }}</span>
+                <div style="width: 100%;">
+                    <h5 class="modal-title" id="registerPetModalLabel" style="margin-bottom: 0;">
+                        <i class="fa-solid fa-paw"></i>
+                        <span>Registrar Mascota</span>
+                        @php
+                            $registeredCount = $order->pets ? $order->pets->count() : 0;
+                            $currentPetNumber = $registeredCount + 1;
+                            $totalPets = $order->pets_quantity;
+                            $progressPercent = $totalPets > 0 ? ($registeredCount / $totalPets * 100) : 0;
+                        @endphp
+                        @if($totalPets > 1)
+                            <span class="badge">{{ $currentPetNumber }} de {{ $totalPets }}</span>
+                        @endif
+                    </h5>
+
+                    @if($totalPets > 1)
+                    <!-- Progress bar visual -->
+                    <div style="margin-top: 16px; background: rgba(255, 255, 255, 0.2); border-radius: 50px; height: 8px; overflow: hidden;">
+                        <div style="background: rgba(255, 255, 255, 0.9); height: 100%; width: {{ $progressPercent }}%; transition: width 0.5s ease; border-radius: 50px; box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                        <span style="color: rgba(255, 255, 255, 0.9); font-size: 0.875rem; font-weight: 600;">
+                            @if($registeredCount > 0)
+                                <i class="fa-solid fa-check-circle"></i> {{ $registeredCount }} completada{{ $registeredCount !== 1 ? 's' : '' }}
+                            @else
+                                Comienza registrando tu primera mascota
+                            @endif
+                        </span>
+                        <span style="color: rgba(255, 255, 255, 0.75); font-size: 0.875rem;">
+                            {{ $totalPets - $registeredCount }} pendiente{{ ($totalPets - $registeredCount) !== 1 ? 's' : '' }}
+                        </span>
+                    </div>
                     @endif
-                </h5>
+                </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
@@ -1010,10 +1034,17 @@
                     <!-- ALERT INFO -->
                     <div class="pet-alert">
                         <div class="pet-alert-icon">
-                            <i class="fa-solid fa-info-circle"></i>
+                            <i class="fa-solid fa-lightbulb"></i>
                         </div>
                         <div class="pet-alert-text">
-                            Los datos de tu mascota serán guardados y se enlazarán a tu cuenta una vez que verifiquemos tu pago.
+                            @if($totalPets > 1)
+                                <strong>Estás registrando tu mascota {{ $currentPetNumber }} de {{ $totalPets }}.</strong><br>
+                                Completa este formulario y podrás continuar con {{ $totalPets > $currentPetNumber ? 'las siguientes' : 'la siguiente' }}.
+                                Los datos se guardarán y enlazarán a tu cuenta tras verificar tu pago.
+                            @else
+                                <strong>¡Excelente!</strong> Completa la información de tu mascota.<br>
+                                Los datos se guardarán y enlazarán a tu cuenta una vez que verifiquemos tu pago.
+                            @endif
                         </div>
                     </div>
 
@@ -1252,7 +1283,7 @@
 
                         <div class="pet-hint">
                             <i class="fa-solid fa-info-circle"></i>
-                            <span>Formatos: JPG, PNG, HEIC • Máximo 20MB</span>
+                            <span>Formatos: JPG, PNG, HEIC • Máximo 100MB</span>
                         </div>
                     </div>
 
@@ -1287,7 +1318,7 @@
 
                         <div class="pet-hint">
                             <i class="fa-solid fa-info-circle"></i>
-                            <span>Máximo 3 fotos adicionales • JPG, PNG, HEIC • Máximo 20MB cada una</span>
+                            <span>Máximo 3 fotos adicionales • JPG, PNG, HEIC • Máximo 100MB cada una</span>
                         </div>
                     </div>
                 </div>
@@ -1300,7 +1331,15 @@
                     </button>
                     <button type="submit" class="pet-btn pet-btn-success" id="submitPetForm">
                         <i class="fa-solid fa-check"></i>
-                        Guardar mascota
+                        @if($totalPets > 1)
+                            @if($registeredCount >= $totalPets - 1)
+                                Guardar última mascota
+                            @else
+                                Guardar y continuar ({{ $currentPetNumber }}/{{ $totalPets }})
+                            @endif
+                        @else
+                            Guardar mascota
+                        @endif
                     </button>
                 </div>
             </form>
@@ -1718,7 +1757,7 @@
 @push('scripts')
 <script>
 (() => {
-  const MAX = 20 * 1024 * 1024;
+  const MAX = 100 * 1024 * 1024; // 100MB
   function tooBig(f){return f && f.size > MAX;}
   function checkFileInput(input){
     if(!input || !input.files) return true;
@@ -1732,11 +1771,11 @@
       const extras = form.querySelector('input[name="photos[]"]');
       if(main && !checkFileInput(main)){
         e.preventDefault();
-        alert('La foto principal supera el límite de 20 MB.');
+        alert('La foto principal supera el límite de 100 MB.');
       }
       if(extras && !checkFileInput(extras)){
         e.preventDefault();
-        alert('Una o más fotos adicionales superan el límite de 20 MB.');
+        alert('Una o más fotos adicionales superan el límite de 100 MB.');
       }
     });
   }
