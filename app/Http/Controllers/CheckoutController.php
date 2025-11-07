@@ -232,8 +232,8 @@ class CheckoutController extends Controller
             'zone'               => ['nullable', 'string', 'max:255'],
             'age'                => ['nullable', 'integer', 'min:0', 'max:50'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
-            'photo'              => ['nullable', 'image', 'max:4096'],
-            'photos.*'           => ['nullable', 'image', 'max:6144'],
+            'photo'              => ['nullable', 'image', 'max:102400'], // 100MB
+            'photos.*'           => ['nullable', 'image', 'max:102400'], // 100MB
             'sex'                => 'nullable|in:male,female,unknown',
             'is_neutered'        => 'nullable|boolean',
             'rabies_vaccine'     => 'nullable|boolean',

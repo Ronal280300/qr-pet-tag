@@ -5,8 +5,146 @@
 @push('styles')
 <style>
     .checkout-container {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 0 auto;
+    }
+
+    /* ====== PROGRESS STEPPER - MEJORA UX ====== */
+    .checkout-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 48px;
+        padding: 32px 24px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .checkout-stepper::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981 0%, #10b981 33%, #4e89e8 33%, #4e89e8 66%, #cbd5e1 66%, #cbd5e1 100%);
+    }
+
+    .stepper-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        flex: 0 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .stepper-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        border: 3px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .stepper-item.active .stepper-circle {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-color: #10b981;
+        animation: checkPulse 0.6s ease-out;
+    }
+
+    .stepper-item.current .stepper-circle {
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+        border-color: #4e89e8;
+        animation: currentPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes checkPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    @keyframes currentPulse {
+        0%, 100% { box-shadow: 0 4px 12px rgba(78, 137, 232, 0.3); }
+        50% { box-shadow: 0 4px 20px rgba(78, 137, 232, 0.6), 0 0 0 8px rgba(78, 137, 232, 0.1); }
+    }
+
+    .stepper-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #9ca3af;
+        display: block;
+    }
+
+    .stepper-item.active .stepper-number,
+    .stepper-item.current .stepper-number {
+        display: none;
+    }
+
+    .stepper-item.active .stepper-circle i,
+    .stepper-item.current .stepper-circle i {
+        display: block;
+        font-size: 1.75rem;
+        color: white;
+    }
+
+    .stepper-circle i {
+        display: none;
+    }
+
+    .stepper-label {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .stepper-label strong {
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .stepper-item.active .stepper-label strong,
+    .stepper-item.current .stepper-label strong {
+        color: #1e293b;
+    }
+
+    .stepper-label small {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .stepper-item.current .stepper-label small {
+        color: #4e89e8;
+        font-weight: 600;
+    }
+
+    .stepper-line {
+        flex: 1;
+        height: 3px;
+        background: #e5e7eb;
+        margin: 0 -8px;
+        position: relative;
+        top: -30px;
+        z-index: 1;
+        transition: background 0.4s ease;
+    }
+
+    .stepper-line.active {
+        background: linear-gradient(90deg, #10b981 0%, #4e89e8 100%);
     }
 
     .plan-header {
@@ -331,18 +469,56 @@
     }
 
     @media (max-width: 768px) {
+        .checkout-stepper {
+            flex-direction: column;
+            padding: 24px 16px;
+            gap: 20px;
+        }
+
+        .checkout-stepper::before {
+            display: none;
+        }
+
+        .stepper-line {
+            width: 3px;
+            height: 40px;
+            margin: -10px 0;
+            top: 0;
+        }
+
+        .stepper-circle {
+            width: 50px;
+            height: 50px;
+        }
+
+        .stepper-circle i {
+            font-size: 1.5rem;
+        }
+
+        .stepper-number {
+            font-size: 1.25rem;
+        }
+
+        .stepper-label strong {
+            font-size: 0.8125rem;
+        }
+
+        .stepper-label small {
+            font-size: 0.6875rem;
+        }
+
         .price-display {
             font-size: 3.5rem;
         }
-        
+
         .features-grid {
             grid-template-columns: 1fr;
         }
-        
+
         .action-buttons {
             flex-direction: column;
         }
-        
+
         .quantity-display {
             font-size: 3rem;
         }
@@ -352,6 +528,53 @@
 
 @section('content')
 <div class="container py-5 checkout-container">
+
+    <!-- Progress Stepper - Mejora UX -->
+    <div class="checkout-stepper">
+        <div class="stepper-item active">
+            <div class="stepper-circle">
+                <i class="fa-solid fa-check"></i>
+                <span class="stepper-number">1</span>
+            </div>
+            <div class="stepper-label">
+                <strong>Seleccionar Plan</strong>
+                <small>Completado</small>
+            </div>
+        </div>
+        <div class="stepper-line active"></div>
+        <div class="stepper-item current">
+            <div class="stepper-circle">
+                <i class="fa-solid fa-shopping-cart"></i>
+                <span class="stepper-number">2</span>
+            </div>
+            <div class="stepper-label">
+                <strong>Revisar Compra</strong>
+                <small>Estás aquí</small>
+            </div>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-item">
+            <div class="stepper-circle">
+                <i class="fa-solid fa-credit-card"></i>
+                <span class="stepper-number">3</span>
+            </div>
+            <div class="stepper-label">
+                <strong>Realizar Pago</strong>
+                <small>Siguiente paso</small>
+            </div>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-item">
+            <div class="stepper-circle">
+                <i class="fa-solid fa-paw"></i>
+                <span class="stepper-number">4</span>
+            </div>
+            <div class="stepper-label">
+                <strong>Registrar Mascotas</strong>
+                <small>Final</small>
+            </div>
+        </div>
+    </div>
 
     <!-- Header del Plan -->
     <div class="plan-header">

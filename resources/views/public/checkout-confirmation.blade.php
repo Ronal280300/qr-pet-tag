@@ -1223,66 +1223,8 @@
     $dist.addEventListener('change', setZone);
 })();
 
-// ===== Uploader principal (legacy)
-(function() {
-    const input = document.getElementById('photo');
-    const preview = document.getElementById('photoPreview');
-    const drop = document.getElementById('photoDrop');
-    const clear = document.getElementById('btnClearPhoto');
-    const form = document.getElementById('checkout-pet-form');
-    const submit = form.querySelector('button[type="submit"]');
-
-    function hasMain() {
-        return !!preview.src && !preview.classList.contains('d-none');
-    }
-
-    function syncSubmit() {
-        const ok = hasMain();
-        submit.disabled = !ok;
-        submit.classList.toggle('disabled', !ok);
-        submit.style.pointerEvents = ok ? '' : 'none';
-        submit.style.opacity = ok ? '' : '.65';
-    }
-
-    function show(file) {
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        preview.src = url;
-        preview.classList.remove('d-none');
-        drop.classList.remove('is-dragover');
-        syncSubmit();
-    }
-
-    input.addEventListener('change', e => show(e.target.files[0]));
-    ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => {
-        e.preventDefault();
-        drop.classList.add('is-dragover');
-    }));
-    ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => {
-        e.preventDefault();
-        drop.classList.remove('is-dragover');
-    }));
-    drop.addEventListener('drop', e => {
-        const f = e.dataTransfer.files && e.dataTransfer.files[0];
-        if (f) {
-            input.files = e.dataTransfer.files;
-            show(f);
-        }
-    });
-    clear.addEventListener('click', () => {
-        preview.src = '';
-        preview.classList.add('d-none');
-        input.value = '';
-        syncSubmit();
-    });
-
-    form.addEventListener('submit', (e) => {
-        if (!hasMain()) {
-            e.preventDefault();
-        }
-    });
-    syncSubmit();
-})();
+// ===== Uploader principal (legacy) - Deprecated, using modal version
+// This code is kept for compatibility but modal handles everything now
 
 // ===== Previews de fotos múltiples + LÍMITE 3
 (function() {

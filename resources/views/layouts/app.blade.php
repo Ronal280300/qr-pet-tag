@@ -6,6 +6,13 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title','QR-Pet Tag')</title>
 
+  {{-- Favicon --}}
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23115DFC;stop-opacity:1' /><stop offset='100%25' style='stop-color:%233466ff;stop-opacity:1' /></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23grad)'/><g fill='white' transform='translate(50,50)'><circle cx='0' cy='-12' r='8'/><circle cx='-12' cy='0' r='6'/><circle cx='12' cy='0' r='6'/><circle cx='-6' cy='12' r='6'/><circle cx='6' cy='12' r='6'/><ellipse cx='0' cy='5' rx='18' ry='20' opacity='0.9'/></g></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23115DFC;stop-opacity:1' /><stop offset='100%25' style='stop-color:%233466ff;stop-opacity:1' /></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23grad2)'/><g fill='white' transform='translate(90,90) scale(1.5)'><circle cx='0' cy='-12' r='8'/><circle cx='-12' cy='0' r='6'/><circle cx='12' cy='0' r='6'/><circle cx='-6' cy='12' r='6'/><circle cx='6' cy='12' r='6'/><ellipse cx='0' cy='5' rx='18' ry='20' opacity='0.9'/></g></svg>">
+  <meta name="theme-color" content="#115DFC">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
   {{-- Bootstrap + FontAwesome --}}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
