@@ -896,11 +896,105 @@
           <span>Google</span>
         </a>
 
+        <!-- Enlace a registro -->
+        <div class="register-prompt">
+          <p class="register-text">
+            ¿No tienes cuenta?
+            <a href="{{ route('register') }}" class="register-link">
+              <strong>Regístrate gratis</strong>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </p>
+        </div>
+
       </form>
     </div>
 
   </div>
 </div>
+
+<style>
+  .register-prompt {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .register-text {
+    font-size: 15px;
+    color: #5f6c7b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .register-link {
+    color: #3466ff;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .register-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(17,93,252,0.08), rgba(52,102,255,0.08));
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .register-link:hover::before {
+    opacity: 1;
+  }
+
+  .register-link:hover {
+    color: #115DFC;
+    transform: translateX(4px);
+  }
+
+  .register-link i {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .register-link:hover i {
+    transform: translateX(4px);
+  }
+
+  .register-link strong {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 640px) {
+    .register-prompt {
+      margin-top: 20px;
+      padding-top: 20px;
+    }
+
+    .register-text {
+      font-size: 14px;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .register-link {
+      font-size: 14px;
+    }
+  }
+</style>
 
 <script>
 function togglePassword() {

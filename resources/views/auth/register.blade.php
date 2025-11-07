@@ -1051,6 +1051,17 @@
           <span>Google</span>
         </a>
 
+        <!-- Enlace a login -->
+        <div class="login-prompt">
+          <p class="login-text">
+            ¿Ya tienes cuenta?
+            <a href="{{ route('login') }}" class="login-link">
+              <strong>Inicia sesión</strong>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </p>
+        </div>
+
         <p class="terms">
           Al registrarte aceptas nuestros
           <a href="{{ route('legal.terms') }}">Términos de uso y Condiciones</a>.
@@ -1060,6 +1071,89 @@
 
   </div>
 </div>
+
+<style>
+  .login-prompt {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .login-text {
+    font-size: 15px;
+    color: #5f6c7b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .login-link {
+    color: #3466ff;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .login-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(17,93,252,0.08), rgba(52,102,255,0.08));
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .login-link:hover::before {
+    opacity: 1;
+  }
+
+  .login-link:hover {
+    color: #115DFC;
+    transform: translateX(4px);
+  }
+
+  .login-link i {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .login-link:hover i {
+    transform: translateX(4px);
+  }
+
+  .login-link strong {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 640px) {
+    .login-prompt {
+      margin-top: 20px;
+      padding-top: 20px;
+    }
+
+    .login-text {
+      font-size: 14px;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .login-link {
+      font-size: 14px;
+    }
+  }
+</style>
 
 <script>
 function togglePassword(inputId, iconId) {
