@@ -600,20 +600,20 @@
 }
 
 .pet-photos-grid {
-    display: grid !important;
+    display: grid;
     grid-template-columns: 1fr;
-    gap: 1.25rem;
-    margin-top: 1.75rem;
+    gap: 1rem;
+    margin-top: 1.5rem;
 }
 
 .pet-photo-item {
     position: relative;
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     border: 3px solid var(--success);
     background: white;
-    min-height: 280px;
-    max-height: 400px;
+    min-height: 200px;
+    max-height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -622,8 +622,8 @@
 .pet-photo-item img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    max-height: 400px;
+    object-fit: cover;
+    max-height: 300px;
 }
 
 .pet-photo-remove {
@@ -825,140 +825,391 @@
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     #registerPetModal .modal-dialog {
-        margin: 1rem;
-        max-width: calc(100% - 2rem);
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
     }
 
     #registerPetModal .modal-header {
-        padding: 1.5rem 1.75rem;
+        padding: 1rem 1.25rem;
     }
 
     #registerPetModal .modal-title {
-        font-size: 1.375rem;
+        font-size: 1.125rem;
         flex-wrap: wrap;
     }
 
     #registerPetModal .modal-title i {
-        font-size: 1.75rem;
+        font-size: 1.375rem;
+    }
+
+    #registerPetModal .modal-title .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
     }
 
     #registerPetModal .modal-body {
-        padding: 1.75rem;
-        max-height: calc(100vh - 280px);
+        padding: 1.25rem;
+        max-height: calc(100vh - 240px);
     }
 
     #registerPetModal .modal-footer {
-        padding: 1.5rem 1.75rem;
+        padding: 1rem 1.25rem;
         flex-direction: row;
-        gap: 1rem;
+        gap: 0.75rem;
+        position: sticky;
+        bottom: 0;
+    }
+
+    .pet-alert {
+        padding: 1rem;
+        gap: 0.875rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .pet-alert-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .pet-alert-text {
+        font-size: 0.875rem;
     }
 
     .pet-section {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .pet-section-header {
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
     }
 
     .pet-section-icon {
-        width: 48px;
-        height: 48px;
-        font-size: 1.5rem;
+        width: 44px;
+        height: 44px;
+        font-size: 1.375rem;
     }
 
     .pet-section-title h3 {
-        font-size: 1.125rem;
+        font-size: 1rem;
+    }
+
+    .pet-section-title p {
+        font-size: 0.875rem;
+    }
+
+    .pet-form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .pet-label {
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .pet-input,
+    .pet-select,
+    .pet-textarea {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.9375rem;
+    }
+
+    .pet-textarea {
+        min-height: 100px;
     }
 
     .pet-radio-group {
         grid-template-columns: 1fr;
-        gap: 0.75rem;
+        gap: 0.625rem;
     }
 
-    .pet-photo-main {
-        min-height: 260px;
+    .pet-radio-label {
+        padding: 1rem 0.875rem;
+        min-height: 85px;
     }
 
-    .pet-photo-placeholder {
-        padding: 2rem 1.5rem;
+    .pet-radio-label i {
+        font-size: 1.625rem;
     }
 
-    .pet-photo-placeholder-icon {
-        width: 64px;
-        height: 64px;
-        font-size: 2rem;
-    }
-
-    .pet-photo-actions {
-        width: 100%;
-        flex-direction: row;
-    }
-
-    .pet-photo-actions .pet-btn {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .pet-photo-item {
-        min-height: 240px;
-    }
-
-    .pet-btn {
-        padding: 0.875rem 1.5rem;
-        font-size: 0.9375rem;
+    .pet-radio-label span {
+        font-size: 0.875rem;
     }
 
     .pet-checkbox-card {
-        padding: 1rem 1.25rem;
+        padding: 0.875rem 1rem;
+    }
+
+    .pet-checkbox-label i {
+        font-size: 1.25rem;
     }
 
     .pet-checkbox-label span {
+        font-size: 0.875rem;
+    }
+
+    .pet-checkbox-input {
+        width: 50px;
+        height: 28px;
+    }
+
+    .pet-checkbox-box {
+        width: 50px;
+        height: 28px;
+    }
+
+    .pet-checkbox-box::after {
+        width: 18px;
+        height: 18px;
+    }
+
+    .pet-photo-main {
+        min-height: 220px;
+    }
+
+    .pet-photo-placeholder {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .pet-photo-placeholder-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .pet-photo-placeholder h4 {
+        font-size: 1.125rem;
+    }
+
+    .pet-photo-placeholder p {
+        font-size: 0.9375rem;
+    }
+
+    .pet-photo-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .pet-photo-actions .pet-btn {
+        width: 100%;
+    }
+
+    .pet-photo-upload-zone {
+        padding: 1.75rem 1.5rem;
+        min-height: 160px;
+    }
+
+    .pet-photo-upload-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .pet-photo-upload-text {
+        font-size: 1rem;
+    }
+
+    .pet-photo-upload-hint {
+        font-size: 0.875rem;
+    }
+
+    .pet-photo-item {
+        min-height: 180px;
+        max-height: 240px;
+    }
+
+    .pet-photo-item img {
+        max-height: 240px;
+    }
+
+    .pet-photo-remove {
+        width: 40px;
+        height: 40px;
+        font-size: 1.125rem;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    .pet-photo-number {
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .pet-btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+        min-width: auto;
+    }
+
+    .pet-hint {
+        padding: 0.625rem 0.875rem;
+        margin-top: 0.875rem;
+    }
+
+    .pet-hint span {
+        font-size: 0.8125rem;
+    }
+
+    .pet-zone-preview {
+        padding: 0.875rem 1rem;
+    }
+
+    .pet-zone-preview-label {
+        font-size: 0.75rem;
+    }
+
+    .pet-zone-preview-value {
         font-size: 0.9375rem;
     }
 }
 
 @media (max-width: 576px) {
     #registerPetModal .modal-dialog {
-        margin: 0.75rem;
-        max-width: calc(100% - 1.5rem);
+        margin: 0.25rem;
+        max-width: calc(100% - 0.5rem);
     }
 
     #registerPetModal .modal-header {
-        padding: 1.25rem 1.5rem;
+        padding: 0.875rem 1rem;
     }
 
     #registerPetModal .modal-title {
-        font-size: 1.125rem;
-        flex-direction: column;
-        align-items: flex-start;
+        font-size: 1rem;
+        gap: 0.5rem;
+    }
+
+    #registerPetModal .modal-title i {
+        font-size: 1.25rem;
+    }
+
+    #registerPetModal .modal-title .badge {
+        font-size: 0.6875rem;
+        padding: 0.3rem 0.625rem;
     }
 
     #registerPetModal .modal-body {
-        padding: 1.5rem;
-        max-height: calc(100vh - 260px);
+        padding: 1rem;
+        max-height: calc(100vh - 200px);
     }
 
     #registerPetModal .modal-footer {
         flex-direction: column;
-        padding: 1.25rem 1.5rem;
-        gap: 0.875rem;
+        padding: 0.875rem 1rem;
+        gap: 0.625rem;
     }
 
     #registerPetModal .modal-footer .pet-btn {
         width: 100%;
-        padding: 1rem 1.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .pet-alert {
+        padding: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .pet-alert-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1.125rem;
+    }
+
+    .pet-alert-text {
+        font-size: 0.8125rem;
+        line-height: 1.5;
     }
 
     .pet-section {
-        padding: 1.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
     }
 
     .pet-section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.875rem;
+        gap: 0.875rem;
+    }
+
+    .pet-section-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .pet-section-title h3 {
+        font-size: 0.9375rem;
+    }
+
+    .pet-section-title p {
+        font-size: 0.8125rem;
+    }
+
+    .pet-form-group {
+        margin-bottom: 1rem;
+    }
+
+    .pet-label {
+        font-size: 0.8125rem;
+    }
+
+    .pet-input,
+    .pet-select,
+    .pet-textarea {
+        padding: 0.6875rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .pet-textarea {
+        min-height: 90px;
+    }
+
+    .pet-radio-label {
+        padding: 0.875rem;
+        min-height: 75px;
+    }
+
+    .pet-radio-label i {
+        font-size: 1.5rem;
+    }
+
+    .pet-radio-label span {
+        font-size: 0.8125rem;
+    }
+
+    .pet-checkbox-card {
+        padding: 0.75rem 0.875rem;
+    }
+
+    .pet-checkbox-label span {
+        font-size: 0.8125rem;
     }
 
     .pet-photo-main {
-        min-height: 240px;
+        min-height: 200px;
+    }
+
+    .pet-photo-placeholder {
+        padding: 1.5rem 1rem;
+    }
+
+    .pet-photo-placeholder-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 1.625rem;
+        margin-bottom: 0.875rem;
+    }
+
+    .pet-photo-placeholder h4 {
+        font-size: 1rem;
+    }
+
+    .pet-photo-placeholder p {
+        font-size: 0.875rem;
     }
 
     .pet-photo-actions {
@@ -970,16 +1221,80 @@
         width: 100%;
     }
 
+    .pet-photo-upload-zone {
+        padding: 1.5rem 1.25rem;
+        min-height: 140px;
+    }
+
+    .pet-photo-upload-icon {
+        width: 54px;
+        height: 54px;
+        font-size: 1.75rem;
+    }
+
+    .pet-photo-upload-text {
+        font-size: 0.9375rem;
+    }
+
+    .pet-photo-upload-hint {
+        font-size: 0.8125rem;
+    }
+
     .pet-photo-item {
-        min-height: 220px;
+        min-height: 160px;
+        max-height: 220px;
+    }
+
+    .pet-photo-item img {
+        max-height: 220px;
     }
 
     .pet-photo-remove {
-        width: 44px;
-        height: 44px;
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+        top: 0.625rem;
+        right: 0.625rem;
+    }
+
+    .pet-photo-number {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.625rem;
+        top: 0.625rem;
+        left: 0.625rem;
+    }
+
+    .pet-btn {
+        padding: 0.6875rem 1rem;
+        font-size: 0.8125rem;
+    }
+
+    .pet-hint {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .pet-hint i {
+        font-size: 0.875rem;
+    }
+
+    .pet-hint span {
+        font-size: 0.75rem;
+    }
+
+    .pet-zone-preview {
+        padding: 0.75rem 0.875rem;
+    }
+
+    .pet-zone-preview i {
         font-size: 1.125rem;
-        top: 0.75rem;
-        right: 0.75rem;
+    }
+
+    .pet-zone-preview-label {
+        font-size: 0.6875rem;
+    }
+
+    .pet-zone-preview-value {
+        font-size: 0.875rem;
     }
 }
 </style>
@@ -1308,10 +1623,10 @@
                         </div>
 
                         <input type="file" id="photos" name="photos[]" class="d-none" multiple accept="image/*">
-                        
-                        <div id="photosPreviewGrid" class="pet-photos-grid" style="display: none;"></div>
-                        
-                        <button type="button" id="btnClearPhotos" class="pet-btn pet-btn-danger" style="display: none; margin-top: 1.25rem; width: 100%;">
+
+                        <div id="photosPreviewGrid" class="pet-photos-grid d-none"></div>
+
+                        <button type="button" id="btnClearPhotos" class="pet-btn pet-btn-danger d-none" style="margin-top: 1.25rem; width: 100%;">
                             <i class="fa-solid fa-trash-alt"></i>
                             Quitar todas las fotos
                         </button>
@@ -1572,30 +1887,31 @@
     function refreshGrid() {
         grid.innerHTML = '';
         if (filesBuffer.length === 0) {
-            grid.style.display = 'none';
-            btnClear.style.display = 'none';
+            grid.classList.add('d-none');
+            btnClear.classList.add('d-none');
             uploadZone.classList.remove('has-photos');
             return;
         }
-        
-        grid.style.cssText = 'display: grid !important;';
-        btnClear.style.display = 'block';
+
+        // Mostrar grid y botón de limpiar
+        grid.classList.remove('d-none');
+        btnClear.classList.remove('d-none');
         uploadZone.classList.add('has-photos');
 
         filesBuffer.forEach((file, idx) => {
             const url = URL.createObjectURL(file);
             const cell = document.createElement('div');
             cell.className = 'pet-photo-item';
-            
+
             const img = document.createElement('img');
             img.src = url;
             img.alt = `Foto ${idx + 1}`;
-            
+
             // Badge con número
             const badge = document.createElement('div');
             badge.className = 'pet-photo-number';
             badge.textContent = `Foto ${idx + 1} de ${MAX}`;
-            
+
             const rm = document.createElement('button');
             rm.type = 'button';
             rm.className = 'pet-photo-remove';
@@ -1605,7 +1921,7 @@
                 e.stopPropagation();
                 removeAt(idx);
             });
-            
+
             cell.appendChild(img);
             cell.appendChild(badge);
             cell.appendChild(rm);
