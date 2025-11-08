@@ -468,35 +468,217 @@
         transform: translateY(-1px);
     }
 
+    /* ====== MOBILE FIRST RESPONSIVE ====== */
     @media (max-width: 768px) {
+        .checkout-container {
+            padding: 0 !important;
+        }
+
+        /* Stepper más compacto en móvil */
         .checkout-stepper {
             flex-direction: column;
-            padding: 24px 16px;
-            gap: 20px;
+            padding: 16px 12px;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-radius: 16px;
         }
 
         .checkout-stepper::before {
             display: none;
         }
 
+        .stepper-item {
+            flex-direction: row;
+            gap: 12px;
+            width: 100%;
+            text-align: left;
+        }
+
         .stepper-line {
             width: 3px;
-            height: 40px;
-            margin: -10px 0;
+            height: 30px;
+            margin: 0 0 0 22px;
             top: 0;
         }
 
         .stepper-circle {
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
         }
 
         .stepper-circle i {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
         }
 
         .stepper-number {
+            font-size: 1.125rem;
+        }
+
+        .stepper-label {
+            text-align: left;
+            align-items: flex-start;
+        }
+
+        .stepper-label strong {
+            font-size: 0.875rem;
+            white-space: normal;
+        }
+
+        .stepper-label small {
+            font-size: 0.75rem;
+        }
+
+        /* Header del plan más compacto */
+        .plan-header {
+            padding: 24px 20px;
+            border-radius: 16px;
+        }
+
+        .plan-badge {
+            font-size: 0.75rem;
+            padding: 6px 16px;
+        }
+
+        .price-display {
+            font-size: 2.75rem;
+            margin: 16px 0 12px;
+        }
+
+        .plan-header h2 {
+            font-size: 1.375rem;
+        }
+
+        .plan-header p {
+            font-size: 0.875rem;
+        }
+
+        /* Features grid */
+        .features-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+            padding: 20px 16px;
+        }
+
+        .feature-item {
+            padding: 12px 16px;
+        }
+
+        .feature-item i {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9375rem;
+        }
+
+        .feature-item div strong {
+            font-size: 0.875rem;
+        }
+
+        .feature-item div span {
+            font-size: 0.8125rem;
+        }
+
+        /* Cards más compactas */
+        .summary-card,
+        .pets-card {
+            padding: 20px 16px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            margin-bottom: 16px;
+        }
+
+        .card-title i {
+            width: 36px;
+            height: 36px;
+            font-size: 1.125rem;
+        }
+
+        /* Quantity selector más compacto */
+        .quantity-selector {
+            gap: 12px;
+        }
+
+        .quantity-display {
+            font-size: 2.25rem;
+            min-width: 60px;
+        }
+
+        .quantity-btn {
+            width: 44px;
+            height: 44px;
             font-size: 1.25rem;
+        }
+
+        /* Summary items */
+        .summary-item {
+            padding: 12px 0;
+            font-size: 0.875rem;
+        }
+
+        .summary-item.total {
+            padding: 16px 0;
+        }
+
+        .summary-item.total .label {
+            font-size: 1rem;
+        }
+
+        .summary-item.total .value {
+            font-size: 1.75rem;
+        }
+
+        /* Buttons */
+        .action-buttons {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-checkout {
+            padding: 14px 24px;
+            font-size: 0.9375rem;
+        }
+
+        .btn-checkout i {
+            font-size: 1.125rem;
+        }
+
+        /* Alert */
+        .alert-info-custom {
+            padding: 16px;
+            font-size: 0.875rem;
+        }
+
+        .alert-info-custom i {
+            font-size: 1.125rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .container {
+            padding: 0 8px !important;
+        }
+
+        .checkout-stepper {
+            padding: 12px 10px;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stepper-circle {
+            width: 40px;
+            height: 40px;
+        }
+
+        .stepper-circle i {
+            font-size: 1.125rem;
+        }
+
+        .stepper-number {
+            font-size: 1rem;
         }
 
         .stepper-label strong {
@@ -507,20 +689,87 @@
             font-size: 0.6875rem;
         }
 
+        .stepper-line {
+            height: 24px;
+            margin-left: 18px;
+        }
+
+        .plan-header {
+            padding: 20px 16px;
+        }
+
         .price-display {
-            font-size: 3.5rem;
+            font-size: 2.25rem;
+        }
+
+        .plan-header h2 {
+            font-size: 1.125rem;
         }
 
         .features-grid {
-            grid-template-columns: 1fr;
+            padding: 16px 12px;
         }
 
-        .action-buttons {
-            flex-direction: column;
+        .feature-item {
+            padding: 10px 12px;
+        }
+
+        .feature-item i {
+            width: 28px;
+            height: 28px;
+            font-size: 0.875rem;
+        }
+
+        .feature-item div strong {
+            font-size: 0.8125rem;
+        }
+
+        .feature-item div span {
+            font-size: 0.75rem;
+        }
+
+        .summary-card,
+        .pets-card {
+            padding: 16px 12px;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+        }
+
+        .card-title i {
+            width: 32px;
+            height: 32px;
+            font-size: 1rem;
         }
 
         .quantity-display {
-            font-size: 3rem;
+            font-size: 2rem;
+            min-width: 50px;
+        }
+
+        .quantity-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 1.125rem;
+        }
+
+        .summary-item {
+            font-size: 0.8125rem;
+        }
+
+        .summary-item.total .label {
+            font-size: 0.9375rem;
+        }
+
+        .summary-item.total .value {
+            font-size: 1.5rem;
+        }
+
+        .btn-checkout {
+            padding: 12px 20px;
+            font-size: 0.875rem;
         }
     }
 </style>
