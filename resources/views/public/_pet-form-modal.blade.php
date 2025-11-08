@@ -599,57 +599,89 @@
     color: var(--gray-500);
 }
 
+/* Grid de fotos opcionales */
 .pet-photos-grid {
-    display: grid;
+    display: grid !important;
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.25rem;
     margin-top: 1.5rem;
+    width: 100%;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.pet-photos-grid.d-none {
+    display: none !important;
 }
 
 .pet-photo-item {
     position: relative;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    border: 3px solid var(--success);
-    background: white;
-    min-height: 200px;
-    max-height: 300px;
-    display: flex;
+    border: 4px solid #10b981;
+    background: #ffffff;
+    min-height: 240px;
+    max-height: 350px;
+    display: flex !important;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+    transition: all 0.3s ease;
+    animation: fadeInScale 0.4s ease-out;
+}
+
+.pet-photo-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.3);
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .pet-photo-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    max-height: 300px;
+    max-height: 350px;
+    display: block !important;
+    visibility: visible !important;
 }
 
 .pet-photo-remove {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 0.875rem;
+    right: 0.875rem;
     width: 48px;
     height: 48px;
     border: none;
     border-radius: 50%;
-    background: var(--danger);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 1.25rem;
+    font-size: 1.375rem;
     font-weight: bold;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5);
-    z-index: 10;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+    z-index: 15;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .pet-photo-remove:hover {
-    background: #dc2626;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
     transform: scale(1.15);
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.8);
 }
 
 .pet-photo-remove:active {
@@ -658,15 +690,20 @@
 
 .pet-photo-number {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
-    background: rgba(0, 0, 0, 0.75);
+    top: 0.875rem;
+    left: 0.875rem;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.75) 100%);
     color: white;
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1.125rem;
     border-radius: 50px;
-    font-weight: 700;
-    font-size: 0.875rem;
-    z-index: 5;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    letter-spacing: 0.3px;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* ===== ZONE PREVIEW ===== */
@@ -1017,26 +1054,34 @@
         font-size: 0.875rem;
     }
 
+    .pet-photos-grid {
+        gap: 1rem;
+        margin-top: 1.25rem;
+    }
+
     .pet-photo-item {
-        min-height: 180px;
-        max-height: 240px;
+        min-height: 200px;
+        max-height: 280px;
+        border-width: 3px;
     }
 
     .pet-photo-item img {
-        max-height: 240px;
+        max-height: 280px;
     }
 
     .pet-photo-remove {
-        width: 40px;
-        height: 40px;
-        font-size: 1.125rem;
+        width: 44px;
+        height: 44px;
+        font-size: 1.25rem;
         top: 0.75rem;
         right: 0.75rem;
     }
 
     .pet-photo-number {
-        font-size: 0.8125rem;
-        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        padding: 0.5rem 0.875rem;
+        top: 0.75rem;
+        left: 0.75rem;
     }
 
     .pet-btn {
@@ -1240,26 +1285,32 @@
         font-size: 0.8125rem;
     }
 
+    .pet-photos-grid {
+        gap: 0.875rem;
+        margin-top: 1rem;
+    }
+
     .pet-photo-item {
-        min-height: 160px;
-        max-height: 220px;
+        min-height: 180px;
+        max-height: 240px;
+        border-width: 3px;
     }
 
     .pet-photo-item img {
-        max-height: 220px;
+        max-height: 240px;
     }
 
     .pet-photo-remove {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
+        width: 40px;
+        height: 40px;
+        font-size: 1.125rem;
         top: 0.625rem;
         right: 0.625rem;
     }
 
     .pet-photo-number {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.625rem;
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.75rem;
         top: 0.625rem;
         left: 0.625rem;
     }
@@ -1886,36 +1937,52 @@
 
     function refreshGrid() {
         grid.innerHTML = '';
+
         if (filesBuffer.length === 0) {
+            // No hay fotos - ocultar grid y botón, mostrar zona de upload
             grid.classList.add('d-none');
+            grid.style.display = 'none';
             btnClear.classList.add('d-none');
+            btnClear.style.display = 'none';
             uploadZone.classList.remove('has-photos');
+            uploadZone.style.display = 'flex';
             return;
         }
 
-        // Mostrar grid y botón de limpiar
+        // HAY FOTOS - Mostrar grid y botón, ocultar zona de upload
         grid.classList.remove('d-none');
+        grid.style.display = 'grid'; // Forzar display grid
         btnClear.classList.remove('d-none');
+        btnClear.style.display = 'block'; // Forzar display block
         uploadZone.classList.add('has-photos');
+        uploadZone.style.display = 'none'; // Ocultar zona de upload
 
+        // Crear preview para cada foto
         filesBuffer.forEach((file, idx) => {
             const url = URL.createObjectURL(file);
             const cell = document.createElement('div');
             cell.className = 'pet-photo-item';
+            cell.style.display = 'flex'; // Asegurar que se muestre
 
             const img = document.createElement('img');
             img.src = url;
             img.alt = `Foto ${idx + 1}`;
+            img.style.display = 'block'; // Asegurar que se muestre
+            img.onload = function() {
+                console.log(`Foto ${idx + 1} cargada correctamente`);
+            };
 
             // Badge con número
             const badge = document.createElement('div');
             badge.className = 'pet-photo-number';
             badge.textContent = `Foto ${idx + 1} de ${MAX}`;
+            badge.style.display = 'block'; // Asegurar que se muestre
 
             const rm = document.createElement('button');
             rm.type = 'button';
             rm.className = 'pet-photo-remove';
             rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            rm.style.display = 'flex'; // Asegurar que se muestre
             rm.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1927,6 +1994,8 @@
             cell.appendChild(rm);
             grid.appendChild(cell);
         });
+
+        console.log(`Preview actualizado: ${filesBuffer.length} foto(s) mostradas`);
     }
 
     function applyBufferToInput() {
@@ -1943,8 +2012,10 @@
 
     input.addEventListener('change', (e) => {
         const incoming = Array.from(e.target.files || []);
+        if (incoming.length === 0) return;
+
         const totalIfAdded = filesBuffer.length + incoming.length;
-        
+
         if (totalIfAdded > MAX) {
             const allowed = Math.max(0, MAX - filesBuffer.length);
             alert(`Máximo ${MAX} fotos adicionales. Puedes añadir ${allowed} foto(s) más.`);
@@ -1954,10 +2025,13 @@
         } else {
             filesBuffer = filesBuffer.concat(incoming);
         }
-        
+
         applyBufferToInput();
         refreshGrid();
         input.value = '';
+
+        // Feedback visual
+        console.log(`✅ ${incoming.length} foto(s) agregada(s). Total: ${filesBuffer.length}`);
     });
 
     btnClear.addEventListener('click', () => {
@@ -1978,8 +2052,10 @@
 
     uploadZone.addEventListener('drop', e => {
         const files = Array.from(e.dataTransfer.files || []);
+        if (files.length === 0) return;
+
         const totalIfAdded = filesBuffer.length + files.length;
-        
+
         if (totalIfAdded > MAX) {
             const allowed = Math.max(0, MAX - filesBuffer.length);
             alert(`Máximo ${MAX} fotos adicionales. Puedes añadir ${allowed} foto(s) más.`);
@@ -1989,9 +2065,12 @@
         } else {
             filesBuffer = filesBuffer.concat(files);
         }
-        
+
         applyBufferToInput();
         refreshGrid();
+
+        // Feedback visual
+        console.log(`✅ ${files.length} foto(s) arrastrada(s). Total: ${filesBuffer.length}`);
     });
 })();
 
