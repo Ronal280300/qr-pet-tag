@@ -179,6 +179,9 @@ class OrderManagementController extends Controller
     protected function sendVerificationEmail(Order $order)
     {
         try {
+            // Cargar relación de mascotas para el template del email
+            $order->load('pets');
+
             Mail::send('emails.client.payment-verified', ['order' => $order], function ($message) use ($order) {
                 $message->to($order->user->email)
                     ->subject("Pago Verificado - Pedido #{$order->order_number}");
