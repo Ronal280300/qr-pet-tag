@@ -210,6 +210,38 @@ class CheckoutController extends Controller
     }
 
     /**
+     * Mostrar formulario completo para registrar mascota (nueva página sin modal)
+     */
+    public function showRegisterPetForm(Order $order)
+    {
+        // Verificar que el pedido pertenezca al usuario autenticado
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'No autorizado');
+        }
+
+        // Verificar que la orden esté en estado correcto
+        if (!in_array($order->status, ['payment_uploaded', 'pending'])) {
+            return redirect()->route('checkout.confirmation', $order)
+                ->with('error', 'No puedes agregar mascotas a esta orden en su estado actual.');
+        }
+
+        // Cargar mascotas asociadas
+        $order->load('pets');
+
+        $totalPets = $order->pets_quantity;
+        $registeredPets = $order->pets->count();
+        $currentPetNumber = $registeredPets + 1;
+
+        // Si ya se registraron todas las mascotas, redirigir
+        if ($registeredPets >= $totalPets) {
+            return redirect()->route('checkout.confirmation', $order)
+                ->with('info', 'Ya has registrado todas las mascotas de tu plan.');
+        }
+
+        return view('public.checkout-register-pet', compact('order', 'totalPets', 'registeredPets', 'currentPetNumber'));
+    }
+
+    /**
      * Crear mascota desde el checkout (pendiente de activación)
      * MISMO PROCESO que PetController@store pero sin enlazar a usuario
      */
@@ -282,7 +314,8 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            return back()->with('success', "Mascota '{$pet->name}' registrada exitosamente. Será enlazada a tu cuenta cuando tu pago sea verificado.");
+            return redirect()->route('checkout.confirmation', $order)
+                ->with('success', "Mascota '{$pet->name}' registrada exitosamente. Será enlazada a tu cuenta cuando tu pago sea verificado.");
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -291,7 +324,8 @@ class CheckoutController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return back()->with('error', 'Error al registrar mascota: ' . $e->getMessage());
+            return redirect()->route('checkout.confirmation', $order)
+                ->with('error', 'Error al registrar mascota: ' . $e->getMessage());
         }
     }
 
