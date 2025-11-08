@@ -64,12 +64,35 @@ class ProfileController extends Controller
             }
         }
 
-        $user->name  = $data['name'];
-        $user->email = $data['email'];
-        $user->phone = $phone;
-        $user->save();
+        // Validar que el teléfono sea único (excepto para el usuario actual)
+        if ($phone !== $user->phone) {
+            $exists = \App\Models\User::where('phone', $phone)
+                ->where('id', '!=', $user->id)
+                ->exists();
 
-        return back()->with('status', 'Perfil actualizado.');
+            if ($exists) {
+                return back()
+                    ->withErrors(['phone_local' => "El teléfono {$phone} ya está registrado por otro usuario."])
+                    ->withInput();
+            }
+        }
+
+        try {
+            $user->name  = $data['name'];
+            $user->email = $data['email'];
+            $user->phone = $phone;
+            $user->save();
+
+            return back()->with('status', 'Perfil actualizado.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Capturar cualquier error de DB (por si acaso)
+            if ($e->getCode() === '23000') {
+                return back()
+                    ->withErrors(['phone_local' => "El teléfono {$phone} ya está en uso."])
+                    ->withInput();
+            }
+            throw $e;
+        }
     }
 
 
