@@ -995,14 +995,14 @@
                                         Llena el formulario con los datos de tu{{ $totalPets > 1 ? 's' : '' }} mascota{{ $totalPets > 1 ? 's' : '' }}
                                     @endif
                                 </p>
-                                <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#registerPetModal" id="btnRegisterPet">
+                                <a href="{{ route('checkout.register-pet-form', $order) }}" class="btn btn-primary w-100" id="btnRegisterPet">
                                     <i class="fa-solid fa-plus"></i>
                                     @if($registeredPets > 0)
                                         Registrar mascota {{ $registeredPets + 1 }}
                                     @else
                                         Registrar mascota
                                     @endif
-                                </button>
+                                </a>
                             </div>
                         </div>
                         @endif
