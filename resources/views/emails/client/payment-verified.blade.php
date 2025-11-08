@@ -55,9 +55,19 @@
             </ul>
 
             <div style="text-align: center;">
-                <a href="{{ route('portal.pets.create') }}" class="btn">
-                    Registrar Mis Mascotas
-                </a>
+                @php
+                    $hasPets = $order->pets && $order->pets->count() > 0;
+                @endphp
+
+                @if($hasPets)
+                    <a href="{{ route('portal.pets.index') }}" class="btn">
+                        🐾 Ver Mis Mascotas ({{ $order->pets->count() }})
+                    </a>
+                @else
+                    <a href="{{ route('portal.pets.create') }}" class="btn">
+                        ✨ Registrar Mis Mascotas
+                    </a>
+                @endif
             </div>
 
             @if($order->admin_notes)
