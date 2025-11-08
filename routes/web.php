@@ -257,6 +257,10 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
             Route::get('notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
             Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+
+            // Logs de correos
+            Route::get('email-logs', [\App\Http\Controllers\Admin\EmailLogController::class, 'index'])->name('email-logs.index');
+            Route::get('email-logs/{log}', [\App\Http\Controllers\Admin\EmailLogController::class, 'show'])->name('email-logs.show');
             Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
             // 👉 Configuración del Sistema
             Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
