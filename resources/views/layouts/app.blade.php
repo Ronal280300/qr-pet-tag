@@ -310,6 +310,7 @@
                     <li><a class="dropdown-item" href="{{ route('portal.admin.orders.index') }}"><i class="fa-solid fa-shopping-cart"></i> Gestionar Órdenes</a></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.plan-settings.index') }}"><i class="fa-solid fa-gear"></i> Configurar Planes</a></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.clients.index') }}"><i class="fa-solid fa-users"></i> Gestionar Clientes</a></li>
+                    <li><a class="dropdown-item" href="{{ route('portal.admin.email-logs.index') }}"><i class="fa-solid fa-envelope"></i> Logs de Correos</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.tags.index') }}"><i class="fa-solid fa-tags"></i> Inventario de TAGs</a></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.activate-tag') }}"><i class="fa-solid fa-bolt"></i> Activar TAG</a></li>
