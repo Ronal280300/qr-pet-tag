@@ -300,6 +300,14 @@
 
               {{-- Admin --}}
               @if(Auth::user()->is_admin)
+                {{-- Campana de Notificaciones --}}
+                <li class="nav-item">
+                  <a class="nav-link position-relative" href="{{ route('portal.admin.notifications.index') }}" id="notificationBell" title="Notificaciones">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="notif-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle badge-sm rounded-pill" style="display: none; font-size: 0.65rem;">0</span>
+                  </a>
+                </li>
+
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
                     <i class="fa-solid fa-screwdriver-wrench me-1"></i> Admin
@@ -403,6 +411,65 @@
 })();
 </script>
 
+{{-- Sistema de Notificaciones en Tiempo Real --}}
+@if(Auth::check() && Auth::user()->is_admin)
+<script>
+(function() {
+  const badge = document.getElementById('notif-badge');
+  const bell = document.getElementById('notificationBell');
+
+  if (!badge || !bell) return;
+
+  // Función para actualizar el contador de notificaciones
+  function updateNotificationCount() {
+    fetch('{{ route("portal.admin.notifications.unread") }}')
+      .then(response => response.json())
+      .then(data => {
+        const count = data.count || 0;
+
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : count;
+          badge.style.display = 'inline-block';
+          bell.classList.add('notification-active');
+        } else {
+          badge.style.display = 'none';
+          bell.classList.remove('notification-active');
+        }
+      })
+      .catch(error => {
+        console.log('Error al obtener notificaciones:', error);
+      });
+  }
+
+  // Actualizar inmediatamente
+  updateNotificationCount();
+
+  // Polling cada 30 segundos
+  setInterval(updateNotificationCount, 30000);
+})();
+</script>
+
+<style>
+#notificationBell {
+  position: relative;
+}
+#notificationBell.notification-active i {
+  animation: bellRing 2s ease-in-out infinite;
+}
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30% { transform: rotate(14deg); }
+  20%, 40% { transform: rotate(-14deg); }
+  50% { transform: rotate(0deg); }
+}
+#notif-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  line-height: 18px;
+}
+</style>
+@endif
 
   @stack('scripts')
 </body>
