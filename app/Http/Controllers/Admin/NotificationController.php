@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(\App\Http\Middleware\AdminOnly::class);
+    }
+
     /**
      * Obtener notificaciones no leídas (para el dropdown)
      */
@@ -22,8 +28,8 @@ class NotificationController extends Controller
         $unreadCount = AdminNotification::unread()->count();
 
         return response()->json([
+            'count' => $unreadCount,
             'notifications' => $notifications,
-            'unread_count' => $unreadCount,
         ]);
     }
 
@@ -65,6 +71,6 @@ class NotificationController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('admin.notifications.index', compact('notifications'));
+        return view('portal.admin.notifications.index', compact('notifications'));
     }
 }
