@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Pet;
-use App\Models\Order;
 use App\Providers\RouteServiceProvider;
 use App\Support\Phone;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -28,23 +26,11 @@ class RegisterController extends Controller
     }
 
     /**
-     * Redirect inteligente: nuevos usuarios → planes, existentes → dashboard
+     * Redirect: nuevos usuarios siempre van a planes
      */
     protected function redirectTo()
     {
-        $user = Auth::user();
-
-        // Usuarios nuevos siempre van a planes
-        // (en registro nunca tendrán mascotas, pero por si acaso verificamos)
-        $hasPets = Pet::where('user_id', $user->id)->exists();
-        $hasOrders = Order::where('user_id', $user->id)
-            ->whereIn('status', ['confirmed', 'payment_uploaded'])
-            ->exists();
-
-        if ($hasPets || $hasOrders) {
-            return route('portal.dashboard');
-        }
-
+        // Usuarios nuevos (registro) siempre van a ver los planes disponibles
         return route('plans.index');
     }
 

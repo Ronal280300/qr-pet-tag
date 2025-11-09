@@ -21,23 +21,20 @@ class LoginController extends Controller
     }
 
     /**
-     * Redirect inteligente: nuevos usuarios → planes, existentes → dashboard
+     * Redirect inteligente: usuarios con mascotas → mascotas, sin mascotas → planes
      */
     protected function redirectTo()
     {
         $user = Auth::user();
 
-        // Si el usuario tiene mascotas o pedidos confirmados, ir al dashboard
+        // Si el usuario tiene mascotas, ir a la lista de mascotas
         $hasPets = Pet::where('user_id', $user->id)->exists();
-        $hasOrders = Order::where('user_id', $user->id)
-            ->whereIn('status', ['confirmed', 'payment_uploaded'])
-            ->exists();
 
-        if ($hasPets || $hasOrders) {
-            return route('portal.dashboard');
+        if ($hasPets) {
+            return route('portal.pets.index');
         }
 
-        // Usuarios nuevos van a planes
+        // Usuarios sin mascotas van a planes
         return route('plans.index');
     }
 
