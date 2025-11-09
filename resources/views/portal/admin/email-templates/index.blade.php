@@ -134,16 +134,16 @@
       <div class="row">
         <div class="col-md-6">
           <ul class="list-unstyled">
-            <li><code>{{'{{'}}name{{'}}'}}</code> - Nombre del usuario</li>
-            <li><code>{{'{{'}}email{{'}}'}}</code> - Email del usuario</li>
-            <li><code>{{'{{'}}phone{{'}}'}}</code> - Teléfono del usuario</li>
+            <li><code>@{{ name }}</code> - Nombre del usuario</li>
+            <li><code>@{{ email }}</code> - Email del usuario</li>
+            <li><code>@{{ phone }}</code> - Teléfono del usuario</li>
           </ul>
         </div>
         <div class="col-md-6">
           <ul class="list-unstyled">
-            <li><code>{{'{{'}}year{{'}}'}}</code> - Año actual</li>
-            <li><code>{{'{{'}}site_name{{'}}'}}</code> - Nombre del sitio</li>
-            <li><code>{{'{{'}}site_url{{'}}'}}</code> - URL del sitio</li>
+            <li><code>@{{ year }}</code> - Año actual</li>
+            <li><code>@{{ site_name }}</code> - Nombre del sitio</li>
+            <li><code>@{{ site_url }}</code> - URL del sitio</li>
           </ul>
         </div>
       </div>

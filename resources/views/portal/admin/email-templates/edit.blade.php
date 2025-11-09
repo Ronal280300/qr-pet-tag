@@ -130,7 +130,7 @@
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
           <div class="form-text">
-            El HTML completo del email. Puedes usar variables como <code>{{'{{'}}name{{'}}'}}</code>, <code>{{'{{'}}email{{'}}'}}</code>, etc.
+            El HTML completo del email. Puedes usar variables como <code>@{{ name }}</code>, <code>@{{ email }}</code>, etc.
           </div>
         </div>
 
@@ -183,15 +183,15 @@
         <div class="col-md-6">
           <ul class="list-unstyled">
             <li class="mb-2">
-              <code>{{'{{'}}name{{'}}'}}</code>
+              <code>@{{ name }}</code>
               <span class="text-muted">- Nombre del usuario</span>
             </li>
             <li class="mb-2">
-              <code>{{'{{'}}email{{'}}'}}</code>
+              <code>@{{ email }}</code>
               <span class="text-muted">- Email del usuario</span>
             </li>
             <li class="mb-2">
-              <code>{{'{{'}}phone{{'}}'}}</code>
+              <code>@{{ phone }}</code>
               <span class="text-muted">- Teléfono del usuario</span>
             </li>
           </ul>
@@ -199,15 +199,15 @@
         <div class="col-md-6">
           <ul class="list-unstyled">
             <li class="mb-2">
-              <code>{{'{{'}}year{{'}}'}}</code>
+              <code>@{{ year }}</code>
               <span class="text-muted">- Año actual</span>
             </li>
             <li class="mb-2">
-              <code>{{'{{'}}site_name{{'}}'}}</code>
+              <code>@{{ site_name }}</code>
               <span class="text-muted">- Nombre del sitio</span>
             </li>
             <li class="mb-2">
-              <code>{{'{{'}}site_url{{'}}'}}</code>
+              <code>@{{ site_url }}</code>
               <span class="text-muted">- URL del sitio</span>
             </li>
           </ul>
@@ -216,8 +216,8 @@
 
       <div class="alert alert-light mt-3 mb-0">
         <strong>Ejemplo de uso:</strong>
-        <pre class="mb-0 mt-2" style="background: #f8f9fa; padding: 10px; border-radius: 4px;"><code>&lt;p&gt;Hola {{'{{'}}name{{'}}'}} 👋&lt;/p&gt;
-&lt;p&gt;Tu email es: {{'{{'}}email{{'}}'}}&lt;/p&gt;</code></pre>
+        <pre class="mb-0 mt-2" style="background: #f8f9fa; padding: 10px; border-radius: 4px;"><code>&lt;p&gt;Hola @{{ name }} 👋&lt;/p&gt;
+&lt;p&gt;Tu email es: @{{ email }}&lt;/p&gt;</code></pre>
       </div>
     </div>
   </div>

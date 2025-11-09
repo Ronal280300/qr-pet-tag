@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pet;
-use App\Models\Order;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,21 +19,13 @@ class LoginController extends Controller
     }
 
     /**
-     * Redirect inteligente: usuarios con mascotas → mascotas, sin mascotas → planes
+     * Redirect: clientes existentes (login) → mascotas
      */
     protected function redirectTo()
     {
-        $user = Auth::user();
-
-        // Si el usuario tiene mascotas, ir a la lista de mascotas
-        $hasPets = Pet::where('user_id', $user->id)->exists();
-
-        if ($hasPets) {
-            return route('portal.pets.index');
-        }
-
-        // Usuarios sin mascotas van a planes
-        return route('plans.index');
+        // Todo cliente que hace LOGIN va a sus mascotas
+        // (si no tiene mascotas verá lista vacía con botón para crear)
+        return route('portal.pets.index');
     }
 
     /**
