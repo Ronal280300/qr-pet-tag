@@ -40,10 +40,9 @@ class NotificationController extends Controller
     {
         $notification->markAsRead();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Notificación marcada como leída',
-        ]);
+        return redirect()
+            ->back()
+            ->with('success', 'Notificación marcada como leída');
     }
 
     /**
@@ -51,15 +50,16 @@ class NotificationController extends Controller
      */
     public function markAllAsRead()
     {
+        $count = AdminNotification::unread()->count();
+
         AdminNotification::unread()->update([
             'is_read' => true,
             'read_at' => now(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Todas las notificaciones marcadas como leídas',
-        ]);
+        return redirect()
+            ->back()
+            ->with('success', "Se marcaron {$count} notificaciones como leídas");
     }
 
     /**

@@ -278,6 +278,16 @@
                 </a>
               </li>
 
+              {{-- Campana de Notificaciones (Admin) - A LA IZQUIERDA --}}
+              @if(Auth::user()->is_admin)
+                <li class="nav-item">
+                  <a class="nav-link position-relative" href="{{ route('portal.admin.notifications.index') }}" id="notificationBell" title="Notificaciones">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="notif-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle badge-sm rounded-pill" style="display: none; font-size: 0.65rem;">0</span>
+                  </a>
+                </li>
+              @endif
+
               {{-- Mi Portal - SIEMPRE PRIMERO con estilo especial --}}
               <li class="nav-item">
                 <a href="{{ route('portal.dashboard') }}" class="nav-link nav-link-portal">
@@ -300,14 +310,6 @@
 
               {{-- Admin --}}
               @if(Auth::user()->is_admin)
-                {{-- Campana de Notificaciones --}}
-                <li class="nav-item">
-                  <a class="nav-link position-relative" href="{{ route('portal.admin.notifications.index') }}" id="notificationBell" title="Notificaciones">
-                    <i class="fa-solid fa-bell"></i>
-                    <span id="notif-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle badge-sm rounded-pill" style="display: none; font-size: 0.65rem;">0</span>
-                  </a>
-                </li>
-
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
                     <i class="fa-solid fa-screwdriver-wrench me-1"></i> Admin
@@ -319,6 +321,9 @@
                     <li><a class="dropdown-item" href="{{ route('portal.admin.plan-settings.index') }}"><i class="fa-solid fa-gear"></i> Configurar Planes</a></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.clients.index') }}"><i class="fa-solid fa-users"></i> Gestionar Clientes</a></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.email-logs.index') }}"><i class="fa-solid fa-envelope"></i> Logs de Correos</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ route('portal.admin.email-templates.index') }}"><i class="fa-solid fa-file-code"></i> Plantillas de Email</a></li>
+                    <li><a class="dropdown-item" href="{{ route('portal.admin.email-campaigns.index') }}"><i class="fa-solid fa-paper-plane"></i> Campañas de Email</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.tags.index') }}"><i class="fa-solid fa-tags"></i> Inventario de TAGs</a></li>
                     <li><a class="dropdown-item" href="{{ route('portal.admin.activate-tag') }}"><i class="fa-solid fa-bolt"></i> Activar TAG</a></li>
