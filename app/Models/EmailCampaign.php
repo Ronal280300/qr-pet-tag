@@ -101,11 +101,14 @@ class EmailCampaign extends Model
      */
     public function getFilteredRecipients()
     {
-        $query = User::query()->where('is_admin', false);
+        // SIEMPRE excluir usuarios inactivos y admins
+        $query = User::query()
+            ->where('is_admin', false)
+            ->where('status', 'active'); // Solo usuarios activos
 
         switch ($this->filter_type) {
             case 'all':
-                // Todos los clientes
+                // Todos los clientes activos
                 break;
 
             case 'no_scans':
@@ -128,10 +131,53 @@ class EmailCampaign extends Model
                 });
                 break;
 
+            case 'has_pets':
+                // Clientes con mascotas registradas
+                $query->has('pets');
+                break;
+
+            case 'no_pets':
+                // Clientes sin mascotas
+                $query->doesntHave('pets');
+                break;
+
+            case 'verified_email':
+                // Clientes con email verificado
+                $query->whereNotNull('email_verified_at');
+                break;
+
+            case 'unverified_email':
+                // Clientes con email NO verificado
+                $query->whereNull('email_verified_at');
+                break;
+
+            case 'has_orders':
+                // Clientes con pedidos
+                $query->has('orders');
+                break;
+
+            case 'no_orders':
+                // Clientes sin pedidos
+                $query->doesntHave('orders');
+                break;
+
+            case 'with_lost_pets':
+                // Clientes con mascotas perdidas
+                $query->whereHas('pets', function($q) {
+                    $q->where('is_lost', true);
+                });
+                break;
+
+            case 'manual':
+                // Selección manual de usuarios
+                if (!empty($this->filter_config['user_ids'])) {
+                    $query->whereIn('id', $this->filter_config['user_ids']);
+                }
+                break;
+
             case 'custom':
                 // Filtros personalizados desde filter_config
                 if ($this->filter_config) {
-                    // Aquí se pueden agregar más filtros personalizados
                     if (isset($this->filter_config['has_pets'])) {
                         if ($this->filter_config['has_pets']) {
                             $query->has('pets');

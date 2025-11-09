@@ -90,8 +90,21 @@
     {{-- Lista de destinatarios --}}
     <div class="col-md-6 mb-4">
       <div class="card shadow">
-        <div class="card-header bg-info text-white">
-          <h5 class="mb-0"><i class="fas fa-users me-2"></i>Destinatarios ({{ $recipients->count() }})</h5>
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-users me-2"></i>Destinatarios
+            (<span id="selectedCount">{{ $recipients->count() }}</span>/{{ $recipients->count() }})
+          </h5>
+          @if(!$recipients->isEmpty())
+            <div>
+              <button type="button" class="btn btn-sm btn-light" onclick="selectAllRecipients()">
+                <i class="fas fa-check-double"></i> Todos
+              </button>
+              <button type="button" class="btn btn-sm btn-light" onclick="deselectAllRecipients()">
+                <i class="fas fa-times"></i> Ninguno
+              </button>
+            </div>
+          @endif
         </div>
         <div class="card-body" style="max-height: 400px; overflow-y: auto;">
           @if($recipients->isEmpty())
@@ -100,22 +113,39 @@
               <p class="text-muted mb-0">No hay destinatarios que cumplan con los filtros seleccionados</p>
             </div>
           @else
-            <ul class="list-group list-group-flush">
+            <ul class="list-group list-group-flush" id="recipientsList">
               @foreach($recipients as $user)
                 <li class="list-group-item px-0">
                   <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                      <strong>{{ $user->name }}</strong>
-                      <br><small class="text-muted">{{ $user->email }}</small>
-                      @if($user->phone)
-                        <br><small class="text-muted"><i class="fas fa-phone fa-xs"></i> {{ $user->phone }}</small>
-                      @endif
+                    <div class="form-check flex-grow-1">
+                      <input class="form-check-input recipient-checkbox"
+                             type="checkbox"
+                             name="selected_recipients[]"
+                             value="{{ $user->id }}"
+                             id="recipient_{{ $user->id }}"
+                             checked
+                             onchange="updateRecipientCount()">
+                      <label class="form-check-label w-100" for="recipient_{{ $user->id }}">
+                        <div class="d-flex justify-content-between">
+                          <div>
+                            <strong>{{ $user->name }}</strong>
+                            <br><small class="text-muted">{{ $user->email }}</small>
+                            @if($user->phone)
+                              <br><small class="text-muted"><i class="fas fa-phone fa-xs"></i> {{ $user->phone }}</small>
+                            @endif
+                          </div>
+                          <span class="badge bg-secondary h-25">{{ $user->pets->count() }} {{ $user->pets->count() == 1 ? 'mascota' : 'mascotas' }}</span>
+                        </div>
+                      </label>
                     </div>
-                    <span class="badge bg-secondary">{{ $user->pets->count() }} {{ $user->pets->count() == 1 ? 'mascota' : 'mascotas' }}</span>
                   </div>
                 </li>
               @endforeach
             </ul>
+            <div class="alert alert-warning mt-3 mb-0">
+              <i class="fas fa-info-circle me-2"></i>
+              <small><strong>Desmarca</strong> usuarios para <strong>excluirlos</strong> del envío. Solo se enviarán emails a los seleccionados.</small>
+            </div>
           @endif
         </div>
       </div>
@@ -137,13 +167,18 @@
           </div>
           <div class="col-md-4 text-end">
             <form method="POST" action="{{ route('portal.admin.email-campaigns.send', $emailCampaign) }}"
-                  onsubmit="return confirm('⚠️ CONFIRMACIÓN FINAL\n\nSe enviarán {{ $recipients->count() }} emails.\n\n¿Continuar?');">
+                  id="sendCampaignForm"
+                  onsubmit="return validateAndConfirmSend();">
               @csrf
+
+              {{-- Los checkboxes de usuarios seleccionados se incluirán aquí --}}
+              <div id="selectedRecipientsContainer"></div>
+
               <a href="{{ route('portal.admin.email-campaigns.show', $emailCampaign) }}"
                  class="btn btn-secondary me-2">
                 <i class="fas fa-times me-1"></i>Cancelar
               </a>
-              <button type="submit" class="btn btn-success btn-lg">
+              <button type="submit" class="btn btn-success btn-lg" id="sendBtn">
                 <i class="fas fa-paper-plane me-2"></i>Confirmar y Enviar
               </button>
             </form>
@@ -172,7 +207,74 @@
       <li>Podrás ver el progreso en la página de detalles de la campaña</li>
       <li>Se crearán logs detallados de cada email enviado</li>
       <li>Los emails fallidos se registrarán con su respectivo error</li>
+      <li><strong>Usuarios inactivos son excluidos automáticamente</strong></li>
     </ul>
   </div>
 </div>
+
+<script>
+// Actualizar contador de destinatarios seleccionados
+function updateRecipientCount() {
+  const checkboxes = document.querySelectorAll('.recipient-checkbox');
+  const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+  document.getElementById('selectedCount').textContent = selectedCount;
+
+  // Actualizar mensaje de confirmación
+  const sendBtn = document.getElementById('sendBtn');
+  if (selectedCount === 0) {
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="fas fa-ban me-2"></i>Sin destinatarios';
+  } else {
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Confirmar y Enviar';
+  }
+}
+
+// Seleccionar todos los destinatarios
+function selectAllRecipients() {
+  const checkboxes = document.querySelectorAll('.recipient-checkbox');
+  checkboxes.forEach(cb => cb.checked = true);
+  updateRecipientCount();
+}
+
+// Deseleccionar todos los destinatarios
+function deselectAllRecipients() {
+  const checkboxes = document.querySelectorAll('.recipient-checkbox');
+  checkboxes.forEach(cb => cb.checked = false);
+  updateRecipientCount();
+}
+
+// Validar y confirmar envío
+function validateAndConfirmSend() {
+  const checkboxes = document.querySelectorAll('.recipient-checkbox');
+  const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+  if (selectedCount === 0) {
+    alert('❌ Debes seleccionar al menos un destinatario para enviar la campaña.');
+    return false;
+  }
+
+  // Copiar los checkboxes seleccionados al formulario
+  const container = document.getElementById('selectedRecipientsContainer');
+  container.innerHTML = '';
+
+  checkboxes.forEach(cb => {
+    if (cb.checked) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'selected_recipients[]';
+      input.value = cb.value;
+      container.appendChild(input);
+    }
+  });
+
+  // Confirmación final
+  return confirm(`⚠️ CONFIRMACIÓN FINAL\n\nSe enviarán ${selectedCount} emails.\n\n¿Continuar?`);
+}
+
+// Inicializar contador al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+  updateRecipientCount();
+});
+</script>
 @endsection

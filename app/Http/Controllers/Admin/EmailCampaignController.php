@@ -133,7 +133,7 @@ class EmailCampaignController extends Controller
     /**
      * Enviar campaña
      */
-    public function send(EmailCampaign $emailCampaign)
+    public function send(Request $request, EmailCampaign $emailCampaign)
     {
         if ($emailCampaign->status !== 'draft') {
             return redirect()
@@ -144,8 +144,28 @@ class EmailCampaignController extends Controller
         DB::beginTransaction();
 
         try {
-            // Obtener destinatarios
+            // Obtener destinatarios filtrados
             $recipients = $emailCampaign->getFilteredRecipients();
+
+            // Si vienen usuarios seleccionados manualmente, filtrar solo esos
+            if ($request->has('selected_recipients')) {
+                $selectedIds = $request->input('selected_recipients', []);
+
+                if (empty($selectedIds)) {
+                    return redirect()
+                        ->back()
+                        ->with('error', 'Debes seleccionar al menos un destinatario.');
+                }
+
+                // Filtrar solo los usuarios seleccionados
+                $recipients = $recipients->whereIn('id', $selectedIds);
+            }
+
+            if ($recipients->count() === 0) {
+                return redirect()
+                    ->back()
+                    ->with('error', 'No hay destinatarios válidos para enviar.');
+            }
 
             // Actualizar campaña
             $emailCampaign->update([
@@ -211,12 +231,13 @@ class EmailCampaignController extends Controller
 
                 // Crear log de email
                 EmailLog::logEmail(
-                    $recipient->email,
-                    $campaign->template->subject,
-                    'sent',
-                    null,
-                    $recipient->user->id,
-                    'campaign'
+                    recipient: $recipient->email,
+                    subject: $campaign->template->subject,
+                    type: 'campaign',
+                    orderId: null,
+                    userId: $recipient->user->id,
+                    status: 'sent',
+                    errorMessage: null
                 );
 
                 // Incrementar contador
@@ -231,12 +252,13 @@ class EmailCampaignController extends Controller
 
                 // Log de error
                 EmailLog::logEmail(
-                    $recipient->email,
-                    $campaign->template->subject,
-                    'failed',
-                    $e->getMessage(),
-                    $recipient->user->id,
-                    'campaign'
+                    recipient: $recipient->email,
+                    subject: $campaign->template->subject,
+                    type: 'campaign',
+                    orderId: null,
+                    userId: $recipient->user->id,
+                    status: 'failed',
+                    errorMessage: $e->getMessage()
                 );
 
                 // Incrementar contador de fallidos

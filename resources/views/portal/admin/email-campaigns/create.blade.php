@@ -48,39 +48,123 @@
         {{-- Tipo de filtro --}}
         <div class="mb-4">
           <label class="form-label fw-bold">Filtro de Destinatarios*</label>
+          <small class="text-muted d-block mb-2">Nota: Siempre se excluyen usuarios inactivos automáticamente</small>
 
-          <div class="list-group">
-            <label class="list-group-item">
-              <input class="form-check-input me-2" type="radio" name="filter_type" value="all" id="filter_all" checked>
-              <div>
-                <strong>Todos los Clientes</strong>
-                <div class="text-muted small">Enviar a todos los usuarios registrados</div>
-              </div>
-            </label>
+          <div class="row">
+            <div class="col-md-6">
+              <h6 class="text-muted small">Filtros Generales</h6>
+              <div class="list-group mb-3">
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="all" id="filter_all" checked>
+                  <div>
+                    <strong>Todos los Clientes Activos</strong>
+                    <div class="text-muted small">Todos los usuarios activos registrados</div>
+                  </div>
+                </label>
 
-            <label class="list-group-item">
-              <input class="form-check-input me-2" type="radio" name="filter_type" value="no_scans" id="filter_no_scans">
-              <div>
-                <strong>Sin Lecturas de QR</strong>
-                <div class="text-muted small">Clientes que no han escaneado su QR en X días</div>
-                <div class="mt-2" id="no_scans_config" style="display:none;">
-                  <label class="form-label small">Días sin escanear:</label>
-                  <input type="number" class="form-control form-control-sm" name="no_scans_days" value="30" min="1">
-                </div>
-              </div>
-            </label>
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="has_pets">
+                  <div>
+                    <strong>Con Mascotas</strong>
+                    <div class="text-muted small">Clientes que tienen mascotas registradas</div>
+                  </div>
+                </label>
 
-            <label class="list-group-item">
-              <input class="form-check-input me-2" type="radio" name="filter_type" value="payment_due" id="filter_payment">
-              <div>
-                <strong>Pago Próximo a Vencer</strong>
-                <div class="text-muted small">Clientes cuya suscripción vence pronto</div>
-                <div class="mt-2" id="payment_due_config" style="display:none;">
-                  <label class="form-label small">Días antes del vencimiento:</label>
-                  <input type="number" class="form-control form-control-sm" name="payment_due_days" value="5" min="1">
-                </div>
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="no_pets">
+                  <div>
+                    <strong>Sin Mascotas</strong>
+                    <div class="text-muted small">Clientes sin mascotas (posible abandono)</div>
+                  </div>
+                </label>
+
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="with_lost_pets">
+                  <div>
+                    <strong>Con Mascotas Perdidas</strong>
+                    <div class="text-muted small">Clientes con mascotas marcadas como perdidas</div>
+                  </div>
+                </label>
               </div>
-            </label>
+
+              <h6 class="text-muted small">Actividad</h6>
+              <div class="list-group mb-3">
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="no_scans" id="filter_no_scans">
+                  <div>
+                    <strong>Sin Lecturas de QR</strong>
+                    <div class="text-muted small">Sin escaneos en X días</div>
+                    <div class="mt-2" id="no_scans_config" style="display:none;">
+                      <label class="form-label small">Días sin escanear:</label>
+                      <input type="number" class="form-control form-control-sm" name="no_scans_days" value="30" min="1">
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <h6 class="text-muted small">Email y Verificación</h6>
+              <div class="list-group mb-3">
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="verified_email">
+                  <div>
+                    <strong>Email Verificado</strong>
+                    <div class="text-muted small">Solo con email confirmado</div>
+                  </div>
+                </label>
+
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="unverified_email">
+                  <div>
+                    <strong>Email No Verificado</strong>
+                    <div class="text-muted small">Recordatorio para verificar email</div>
+                  </div>
+                </label>
+              </div>
+
+              <h6 class="text-muted small">Pedidos y Pagos</h6>
+              <div class="list-group mb-3">
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="payment_due" id="filter_payment">
+                  <div>
+                    <strong>Pago Próximo a Vencer</strong>
+                    <div class="text-muted small">Suscripción vence pronto</div>
+                    <div class="mt-2" id="payment_due_config" style="display:none;">
+                      <label class="form-label small">Días antes del vencimiento:</label>
+                      <input type="number" class="form-control form-control-sm" name="payment_due_days" value="5" min="1">
+                    </div>
+                  </div>
+                </label>
+
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="has_orders">
+                  <div>
+                    <strong>Con Pedidos</strong>
+                    <div class="text-muted small">Clientes que han realizado compras</div>
+                  </div>
+                </label>
+
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="no_orders">
+                  <div>
+                    <strong>Sin Pedidos</strong>
+                    <div class="text-muted small">Registrados pero sin compras</div>
+                  </div>
+                </label>
+              </div>
+
+              <h6 class="text-muted small">Selección Manual</h6>
+              <div class="list-group">
+                <label class="list-group-item">
+                  <input class="form-check-input me-2" type="radio" name="filter_type" value="manual" id="filter_manual">
+                  <div>
+                    <strong>Selección Manual</strong>
+                    <div class="text-muted small">Elige usuarios específicos</div>
+                  </div>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
