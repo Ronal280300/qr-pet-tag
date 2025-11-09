@@ -278,6 +278,16 @@
                 </a>
               </li>
 
+              {{-- Campana de Notificaciones (Admin) - A LA IZQUIERDA --}}
+              @if(Auth::user()->is_admin)
+                <li class="nav-item">
+                  <a class="nav-link position-relative" href="{{ route('portal.admin.notifications.index') }}" id="notificationBell" title="Notificaciones">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="notif-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle badge-sm rounded-pill" style="display: none; font-size: 0.65rem;">0</span>
+                  </a>
+                </li>
+              @endif
+
               {{-- Mi Portal - SIEMPRE PRIMERO con estilo especial --}}
               <li class="nav-item">
                 <a href="{{ route('portal.dashboard') }}" class="nav-link nav-link-portal">
@@ -300,14 +310,6 @@
 
               {{-- Admin --}}
               @if(Auth::user()->is_admin)
-                {{-- Campana de Notificaciones --}}
-                <li class="nav-item">
-                  <a class="nav-link position-relative" href="{{ route('portal.admin.notifications.index') }}" id="notificationBell" title="Notificaciones">
-                    <i class="fa-solid fa-bell"></i>
-                    <span id="notif-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle badge-sm rounded-pill" style="display: none; font-size: 0.65rem;">0</span>
-                  </a>
-                </li>
-
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
                     <i class="fa-solid fa-screwdriver-wrench me-1"></i> Admin
