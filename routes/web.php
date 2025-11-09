@@ -261,6 +261,18 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             // Logs de correos
             Route::get('email-logs', [\App\Http\Controllers\Admin\EmailLogController::class, 'index'])->name('email-logs.index');
             Route::get('email-logs/{log}', [\App\Http\Controllers\Admin\EmailLogController::class, 'show'])->name('email-logs.show');
+
+            // Email Marketing - Plantillas
+            Route::resource('email-templates', \App\Http\Controllers\Admin\EmailTemplateController::class);
+            Route::get('email-templates/{emailTemplate}/preview', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'preview'])->name('email-templates.preview');
+            Route::post('email-templates/{emailTemplate}/duplicate', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'duplicate'])->name('email-templates.duplicate');
+
+            // Email Marketing - Campañas
+            Route::resource('email-campaigns', \App\Http\Controllers\Admin\EmailCampaignController::class);
+            Route::get('email-campaigns/preview/recipients', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'previewRecipients'])->name('email-campaigns.preview-recipients');
+            Route::get('email-campaigns/{emailCampaign}/confirm', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'confirm'])->name('email-campaigns.confirm');
+            Route::post('email-campaigns/{emailCampaign}/send', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'send'])->name('email-campaigns.send');
+
             Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
             // 👉 Configuración del Sistema
             Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
