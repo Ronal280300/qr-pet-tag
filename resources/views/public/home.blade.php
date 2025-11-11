@@ -1643,58 +1643,224 @@
 </section>
 
 
-{{-- ====== MASCOTAS PROTEGIDAS - Galería ====== --}}
-<section class="pets-gallery-section">
+{{-- ====== MASCOTAS PROTEGIDAS - Carousel Infinito ====== --}}
+<section class="pets-carousel-section">
   <div class="container">
     <div class="section-header reveal">
       <span class="section-badge">
         <i class="fa-solid fa-heart"></i> Mascotas Protegidas
       </span>
       <h2 class="section-title">Ellos ya están <span class="gradient-text">protegidos</span></h2>
-      <p class="section-subtitle">Miles de mascotas ya confían en QR-Pet Tag para su seguridad</p>
+      <p class="section-subtitle">Únete a las familias que ya confían en QR-Pet Tag para proteger a sus mejores amigos</p>
     </div>
 
-    <div class="pets-gallery reveal">
-      <div class="row g-4">
-        <div class="col-6 col-md-3">
-          <div class="pet-card will-change-transform">
-            <div class="pet-image">
-              <img src="{{ asset('storage/images/asha.jpeg') }}" alt="Asha - Mascota protegida" loading="lazy">
+    @if($pets->count() > 0)
+    <div class="carousel-infinite-container">
+      <div class="carousel-track">
+        {{-- Renderizar las mascotas 2 veces para el efecto seamless --}}
+        @foreach($pets->concat($pets) as $pet)
+        <div class="carousel-pet-card">
+          <div class="pet-photo-wrapper">
+            <img src="{{ $pet->main_photo_url }}" alt="{{ $pet->name }}" loading="lazy">
+            <div class="pet-overlay">
+              <div class="pet-info">
+                <i class="fa-solid fa-paw"></i>
+                <span class="pet-name">{{ $pet->name }}</span>
+              </div>
             </div>
-            <div class="pet-name"></div>
           </div>
         </div>
-        
-        <div class="col-6 col-md-3">
-          <div class="pet-card will-change-transform">
-            <div class="pet-image">
-              <img src="{{ asset('storage/images/coqueta.jpeg') }}" alt="Coqueta - Mascota protegida" loading="lazy">
-            </div>
-            <div class="pet-name"></div>
-          </div>
-        </div>
-        
-        <div class="col-6 col-md-3">
-          <div class="pet-card will-change-transform">
-            <div class="pet-image">
-              <img src="{{ asset('storage/images/morgan.jpeg') }}" alt="Morgan - Mascota protegida" loading="lazy">
-            </div>
-            <div class="pet-name"></div>
-          </div>
-        </div>
-        
-        <div class="col-6 col-md-3">
-          <div class="pet-card will-change-transform">
-            <div class="pet-image">
-              <img src="{{ asset('storage/images/negro.jpeg') }}" alt="Negro - Mascota protegida" loading="lazy">
-            </div>
-            <div class="pet-name"></div>
-          </div>
-        </div>
+        @endforeach
       </div>
     </div>
+    @else
+    {{-- Fallback si no hay mascotas --}}
+    <div class="no-pets-message">
+      <i class="fa-solid fa-paw"></i>
+      <p>Pronto verás aquí a las mascotas protegidas con QR-Pet Tag</p>
+    </div>
+    @endif
   </div>
 </section>
+
+<style>
+  /* ============================================
+     CAROUSEL INFINITO DE MASCOTAS
+     ============================================ */
+  .pets-carousel-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, var(--bg-subtle) 0%, var(--bg) 100%);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .carousel-infinite-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    margin-top: 48px;
+    padding: 20px 0;
+  }
+
+  /* Gradientes a los lados para efecto fade */
+  .carousel-infinite-container::before,
+  .carousel-infinite-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 150px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .carousel-infinite-container::before {
+    left: 0;
+    background: linear-gradient(90deg, var(--bg-subtle) 0%, transparent 100%);
+  }
+
+  .carousel-infinite-container::after {
+    right: 0;
+    background: linear-gradient(270deg, var(--bg-subtle) 0%, transparent 100%);
+  }
+
+  .carousel-track {
+    display: flex;
+    gap: 24px;
+    animation: scroll-infinite 40s linear infinite;
+    will-change: transform;
+  }
+
+  /* Pausar en hover */
+  .carousel-infinite-container:hover .carousel-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes scroll-infinite {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-50% - 12px));
+    }
+  }
+
+  .carousel-pet-card {
+    flex-shrink: 0;
+    width: 280px;
+    height: 280px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .carousel-pet-card:hover {
+    transform: translateY(-12px) scale(1.05);
+    box-shadow: var(--shadow-xl);
+    z-index: 10;
+  }
+
+  .pet-photo-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .pet-photo-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .carousel-pet-card:hover .pet-photo-wrapper img {
+    transform: scale(1.15);
+  }
+
+  .pet-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.8) 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .carousel-pet-card:hover .pet-overlay {
+    opacity: 1;
+  }
+
+  .pet-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+  }
+
+  .pet-info i {
+    font-size: 20px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .pet-name {
+    font-size: 18px;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* No pets message */
+  .no-pets-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  .no-pets-message i {
+    font-size: 64px;
+    opacity: 0.3;
+    margin-bottom: 16px;
+  }
+
+  .no-pets-message p {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .carousel-pet-card {
+      width: 220px;
+      height: 220px;
+    }
+
+    .carousel-track {
+      gap: 16px;
+      animation-duration: 30s;
+    }
+
+    .carousel-infinite-container::before,
+    .carousel-infinite-container::after {
+      width: 80px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .carousel-pet-card {
+      width: 180px;
+      height: 180px;
+    }
+
+    .pet-name {
+      font-size: 16px;
+    }
+  }
+</style>
 
 {{-- ====== FAQ SECTION ====== --}}
 <section class="faq-modern">

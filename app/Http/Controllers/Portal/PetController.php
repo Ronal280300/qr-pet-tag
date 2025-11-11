@@ -55,6 +55,11 @@ class PetController extends Controller
 
             // NUEVOS CAMPOS
             'sex'            => 'nullable|in:male,female,unknown',
+            
+            // CONTACTO DE EMERGENCIA
+            'has_emergency_contact'    => 'nullable|boolean',
+            'emergency_contact_name'   => 'nullable|string|max:120',
+            'emergency_contact_phone'  => 'nullable|string|max:20',
             'is_neutered'    => 'nullable|boolean',
             'rabies_vaccine' => 'nullable|boolean',
         ]);
@@ -145,11 +150,23 @@ class PetController extends Controller
             // Se normalizan abajo
             'is_neutered'    => ['nullable', 'boolean'],
             'rabies_vaccine' => ['nullable', 'boolean'],
+            
+            // CONTACTO DE EMERGENCIA
+            'has_emergency_contact'    => ['nullable', 'boolean'],
+            'emergency_contact_name'   => ['nullable', 'string', 'max:120'],
+            'emergency_contact_phone'  => ['nullable', 'string', 'max:20'],
         ]);
 
         // Normalización de toggles (aunque no lleguen en la request)
         $data['is_neutered']    = $request->boolean('is_neutered');
         $data['rabies_vaccine'] = $request->boolean('rabies_vaccine');
+        
+        // Contacto de emergencia
+        $data['has_emergency_contact'] = $request->boolean('has_emergency_contact');
+        if (!$data['has_emergency_contact']) {
+            $data['emergency_contact_name'] = null;
+            $data['emergency_contact_phone'] = null;
+        }
 
         DB::transaction(function () use ($request, $pet, $data) {
             // 1) Eliminar fotos marcadas

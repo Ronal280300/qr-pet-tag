@@ -269,6 +269,73 @@
           </div>
         </div>
 
+
+        {{-- ======================= CONTACTO DE EMERGENCIA ======================= --}}
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon-wrapper">
+              <div class="section-icon danger">
+                <i class="fa-solid fa-phone-volume"></i>
+              </div>
+              <div class="section-info">
+                <h2 class="section-title">Contacto de Emergencia (Opcional)</h2>
+                <p class="section-description">Si el dueño no responde, mostrar otro contacto en el perfil público</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <div class="toggle-card mb-4">
+              <div class="toggle-info">
+                <div class="toggle-icon">
+                  <i class="fa-solid fa-user-nurse"></i>
+                </div>
+                <div>
+                  <label class="toggle-label" for="has_emergency_contact">Habilitar Contacto de Emergencia</label>
+                  <p class="toggle-description">Se mostrará como contacto secundario en caso de emergencia</p>
+                </div>
+              </div>
+              <input type="hidden" name="has_emergency_contact" value="0">
+              <label class="modern-switch">
+                <input id="has_emergency_contact" type="checkbox" name="has_emergency_contact" value="1" 
+                       onchange="toggleEmergencyFields()">
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+
+            <div id="emergency-fields" class="row g-4" style="display: none;">
+              <div class="col-12 col-md-6">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-user label-icon"></i>
+                    Nombre del contacto
+                  </label>
+                  <input type="text" name="emergency_contact_name" class="form-input" 
+                         placeholder="Ej: María González">
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-mobile-screen label-icon"></i>
+                    Teléfono del contacto
+                  </label>
+                  <input type="text" name="emergency_contact_phone" class="form-input" 
+                         placeholder="Ej: +506 8765-4321">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="alert alert-info">
+                  <i class="fa-solid fa-circle-info me-2"></i>
+                  <strong>Nota:</strong> Este contacto aparecerá como alternativa en el perfil público 
+                  de la mascota con la etiqueta "Contacto de Emergencia".
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         {{-- ======================= FOTOS MÚLTIPLES ======================= --}}
         <div class="form-section">
           <div class="section-header">
@@ -1415,5 +1482,6 @@
       if (filesBuffer.length > MAX) e.preventDefault();
     });
   })();
+  \n  // Toggle emergency contact fields\n  function toggleEmergencyFields() {\n    const toggle = document.getElementById("has_emergency_contact");\n    const fields = document.getElementById("emergency-fields");\n    if (toggle.checked) {\n      fields.style.display = "flex";\n    } else {\n      fields.style.display = "none";\n      // Clear fields when disabled\n      document.querySelector("input[name=\"emergency_contact_name\"]").value = "";\n      document.querySelector("input[name=\"emergency_contact_phone\"]").value = "";\n    }\n  }
 </script>
 @endpush
