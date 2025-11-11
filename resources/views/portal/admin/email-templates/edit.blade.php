@@ -3,223 +3,1028 @@
 @section('title', 'Editar Plantilla de Email')
 
 @section('content')
-<div class="container-fluid py-4">
-  <div class="row mb-4">
-    <div class="col">
-      <h1 class="h3 mb-0 text-gray-800">
-        <i class="fas fa-edit me-2"></i>Editar Plantilla de Email
-      </h1>
-      <p class="text-muted mb-0">{{ $emailTemplate->name }}</p>
-    </div>
-    <div class="col-auto">
-      <a href="{{ route('portal.admin.email-templates.preview', $emailTemplate) }}"
-         class="btn btn-info"
-         target="_blank">
-        <i class="fas fa-eye me-1"></i>Vista Previa
-      </a>
-      <a href="{{ route('portal.admin.email-templates.index') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-1"></i>Volver
-      </a>
-    </div>
-  </div>
-
-  @if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show">
-      <strong>¡Error!</strong> Por favor corrige los siguientes problemas:
-      <ul class="mb-0 mt-2">
-        @foreach ($errors->all() as $error)
-          <li>{{ $error }}</li>
-        @endforeach
-      </ul>
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  @endif
-
-  <div class="card shadow">
-    <div class="card-body">
-      <form method="POST" action="{{ route('portal.admin.email-templates.update', $emailTemplate) }}">
-        @csrf
-        @method('PUT')
-
-        {{-- Nombre --}}
-        <div class="mb-4">
-          <label for="name" class="form-label fw-bold">
-            Nombre de la Plantilla*
-          </label>
-          <input type="text"
-                 class="form-control @error('name') is-invalid @enderror"
-                 id="name"
-                 name="name"
-                 value="{{ old('name', $emailTemplate->name) }}"
-                 required
-                 placeholder="Ej: Recordatorio de Pago Mensual">
-          @error('name')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-          <div class="form-text">Un nombre descriptivo para identificar la plantilla</div>
+<div class="email-template-edit-page">
+  <div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-icon">
+          <i class="fas fa-edit"></i>
         </div>
-
-        {{-- Categoría --}}
-        <div class="mb-4">
-          <label for="category" class="form-label fw-bold">
-            Categoría*
-          </label>
-          <select class="form-select @error('category') is-invalid @enderror"
-                  id="category"
-                  name="category"
-                  required>
-            <option value="">Seleccionar categoría...</option>
-            @foreach($categories as $key => $label)
-              <option value="{{ $key }}"
-                      {{ old('category', $emailTemplate->category) == $key ? 'selected' : '' }}>
-                {{ $label }}
-              </option>
-            @endforeach
-          </select>
-          @error('category')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-        </div>
-
-        {{-- Asunto --}}
-        <div class="mb-4">
-          <label for="subject" class="form-label fw-bold">
-            Asunto del Email*
-          </label>
-          <input type="text"
-                 class="form-control @error('subject') is-invalid @enderror"
-                 id="subject"
-                 name="subject"
-                 value="{{ old('subject', $emailTemplate->subject) }}"
-                 required
-                 placeholder="Ej: Recordatorio: Tu plan vence pronto">
-          @error('subject')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-          <div class="form-text">El asunto que verán los destinatarios en su bandeja de entrada</div>
-        </div>
-
-        {{-- Descripción --}}
-        <div class="mb-4">
-          <label for="description" class="form-label fw-bold">
-            Descripción (opcional)
-          </label>
-          <textarea class="form-control @error('description') is-invalid @enderror"
-                    id="description"
-                    name="description"
-                    rows="2"
-                    placeholder="Descripción interna de la plantilla">{{ old('description', $emailTemplate->description) }}</textarea>
-          @error('description')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-          <div class="form-text">Nota interna sobre el propósito de esta plantilla</div>
-        </div>
-
-        {{-- Contenido HTML --}}
-        <div class="mb-4">
-          <label for="html_content" class="form-label fw-bold">
-            Contenido HTML*
-          </label>
-          <textarea class="form-control @error('html_content') is-invalid @enderror"
-                    id="html_content"
-                    name="html_content"
-                    rows="15"
-                    required
-                    style="font-family: monospace;">{{ old('html_content', $emailTemplate->html_content) }}</textarea>
-          @error('html_content')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-          <div class="form-text">
-            El HTML completo del email. Puedes usar variables como <code>@{{ name }}</code>, <code>@{{ email }}</code>, etc.
-          </div>
-        </div>
-
-        {{-- Estado --}}
-        <div class="mb-4">
-          <div class="form-check form-switch">
-            <input class="form-check-input"
-                   type="checkbox"
-                   id="is_active"
-                   name="is_active"
-                   value="1"
-                   {{ old('is_active', $emailTemplate->is_active) ? 'checked' : '' }}>
-            <label class="form-check-label" for="is_active">
-              <strong>Plantilla Activa</strong>
-              <div class="text-muted small">Solo las plantillas activas estarán disponibles para usar en campañas</div>
-            </label>
-          </div>
-        </div>
-
-        {{-- Información adicional --}}
-        @if($emailTemplate->campaigns()->count() > 0)
-          <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            Esta plantilla está siendo usada en <strong>{{ $emailTemplate->campaigns()->count() }}</strong>
-            {{ $emailTemplate->campaigns()->count() == 1 ? 'campaña' : 'campañas' }}.
-          </div>
-        @endif
-
-        {{-- Botones --}}
-        <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save me-1"></i>Guardar Cambios
-          </button>
-          <a href="{{ route('portal.admin.email-templates.index') }}" class="btn btn-secondary">
-            <i class="fas fa-times me-1"></i>Cancelar
-          </a>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  {{-- Panel de ayuda con variables --}}
-  <div class="card shadow mt-4">
-    <div class="card-header bg-info text-white">
-      <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Variables Disponibles</h6>
-    </div>
-    <div class="card-body">
-      <p class="mb-3">Puedes usar las siguientes variables en el contenido HTML. Serán reemplazadas automáticamente al enviar:</p>
-      <div class="row">
-        <div class="col-md-6">
-          <ul class="list-unstyled">
-            <li class="mb-2">
-              <code>@{{ name }}</code>
-              <span class="text-muted">- Nombre del usuario</span>
-            </li>
-            <li class="mb-2">
-              <code>@{{ email }}</code>
-              <span class="text-muted">- Email del usuario</span>
-            </li>
-            <li class="mb-2">
-              <code>@{{ phone }}</code>
-              <span class="text-muted">- Teléfono del usuario</span>
-            </li>
-          </ul>
-        </div>
-        <div class="col-md-6">
-          <ul class="list-unstyled">
-            <li class="mb-2">
-              <code>@{{ year }}</code>
-              <span class="text-muted">- Año actual</span>
-            </li>
-            <li class="mb-2">
-              <code>@{{ site_name }}</code>
-              <span class="text-muted">- Nombre del sitio</span>
-            </li>
-            <li class="mb-2">
-              <code>@{{ site_url }}</code>
-              <span class="text-muted">- URL del sitio</span>
-            </li>
-          </ul>
+        <div class="header-text">
+          <h1 class="header-title">Editar Plantilla de Email</h1>
+          <p class="header-subtitle">{{ $emailTemplate->name }}</p>
         </div>
       </div>
+      <div class="header-actions">
+        <a href="{{ route('portal.admin.email-templates.preview', $emailTemplate) }}"
+           class="btn-preview"
+           target="_blank">
+          <i class="fas fa-eye"></i>
+          <span>Vista Previa</span>
+        </a>
+        <a href="{{ route('portal.admin.email-templates.index') }}" class="btn-back">
+          <i class="fas fa-arrow-left"></i>
+          <span>Volver</span>
+        </a>
+      </div>
+    </div>
 
-      <div class="alert alert-light mt-3 mb-0">
-        <strong>Ejemplo de uso:</strong>
-        <pre class="mb-0 mt-2" style="background: #f8f9fa; padding: 10px; border-radius: 4px;"><code>&lt;p&gt;Hola @{{ name }} 👋&lt;/p&gt;
+    {{-- Error Alert --}}
+    @if ($errors->any())
+      <div class="alert-error">
+        <div class="alert-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="alert-content">
+          <strong class="alert-title">¡Error!</strong>
+          <p class="alert-message">Por favor corrige los siguientes problemas:</p>
+          <ul class="alert-list">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+        <button type="button" class="alert-close" data-bs-dismiss="alert">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    @endif
+
+    <div class="content-grid">
+      {{-- Main Form --}}
+      <div class="form-card">
+        <form method="POST" action="{{ route('portal.admin.email-templates.update', $emailTemplate) }}">
+          @csrf
+          @method('PUT')
+
+          {{-- Nombre --}}
+          <div class="form-group">
+            <label for="name" class="form-label">
+              <i class="fas fa-tag"></i>
+              Nombre de la Plantilla
+              <span class="required">*</span>
+            </label>
+            <input type="text"
+                   class="form-input @error('name') is-invalid @enderror"
+                   id="name"
+                   name="name"
+                   value="{{ old('name', $emailTemplate->name) }}"
+                   required
+                   placeholder="Ej: Recordatorio de Pago Mensual">
+            @error('name')
+              <div class="input-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ $message }}
+              </div>
+            @enderror
+            <div class="form-help">Un nombre descriptivo para identificar la plantilla</div>
+          </div>
+
+          {{-- Categoría --}}
+          <div class="form-group">
+            <label for="category" class="form-label">
+              <i class="fas fa-folder"></i>
+              Categoría
+              <span class="required">*</span>
+            </label>
+            <select class="form-select @error('category') is-invalid @enderror"
+                    id="category"
+                    name="category"
+                    required>
+              <option value="">Seleccionar categoría...</option>
+              @foreach($categories as $key => $label)
+                <option value="{{ $key }}" {{ old('category', $emailTemplate->category) == $key ? 'selected' : '' }}>
+                  {{ $label }}
+                </option>
+              @endforeach
+            </select>
+            @error('category')
+              <div class="input-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ $message }}
+              </div>
+            @enderror
+          </div>
+
+          {{-- Asunto --}}
+          <div class="form-group">
+            <label for="subject" class="form-label">
+              <i class="fas fa-envelope"></i>
+              Asunto del Email
+              <span class="required">*</span>
+            </label>
+            <input type="text"
+                   class="form-input @error('subject') is-invalid @enderror"
+                   id="subject"
+                   name="subject"
+                   value="{{ old('subject', $emailTemplate->subject) }}"
+                   required
+                   placeholder="Ej: Recordatorio: Tu plan vence pronto">
+            @error('subject')
+              <div class="input-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ $message }}
+              </div>
+            @enderror
+            <div class="form-help">El asunto que verán los destinatarios en su bandeja de entrada</div>
+          </div>
+
+          {{-- Descripción --}}
+          <div class="form-group">
+            <label for="description" class="form-label">
+              <i class="fas fa-align-left"></i>
+              Descripción
+              <span class="optional">(opcional)</span>
+            </label>
+            <textarea class="form-textarea @error('description') is-invalid @enderror"
+                      id="description"
+                      name="description"
+                      rows="3"
+                      placeholder="Descripción interna de la plantilla">{{ old('description', $emailTemplate->description) }}</textarea>
+            @error('description')
+              <div class="input-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ $message }}
+              </div>
+            @enderror
+            <div class="form-help">Nota interna sobre el propósito de esta plantilla</div>
+          </div>
+
+          {{-- Contenido HTML --}}
+          <div class="form-group">
+            <label for="html_content" class="form-label">
+              <i class="fas fa-code"></i>
+              Contenido HTML
+              <span class="required">*</span>
+            </label>
+            <textarea class="form-textarea form-code @error('html_content') is-invalid @enderror"
+                      id="html_content"
+                      name="html_content"
+                      rows="15"
+                      required
+                      placeholder="Escribe o pega el HTML de tu plantilla...">{{ old('html_content', $emailTemplate->html_content) }}</textarea>
+            @error('html_content')
+              <div class="input-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ $message }}
+              </div>
+            @enderror
+            <div class="form-help">
+              El HTML completo del email. Puedes usar variables como <code>@{{ name }}</code>, <code>@{{ email }}</code>, etc.
+            </div>
+          </div>
+
+          {{-- Estado --}}
+          <div class="form-group">
+            <div class="switch-container">
+              <input class="switch-input"
+                     type="checkbox"
+                     id="is_active"
+                     name="is_active"
+                     value="1"
+                     {{ old('is_active', $emailTemplate->is_active) ? 'checked' : '' }}>
+              <label class="switch-label" for="is_active">
+                <span class="switch-slider"></span>
+              </label>
+              <div class="switch-text">
+                <strong>Plantilla Activa</strong>
+                <p>Solo las plantillas activas estarán disponibles para usar en campañas</p>
+              </div>
+            </div>
+          </div>
+
+          {{-- Información sobre uso en campañas --}}
+          @if($emailTemplate->campaigns()->count() > 0)
+            <div class="info-box">
+              <div class="info-icon">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <div class="info-content">
+                Esta plantilla está siendo usada en 
+                <strong>{{ $emailTemplate->campaigns()->count() }}</strong>
+                {{ $emailTemplate->campaigns()->count() == 1 ? 'campaña' : 'campañas' }}.
+              </div>
+            </div>
+          @endif
+
+          {{-- Botones --}}
+          <div class="form-actions">
+            <button type="submit" class="btn-submit">
+              <i class="fas fa-save"></i>
+              <span>Guardar Cambios</span>
+            </button>
+            <a href="{{ route('portal.admin.email-templates.index') }}" class="btn-cancel">
+              <i class="fas fa-times"></i>
+              <span>Cancelar</span>
+            </a>
+          </div>
+        </form>
+      </div>
+
+      {{-- Variables Help Panel --}}
+      <div class="help-card">
+        <div class="help-header">
+          <div class="help-icon">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <h2 class="help-title">Variables Disponibles</h2>
+        </div>
+
+        <div class="help-body">
+          <p class="help-intro">Puedes usar las siguientes variables en el contenido HTML. Serán reemplazadas automáticamente al enviar:</p>
+
+          <div class="variables-section">
+            <h3 class="variables-subtitle">
+              <i class="fas fa-user"></i>
+              Datos del Usuario
+            </h3>
+            <div class="variable-list">
+              <div class="variable-item">
+                <code class="variable-code">@{{ name }}</code>
+                <span class="variable-desc">Nombre del usuario</span>
+              </div>
+              <div class="variable-item">
+                <code class="variable-code">@{{ email }}</code>
+                <span class="variable-desc">Email del usuario</span>
+              </div>
+              <div class="variable-item">
+                <code class="variable-code">@{{ phone }}</code>
+                <span class="variable-desc">Teléfono del usuario</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="variables-section">
+            <h3 class="variables-subtitle">
+              <i class="fas fa-globe"></i>
+              Datos del Sistema
+            </h3>
+            <div class="variable-list">
+              <div class="variable-item">
+                <code class="variable-code">@{{ year }}</code>
+                <span class="variable-desc">Año actual</span>
+              </div>
+              <div class="variable-item">
+                <code class="variable-code">@{{ site_name }}</code>
+                <span class="variable-desc">Nombre del sitio</span>
+              </div>
+              <div class="variable-item">
+                <code class="variable-code">@{{ site_url }}</code>
+                <span class="variable-desc">URL del sitio</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="example-box">
+            <div class="example-header">
+              <i class="fas fa-code"></i>
+              <strong>Ejemplo de uso</strong>
+            </div>
+            <pre class="example-code"><code>&lt;p&gt;Hola @{{ name }} 👋&lt;/p&gt;
 &lt;p&gt;Tu email es: @{{ email }}&lt;/p&gt;</code></pre>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+.email-template-edit-page {
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* ========== Header ========== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #115DFC 0%, #0047CC 100%);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: white;
+  box-shadow: 0 8px 20px rgba(17, 93, 252, 0.3);
+  flex-shrink: 0;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.header-subtitle {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.25);
+}
+
+.btn-preview:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.35);
+  color: white;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  color: #424242;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.btn-back:hover {
+  background: #f5f5f5;
+  border-color: #115DFC;
+  color: #115DFC;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.btn-preview i,
+.btn-back i {
+  font-size: 16px;
+}
+
+/* ========== Error Alert ========== */
+.alert-error {
+  background: white;
+  border-left: 4px solid #F44336;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(244, 67, 54, 0.15);
+  margin-bottom: 24px;
+}
+
+.alert-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  display: block;
+  color: #D32F2F;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.alert-message {
+  color: #424242;
+  font-size: 14px;
+  margin: 0 0 8px 0;
+}
+
+.alert-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #616161;
+  font-size: 13px;
+}
+
+.alert-list li {
+  margin-bottom: 4px;
+}
+
+.alert-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 8px;
+  color: #757575;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alert-close:hover {
+  background: #eeeeee;
+  color: #424242;
+}
+
+/* ========== Content Grid ========== */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ========== Form Card ========== */
+.form-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.form-group {
+  margin-bottom: 28px;
+}
+
+.form-group:last-of-type {
+  margin-bottom: 32px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+
+.form-label i {
+  color: #115DFC;
+  font-size: 16px;
+}
+
+.required {
+  color: #F44336;
+  font-weight: 700;
+}
+
+.optional {
+  color: #9e9e9e;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #424242;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #115DFC;
+  box-shadow: 0 0 0 3px rgba(17, 93, 252, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.form-code {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  background: #fafafa;
+}
+
+.form-input.is-invalid,
+.form-select.is-invalid,
+.form-textarea.is-invalid {
+  border-color: #F44336;
+}
+
+.input-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #D32F2F;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.input-error i {
+  font-size: 12px;
+}
+
+.form-help {
+  font-size: 13px;
+  color: #757575;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.form-help code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #115DFC;
+  font-weight: 600;
+}
+
+/* ========== Switch ========== */
+.switch-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: #f8f9ff;
+  border-radius: 12px;
+  border: 2px solid #e3f2fd;
+}
+
+.switch-input {
+  display: none;
+}
+
+.switch-label {
+  position: relative;
+  width: 56px;
+  height: 32px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #bdbdbd;
+  border-radius: 32px;
+  transition: all 0.3s ease;
+}
+
+.switch-slider::before {
+  content: '';
+  position: absolute;
+  height: 24px;
+  width: 24px;
+  left: 4px;
+  bottom: 4px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.switch-input:checked + .switch-label .switch-slider {
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+}
+
+.switch-input:checked + .switch-label .switch-slider::before {
+  transform: translateX(24px);
+}
+
+.switch-text {
+  flex: 1;
+}
+
+.switch-text strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.switch-text p {
+  font-size: 13px;
+  color: #616161;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ========== Info Box ========== */
+.info-box {
+  background: white;
+  border-left: 4px solid #2196F3;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
+  margin-bottom: 24px;
+}
+
+.info-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.info-content {
+  flex: 1;
+  color: #424242;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.info-content strong {
+  color: #1976D2;
+  font-weight: 700;
+}
+
+/* ========== Form Actions ========== */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.btn-submit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #115DFC 0%, #3466ff 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(17, 93, 252, 0.25);
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(17, 93, 252, 0.35);
+}
+
+.btn-submit i {
+  font-size: 16px;
+}
+
+.btn-cancel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  color: #616161;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background: #f5f5f5;
+  border-color: #bdbdbd;
+  color: #424242;
+}
+
+/* ========== Help Card ========== */
+.help-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  position: sticky;
+  top: 24px;
+  overflow: hidden;
+}
+
+.help-header {
+  padding: 24px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.help-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.help-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.help-body {
+  padding: 24px;
+}
+
+.help-intro {
+  font-size: 14px;
+  color: #616161;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.variables-section {
+  margin-bottom: 24px;
+}
+
+.variables-section:last-of-type {
+  margin-bottom: 24px;
+}
+
+.variables-subtitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.variables-subtitle i {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #115DFC 0%, #3466ff 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+}
+
+.variable-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.variable-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.variable-item:hover {
+  background: #f0f0f0;
+}
+
+.variable-code {
+  background: white;
+  border: 2px solid #e0e0e0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #115DFC;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.variable-item:hover .variable-code {
+  border-color: #115DFC;
+  background: #f8f9ff;
+}
+
+.variable-desc {
+  font-size: 12px;
+  color: #757575;
+  padding-left: 10px;
+}
+
+.example-box {
+  background: #fafafa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.example-header {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #115DFC 0%, #3466ff 100%);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.example-header i {
+  font-size: 14px;
+}
+
+.example-code {
+  margin: 0;
+  padding: 16px;
+  background: white;
+  border: none;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #424242;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1200px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .help-card {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .header-content {
+    gap: 16px;
+  }
+
+  .header-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .header-title {
+    font-size: 24px;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .btn-preview,
+  .btn-back {
+    flex: 1;
+    justify-content: center;
+    padding: 14px 20px;
+  }
+
+  .form-card {
+    padding: 24px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-submit,
+  .btn-cancel {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 24px;
+  }
+
+  .switch-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .help-body {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .header-title {
+    font-size: 20px;
+  }
+
+  .form-card {
+    padding: 20px;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  .header-actions {
+    flex-direction: column;
+  }
+
+  .btn-preview,
+  .btn-back {
+    width: 100%;
+  }
+}
+</style>
 @endsection
