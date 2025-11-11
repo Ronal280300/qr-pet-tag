@@ -617,7 +617,7 @@
                             <i class="fa-solid fa-mobile-screen"></i>
                         </div>
                         <div class="modern-alert-content">
-                            <strong>SINPE Móvil:</strong> También puedes usar el número <strong>8888-8888</strong>
+                            <strong>SINPE Móvil:</strong> También puedes usar el número <strong>6290-1184</strong>
                         </div>
                     </div>
                 </div>
@@ -754,13 +754,13 @@
                     <p class="text-muted mb-4">Estamos aquí para ayudarte en cada paso</p>
 
                     <div class="help-buttons">
-                        <a href="https://wa.me/50670000000?text=Hola,%20necesito%20ayuda%20con%20mi%20pago%20del%20plan%20{{ urlencode($plan->name) }}"
+                        <a href="https://wa.me/50662901184?text=Hola,%20necesito%20ayuda%20con%20mi%20pago%20del%20plan%20{{ urlencode($plan->name) }}"
                            target="_blank"
                            class="help-btn btn-whatsapp">
                             <i class="fa-brands fa-whatsapp fs-5"></i>
                             <span>WhatsApp</span>
                         </a>
-                        <a href="mailto:soporte@qrpettag.com?subject=Ayuda con pago - {{ $plan->name }}"
+                        <a href="mailto:info.qrpettag@gmail.com?subject=Ayuda con pago - {{ $plan->name }}"
                            class="help-btn btn-email">
                             <i class="fa-solid fa-envelope fs-5"></i>
                             <span>Email</span>

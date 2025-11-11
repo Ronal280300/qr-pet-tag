@@ -72,7 +72,7 @@ class SettingsSeeder extends Seeder
             ],
             [
                 'key' => 'contact_phone',
-                'value' => '+50688888888',
+                'value' => '+50662901184',
                 'type' => 'tel',
                 'group' => 'contact',
                 'label' => 'Teléfono de Contacto',
@@ -81,7 +81,7 @@ class SettingsSeeder extends Seeder
             ],
             [
                 'key' => 'contact_whatsapp',
-                'value' => '+50688888888',
+                'value' => '+50662901184',
                 'type' => 'tel',
                 'group' => 'contact',
                 'label' => 'WhatsApp de Contacto',
@@ -90,7 +90,7 @@ class SettingsSeeder extends Seeder
             ],
             [
                 'key' => 'whatsapp_number',
-                'value' => '50670000000',
+                'value' => '50662901184',
                 'type' => 'tel',
                 'group' => 'contact',
                 'label' => 'Número WhatsApp (Legacy)',
@@ -117,7 +117,7 @@ class SettingsSeeder extends Seeder
             ],
             [
                 'key' => 'admin_email',
-                'value' => config('mail.from.address', 'admin@qrpettag.com'),
+                'value' => 'info.qrpettag@gmail.com',
                 'type' => 'email',
                 'group' => 'contact',
                 'label' => 'Email Admin',
