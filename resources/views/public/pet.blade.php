@@ -27,6 +27,19 @@
   $sex = $pet->sex ?? 'unknown';
   $sexIcon = $sex === 'male' ? 'fa-mars' : ($sex === 'female' ? 'fa-venus' : 'fa-circle-question');
   $sexText = $sex === 'male' ? 'Macho' : ($sex === 'female' ? 'Hembra' : 'Sexo N/D');
+  $sexColor = $sex === 'male' ? '#60a5fa' : ($sex === 'female' ? '#f472b6' : '#9ca3af');
+
+  $species = $pet->species ?? 'unknown';
+  $speciesIcon = $species === 'dog' ? 'fa-dog' : ($species === 'cat' ? 'fa-cat' : 'fa-paw');
+  $speciesText = $species === 'dog' ? 'Perro' : ($species === 'cat' ? 'Gato' : 'Mascota');
+
+  $size = $pet->size ?? null;
+  $sizeMap = ['small' => 'Pequeño', 'medium' => 'Mediano', 'large' => 'Grande'];
+  $sizeText = $size ? ($sizeMap[$size] ?? ucfirst($size)) : null;
+
+  $color = $pet->color ?? null;
+
+  $mainPhoto = $gallery->first();
 
   $neut   = (bool) ($pet->is_neutered ?? false);
   $rabies = (bool) ($pet->rabies_vaccine ?? false);
@@ -668,6 +681,27 @@ body {
         </div>
       </div>
     @endif
+
+    @if(optional($pet->reward)->active)
+      <div class="alert-banner alert-reward">
+        <i class="fa-solid fa-medal"></i>
+        <div class="alert-content">
+          <div class="alert-title">
+            <span class="pulse-icon"></span>
+            Recompensa activa
+            @if(optional($pet->reward)->amount)
+              - ₡{{ number_format((float)optional($pet->reward)->amount, 2) }}
+            @endif
+          </div>
+          @if(optional($pet->reward)->message)
+            <div class="alert-text">{{ optional($pet->reward)->message }}</div>
+          @endif
+        </div>
+      </div>
+    @endif
+  </div>
+  @endif
+
 {{-- ===== HERO FULLSCREEN ===== --}}
 <section class="pet-hero-full">
   <img src="{{ $mainPhoto }}"
