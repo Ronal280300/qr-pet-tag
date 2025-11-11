@@ -1342,6 +1342,160 @@ window.addEventListener('load', function() {
                         box-shadow: 0 0 0 0 rgba(78, 137, 232, 0);
                     }
                 }
+                
+                .swal2-popup.modern-guide {
+                    border-radius: 24px !important;
+                    padding: 0 !important;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+                }
+                
+                .swal2-popup.modern-guide .swal2-icon {
+                    margin: 32px auto 24px !important;
+                    border-width: 3px !important;
+                }
+                
+                .swal2-popup.modern-guide .swal2-title {
+                    padding: 0 32px !important;
+                    font-size: 1.75rem !important;
+                    font-weight: 800 !important;
+                    color: #1a202c !important;
+                    margin-bottom: 8px !important;
+                }
+                
+                .swal2-popup.modern-guide .swal2-html-container {
+                    padding: 0 32px 32px !important;
+                    margin: 0 !important;
+                }
+                
+                .swal2-popup.modern-guide .swal2-actions {
+                    padding: 0 32px 32px !important;
+                    gap: 12px !important;
+                    flex-wrap: wrap !important;
+                }
+                
+                .swal2-popup.modern-guide .swal2-confirm,
+                .swal2-popup.modern-guide .swal2-cancel {
+                    border-radius: 14px !important;
+                    padding: 14px 28px !important;
+                    font-weight: 700 !important;
+                    font-size: 1rem !important;
+                    margin: 0 !important;
+                    min-width: 140px !important;
+                    transition: all 0.3s ease !important;
+                }
+                
+                .swal2-popup.modern-guide .swal2-confirm:hover {
+                    transform: translateY(-2px) !important;
+                    box-shadow: 0 8px 20px rgba(78, 137, 232, 0.4) !important;
+                }
+                
+                .swal2-popup.modern-guide .swal2-cancel:hover {
+                    transform: translateY(-2px) !important;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+                }
+                
+                .guide-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+                    border: 2px solid #93c5fd;
+                    border-radius: 12px;
+                    padding: 12px 16px;
+                    margin: 16px 0;
+                    font-size: 14px;
+                    color: #1e40af;
+                    font-weight: 600;
+                }
+                
+                .guide-badge i {
+                    font-size: 18px;
+                }
+                
+                .guide-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 16px 0;
+                }
+                
+                .guide-list li {
+                    padding: 10px 0;
+                    padding-left: 32px;
+                    position: relative;
+                    font-size: 14px;
+                    color: #475569;
+                    line-height: 1.6;
+                }
+                
+                .guide-list li::before {
+                    content: "✓";
+                    position: absolute;
+                    left: 0;
+                    top: 10px;
+                    width: 24px;
+                    height: 24px;
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 700;
+                    font-size: 12px;
+                }
+                
+                .guide-tip {
+                    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+                    border: 2px solid #6ee7b7;
+                    border-radius: 12px;
+                    padding: 14px 16px;
+                    margin-top: 16px;
+                }
+                
+                .guide-tip p {
+                    margin: 0;
+                    font-size: 13px;
+                    color: #065f46;
+                    line-height: 1.5;
+                }
+                
+                @media (max-width: 640px) {
+                    .swal2-popup.modern-guide {
+                        width: calc(100% - 32px) !important;
+                        margin: 16px !important;
+                    }
+                    
+                    .swal2-popup.modern-guide .swal2-title {
+                        font-size: 1.5rem !important;
+                        padding: 0 24px !important;
+                    }
+                    
+                    .swal2-popup.modern-guide .swal2-html-container {
+                        padding: 0 24px 24px !important;
+                    }
+                    
+                    .swal2-popup.modern-guide .swal2-actions {
+                        padding: 0 24px 24px !important;
+                        flex-direction: column !important;
+                    }
+                    
+                    .swal2-popup.modern-guide .swal2-confirm,
+                    .swal2-popup.modern-guide .swal2-cancel {
+                        width: 100% !important;
+                        min-width: unset !important;
+                    }
+                    
+                    .guide-list li {
+                        font-size: 13px;
+                        padding-left: 28px;
+                    }
+                    
+                    .guide-list li::before {
+                        width: 20px;
+                        height: 20px;
+                        font-size: 11px;
+                    }
+                }
             `;
             document.head.appendChild(style);
         }
@@ -1350,19 +1504,17 @@ window.addEventListener('load', function() {
         Swal.fire({
             title: '🐾 ¡Registra tus mascotas!',
             html: `
-                <div style="text-align: left; padding: 10px;">
-                    <p style="font-size: 16px; margin-bottom: 16px;">
-                        Según tu plan, puedes registrar <strong>{{ $totalPets }} mascota(s)</strong>.
+                <div style="text-align: left;">
+                    <p style="font-size: 16px; margin-bottom: 12px; color: #1f2937; line-height: 1.6;">
+                        Según tu plan, puedes registrar <strong style="color: #4e89e8;">{{ $totalPets }} mascota(s)</strong>.
                     </p>
-                    <p style="font-size: 15px; color: #64748b; margin-bottom: 16px;">
-                        💡 Mientras verificamos tu pago, puedes adelantar el proceso registrando
-                        la información de tus mascotas ahora.
+                    <p style="font-size: 15px; color: #64748b; margin-bottom: 0; line-height: 1.6;">
+                        Mientras verificamos tu pago, puedes adelantar el proceso registrando la información ahora.
                     </p>
-                    <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-                                border-radius: 12px; padding: 16px; border: 2px solid #93c5fd;">
-                        <p style="margin: 0; font-size: 14px; color: #1e40af;">
-                            <strong>⚡ Beneficio:</strong> Agiliza la personalización de tus placas QR
-                        </p>
+                    
+                    <div class="guide-badge">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span><strong>Beneficio:</strong> Agiliza la personalización de tus placas QR</span>
                     </div>
                 </div>
             `,
@@ -1373,15 +1525,14 @@ window.addEventListener('load', function() {
             confirmButtonColor: '#4e89e8',
             cancelButtonColor: '#94a3b8',
             customClass: {
-                popup: 'animated-popup',
-                confirmButton: 'btn-modern',
-                cancelButton: 'btn-modern'
+                popup: 'modern-guide'
             },
+            buttonsStyling: true,
             showClass: {
-                popup: 'animate__animated animate__fadeInDown'
+                popup: 'animate__animated animate__fadeInDown animate__faster'
             },
             hideClass: {
-                popup: 'animate__animated animate__fadeOutUp'
+                popup: 'animate__animated animate__fadeOutUp animate__faster'
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -1390,37 +1541,39 @@ window.addEventListener('load', function() {
 
                 setTimeout(function() {
                     Swal.fire({
-                        title: '👆 ¡Aquí está!',
+                        title: '👆 ¡Aquí está el botón!',
                         html: `
-                            <div style="text-align: left; padding: 10px;">
-                                <p style="font-size: 15px; margin-bottom: 16px;">
-                                    Haz clic en el botón <strong style="color: #4e89e8;">"Registrar mascota"</strong>
-                                    para comenzar.
+                            <div style="text-align: left;">
+                                <p style="font-size: 15px; margin-bottom: 12px; color: #1f2937; line-height: 1.6;">
+                                    Haz clic en <strong style="color: #4e89e8;">"Registrar mascota"</strong> para comenzar.
                                 </p>
-                                <p style="font-size: 14px; color: #64748b; margin-bottom: 12px;">
-                                    📝 Te pediremos información como:
+                                
+                                <p style="font-size: 14px; color: #64748b; margin-bottom: 8px; font-weight: 600;">
+                                    📝 Información que necesitarás:
                                 </p>
-                                <ul style="text-align: left; font-size: 14px; color: #64748b; padding-left: 20px;">
-                                    <li>Nombre y raza</li>
+                                
+                                <ul class="guide-list">
+                                    <li>Nombre y raza de tu mascota</li>
                                     <li>Edad y sexo</li>
-                                    <li>Condiciones médicas</li>
+                                    <li>Condiciones médicas (opcional)</li>
                                     <li>Foto de tu mascota</li>
-                                    <li>Ubicación (zona)</li>
+                                    <li>Ubicación (zona en Costa Rica)</li>
                                 </ul>
-                                <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-                                            border-radius: 12px; padding: 12px; border: 2px solid #6ee7b7; margin-top: 12px;">
-                                    <p style="margin: 0; font-size: 13px; color: #065f46;">
-                                        <strong>✨ Tranquilo:</strong> También puedes registrarlas más tarde por WhatsApp
+                                
+                                <div class="guide-tip">
+                                    <p>
+                                        <strong>✨ Tranquilo:</strong> Si prefieres, también puedes registrar tus mascotas más tarde por WhatsApp con nuestra ayuda.
                                     </p>
                                 </div>
                             </div>
                         `,
                         icon: 'success',
-                        confirmButtonText: 'Entendido',
+                        confirmButtonText: '✅ ¡Entendido!',
                         confirmButtonColor: '#10b981',
                         customClass: {
-                            popup: 'animated-popup'
+                            popup: 'modern-guide'
                         },
+                        buttonsStyling: true,
                         showClass: {
                             popup: 'animate__animated animate__bounceIn'
                         },
@@ -1451,7 +1604,6 @@ window.addEventListener('load', function() {
     }, 1500);
 });
 @endif
-
 // ===== Auto-abrir modal si hay mascotas pendientes y se acaba de registrar una
 (() => {
     @php
