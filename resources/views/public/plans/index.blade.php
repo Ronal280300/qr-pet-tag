@@ -8,7 +8,7 @@
     <div class="container py-5">
         <div class="text-center mb-5 reveal">
             <div class="plan-badge-modern">
-                <span class="plan-badge-icon">ðŸ’Ž</span>
+                <span class="plan-badge-icon"></span>
                 <span>PLANES</span>
             </div>
             <h1 class="display-title-modern mb-3">
