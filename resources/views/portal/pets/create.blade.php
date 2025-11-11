@@ -1482,6 +1482,19 @@
       if (filesBuffer.length > MAX) e.preventDefault();
     });
   })();
-  \n  // Toggle emergency contact fields\n  function toggleEmergencyFields() {\n    const toggle = document.getElementById("has_emergency_contact");\n    const fields = document.getElementById("emergency-fields");\n    if (toggle.checked) {\n      fields.style.display = "flex";\n    } else {\n      fields.style.display = "none";\n      // Clear fields when disabled\n      document.querySelector("input[name=\"emergency_contact_name\"]").value = "";\n      document.querySelector("input[name=\"emergency_contact_phone\"]").value = "";\n    }\n  }
+
+  // Toggle emergency contact fields
+  function toggleEmergencyFields() {
+    const toggle = document.getElementById("has_emergency_contact");
+    const fields = document.getElementById("emergency-fields");
+    if (toggle.checked) {
+      fields.style.display = "flex";
+    } else {
+      fields.style.display = "none";
+      // Clear fields when disabled
+      document.querySelector("input[name=\"emergency_contact_name\"]").value = "";
+      document.querySelector("input[name=\"emergency_contact_phone\"]").value = "";
+    }
+  }
 </script>
 @endpush
