@@ -161,6 +161,55 @@
               <textarea name="medical_conditions" id="medical_conditions" rows="4" class="form-control modern"
                 placeholder="Alergias, medicación, etc." {{ $noMed ? 'disabled' : '' }}>{{ $pet->medical_conditions }}</textarea>
             </div>
+
+            {{-- Contacto de Emergencia --}}
+            <div class="col-12 mt-4">
+              <label class="form-label fw-bold">
+                <i class="fa-solid fa-phone-volume me-2"></i>
+                Contacto de Emergencia (Opcional)
+              </label>
+              <div class="form-text mb-3">Si el dueño no responde, este contacto aparecerá como alternativa en el perfil público.</div>
+              
+              <div class="form-row mb-3">
+                <label class="mb-0" for="has_emergency_contact">Habilitar contacto de emergencia</label>
+                @php $hasEmergency = (bool)($pet->has_emergency_contact ?? false); @endphp
+                <input type="hidden" name="has_emergency_contact" value="0">
+                <label class="ft-switch" aria-label="Habilitar contacto de emergencia">
+                  <input id="has_emergency_contact" name="has_emergency_contact" type="checkbox" value="1" 
+                         {{ $hasEmergency ? 'checked' : '' }} onchange="toggleEmergencyFieldsEdit()">
+                  <span class="track"><span class="thumb"></span></span>
+                </label>
+              </div>
+
+              <div id="emergency-fields-edit" class="row g-3" style="display: {{ $hasEmergency ? 'flex' : 'none' }};">
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Nombre del contacto</label>
+                  <div class="input-icon">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" name="emergency_contact_name" class="form-control modern" 
+                           value="{{ old('emergency_contact_name', $pet->emergency_contact_name ?? '') }}"
+                           placeholder="Ej: María González">
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Teléfono del contacto</label>
+                  <div class="input-icon">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                    <input type="text" name="emergency_contact_phone" class="form-control modern" 
+                           value="{{ old('emergency_contact_phone', $pet->emergency_contact_phone ?? '') }}"
+                           placeholder="Ej: +506 8765-4321">
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="alert alert-info small mb-0">
+                    <i class="fa-solid fa-circle-info me-2"></i>
+                    <strong>Nota:</strong> Este contacto se mostrará como "Contacto de Emergencia" en el perfil público.
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -976,5 +1025,6 @@
 
     refreshCounter();
   })();
+  \n  // Toggle emergency contact fields\n  function toggleEmergencyFieldsEdit() {\n    const toggle = document.getElementById("has_emergency_contact");\n    const fields = document.getElementById("emergency-fields-edit");\n    if (toggle.checked) {\n      fields.style.display = "flex";\n    } else {\n      fields.style.display = "none";\n      // Clear fields when disabled\n      const nameInput = document.querySelector("input[name=\"emergency_contact_name\"]");\n      const phoneInput = document.querySelector("input[name=\"emergency_contact_phone\"]");\n      if (nameInput) nameInput.value = "";\n      if (phoneInput) phoneInput.value = "";\n    }\n  }
 </script>
 @endpush

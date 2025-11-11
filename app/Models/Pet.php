@@ -37,6 +37,11 @@ class Pet extends Model
         'color',          // texto libre
         'is_neutered',    // bool
         'rabies_vaccine', // bool
+        
+        // ===== CONTACTO DE EMERGENCIA =====
+        'has_emergency_contact',    // bool
+        'emergency_contact_name',   // string
+        'emergency_contact_phone',  // string
     ];
 
     /**
@@ -53,6 +58,7 @@ class Pet extends Model
             'rabies_vaccine' => 'boolean',
             'pending_activation' => 'boolean',
             'last_fb_posted_at' => 'datetime',
+            'has_emergency_contact' => 'boolean',
         ];
     }
 
