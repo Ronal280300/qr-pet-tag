@@ -22,17 +22,17 @@
             <div class="selector-track">
                 <div class="selector-background onetime-active" id="selectorBackground"></div>
                 <button class="selector-option active" data-type="oneTime">
-                    <span class="selector-icon">ðŸ’³</span>
+                    <span class="selector-icon"></span>
                     <span class="selector-text">
-                        <strong>Pago Ãšnico</strong>
+                        <strong>Pago Unico</strong>
                         <small>Una sola vez</small>
                     </span>
                 </button>
                 <button class="selector-option" data-type="subscription">
-                    <span class="selector-icon">ðŸ”„</span>
+                    <span class="selector-icon"></span>
                     <span class="selector-text">
-                        <strong>SuscripciÃ³n</strong>
-                        <small>RenovaciÃ³n automÃ¡tica</small>
+                        <strong>Suscripción</strong>
+                        <small>Renovación automatica</small>
                     </span>
                 </button>
             </div>
