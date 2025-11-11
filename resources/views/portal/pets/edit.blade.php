@@ -1025,6 +1025,21 @@
 
     refreshCounter();
   })();
-  \n  // Toggle emergency contact fields\n  function toggleEmergencyFieldsEdit() {\n    const toggle = document.getElementById("has_emergency_contact");\n    const fields = document.getElementById("emergency-fields-edit");\n    if (toggle.checked) {\n      fields.style.display = "flex";\n    } else {\n      fields.style.display = "none";\n      // Clear fields when disabled\n      const nameInput = document.querySelector("input[name=\"emergency_contact_name\"]");\n      const phoneInput = document.querySelector("input[name=\"emergency_contact_phone\"]");\n      if (nameInput) nameInput.value = "";\n      if (phoneInput) phoneInput.value = "";\n    }\n  }
+
+  // Toggle emergency contact fields
+  function toggleEmergencyFieldsEdit() {
+    const toggle = document.getElementById("has_emergency_contact");
+    const fields = document.getElementById("emergency-fields-edit");
+    if (toggle.checked) {
+      fields.style.display = "flex";
+    } else {
+      fields.style.display = "none";
+      // Clear fields when disabled
+      const nameInput = document.querySelector("input[name=\"emergency_contact_name\"]");
+      const phoneInput = document.querySelector("input[name=\"emergency_contact_phone\"]");
+      if (nameInput) nameInput.value = "";
+      if (phoneInput) phoneInput.value = "";
+    }
+  }
 </script>
 @endpush
