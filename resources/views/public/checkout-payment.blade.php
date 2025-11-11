@@ -4,6 +4,12 @@
 
 @push('styles')
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
     .payment-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -97,6 +103,7 @@
         font-weight: 600;
         color: #9ca3af;
         transition: color 0.3s ease;
+        letter-spacing: -0.01em;
     }
 
     .step.completed .step-label,
@@ -128,28 +135,13 @@
         overflow: hidden;
     }
 
-    .payment-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
     .payment-header h2 {
         position: relative;
         z-index: 1;
         font-weight: 800;
         font-size: 1.75rem;
         margin: 0;
+        letter-spacing: -0.02em;
     }
 
     /* Alert Modernizado */
@@ -194,6 +186,7 @@
         flex: 1;
         color: #1e40af;
         line-height: 1.6;
+        letter-spacing: -0.01em;
     }
 
     .modern-alert.warning .modern-alert-content {
@@ -217,6 +210,7 @@
         font-weight: 700;
         margin-bottom: 24px;
         color: #1a202c;
+        letter-spacing: -0.02em;
     }
 
     .section-title i {
@@ -257,6 +251,7 @@
         color: #64748b;
         font-weight: 500;
         font-size: 0.9375rem;
+        letter-spacing: -0.01em;
     }
 
     .bank-detail-value {
@@ -266,6 +261,8 @@
         cursor: pointer;
         transition: color 0.3s ease;
         font-size: 1rem;
+        letter-spacing: -0.01em;
+        font-variant-numeric: tabular-nums;
     }
 
     .bank-detail-value:hover {
@@ -277,11 +274,13 @@
         background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
         font-weight: 900;
-        letter-spacing: -0.5px;
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
     }
 
-    /* Upload Zone Mejorada */
+    /* Upload Zone Mejorada con Estados */
     .upload-zone {
         border: 3px dashed #cbd5e1;
         border-radius: 20px;
@@ -294,24 +293,11 @@
         overflow: hidden;
     }
 
-    .upload-zone::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(78, 137, 232, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-    }
-
     .upload-zone:hover {
         border-color: #4e89e8;
         background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
         transform: translateY(-4px);
         box-shadow: 0 12px 30px rgba(78, 137, 232, 0.15);
-    }
-
-    .upload-zone:hover::before {
-        opacity: 1;
     }
 
     .upload-zone.active {
@@ -332,15 +318,59 @@
         color: white;
         font-size: 2.5rem;
         box-shadow: 0 10px 30px rgba(78, 137, 232, 0.3);
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
     }
 
     .upload-zone:hover .upload-icon {
-        transform: scale(1.1) rotateZ(5deg);
+        transform: scale(1.05);
     }
 
     .upload-zone.active .upload-icon {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        animation: successPulse 0.6s ease-out;
+    }
+
+    @keyframes successPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    .upload-zone h5 {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 8px;
+        letter-spacing: -0.01em;
+        transition: all 0.3s ease;
+    }
+
+    .upload-zone.active h5 {
+        color: #059669;
+    }
+
+    .upload-zone p {
+        transition: all 0.3s ease;
+    }
+
+    /* Status Badge en Upload Zone */
+    .upload-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 12px;
+        color: #059669;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-top: 12px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .upload-zone.active .upload-status {
+        opacity: 1;
     }
 
     /* Preview Mejorado */
@@ -388,6 +418,7 @@
         border-bottom: 1px solid rgba(78, 137, 232, 0.2);
         color: #1e40af;
         font-weight: 500;
+        letter-spacing: -0.01em;
     }
 
     .summary-row:last-child {
@@ -403,7 +434,9 @@
         background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        letter-spacing: -1px;
+        background-clip: text;
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
     }
 
     /* Info Card Mejorada */
@@ -419,10 +452,12 @@
         padding: 10px 0;
         color: #475569;
         line-height: 1.6;
+        letter-spacing: -0.01em;
     }
 
     .info-card ol li strong {
         color: #1e293b;
+        font-weight: 700;
     }
 
     /* Help Buttons Mejorados */
@@ -445,6 +480,7 @@
         gap: 12px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         font-size: 1rem;
+        letter-spacing: -0.01em;
     }
 
     .help-btn:hover {
@@ -487,6 +523,7 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
+        letter-spacing: -0.01em;
     }
 
     .btn-submit:hover:not(:disabled) {
@@ -510,6 +547,7 @@
         font-size: 1.125rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        letter-spacing: -0.01em;
     }
 
     .btn-cancel:hover {
@@ -540,6 +578,14 @@
 
         .help-btn {
             min-width: 100%;
+        }
+
+        .amount-highlight {
+            font-size: 1.75rem;
+        }
+
+        .summary-total {
+            font-size: 1.75rem;
         }
     }
 </style>
@@ -592,19 +638,19 @@
                     <div class="bank-info-box">
                         <div class="bank-detail">
                             <span class="bank-detail-label">Banco:</span>
-                            <span class="bank-detail-value">Banco Nacional de Costa Rica</span>
+                            <span class="bank-detail-value">BAC SAN JOSÉ</span>
                         </div>
                         <div class="bank-detail">
                             <span class="bank-detail-label">Cuenta IBAN:</span>
                             <span class="bank-detail-value" title="Click para copiar">CR00 0000 0000 0000 0000</span>
                         </div>
-                        <div class="bank-detail">
-                            <span class="bank-detail-label">Titular:</span>
-                            <span class="bank-detail-value">QR Pet Tag S.A.</span>
+                         <div class="bank-detail">
+                            <span class="bank-detail-label">Cuenta BAC:</span>
+                            <span class="bank-detail-value" title="Click para copiar">978151618</span>
                         </div>
                         <div class="bank-detail">
-                            <span class="bank-detail-label">Cédula:</span>
-                            <span class="bank-detail-value">3-101-XXXXXX</span>
+                            <span class="bank-detail-label">Titular:</span>
+                            <span class="bank-detail-value">Ronaldo Segura Paniagua</span>
                         </div>
                         <div class="bank-detail">
                             <span class="bank-detail-label">Monto a transferir:</span>
@@ -617,7 +663,7 @@
                             <i class="fa-solid fa-mobile-screen"></i>
                         </div>
                         <div class="modern-alert-content">
-                            <strong>SINPE Móvil:</strong> También puedes usar el número <strong>6290-1184</strong>
+                            <strong>SINPE Móvil:</strong> También puedes usar el número <strong>8530-7943</strong>
                         </div>
                     </div>
                 </div>
@@ -636,12 +682,16 @@
                         </div>
 
                         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('payment_proof').click()">
-                            <div class="upload-icon">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <div class="upload-icon" id="uploadIcon">
+                                <i class="fa-solid fa-hand-pointer"></i>
                             </div>
-                            <h5 class="fw-bold mb-2">Click para seleccionar archivo</h5>
-                            <p class="text-muted mb-0">JPG, PNG o PDF (máx. 5MB)</p>
+                            <h5 class="fw-bold mb-2" id="uploadTitle">Toca para subir tu comprobante</h5>
+                            <p class="text-muted mb-0" id="uploadSubtitle">JPG, PNG o PDF (máx. 5MB)</p>
                             <p class="text-muted mt-2 mb-0"><small>O arrastra tu archivo aquí</small></p>
+                            <div class="upload-status" id="uploadStatus">
+                                <i class="fa-solid fa-check-circle"></i>
+                                <span>¡Archivo listo para enviar!</span>
+                            </div>
                         </div>
 
                         <input type="file"
@@ -754,13 +804,13 @@
                     <p class="text-muted mb-4">Estamos aquí para ayudarte en cada paso</p>
 
                     <div class="help-buttons">
-                        <a href="https://wa.me/50662901184?text=Hola,%20necesito%20ayuda%20con%20mi%20pago%20del%20plan%20{{ urlencode($plan->name) }}"
+                        <a href="https://wa.me/50670000000?text=Hola,%20necesito%20ayuda%20con%20mi%20pago%20del%20plan%20{{ urlencode($plan->name) }}"
                            target="_blank"
                            class="help-btn btn-whatsapp">
                             <i class="fa-brands fa-whatsapp fs-5"></i>
                             <span>WhatsApp</span>
                         </a>
-                        <a href="mailto:info.qrpettag@gmail.com?subject=Ayuda con pago - {{ $plan->name }}"
+                        <a href="mailto:soporte@qrpettag.com?subject=Ayuda con pago - {{ $plan->name }}"
                            class="help-btn btn-email">
                             <i class="fa-solid fa-envelope fs-5"></i>
                             <span>Email</span>
@@ -772,38 +822,400 @@
     </div>
 </div>
 
-{{-- Loading Overlay Moderno --}}
-<div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-    <div style="text-align: center; color: white;">
-        <div style="width: 120px; height: 120px; margin: 0 auto 32px; position: relative;">
-            <div style="width: 120px; height: 120px; border: 6px solid rgba(78, 137, 232, 0.2); border-radius: 50%; position: absolute;"></div>
-            <div style="width: 120px; height: 120px; border: 6px solid transparent; border-top-color: #4e89e8; border-radius: 50%; animation: spin 1s linear infinite; position: absolute;"></div>
-            <div style="width: 90px; height: 90px; border: 4px solid transparent; border-top-color: #10b981; border-radius: 50%; animation: spin 1.5s linear infinite reverse; position: absolute; top: 15px; left: 15px;"></div>
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px;">
-                <i class="fa-solid fa-cloud-arrow-up" style="animation: pulse 2s ease-in-out infinite;"></i>
+{{-- Loading Overlay Ultra Moderno --}}
+<div id="loadingOverlay" class="loading-overlay-modern">
+    <div class="loading-backdrop"></div>
+    <div class="loading-content-modern">
+        <!-- Animated Icon Container -->
+        <div class="loading-icon-container">
+            <!-- Outer Ring -->
+            <div class="loading-ring loading-ring-outer"></div>
+            <!-- Middle Ring -->
+            <div class="loading-ring loading-ring-middle"></div>
+            <!-- Inner Ring -->
+            <div class="loading-ring loading-ring-inner"></div>
+            <!-- Center Icon -->
+            <div class="loading-center-icon">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
             </div>
+            <!-- Particles -->
+            <div class="loading-particle loading-particle-1"></div>
+            <div class="loading-particle loading-particle-2"></div>
+            <div class="loading-particle loading-particle-3"></div>
+            <div class="loading-particle loading-particle-4"></div>
         </div>
-        <h3 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">Subiendo tu comprobante...</h3>
-        <p style="font-size: 16px; color: rgba(255, 255, 255, 0.7); margin: 0;">Por favor espera, esto tomará solo unos segundos</p>
-        <div style="margin-top: 24px;">
-            <div style="width: 200px; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; margin: 0 auto; overflow: hidden;">
-                <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #4e89e8, #10b981); animation: progress 2s ease-in-out infinite;"></div>
+
+        <!-- Text Content -->
+        <div class="loading-text-modern">
+            <h3 class="loading-title">Subiendo tu comprobante</h3>
+            <p class="loading-subtitle">Por favor espera, esto tomará solo unos segundos</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="loading-progress-container">
+            <div class="loading-progress-bar">
+                <div class="loading-progress-fill"></div>
+                <div class="loading-progress-glow"></div>
+            </div>
+            <div class="loading-percentage" id="loadingPercentage">0%</div>
+        </div>
+
+        <!-- Steps Indicator -->
+        <div class="loading-steps">
+            <div class="loading-step loading-step-active">
+                <div class="loading-step-icon"><i class="fa-solid fa-check"></i></div>
+                <span>Preparando</span>
+            </div>
+            <div class="loading-step loading-step-active">
+                <div class="loading-step-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
+                <span>Subiendo</span>
+            </div>
+            <div class="loading-step">
+                <div class="loading-step-icon"><i class="fa-solid fa-circle"></i></div>
+                <span>Finalizando</span>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-@keyframes spin {
+/* Loading Overlay Styles */
+.loading-overlay-modern {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+}
+
+.loading-overlay-modern.show {
+    display: flex;
+}
+
+.loading-backdrop {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%);
+    backdrop-filter: blur(12px);
+}
+
+.loading-content-modern {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 400px;
+    padding: 20px;
+}
+
+/* Icon Container */
+.loading-icon-container {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 40px;
+    position: relative;
+}
+
+/* Rings */
+.loading-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid transparent;
+}
+
+.loading-ring-outer {
+    width: 160px;
+    height: 160px;
+    border-top-color: #4e89e8;
+    border-right-color: #4e89e8;
+    animation: spinSlow 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    opacity: 0.6;
+}
+
+.loading-ring-middle {
+    width: 120px;
+    height: 120px;
+    top: 20px;
+    left: 20px;
+    border-top-color: #10b981;
+    border-left-color: #10b981;
+    animation: spinMedium 2s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
+    opacity: 0.8;
+}
+
+.loading-ring-inner {
+    width: 80px;
+    height: 80px;
+    top: 40px;
+    left: 40px;
+    border-top-color: #60a5fa;
+    border-right-color: #60a5fa;
+    border-bottom-color: #60a5fa;
+    animation: spinFast 1.5s linear infinite;
+}
+
+/* Center Icon */
+.loading-center-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    box-shadow: 0 8px 32px rgba(78, 137, 232, 0.4);
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+/* Particles */
+.loading-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particleFloat 3s ease-in-out infinite;
+}
+
+.loading-particle-1 {
+    top: 10%;
+    left: 50%;
+    animation-delay: 0s;
+}
+
+.loading-particle-2 {
+    top: 50%;
+    right: 10%;
+    animation-delay: 0.75s;
+}
+
+.loading-particle-3 {
+    bottom: 10%;
+    left: 50%;
+    animation-delay: 1.5s;
+}
+
+.loading-particle-4 {
+    top: 50%;
+    left: 10%;
+    animation-delay: 2.25s;
+}
+
+/* Text Styles */
+.loading-text-modern {
+    margin-bottom: 32px;
+}
+
+.loading-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: white;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+    animation: textFade 2s ease-in-out infinite;
+}
+
+.loading-subtitle {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+}
+
+/* Progress Bar */
+.loading-progress-container {
+    margin-bottom: 32px;
+}
+
+.loading-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.loading-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4e89e8 0%, #10b981 100%);
+    border-radius: 10px;
+    animation: progressFill 3s ease-in-out infinite;
+}
+
+.loading-progress-glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 40px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
+    border-radius: 10px;
+    animation: progressGlow 2s ease-in-out infinite;
+}
+
+.loading-percentage {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.05em;
+}
+
+/* Loading Steps */
+.loading-steps {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.loading-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+.loading-step-active {
+    opacity: 1;
+}
+
+.loading-step-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.loading-step-active .loading-step-icon {
+    background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(78, 137, 232, 0.4);
+}
+
+.loading-step span {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: -0.01em;
+}
+
+.loading-step-active span {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Animations */
+@keyframes spinSlow {
+    from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.8; }
+
+@keyframes spinMedium {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
-@keyframes progress {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+
+@keyframes spinFast {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes iconFloat {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+@keyframes particleFloat {
+    0%, 100% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(var(--tx, 0), var(--ty, -30px)) scale(1);
+    }
+}
+
+@keyframes textFade {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes progressFill {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+@keyframes progressGlow {
+    0% { left: -40px; }
+    100% { left: 100%; }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .loading-icon-container {
+        width: 120px;
+        height: 120px;
+    }
+
+    .loading-ring-outer {
+        width: 120px;
+        height: 120px;
+    }
+
+    .loading-ring-middle {
+        width: 90px;
+        height: 90px;
+        top: 15px;
+        left: 15px;
+    }
+
+    .loading-ring-inner {
+        width: 60px;
+        height: 60px;
+        top: 30px;
+        left: 30px;
+    }
+
+    .loading-center-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+    }
+
+    .loading-title {
+        font-size: 22px;
+    }
+
+    .loading-steps {
+        gap: 16px;
+    }
 }
 </style>
 
@@ -815,11 +1227,19 @@ function previewFile(event) {
     const previewImage = document.getElementById('previewImage');
     const previewPDF = document.getElementById('previewPDF');
     const uploadZone = document.getElementById('uploadZone');
+    const uploadIcon = document.getElementById('uploadIcon');
+    const uploadTitle = document.getElementById('uploadTitle');
+    const uploadSubtitle = document.getElementById('uploadSubtitle');
 
     if (file) {
         // Habilitar botón
         submitBtn.disabled = false;
         uploadZone.classList.add('active');
+
+        // Cambiar icono y texto
+        uploadIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        uploadTitle.textContent = '¡Comprobante cargado!';
+        uploadSubtitle.textContent = file.name;
 
         // Mostrar preview
         previewContainer.style.display = 'block';
@@ -841,6 +1261,9 @@ function previewFile(event) {
         submitBtn.disabled = true;
         previewContainer.style.display = 'none';
         uploadZone.classList.remove('active');
+        uploadIcon.innerHTML = '<i class="fa-solid fa-hand-pointer"></i>';
+        uploadTitle.textContent = 'Toca para subir tu comprobante';
+        uploadSubtitle.textContent = 'JPG, PNG o PDF (máx. 5MB)';
     }
 }
 
@@ -849,16 +1272,19 @@ const uploadZone = document.getElementById('uploadZone');
 
 uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
-    uploadZone.classList.add('active');
+    uploadZone.style.borderColor = '#4e89e8';
+    uploadZone.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)';
 });
 
 uploadZone.addEventListener('dragleave', () => {
-    uploadZone.classList.remove('active');
+    if (!uploadZone.classList.contains('active')) {
+        uploadZone.style.borderColor = '#cbd5e1';
+        uploadZone.style.background = 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)';
+    }
 });
 
 uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
-    uploadZone.classList.remove('active');
 
     const files = e.dataTransfer.files;
     if (files.length > 0) {
@@ -870,14 +1296,48 @@ uploadZone.addEventListener('drop', (e) => {
 // Loading Overlay cuando se envía el formulario
 const paymentForm = document.getElementById('paymentForm');
 const loadingOverlay = document.getElementById('loadingOverlay');
+const submitBtn = document.getElementById('submitBtn');
 
 paymentForm.addEventListener('submit', function(e) {
     // Mostrar el overlay de carga
-    loadingOverlay.style.display = 'flex';
+    loadingOverlay.classList.add('show');
 
     // Deshabilitar el botón de submit
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Subiendo...';
+
+    // Simular progreso de carga
+    simulateProgress();
 });
+
+// Función para simular progreso realista
+function simulateProgress() {
+    const percentageElement = document.getElementById('loadingPercentage');
+    const steps = document.querySelectorAll('.loading-step');
+    let progress = 0;
+    
+    const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        
+        if (progress > 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            // Activar paso final
+            steps[2].classList.add('loading-step-active');
+        }
+        
+        // Actualizar porcentaje
+        percentageElement.textContent = Math.floor(progress) + '%';
+        
+        // Activar pasos según progreso
+        if (progress > 30) {
+            steps[1].classList.add('loading-step-active');
+        }
+        if (progress > 70) {
+            steps[2].classList.add('loading-step-active');
+        }
+    }, 200);
+}
 </script>
 @endsection
