@@ -137,7 +137,7 @@
           name="phone"
           class="form-control @error('phone') is-invalid @enderror"
           value="{{ old('phone') }}"
-          placeholder="Ej: +506 8888-8888"
+          placeholder="Ej: +506 6290-1184"
           required
           autofocus
         >

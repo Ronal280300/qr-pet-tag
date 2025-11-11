@@ -145,9 +145,9 @@ class SettingsController extends Controller
             ['key' => 'maintenance_mode', 'value' => '0', 'type' => 'boolean', 'group' => 'general', 'label' => 'Modo Mantenimiento', 'description' => 'Activar modo mantenimiento', 'order' => 3],
 
             // Contacto
-            ['key' => 'contact_email', 'value' => 'admin@qrpettag.com', 'type' => 'string', 'group' => 'contact', 'label' => 'Email de Contacto', 'description' => 'Email para notificaciones', 'order' => 1],
-            ['key' => 'contact_phone', 'value' => '+506 1234-5678', 'type' => 'string', 'group' => 'contact', 'label' => 'Teléfono', 'description' => 'Teléfono de contacto', 'order' => 2],
-            ['key' => 'whatsapp_number', 'value' => '50612345678', 'type' => 'string', 'group' => 'contact', 'label' => 'WhatsApp', 'description' => 'Número de WhatsApp (con código de país)', 'order' => 3],
+            ['key' => 'contact_email', 'value' => 'info.qrpettag@gmail.com', 'type' => 'string', 'group' => 'contact', 'label' => 'Email de Contacto', 'description' => 'Email para notificaciones', 'order' => 1],
+            ['key' => 'contact_phone', 'value' => '+506 6290-1184', 'type' => 'string', 'group' => 'contact', 'label' => 'Teléfono', 'description' => 'Teléfono de contacto', 'order' => 2],
+            ['key' => 'whatsapp_number', 'value' => '50662901184', 'type' => 'string', 'group' => 'contact', 'label' => 'WhatsApp', 'description' => 'Número de WhatsApp (con código de país)', 'order' => 3],
             ['key' => 'contact_address', 'value' => 'San José, Costa Rica', 'type' => 'string', 'group' => 'contact', 'label' => 'Dirección', 'description' => 'Dirección física', 'order' => 4],
 
             // Tema y Colores
@@ -158,7 +158,7 @@ class SettingsController extends Controller
             // Email
             ['key' => 'mail_from_name', 'value' => 'QR Pet Tag', 'type' => 'string', 'group' => 'email', 'label' => 'Nombre del Remitente', 'description' => 'Nombre en correos salientes', 'order' => 1],
             ['key' => 'mail_from_address', 'value' => 'noreply@qrpettag.com', 'type' => 'string', 'group' => 'email', 'label' => 'Email del Remitente', 'description' => 'Email de salida', 'order' => 2],
-            ['key' => 'admin_notification_email', 'value' => 'admin@qrpettag.com', 'type' => 'string', 'group' => 'email', 'label' => 'Email Admin', 'description' => 'Email para notificaciones de órdenes', 'order' => 3],
+            ['key' => 'admin_notification_email', 'value' => 'info.qrpettag@gmail.com', 'type' => 'string', 'group' => 'email', 'label' => 'Email Admin', 'description' => 'Email para notificaciones de órdenes', 'order' => 3],
 
             // Notificaciones
             ['key' => 'notifications_enabled', 'value' => '1', 'type' => 'boolean', 'group' => 'notifications', 'label' => 'Habilitar Notificaciones', 'description' => 'Activar sistema de notificaciones', 'order' => 1],

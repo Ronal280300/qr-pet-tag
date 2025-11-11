@@ -978,13 +978,13 @@
                   <path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
                     d="M4 5c0-1.105.895-2 2-2h1.5c.74 0 1.386.405 1.732 1.036l.788 1.417a2 2 0 0 1-.223 2.224l-.82.984a12.05 12.05 0 0 0 5.078 5.078l.984-.82a2 2 0 0 1 2.224-.223l1.417.788A2 2 0 0 1 20 17.5V19a2 2 0 0 1-2 2h-1C9.373 21 3 14.627 3 7V6a1 1 0 0 1 1-1Z" />
                 </svg>
-                <input 
-                  id="phone_local" 
-                  name="phone_local" 
+                <input
+                  id="phone_local"
+                  name="phone_local"
                   type="text"
                   class="form-input @error('phone_local') is-invalid @enderror"
-                  value="{{ old('phone_local') }}" 
-                  placeholder="8888-8888">
+                  value="{{ old('phone_local') }}"
+                  placeholder="6290-1184">
               </div>
             </div>
             <small class="phone-help">Compatible con WhatsApp</small>

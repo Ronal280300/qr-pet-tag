@@ -50,7 +50,7 @@ return [
         'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
         'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'), // Formato: +14155238886
-        'admin_phone' => env('ADMIN_WHATSAPP_PHONE'), // Formato: +50688888888
+        'admin_phone' => env('ADMIN_WHATSAPP_PHONE'), // Formato: +50662901184
     ],
 
 ];
