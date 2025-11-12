@@ -683,84 +683,94 @@
   }
 
   /* ============================================
-     PETS GALLERY - Galería de mascotas
+     PETS CAROUSEL INFINITO - Galería de mascotas
      ============================================ */
   .pets-gallery-section {
     padding: 100px 0;
     background: white;
+    overflow: hidden;
   }
 
-  .pets-gallery {
+  .pets-carousel-wrapper {
     margin-top: 48px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
   }
 
-  .pet-card {
+  /* Gradiente para suavizar los bordes */
+  .pets-carousel-wrapper::before,
+  .pets-carousel-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .pets-carousel-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, white, transparent);
+  }
+
+  .pets-carousel-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, white, transparent);
+  }
+
+  .pets-carousel-track {
+    display: flex;
+    gap: 24px;
+    animation: scroll-infinite 40s linear infinite;
+    width: max-content;
+  }
+
+  .pets-carousel-track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes scroll-infinite {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .pet-carousel-item {
+    flex-shrink: 0;
+    width: 220px;
+  }
+
+  .pet-carousel-card {
     position: relative;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .pet-card:hover {
+  .pet-carousel-card:hover {
     transform: translateY(-12px);
   }
 
-  .pet-image {
-    position: relative;
+  .pet-carousel-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
     border-radius: 20px;
-    overflow: hidden;
     box-shadow: var(--shadow-md);
     transition: all 0.4s ease;
-    aspect-ratio: 1;
-  }
-
-  .pet-card:hover .pet-image {
-    box-shadow: var(--shadow-xl);
-  }
-
-  .pet-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
     display: block;
-    transition: transform 0.4s ease;
   }
 
-  .pet-card:hover .pet-image img {
+  .pet-carousel-card:hover img {
+    box-shadow: var(--shadow-xl);
     transform: scale(1.05);
   }
 
-  .pet-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--success), #059669);
-    border-radius: 50%;
-    color: white;
-    font-size: 18px;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    animation: badgePop 0.6s ease-out 0.3s both;
-  }
-
-  @keyframes badgePop {
-    0% {
-      transform: scale(0) rotate(-180deg);
-      opacity: 0;
-    }
-    70% {
-      transform: scale(1.2) rotate(10deg);
-    }
-    100% {
-      transform: scale(1) rotate(0deg);
-      opacity: 1;
-    }
-  }
-
-  .pet-name {
+  .pet-carousel-name {
     text-align: center;
     margin-top: 16px;
     font-size: 18px;
@@ -769,7 +779,7 @@
     transition: color 0.3s ease;
   }
 
-  .pet-card:hover .pet-name {
+  .pet-carousel-card:hover .pet-carousel-name {
     color: var(--primary);
   }
 
@@ -1284,22 +1294,27 @@
       padding: 0 10px;
     }
 
-    /* Galería de mascotas en móvil */
-    .pet-card {
-      margin-bottom: 8px;
+    /* Carousel de mascotas en móvil */
+    .pet-carousel-item {
+      width: 180px;
     }
 
-    .pet-badge {
-      width: 32px;
-      height: 32px;
-      font-size: 14px;
-      top: 8px;
-      right: 8px;
+    .pet-carousel-card img {
+      height: 180px;
     }
 
-    .pet-name {
+    .pet-carousel-name {
       font-size: 16px;
       margin-top: 12px;
+    }
+
+    .pets-carousel-wrapper::before,
+    .pets-carousel-wrapper::after {
+      width: 50px;
+    }
+
+    .pets-carousel-track {
+      gap: 16px;
     }
 
     /* Asegurar que nada se salga */
@@ -1643,7 +1658,7 @@
 </section>
 
 
-{{-- ====== MASCOTAS PROTEGIDAS - Galería ====== --}}
+{{-- ====== MASCOTAS PROTEGIDAS - Carousel Infinito ====== --}}
 <section class="pets-gallery-section">
   <div class="container">
     <div class="section-header reveal">
@@ -1654,45 +1669,81 @@
       <p class="section-subtitle">Miles de mascotas ya confían en QR-Pet Tag para su seguridad</p>
     </div>
 
-    <div class="pets-gallery reveal">
-      <div class="row g-4">
-        <div class="col-6 col-md-3">
-          <div class="pet-card will-change-transform">
-            <div class="pet-image">
-              <img src="{{ asset('storage/images/asha.jpeg') }}" alt="Asha - Mascota protegida" loading="lazy">
+    @if($pets && $pets->count() > 0)
+    <div class="pets-carousel-wrapper reveal">
+      <div class="pets-carousel-track">
+        {{-- Primera iteración de mascotas --}}
+        @foreach($pets as $pet)
+          @php
+            $mainPhoto = $pet->photos->first();
+          @endphp
+          @if($mainPhoto)
+          <div class="pet-carousel-item">
+            <div class="pet-carousel-card">
+              <img src="{{ Storage::url($mainPhoto->image_path) }}"
+                   alt="{{ $pet->name }}"
+                   loading="lazy">
+              <div class="pet-carousel-name">{{ $pet->name }}</div>
             </div>
-            <div class="pet-name"></div>
           </div>
-        </div>
-        
-        <div class="col-6 col-md-3">
-          <div class="pet-card will-change-transform">
-            <div class="pet-image">
-              <img src="{{ asset('storage/images/coqueta.jpeg') }}" alt="Coqueta - Mascota protegida" loading="lazy">
+          @endif
+        @endforeach
+
+        {{-- Duplicamos las mascotas para efecto infinito seamless --}}
+        @foreach($pets as $pet)
+          @php
+            $mainPhoto = $pet->photos->first();
+          @endphp
+          @if($mainPhoto)
+          <div class="pet-carousel-item" aria-hidden="true">
+            <div class="pet-carousel-card">
+              <img src="{{ Storage::url($mainPhoto->image_path) }}"
+                   alt="{{ $pet->name }}"
+                   loading="lazy">
+              <div class="pet-carousel-name">{{ $pet->name }}</div>
             </div>
-            <div class="pet-name"></div>
           </div>
-        </div>
-        
-        <div class="col-6 col-md-3">
-          <div class="pet-card will-change-transform">
-            <div class="pet-image">
-              <img src="{{ asset('storage/images/morgan.jpeg') }}" alt="Morgan - Mascota protegida" loading="lazy">
-            </div>
-            <div class="pet-name"></div>
-          </div>
-        </div>
-        
-        <div class="col-6 col-md-3">
-          <div class="pet-card will-change-transform">
-            <div class="pet-image">
-              <img src="{{ asset('storage/images/negro.jpeg') }}" alt="Negro - Mascota protegida" loading="lazy">
-            </div>
-            <div class="pet-name"></div>
-          </div>
-        </div>
+          @endif
+        @endforeach
       </div>
     </div>
+    @else
+    {{-- Fallback: Mostrar imágenes estáticas si no hay mascotas en BD --}}
+    <div class="pets-carousel-wrapper reveal">
+      <div class="pets-carousel-track">
+        @php
+          $fallbackPets = [
+            ['image' => 'asha.jpeg', 'name' => 'Asha'],
+            ['image' => 'coqueta.jpeg', 'name' => 'Coqueta'],
+            ['image' => 'morgan.jpeg', 'name' => 'Morgan'],
+            ['image' => 'negro.jpeg', 'name' => 'Negro'],
+          ];
+        @endphp
+
+        @foreach($fallbackPets as $fallback)
+        <div class="pet-carousel-item">
+          <div class="pet-carousel-card">
+            <img src="{{ asset('storage/images/' . $fallback['image']) }}"
+                 alt="{{ $fallback['name'] }}"
+                 loading="lazy">
+            <div class="pet-carousel-name">{{ $fallback['name'] }}</div>
+          </div>
+        </div>
+        @endforeach
+
+        @foreach($fallbackPets as $fallback)
+        <div class="pet-carousel-item" aria-hidden="true">
+          <div class="pet-carousel-card">
+            <img src="{{ asset('storage/images/' . $fallback['image']) }}"
+                 alt="{{ $fallback['name'] }}"
+                 loading="lazy">
+            <div class="pet-carousel-name">{{ $fallback['name'] }}</div>
+          </div>
+        </div>
+        @endforeach
+      </div>
+    </div>
+    @endif
   </div>
 </section>
 
