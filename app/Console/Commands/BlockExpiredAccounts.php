@@ -67,7 +67,8 @@ class BlockExpiredAccounts extends Command
                     'expiredAt' => $user->plan_expires_at,
                 ], function ($message) use ($user) {
                     $message->to($user->email)
-                        ->subject('⚠️ Cuenta suspendida por falta de pago - ' . config('app.name'));
+                        ->subject('⚠️ Cuenta suspendida por falta de pago - ' . config('app.name'))
+                        ->setContentType('text/html; charset=UTF-8');
                 });
 
                 EmailLog::logEmail(
