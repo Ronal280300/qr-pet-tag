@@ -339,8 +339,8 @@ class CheckoutController extends Controller
 
             Mail::send('emails.admin.new-payment', ['order' => $order], function ($message) use ($adminEmail, $order) {
                 $message->to($adminEmail)
-                    ->subject("Nuevo Comprobante de Pago - Pedido #{$order->order_number}")
-                    ->setContentType('text/html; charset=UTF-8');
+                    ->subject("Nuevo Comprobante de Pago - Pedido #{$order->order_number}");
+                $message->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
             });
 
             EmailLog::logEmail(
@@ -377,8 +377,8 @@ class CheckoutController extends Controller
         try {
             Mail::send('emails.client.payment-received', ['order' => $order], function ($message) use ($order) {
                 $message->to($order->user->email)
-                    ->subject("Comprobante Recibido - Pedido #{$order->order_number}")
-                    ->setContentType('text/html; charset=UTF-8');
+                    ->subject("Comprobante Recibido - Pedido #{$order->order_number}");
+                $message->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
             });
 
             EmailLog::logEmail(
