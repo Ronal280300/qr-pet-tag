@@ -1680,7 +1680,7 @@
           @if($mainPhoto)
           <div class="pet-carousel-item">
             <div class="pet-carousel-card">
-              <img src="{{ Storage::url($mainPhoto->image_path) }}"
+              <img src="{{ $mainPhoto->url }}"
                    alt="{{ $pet->name }}"
                    loading="lazy">
               <div class="pet-carousel-name">{{ $pet->name }}</div>
@@ -1697,7 +1697,7 @@
           @if($mainPhoto)
           <div class="pet-carousel-item" aria-hidden="true">
             <div class="pet-carousel-card">
-              <img src="{{ Storage::url($mainPhoto->image_path) }}"
+              <img src="{{ $mainPhoto->url }}"
                    alt="{{ $pet->name }}"
                    loading="lazy">
               <div class="pet-carousel-name">{{ $pet->name }}</div>
