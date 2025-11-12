@@ -60,8 +60,8 @@ class SendPaymentReminders extends Command
                     'expiresAt' => $user->plan_expires_at,
                 ], function ($message) use ($user) {
                     $message->to($user->email)
-                        ->subject('⏰ Tu plan vence mañana - ' . config('app.name'))
-                        ->setContentType('text/html; charset=UTF-8');
+                        ->subject('⏰ Tu plan vence mañana - ' . config('app.name'));
+                    $message->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
                 });
 
                 EmailLog::logEmail(

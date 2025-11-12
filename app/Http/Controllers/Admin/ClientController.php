@@ -431,8 +431,8 @@ class ClientController extends Controller
                 'expiresAt' => $user->plan_expires_at,
             ], function ($message) use ($user) {
                 $message->to($user->email)
-                    ->subject('Recordatorio de Pago - ' . config('app.name'))
-                    ->setContentType('text/html; charset=UTF-8');
+                    ->subject('Recordatorio de Pago - ' . config('app.name'));
+                $message->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
             });
 
             \App\Models\EmailLog::logEmail(

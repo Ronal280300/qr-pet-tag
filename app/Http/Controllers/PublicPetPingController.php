@@ -190,8 +190,8 @@ class PublicPetPingController extends Controller
                         $viewData,
                         function ($m) use ($pet, $subject) {
                             $m->to($pet->user->email)
-                                ->subject($subject)
-                                ->setContentType('text/html; charset=UTF-8');
+                                ->subject($subject);
+                            $m->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
                         }
                     );
 
