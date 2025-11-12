@@ -220,7 +220,8 @@ class EmailCampaignController extends Controller
                 Mail::send([], [], function ($message) use ($recipient, $campaign, $html) {
                     $message->to($recipient->email)
                         ->subject($campaign->template->subject)
-                        ->html($html);
+                        ->html($html)
+                        ->setContentType('text/html; charset=UTF-8');
                 });
 
                 // Actualizar recipient

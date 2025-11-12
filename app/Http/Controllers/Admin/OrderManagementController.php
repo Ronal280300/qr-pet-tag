@@ -184,7 +184,8 @@ class OrderManagementController extends Controller
 
             Mail::send('emails.client.payment-verified', ['order' => $order], function ($message) use ($order) {
                 $message->to($order->user->email)
-                    ->subject("Pago Verificado - Pedido #{$order->order_number}");
+                    ->subject("Pago Verificado - Pedido #{$order->order_number}")
+                    ->setContentType('text/html; charset=UTF-8');
             });
 
             EmailLog::logEmail(
@@ -221,7 +222,8 @@ class OrderManagementController extends Controller
         try {
             Mail::send('emails.client.payment-rejected', ['order' => $order], function ($message) use ($order) {
                 $message->to($order->user->email)
-                    ->subject("Pago Rechazado - Pedido #{$order->order_number}");
+                    ->subject("Pago Rechazado - Pedido #{$order->order_number}")
+                    ->setContentType('text/html; charset=UTF-8');
             });
 
             EmailLog::logEmail(
