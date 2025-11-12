@@ -221,7 +221,6 @@ class EmailCampaignController extends Controller
                     $message->to($recipient->email)
                         ->subject($campaign->template->subject)
                         ->html($html);
-                    $message->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
                 });
 
                 // Actualizar recipient

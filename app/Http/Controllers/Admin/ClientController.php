@@ -432,7 +432,6 @@ class ClientController extends Controller
             ], function ($message) use ($user) {
                 $message->to($user->email)
                     ->subject('Recordatorio de Pago - ' . config('app.name'));
-                $message->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
             });
 
             \App\Models\EmailLog::logEmail(
