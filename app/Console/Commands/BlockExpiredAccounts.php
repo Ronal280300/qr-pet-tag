@@ -68,7 +68,6 @@ class BlockExpiredAccounts extends Command
                 ], function ($message) use ($user) {
                     $message->to($user->email)
                         ->subject('⚠️ Cuenta suspendida por falta de pago - ' . config('app.name'));
-                    $message->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
                 });
 
                 EmailLog::logEmail(

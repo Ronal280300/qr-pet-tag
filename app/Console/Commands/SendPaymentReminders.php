@@ -61,7 +61,6 @@ class SendPaymentReminders extends Command
                 ], function ($message) use ($user) {
                     $message->to($user->email)
                         ->subject('⏰ Tu plan vence mañana - ' . config('app.name'));
-                    $message->getSwiftMessage()->setContentType('text/html; charset=UTF-8');
                 });
 
                 EmailLog::logEmail(
