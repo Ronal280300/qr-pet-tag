@@ -6,94 +6,116 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #2d3748;
-            background-color: #f7fafc;
-        }
-        .email-wrapper {
-            background-color: #f7fafc;
-            padding: 40px 20px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            padding: 20px 0;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: white;
-            border-radius: 12px;
+            background: #ffffff;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         .header {
-            background: linear-gradient(135deg, #4e89e8 0%, #3b82f6 100%);
-            color: white;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+            color: #ffffff;
             padding: 50px 30px;
             text-align: center;
+            position: relative;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #34d399, #10b981);
+        }
+        .header-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            display: block;
         }
         .header h1 {
             font-size: 32px;
-            font-weight: 700;
+            font-weight: 800;
             margin: 0 0 10px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            letter-spacing: -0.5px;
         }
         .header p {
-            font-size: 16px;
+            font-size: 18px;
             opacity: 0.95;
             margin: 0;
+            font-weight: 500;
         }
         .content {
             padding: 40px 30px;
+            background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
         }
         .greeting {
-            font-size: 18px;
-            color: #1a202c;
+            font-size: 22px;
+            color: #1e3a8a;
             margin-bottom: 20px;
-            font-weight: 600;
+            font-weight: 700;
         }
         .message {
             font-size: 16px;
-            color: #4a5568;
-            margin-bottom: 25px;
-            line-height: 1.7;
+            color: #374151;
+            margin-bottom: 30px;
+            line-height: 1.8;
         }
         .order-details {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            padding: 25px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+            padding: 30px;
+            border-radius: 12px;
             margin: 30px 0;
-            border: 1px solid #bfdbfe;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
         .order-details h3 {
-            color: #1e40af;
+            color: #1e3a8a;
             margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
         }
         .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #93c5fd;
+            padding: 14px 0;
+            border-bottom: 2px solid #60a5fa;
             align-items: center;
         }
         .detail-row:last-child {
             border-bottom: none;
         }
         .detail-row strong {
-            color: #1e3a8a;
-            font-weight: 600;
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 15px;
         }
         .detail-row span {
-            color: #2d3748;
-            font-weight: 500;
+            color: #1e3a8a;
+            font-weight: 600;
+            font-size: 15px;
         }
         .timeline-section {
-            margin: 35px 0;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border: 2px solid #fbbf24;
         }
         .timeline-section h3 {
-            color: #2d3748;
+            color: #78350f;
             margin-bottom: 25px;
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 800;
             text-align: center;
         }
         .timeline {
@@ -103,7 +125,7 @@
         .timeline-step {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             position: relative;
         }
         .timeline-step:last-child {
@@ -120,197 +142,208 @@
             justify-content: center;
             margin-right: 20px;
             flex-shrink: 0;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 18px;
-            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
             z-index: 2;
             position: relative;
+            border: 3px solid #065f46;
         }
         .timeline-icon.pending {
-            background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
-            box-shadow: 0 4px 10px rgba(160, 174, 192, 0.2);
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+            border: 3px solid #4b5563;
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
         }
         .timeline-content {
             flex: 1;
-            padding-top: 5px;
+            padding-top: 8px;
         }
         .timeline-content strong {
             display: block;
-            color: #2d3748;
+            color: #78350f;
             font-size: 16px;
             margin-bottom: 5px;
+            font-weight: 800;
         }
         .timeline-content p {
             margin: 0;
-            color: #718096;
+            color: #92400e;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-weight: 600;
         }
         .tip-box {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-            border-left: 4px solid #f59e0b;
-            padding: 20px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 5px solid #10b981;
+            padding: 25px;
+            border-radius: 10px;
             margin: 30px 0;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
         }
         .tip-box strong {
-            color: #92400e;
+            color: #065f46;
             display: block;
             margin-bottom: 10px;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 800;
         }
         .tip-box p {
-            color: #78350f;
+            color: #047857;
             margin: 0;
-            line-height: 1.6;
+            line-height: 1.7;
+            font-weight: 500;
         }
         .footer {
-            background: #1a202c;
-            color: #cbd5e0;
-            padding: 35px 30px;
+            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+            color: #e5e7eb;
+            padding: 40px 30px;
             text-align: center;
         }
         .footer-logo {
-            font-size: 22px;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: 800;
             color: #10b981;
             margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         .footer-text {
             font-size: 14px;
             margin: 10px 0;
-            color: #a0aec0;
+            color: #d1d5db;
         }
         .footer-contact {
-            margin: 20px 0;
-            padding-top: 20px;
-            border-top: 1px solid #2d3748;
+            margin: 25px 0;
+            padding: 25px;
+            background: #374151;
+            border-radius: 12px;
         }
         .footer-contact p {
-            margin: 8px 0;
-            font-size: 14px;
+            margin: 10px 0;
+            font-size: 15px;
+            font-weight: 600;
         }
         .footer-contact a {
-            color: #10b981;
+            color: #34d399;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
         }
         .footer-btn {
             display: inline-block;
-            background: #25D366;
-            color: white !important;
-            padding: 12px 28px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: #ffffff !important;
+            padding: 14px 32px;
             text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
+            border-radius: 50px;
+            font-weight: 700;
             margin-top: 15px;
-            font-size: 14px;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+            border: 2px solid #075e54;
         }
         @media only screen and (max-width: 600px) {
+            body { padding: 10px 0; }
             .header h1 { font-size: 26px; }
+            .header-icon { font-size: 48px; }
             .content { padding: 30px 20px; }
             .timeline-icon { width: 45px; height: 45px; font-size: 16px; }
+            .order-details, .timeline-section { padding: 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="email-wrapper">
-        <div class="container">
-            <div class="header">
-                <h1>✅ ¡Comprobante Recibido!</h1>
-                <p>Estamos procesando tu pago</p>
-            </div>
+    <div class="container">
+        <div class="header">
+            <span class="header-icon">✅</span>
+            <h1>¡Comprobante Recibido!</h1>
+            <p>Estamos verificando tu pago</p>
+        </div>
 
-            <div class="content">
-                <p class="greeting">¡Hola {{ $order->user->name }}!</p>
+        <div class="content">
+            <p class="greeting">¡Hola {{ $order->user->name }}!</p>
 
-                <p class="message">
-                    ¡Gracias por tu compra! Hemos recibido tu comprobante de pago exitosamente y estamos
-                    trabajando para verificarlo. Te mantendremos informado del progreso.
-                </p>
+            <p class="message">
+                ¡Gracias por tu compra! Hemos recibido tu comprobante exitosamente y estamos
+                verificándolo. Te mantendremos informado del progreso.
+            </p>
 
-                <div class="order-details">
-                    <h3>📦 Detalles de tu Pedido</h3>
-                    <div class="detail-row">
-                        <strong>Número de Pedido:</strong>
-                        <span>{{ $order->order_number }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <strong>Plan Seleccionado:</strong>
-                        <span>{{ $order->plan->name }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <strong>Mascotas Incluidas:</strong>
-                        <span>{{ $order->pets_quantity }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <strong>Total Pagado:</strong>
-                        <span style="color: #1e40af; font-size: 20px; font-weight: 700;">
-                            ₡{{ number_format($order->total, 0, ',', '.') }}
-                        </span>
-                    </div>
+            <div class="order-details">
+                <h3>📦 Detalles de tu Pedido</h3>
+                <div class="detail-row">
+                    <strong>Pedido:</strong>
+                    <span>#{{ $order->order_number }}</span>
                 </div>
-
-                <div class="timeline-section">
-                    <h3>🚀 ¿Qué sigue ahora?</h3>
-                    <div class="timeline">
-                        <div class="timeline-step">
-                            <div class="timeline-icon">✓</div>
-                            <div class="timeline-content">
-                                <strong>1. Comprobante Recibido</strong>
-                                <p>Tu pago está en proceso de verificación por nuestro equipo</p>
-                            </div>
-                        </div>
-                        <div class="timeline-step">
-                            <div class="timeline-icon pending">2</div>
-                            <div class="timeline-content">
-                                <strong>2. Verificación del Pago</strong>
-                                <p>Confirmaremos tu transferencia (máximo 24 horas hábiles)</p>
-                            </div>
-                        </div>
-                        <div class="timeline-step">
-                            <div class="timeline-icon pending">3</div>
-                            <div class="timeline-content">
-                                <strong>3. Personalización de Placas</strong>
-                                <p>Te contactaremos para diseñar tus placas QR personalizadas</p>
-                            </div>
-                        </div>
-                        <div class="timeline-step">
-                            <div class="timeline-icon pending">4</div>
-                            <div class="timeline-content">
-                                <strong>4. Envío a Domicilio</strong>
-                                <p>Recibirás tus placas QR en 3-5 días hábiles</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="detail-row">
+                    <strong>Plan:</strong>
+                    <span>{{ $order->plan->name }}</span>
                 </div>
-
-                <div class="tip-box">
-                    <strong>💡 Consejo Útil</strong>
-                    <p>
-                        Mientras verificamos tu pago, puedes registrar la información de tus mascotas desde tu panel
-                        de usuario. Esto nos ayudará a agilizar el proceso de personalización de tus placas QR.
-                    </p>
+                <div class="detail-row">
+                    <strong>Mascotas:</strong>
+                    <span>{{ $order->pets_quantity }}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Total:</strong>
+                    <span>₡{{ number_format($order->total, 0, ',', '.') }}</span>
                 </div>
             </div>
 
-            <div class="footer">
-                <div class="footer-logo">🐾 QR Pet Tag</div>
-                <p class="footer-text">Protección inteligente para tus mejores amigos</p>
-
-                <div class="footer-contact">
-                    <p><strong>¿Necesitas ayuda?</strong></p>
-                    <p>📧 Email: <a href="mailto:info.qrpet@gmail.com">info.qrpet@gmail.com</a></p>
-                    <a href="https://wa.me/{{ config('app.whatsapp_number', '50685307943') }}?text={{ urlencode('Hola, necesito ayuda con mi cuenta de QR Pet Tag') }}" class="footer-btn">
-                        💬 Contáctanos por WhatsApp
-                    </a>
+            <div class="timeline-section">
+                <h3>🚀 ¿Qué Sigue Ahora?</h3>
+                <div class="timeline">
+                    <div class="timeline-step">
+                        <div class="timeline-icon">✓</div>
+                        <div class="timeline-content">
+                            <strong>1. Comprobante Recibido</strong>
+                            <p>Tu pago está en verificación</p>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-icon pending">2</div>
+                        <div class="timeline-content">
+                            <strong>2. Verificación</strong>
+                            <p>Confirmaremos tu pago (máx. 24h)</p>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-icon pending">3</div>
+                        <div class="timeline-content">
+                            <strong>3. Personalización</strong>
+                            <p>Diseñaremos tus placas QR</p>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-icon pending">4</div>
+                        <div class="timeline-content">
+                            <strong>4. Envío</strong>
+                            <p>Las recibirás en 3-5 días</p>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <p class="footer-text" style="margin-top: 25px; font-size: 12px; color: #718096;">
-                    © {{ date('Y') }} QR Pet Tag. Todos los derechos reservados.<br>
-                    Gracias por confiar en nosotros para proteger a tus mascotas 🐾
+            <div class="tip-box">
+                <strong>💡 Consejo Útil</strong>
+                <p>
+                    Mientras verificamos tu pago, registra la información de tus mascotas en tu panel.
+                    Esto agilizará la personalización de tus placas QR.
                 </p>
             </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-logo">🐾 QR PET TAG</div>
+            <p class="footer-text">Protección inteligente para tus mejores amigos</p>
+
+            <div class="footer-contact">
+                <p><strong>¿Necesitas Ayuda?</strong></p>
+                <p>📧 <a href="mailto:info.qrpet@gmail.com">info.qrpet@gmail.com</a></p>
+                <a href="https://wa.me/{{ config('app.whatsapp_number', '50685307943') }}?text={{ urlencode('Hola, necesito ayuda con QR Pet Tag') }}" class="footer-btn">
+                    💬 WhatsApp
+                </a>
+            </div>
+
+            <p class="footer-text" style="margin-top: 25px; font-size: 12px; opacity: 0.7;">
+                © {{ date('Y') }} QR Pet Tag • Todos los derechos reservados
+            </p>
         </div>
     </div>
 </body>
