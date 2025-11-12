@@ -8,8 +8,8 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            padding: 20px 0;
+            background: #eff6ff;
+            padding: 20px 10px;
         }
         .container {
             max-width: 600px;
@@ -17,7 +17,8 @@
             background: #ffffff;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border: 4px solid #3b82f6;
         }
         .header {
             background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
@@ -55,30 +56,31 @@
         }
         .content {
             padding: 40px 30px;
-            background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+            background: #ffffff;
         }
         .greeting {
             font-size: 22px;
-            color: #1e3a8a;
+            color: #111827;
             margin-bottom: 20px;
-            font-weight: 700;
+            font-weight: 800;
         }
         .message {
-            font-size: 16px;
-            color: #374151;
+            font-size: 17px;
+            color: #1f2937;
             margin-bottom: 30px;
             line-height: 1.8;
+            font-weight: 500;
         }
         .order-details {
-            background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+            background: #eff6ff;
             padding: 30px;
             border-radius: 12px;
             margin: 30px 0;
-            border: 2px solid #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            border: 4px solid #3b82f6;
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
         }
         .order-details h3 {
-            color: #1e3a8a;
+            color: #3b82f6;
             margin-bottom: 20px;
             font-size: 20px;
             font-weight: 800;
@@ -88,31 +90,31 @@
             display: flex;
             justify-content: space-between;
             padding: 14px 0;
-            border-bottom: 2px solid #60a5fa;
+            border-bottom: 2px solid #dbeafe;
             align-items: center;
         }
         .detail-row:last-child {
             border-bottom: none;
         }
         .detail-row strong {
-            color: #1e40af;
+            color: #111827;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 16px;
         }
         .detail-row span {
-            color: #1e3a8a;
-            font-weight: 600;
-            font-size: 15px;
+            color: #1f2937;
+            font-weight: 700;
+            font-size: 16px;
         }
         .timeline-section {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            background: #fffbeb;
             padding: 30px;
             border-radius: 12px;
             margin: 30px 0;
-            border: 2px solid #fbbf24;
+            border: 4px solid #fbbf24;
         }
         .timeline-section h3 {
-            color: #78350f;
+            color: #d97706;
             margin-bottom: 25px;
             font-size: 20px;
             font-weight: 800;
@@ -160,38 +162,39 @@
         }
         .timeline-content strong {
             display: block;
-            color: #78350f;
+            color: #1f2937;
             font-size: 16px;
             margin-bottom: 5px;
             font-weight: 800;
         }
         .timeline-content p {
             margin: 0;
-            color: #92400e;
-            font-size: 14px;
+            color: #4b5563;
+            font-size: 15px;
             line-height: 1.6;
             font-weight: 600;
         }
         .tip-box {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            background: #f0fdf4;
             border-left: 5px solid #10b981;
             padding: 25px;
             border-radius: 10px;
             margin: 30px 0;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            border: 3px solid #10b981;
+            border-left-width: 5px;
         }
         .tip-box strong {
-            color: #065f46;
+            color: #10b981;
             display: block;
             margin-bottom: 10px;
             font-size: 18px;
             font-weight: 800;
         }
         .tip-box p {
-            color: #047857;
+            color: #1f2937;
             margin: 0;
             line-height: 1.7;
-            font-weight: 500;
+            font-weight: 600;
         }
         .footer {
             background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
