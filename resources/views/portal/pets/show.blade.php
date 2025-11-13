@@ -342,7 +342,6 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 </div>
 
 {{-- Tarjeta para compartir en redes (oculta, se usa para generar imagen) --}}
-@if(isset($pet) && $pet->exists)
 <div id="shareCardTemplate" style="position: fixed; left: -9999px; top: 0;">
   <div class="share-card-content">
     <div class="share-card-header">
@@ -385,7 +384,6 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
     </div>
   </div>
 </div>
-@endif
 
 @endsection
 
