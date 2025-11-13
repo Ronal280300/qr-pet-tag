@@ -235,7 +235,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
               <span class="tag-label">TAG:</span>
               <span class="tag-value">{{ $qr->activation_code }}</span>
             </span>
-            <button type="button" class="btn-copy-tag" onclick="copyTag()" title="Copiar TAG">
+            <button type="button" class="btn-copy-tag" onclick="copyTag(this)" title="Copiar TAG">
               <i class="fa-solid fa-copy"></i>
             </button>
           </div>
@@ -256,7 +256,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
         @if($publicUrl)
         <div class="qr-url-box">
           <input type="text" value="{{ $publicUrl }}" readonly class="qr-url-input" id="qrUrlInput">
-          <button type="button" class="btn-copy-url" onclick="copyQrUrl()" title="Copiar URL">
+          <button type="button" class="btn-copy-url" onclick="copyQrUrl(this)" title="Copiar URL">
             <i class="fa-solid fa-copy"></i>
           </button>
         </div>
@@ -695,9 +695,9 @@ window.publishToFacebook=publishToFacebook;
 (function(){const forms=document.querySelectorAll('form[data-confirm]');forms.forEach(form=>{form.addEventListener('submit',async(e)=>{e.stopPropagation();e.preventDefault();const msg=form.getAttribute('data-confirm')||'¿Confirmar?';const res=await Swal.fire({title:'Confirmar',text:msg,icon:'question',showCancelButton:true,confirmButtonText:'Sí',cancelButtonText:'Cancelar'});if(res.isConfirmed)form.submit()},{passive:false})})})();
 
 // Copiar TAG
-function copyTag(){const tag=document.getElementById('tagCode')?.dataset?.tag;if(!tag){Swal.fire({icon:'error',title:'Error',text:'No se encontró el TAG',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(tag).then(()=>{const btn=window.event.target.closest('.btn-copy-tag');if(!btn)return;const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500);Swal.fire({icon:'success',title:'¡Copiado!',text:'TAG copiado al portapapeles',timer:1500,showConfirmButton:false})}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar el TAG',confirmButtonText:'Aceptar'})})}
+function copyTag(btn){const tag=document.getElementById('tagCode')?.dataset?.tag;if(!tag){Swal.fire({icon:'error',title:'Error',text:'No se encontró el TAG',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(tag).then(()=>{if(!btn)return;const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500);Swal.fire({icon:'success',title:'¡Copiado!',text:'TAG copiado al portapapeles',timer:1500,showConfirmButton:false})}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar el TAG',confirmButtonText:'Aceptar'})})}
 
 // Copiar URL QR
-function copyQrUrl(){const input=document.getElementById('qrUrlInput');const url=input?.value;if(!url){Swal.fire({icon:'error',title:'Error',text:'No se encontró la URL',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(url).then(()=>{const btn=window.event.target.closest('.btn-copy-url');if(!btn)return;const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500);Swal.fire({icon:'success',title:'¡Copiado!',text:'URL copiada al portapapeles',timer:1500,showConfirmButton:false})}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar la URL',confirmButtonText:'Aceptar'})})}
+function copyQrUrl(btn){const input=document.getElementById('qrUrlInput');const url=input?.value;if(!url){Swal.fire({icon:'error',title:'Error',text:'No se encontró la URL',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(url).then(()=>{if(!btn)return;const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500);Swal.fire({icon:'success',title:'¡Copiado!',text:'URL copiada al portapapeles',timer:1500,showConfirmButton:false})}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar la URL',confirmButtonText:'Aceptar'})})}
 </script>
 @endpush
