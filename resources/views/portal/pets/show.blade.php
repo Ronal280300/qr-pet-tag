@@ -184,10 +184,13 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
             </button>
           </form>
           @if($pet->is_lost)
-          <button type="button" class="btn-action btn-action-info" id="btnGenerateShareCard">
-            <i class="fa-solid fa-bullhorn"></i>
-            <span>Generar publicación para redes</span>
-          </button>
+          <form action="{{ route('portal.pets.share-card', $pet) }}" method="POST">
+            @csrf
+            <button type="submit" class="btn-action btn-action-info">
+              <i class="fa-solid fa-bullhorn"></i>
+              <span>Generar publicación para redes</span>
+            </button>
+          </form>
           @endif
         </div>
       </div>
@@ -232,7 +235,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
               <span class="tag-label">TAG:</span>
               <span class="tag-value">{{ $qr->activation_code }}</span>
             </span>
-            <button type="button" class="btn-copy-tag" onclick="copyTag(this)" title="Copiar TAG">
+            <button type="button" class="btn-copy-tag" onclick="copyTag()" title="Copiar TAG">
               <i class="fa-solid fa-copy"></i>
             </button>
           </div>
@@ -253,7 +256,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
         @if($publicUrl)
         <div class="qr-url-box">
           <input type="text" value="{{ $publicUrl }}" readonly class="qr-url-input" id="qrUrlInput">
-          <button type="button" class="btn-copy-url" onclick="copyQrUrl(this)" title="Copiar URL">
+          <button type="button" class="btn-copy-url" onclick="copyQrUrl()" title="Copiar URL">
             <i class="fa-solid fa-copy"></i>
           </button>
         </div>
@@ -337,47 +340,6 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
           </button>
         </form>
       </div>
-    </div>
-  </div>
-</div>
-
-{{-- Tarjeta para compartir en redes (oculta, se usa para generar imagen) --}}
-<div id="shareCardTemplate" style="position: fixed; left: -9999px; top: 0;">
-  <div class="share-card-content">
-    <div class="share-card-header">
-      <h1 class="share-card-title">SE BUSCA</h1>
-      <p class="share-card-subtitle">MASCOTA PERDIDA</p>
-    </div>
-
-    <div class="share-card-photo-wrapper">
-      <img src="{{ ($mainPhoto = $pet->photos()->orderBy('sort_order')->first()) ? $mainPhoto->url : asset('images/placeholder-pet.jpg') }}" alt="{{ $pet->name }}" class="share-card-photo" crossorigin="anonymous">
-    </div>
-
-    <div class="share-card-info">
-      <h2 class="share-card-name">{{ mb_strtoupper($pet->name) }}</h2>
-
-      @if($pet->full_location || $pet->zone)
-      <p class="share-card-location">
-        <i class="fa-solid fa-location-dot"></i>
-        {{ $pet->full_location ?: $pet->zone }}
-      </p>
-      @endif
-
-      <div class="share-card-contact">
-        <p class="share-card-contact-label">CONTACTO</p>
-        @php
-          $phone = $pet->user->phone ?? $pet->owner_phone ?? '+506 0000 0000';
-          $digits = preg_replace('/\D/', '', $phone);
-          if (strlen($digits) >= 8) {
-            $formatted = '+506 ' . substr($digits, -8, 4) . ' ' . substr($digits, -4);
-          } else {
-            $formatted = $phone;
-          }
-        @endphp
-        <p class="share-card-phone">{{ $formatted }}</p>
-      </div>
-
-      <p class="share-card-footer">¡Ayúdanos a encontrarlo!</p>
     </div>
   </div>
 </div>
@@ -700,127 +662,17 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 .carousel-indicators-modern button{width:6px;height:6px}
 .carousel-indicators-modern button.active{width:18px}
 }
-
-/* ===== TARJETA PARA COMPARTIR EN REDES ===== */
-#shareCardTemplate {
-  width: 1080px;
-  visibility: visible;
-}
-
-.share-card-content {
-  width: 1080px;
-  height: 1350px;
-  background: #FFFFFF;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  overflow: hidden;
-  position: relative;
-}
-
-.share-card-header {
-  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-  padding: 60px 40px;
-  text-align: center;
-}
-
-.share-card-title {
-  font-size: 80px;
-  font-weight: 900;
-  color: #FFFFFF;
-  margin: 0 0 10px 0;
-  letter-spacing: 8px;
-  text-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.share-card-subtitle {
-  font-size: 42px;
-  font-weight: 400;
-  color: rgba(255,255,255,0.95);
-  margin: 0;
-  letter-spacing: 3px;
-}
-
-.share-card-photo-wrapper {
-  width: 520px;
-  height: 520px;
-  margin: 60px auto 40px;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-  background: #F3F4F6;
-}
-
-.share-card-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.share-card-info {
-  text-align: center;
-  padding: 0 80px;
-}
-
-.share-card-name {
-  font-size: 76px;
-  font-weight: 900;
-  color: #1F2937;
-  margin: 0 0 30px 0;
-  letter-spacing: 2px;
-}
-
-.share-card-location {
-  font-size: 36px;
-  color: #6B7280;
-  margin: 0 0 40px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.share-card-location i {
-  color: #EF4444;
-}
-
-.share-card-contact {
-  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-  padding: 32px 48px;
-  border-radius: 20px;
-  margin: 0 auto 40px;
-  box-shadow: 0 12px 32px rgba(239,68,68,0.3);
-  max-width: 700px;
-}
-
-.share-card-contact-label {
-  font-size: 24px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.9);
-  margin: 0 0 8px 0;
-  letter-spacing: 2px;
-}
-
-.share-card-phone {
-  font-size: 56px;
-  font-weight: 900;
-  color: #FFFFFF;
-  margin: 0;
-  letter-spacing: 3px;
-}
-
-.share-card-footer {
-  font-size: 32px;
-  color: #6B7280;
-  margin: 0;
-  font-weight: 500;
-}
 </style>
 @endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
+// Copiar TAG
+function copyTag(){const tag=document.getElementById('tagCode').dataset.tag;navigator.clipboard.writeText(tag).then(()=>{const btn=event.target.closest('.btn-copy-tag');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch(()=>alert('No se pudo copiar: '+tag))}
+
+// Copiar URL QR
+function copyQrUrl(){const input=document.getElementById('qrUrlInput');const url=input.value;navigator.clipboard.writeText(url).then(()=>{const btn=event.target.closest('.btn-copy-url');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch(()=>alert('No se pudo copiar: '+url))}
 
 // Tooltips
 (function(){const list=[].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));list.forEach(el=>new bootstrap.Tooltip(el))})();
@@ -848,102 +700,9 @@ window.publishToFacebook=publishToFacebook;
 (function(){const forms=document.querySelectorAll('form[data-confirm]');forms.forEach(form=>{form.addEventListener('submit',async(e)=>{e.stopPropagation();e.preventDefault();const msg=form.getAttribute('data-confirm')||'¿Confirmar?';const res=await Swal.fire({title:'Confirmar',text:msg,icon:'question',showCancelButton:true,confirmButtonText:'Sí',cancelButtonText:'Cancelar'});if(res.isConfirmed)form.submit()},{passive:false})})})();
 
 // Copiar TAG
-function copyTag(btn){const tag=document.getElementById('tagCode')?.dataset?.tag;if(!tag){Swal.fire({icon:'error',title:'Error',text:'No se encontró el TAG',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(tag).then(()=>{if(!btn)return;const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500);Swal.fire({icon:'success',title:'¡Copiado!',text:'TAG copiado al portapapeles',timer:1500,showConfirmButton:false})}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar el TAG',confirmButtonText:'Aceptar'})})}
+function copyTag(event){const tag=document.getElementById('tagCode')?.dataset?.tag;if(!tag){Swal.fire({icon:'error',title:'Error',text:'No se encontró el TAG',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(tag).then(()=>{const btn=event.target.closest('.btn-copy-tag');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar el TAG: '+tag,confirmButtonText:'Aceptar'})})}
 
 // Copiar URL QR
-function copyQrUrl(btn){const input=document.getElementById('qrUrlInput');const url=input?.value;if(!url){Swal.fire({icon:'error',title:'Error',text:'No se encontró la URL',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(url).then(()=>{if(!btn)return;const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500);Swal.fire({icon:'success',title:'¡Copiado!',text:'URL copiada al portapapeles',timer:1500,showConfirmButton:false})}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar la URL',confirmButtonText:'Aceptar'})})}
-
-// Generar imagen para compartir en redes con html2canvas
-(function(){
-  const btn = document.getElementById('btnGenerateShareCard');
-  if (!btn) return;
-
-  btn.addEventListener('click', async function() {
-    const template = document.getElementById('shareCardTemplate');
-    const content = template.querySelector('.share-card-content');
-
-    if (!content) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo cargar la plantilla',
-        confirmButtonText: 'Aceptar'
-      });
-      return;
-    }
-
-    // Mostrar loading
-    Swal.fire({
-      title: 'Generando imagen...',
-      html: 'Esto puede tardar unos segundos',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    try {
-      // Hacer visible temporalmente para captura
-      template.style.left = '0';
-      template.style.visibility = 'visible';
-
-      // Esperar a que las imágenes carguen
-      const img = content.querySelector('.share-card-photo');
-      if (img && !img.complete) {
-        await new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-          setTimeout(resolve, 3000); // timeout de seguridad
-        });
-      }
-
-      // Generar imagen con html2canvas
-      const canvas = await html2canvas(content, {
-        width: 1080,
-        height: 1350,
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        imageTimeout: 0
-      });
-
-      // Ocultar de nuevo
-      template.style.left = '-9999px';
-
-      // Convertir a blob y descargar
-      canvas.toBlob(function(blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mascota-perdida-{{ $pet->id }}.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        Swal.fire({
-          icon: 'success',
-          title: '¡Imagen generada!',
-          html: 'La imagen se ha descargado correctamente.<br>Ahora puedes compartirla en redes sociales.',
-          confirmButtonText: 'Aceptar'
-        });
-      }, 'image/png', 1.0);
-
-    } catch (error) {
-      console.error('Error al generar imagen:', error);
-      template.style.left = '-9999px';
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al generar imagen',
-        text: 'No se pudo crear la imagen. Por favor, intenta de nuevo.',
-        confirmButtonText: 'Aceptar'
-      });
-    }
-  });
-})();
+function copyQrUrl(event){const input=document.getElementById('qrUrlInput');const url=input?.value;if(!url){Swal.fire({icon:'error',title:'Error',text:'No se encontró la URL',confirmButtonText:'Aceptar'});return}navigator.clipboard.writeText(url).then(()=>{const btn=event.target.closest('.btn-copy-url');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch((err)=>{Swal.fire({icon:'error',title:'Error al copiar',text:'No se pudo copiar la URL',confirmButtonText:'Aceptar'})})}
 </script>
 @endpush
