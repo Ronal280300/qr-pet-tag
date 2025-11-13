@@ -352,9 +352,8 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
     <div class="share-card-photo-wrapper">
       @php
         $mainPhoto = $pet->photos()->orderBy('sort_order')->first();
-        $photoUrl = $mainPhoto ? $mainPhoto->url : asset('images/placeholder-pet.jpg');
       @endphp
-      <img src="{{ $photoUrl }}" alt="{{ $pet->name }}" class="share-card-photo" crossorigin="anonymous">
+      <img src="{{ $mainPhoto ? $mainPhoto->url : asset('images/placeholder-pet.jpg') }}" alt="{{ $pet->name }}" class="share-card-photo" crossorigin="anonymous">
     </div>
 
     <div class="share-card-info">
