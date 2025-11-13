@@ -14,213 +14,72 @@ class PetShareCardService
     {
         $m = new ImageManager(new Driver());
 
-        // ===== Paleta moderna y vibrante
-        $cardBg     = '#FFFFFF';
-        $primary    = '#667eea'; // morado moderno
-        $secondary  = '#764ba2'; // morado oscuro
-        $accent     = '#10b981'; // verde éxito
-        $warning    = '#ef4444'; // rojo alerta
+        // ===== DISEÑO MINIMALISTA Y LIMPIO =====
+        $W = 1080; $H = 1350; // Instagram 4:5
 
-        $titleColor = '#111827';
-        $subtitle   = '#374151';
-        $bodyText   = '#4b5563';
-        $muted      = '#6b7280';
-        $light      = '#9ca3af';
+        // Colores simples y profesionales
+        $white = '#FFFFFF';
+        $red = '#EF4444';
+        $darkGray = '#1F2937';
+        $gray = '#6B7280';
+        $lightGray = '#F3F4F6';
 
-        // ===== Lienzo con gradiente sutil de fondo
-        $W = 1080; $H = 1350; // Formato Instagram (4:5)
-        $img = $m->create($W, $H);
+        // Crear lienzo blanco simple
+        $img = $m->create($W, $H)->fill($white);
 
-        // Fondo con gradiente sutil
-        for ($y = 0; $y < $H; $y++) {
-            $ratio = $y / $H;
-            $r = 250 + (int)($ratio * 5);
-            $g = 250 + (int)($ratio * 10);
-            $b = 255;
-            $color = sprintf('#%02x%02x%02x', $r, $g, $b);
-            $this->rect($img, $W, 1, 0, $y, $color);
-        }
+        // ===== HEADER ROJO SIMPLE =====
+        $this->rect($img, $W, 280, 0, 0, $red);
 
-        // ===== Header con gradiente rojo dramático
-        $headerH = 180;
+        // Texto header centrado
+        $this->text($img, 'SE BUSCA', $W / 2, 80, 64, $white, $this->bold(), ['align' => 'center']);
+        $this->text($img, 'MASCOTA PERDIDA', $W / 2, 170, 42, $white, $this->regular(), ['align' => 'center']);
 
-        // Gradiente rojo del header
-        for ($y = 0; $y < $headerH; $y++) {
-            $ratio = $y / $headerH;
-            $r = 239 - (int)($ratio * 20);
-            $g = 68 - (int)($ratio * 20);
-            $b = 68 - (int)($ratio * 20);
-            $color = sprintf('#%02x%02x%02x', $r, $g, $b);
-            $this->rect($img, $W, 1, 0, $y, $color);
-        }
+        // ===== FOTO CUADRADA SIMPLE =====
+        $photoSize = 480;
+        $photoX = (int)(($W - $photoSize) / 2);
+        $photoY = 340;
 
-        // Icono de alerta grande
-        $iconSize = 64;
-        $iconX = (int)($W / 2);
-        $iconY = 50;
+        // Fondo gris para la foto
+        $this->rect($img, $photoSize, $photoSize, $photoX, $photoY, $lightGray);
 
-        $this->circle($img, $iconSize, $iconX, $iconY, '#FFFFFF');
-        $this->circle($img, $iconSize - 4, $iconX, $iconY, $warning);
-        $this->text($img, '!', $iconX - 20, $iconY - 40, 80, '#FFFFFF', $this->bold());
-
-        // Texto del header
-        $this->text($img, '¡MASCOTA PERDIDA!', $W / 2, 130, 52, '#FFFFFF', $this->bold(), ['align' => 'center']);
-
-        // ===== Card principal con foto circular
-        $cardTop = $headerH + 40;
-        $cardPad = 50;
-        $cardW = $W - ($cardPad * 2);
-
-        // Sombra del card
-        $this->rect($img, $cardW, 840, $cardPad + 6, $cardTop + 6, '#00000015');
-        $this->rect($img, $cardW, 840, $cardPad, $cardTop, $cardBg);
-
-        // Foto circular con borde
-        $photoSize = 300;
-        $photoX = (int)(($W / 2) - ($photoSize / 2));
-        $photoY = $cardTop - ($photoSize / 3); // Sobresale del card
-
-        // Borde blanco grueso
-        $this->circle($img, (int)($photoSize / 2) + 12, (int)($W / 2), $photoY + (int)($photoSize / 2), '#FFFFFF');
-
-        // Borde de color
-        $this->circle($img, (int)($photoSize / 2) + 8, (int)($W / 2), $photoY + (int)($photoSize / 2), $primary);
-
-        // Foto
+        // Cargar y colocar foto
         $photoAbs = $this->mainPhotoAbsolute($pet);
         if ($photoAbs && is_file($photoAbs)) {
             $photo = $m->read($photoAbs)->cover($photoSize, $photoSize);
-
-            // Crear máscara circular
-            $mask = $m->create($photoSize, $photoSize)->fill('#00000000');
-            $this->circle($mask, (int)($photoSize / 2), (int)($photoSize / 2), (int)($photoSize / 2), '#FFFFFF');
-
-            // Aplicar máscara (si la versión de Intervention lo soporta, sino usamos contain)
             $img->place($photo, 'top-left', $photoX, $photoY);
         } else {
-            $this->circle($img, (int)($photoSize / 2), (int)($W / 2), $photoY + (int)($photoSize / 2), '#F3F4F6');
-            $this->text($img, 'FOTO', $W / 2, $photoY + (int)($photoSize / 2) - 20, 32, $muted, $this->bold(), ['align' => 'center']);
-            $this->text($img, 'NO DISPONIBLE', $W / 2, $photoY + (int)($photoSize / 2) + 20, 22, $light, $this->regular(), ['align' => 'center']);
+            $this->text($img, 'SIN FOTO', $W / 2, $photoY + 220, 36, $gray, $this->bold(), ['align' => 'center']);
         }
 
-        // ===== Nombre (debajo de la foto)
+        // Borde simple alrededor de la foto
+        $this->rect($img, $photoSize, $photoSize, $photoX, $photoY, '#00000000', ['color' => $lightGray, 'width' => 3]);
+
+        // ===== NOMBRE DE LA MASCOTA =====
         $nameY = $photoY + $photoSize + 60;
-        $name = trim($pet->name ?: 'Mascota');
-        $nameSize = 72;
-        $maxNameWidth = $cardW - 100;
-        while ($nameSize > 48 && $this->textWidth($name, $nameSize) > $maxNameWidth) {
-            $nameSize -= 3;
-        }
+        $name = mb_strtoupper(trim($pet->name ?: 'MASCOTA'));
+        $this->text($img, $name, $W / 2, $nameY, 72, $darkGray, $this->bold(), ['align' => 'center']);
 
-        // Nombre con sombra sutil
-        $this->text($img, $name, ($W / 2) + 2, $nameY + 2, $nameSize, '#00000010', $this->bold(), ['align' => 'center']);
-        $this->text($img, $name, $W / 2, $nameY, $nameSize, $titleColor, $this->bold(), ['align' => 'center']);
+        // ===== UBICACIÓN =====
+        $locationY = $nameY + 100;
+        $zone = $pet->full_location ?: ($pet->zone ?: 'Ubicación desconocida');
+        $this->text($img, $zone, $W / 2, $locationY, 36, $gray, $this->regular(), ['align' => 'center']);
 
-        // Línea decorativa bajo el nombre
-        $lineW = (int)min(250, $this->textWidth($name, $nameSize) * 0.7);
-        $lineY = $nameY + $this->lineHeight($nameSize) + 20;
-
-        // Gradiente en la línea
-        $this->rect($img, (int)($lineW / 2), 4, (int)(($W / 2) - ($lineW / 2)), $lineY, $primary);
-        $this->rect($img, (int)($lineW / 2), 4, (int)($W / 2), $lineY, $secondary);
-
-        // ===== Ubicación destacada
-        $locationY = $lineY + 50;
-        $zone = $pet->full_location ?: ($pet->zone ?: 'Ubicación no disponible');
-        $locationText = '📍 ' . $zone;
-
-        $locBgW = (int)min($cardW - 80, $this->textWidth($locationText, 32) + 80);
-        $locBgX = (int)(($W / 2) - ($locBgW / 2));
-
-        // Fondo con gradiente sutil
-        $this->rect($img, $locBgW, 70, $locBgX, $locationY - 10, $primary . '15');
-        $this->rect($img, $locBgW, 70, $locBgX, $locationY - 10, $cardBg, ['color' => $primary . '40', 'width' => 2]);
-        $this->text($img, $locationText, $W / 2, $locationY + 15, 32, $titleColor, $this->bold(), ['align' => 'center']);
-
-        // ===== Info cards (grid 2x2 moderno)
-        $gridTop = $locationY + 110;
-        $cardSize = 200;
-        $cardGap = 30;
-        $gridStartX = (int)(($W / 2) - $cardSize - ($cardGap / 2));
-
-        $gridCards = [
-            ['icon' => $pet->sex === 'female' ? '♀' : ($pet->sex === 'male' ? '♂' : '?'), 'color' => $pet->sex === 'female' ? '#f472b6' : '#60a5fa', 'label' => 'SEXO', 'value' => $this->sexLabel($pet->sex)],
-            ['icon' => '🎂', 'color' => $accent, 'label' => 'EDAD', 'value' => ($pet->age !== null ? $pet->age . ' años' : 'N/D')],
-            ['icon' => '💉', 'color' => $pet->rabies_vaccine ? $accent : $warning, 'label' => 'VACUNA', 'value' => $pet->rabies_vaccine ? 'Al día' : 'N/D'],
-            ['icon' => '✂️', 'color' => $pet->is_neutered ? $accent : $warning, 'label' => 'ESTERILIZ.', 'value' => $this->shortNeuteredLabel($pet)],
-        ];
-
-        $row = 0; $col = 0;
-        foreach ($gridCards as $card) {
-            $cardX = $gridStartX + ($col * ($cardSize + $cardGap));
-            $cardY = $gridTop + ($row * ($cardSize + $cardGap));
-
-            // Sombra
-            $this->rect($img, $cardSize, $cardSize, $cardX + 4, $cardY + 4, '#00000010');
-
-            // Card
-            $this->rect($img, $cardSize, $cardSize, $cardX, $cardY, '#FFFFFF', ['color' => $card['color'] . '30', 'width' => 3]);
-
-            // Barra superior de color
-            $this->rect($img, $cardSize, 8, $cardX, $cardY, $card['color']);
-
-            // Icono
-            $this->text($img, $card['icon'], $cardX + (int)($cardSize / 2), $cardY + 50, 48, $card['color'], $this->bold(), ['align' => 'center']);
-
-            // Label
-            $this->text($img, $card['label'], $cardX + (int)($cardSize / 2), $cardY + 120, 18, $muted, $this->bold(), ['align' => 'center']);
-
-            // Value
-            $this->text($img, $card['value'], $cardX + (int)($cardSize / 2), $cardY + 150, 24, $titleColor, $this->bold(), ['align' => 'center']);
-
-            $col++;
-            if ($col >= 2) { $col = 0; $row++; }
-        }
-
-        // ===== Contacto destacado
-        $contactY = $gridTop + (2 * ($cardSize + $cardGap)) + 40;
-        $contactH = 140;
-        $contactW = $cardW - 60;
-        $contactX = $cardPad + 30;
-
-        // Fondo con gradiente
-        $this->rect($img, $contactW, $contactH, $contactX + 4, $contactY + 4, '#00000010');
-
-        // Gradiente verde
-        for ($y = 0; $y < $contactH; $y++) {
-            $ratio = $y / $contactH;
-            $r = 16 + (int)($ratio * 10);
-            $g = 185 + (int)($ratio * 15);
-            $b = 129 + (int)($ratio * 10);
-            $color = sprintf('#%02x%02x%02x', $r, $g, $b);
-            $this->rect($img, $contactW, 1, $contactX, $contactY + $y, $color);
-        }
-
-        // Título
-        $this->text($img, '📞 LLAMAR AHORA', $contactX + (int)($contactW / 2), $contactY + 30, 28, '#FFFFFF', $this->bold(), ['align' => 'center']);
-
-        // Teléfono grande
+        // ===== TELÉFONO DESTACADO =====
+        $phoneY = $locationY + 80;
         $phone = $this->displayPhoneForce($pet);
-        $this->text($img, $phone, $contactX + (int)($contactW / 2), $contactY + 75, 48, '#FFFFFF', $this->bold(), ['align' => 'center']);
 
-        // ===== Footer con logo y call to action
-        $footerY = $H - 120;
+        // Fondo rojo suave para el teléfono
+        $phoneBoxW = 600;
+        $phoneBoxH = 100;
+        $phoneBoxX = (int)(($W - $phoneBoxW) / 2);
+        $this->rect($img, $phoneBoxW, $phoneBoxH, $phoneBoxX, $phoneY - 20, $red);
 
-        // Texto motivacional
-        $this->text($img, '¡Ayúdanos a encontrarlo!', $W / 2, $footerY, 28, $subtitle, $this->bold(), ['align' => 'center']);
-        $this->text($img, 'Comparte esta publicación', $W / 2, $footerY + 40, 22, $muted, $this->regular(), ['align' => 'center']);
+        $this->text($img, 'CONTACTO', $W / 2, $phoneY, 24, $white, $this->regular(), ['align' => 'center']);
+        $this->text($img, $phone, $W / 2, $phoneY + 50, 48, $white, $this->bold(), ['align' => 'center']);
 
-        // Logo pequeño
-        $logoRel = 'images/qr-pet-tag-logo.png';
-        if (Storage::disk('public')->exists($logoRel)) {
-            $logoAbs = Storage::disk('public')->path($logoRel);
-            $logo = $m->read($logoAbs)->contain(200, 40);
-            $placeW = method_exists($logo, 'width') ? $logo->width() : 200;
-            $logoX = (int)(($W - $placeW) / 2);
-            $img->place($logo, 'top-left', $logoX, $footerY + 70);
-        } else {
-            $this->text($img, 'QR PET TAG', $W / 2, $footerY + 80, 24, $primary, $this->bold(), ['align' => 'center']);
-        }
+        // ===== FOOTER SIMPLE =====
+        $footerY = $H - 80;
+        $this->text($img, '¡Ayúdanos a encontrarlo!', $W / 2, $footerY, 28, $gray, $this->regular(), ['align' => 'center']);
 
         // Guardar
         $dir = 'share';
