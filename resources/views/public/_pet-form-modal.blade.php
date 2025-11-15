@@ -1,3 +1,4 @@
+
 {{-- Modal para registrar mascota desde checkout - REDISEÑADO COMPLETAMENTE --}}
 <style>
 /* ===== VARIABLES Y RESET ===== */

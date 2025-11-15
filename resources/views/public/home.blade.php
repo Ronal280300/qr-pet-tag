@@ -1307,6 +1307,8 @@
       font-size: 16px;
       margin-top: 12px;
     }
+    
+    
 
     .pets-carousel-wrapper::before,
     .pets-carousel-wrapper::after {
@@ -1467,11 +1469,11 @@
 @include('public.partials.plans-section')
 
 
-{{-- ====== METRICS SECTION ====== --}}
+<!--{{-- ====== METRICS SECTION ====== --}}
 <section class="metrics-section">
 </section>
 
-{{-- ====== FEATURES SECTION ====== --}}
+ {{-- ====== FEATURES SECTION ====== --}}
 <section class="features-section">
   <div class="container">
     <div class="section-header reveal">
@@ -1544,7 +1546,7 @@
       </div>
     </div>
   </div>
-</section>
+</section> -->
 
 {{-- ====== BENEFITS SECTION ====== --}}
 <section class="benefits-section">
@@ -1589,7 +1591,7 @@
           </div>
           <div class="benefit-content">
             <h3>Disponible en cualquier lugar</h3>
-            <p>Funciona globalmente sin necesidad de aplicaciones adicionales ni suscripciones.</p>
+            <p>Funciona globalmente sin necesidad de aplicaciones adicionales.</p>
           </div>
         </div>
       </div>
@@ -1618,7 +1620,7 @@
         <i class="fa-solid fa-lightbulb"></i> Proceso
       </span>
       <h2 class="section-title">Activa la protección <span class="gradient-text">QR-Pet Tag</span> en 3 pasos</h2>
-      <p class="section-subtitle">Empieza hoy y mantén a tu mascota identificada y segura en menos de un día</p>
+      <p class="section-subtitle">Empieza hoy y mantén a tu mascota identificada y segura en 3 simples pasos</p>
     </div>
 
     <div class="row g-4">
@@ -1649,7 +1651,7 @@
           <div class="step-number">3</div>
           <h3 class="step-title">Activa tu código QR</h3>
           <p class="step-description">
-            Una vez verificado el pago, podrás acceder a tu panel, ver tus mascotas y activar sus códigos QR personalizados.
+            Una vez verificado el pago, podrás acceder a tu panel, ver tus mascotas o activar sus códigos QR personalizados.
           </p>
         </div>
       </div>
@@ -1666,7 +1668,7 @@
         <i class="fa-solid fa-heart"></i> Mascotas Protegidas
       </span>
       <h2 class="section-title">Ellos ya están <span class="gradient-text">protegidos</span></h2>
-      <p class="section-subtitle">Miles de mascotas ya confían en QR-Pet Tag para su seguridad</p>
+      <p class="section-subtitle">Mascotas que se encuentran protegidas por QR-Pet Tag para su seguridad</p>
     </div>
 
     @if($pets && $pets->count() > 0)
@@ -1808,8 +1810,8 @@
           </div>
         </div>
         <div class="faq-content">
-          <p>Registrarte en la plataforma es completamente gratis. Puedes crear el perfil digital de tu mascota y generar su código QR sin costo alguno.</p>
-          <p>Si deseas adquirir una placa física personalizada para el collar, esta tiene un costo único. ¡No hay mensualidades ni suscripciones!</p>
+          <p>Registrate y selecciona el plan que mejor se adapte a tu necesidad. Puedes crear el perfil digital de tu mascota y generar su código QR.</p>
+          <p>Si deseas adquirir una placa física personalizada para el collar, esta viene incluido según el plan seleccionado.</p>
         </div>
       </div>
 
@@ -1826,7 +1828,7 @@
           </div>
         </div>
         <div class="faq-content">
-          <p>Sí, recibes una notificación inmediata cada vez que alguien escanea el código QR de tu mascota.</p>
+          <p>Sí, recibes una notificación por correo inmediata cada vez que alguien escanea el código QR de tu mascota.</p>
           <p>Esto te permite saber al instante que tu mascota ha sido encontrada y alguien está intentando contactarte.</p>
         </div>
       </div>
