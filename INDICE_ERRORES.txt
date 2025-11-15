@@ -1,0 +1,216 @@
+================================================================================
+                           ÍNDICE RÁPIDO DE ERRORES
+                        Búsqueda por archivo y línea
+================================================================================
+
+ARCHIVO: PetQrService.php
+================================================================================
+
+Línea 17-91 | ensureSlugAndImage() + buildFromUrl()
+  - Error 1.1: Sin validación de generación de QR (45-51) - ALTO
+  - Error 1.2: Race condition en slug generation (25-28) - CRÍTICO
+  - Error 1.3: Sin validación de URL (42) - MEDIO
+  - Error 1.5: Doble guardado innecesario (38-39, 54-57) - BAJO
+
+Línea 65-91 | buildFromUrl()
+  - Error 1.4: Sin validación de URL (65-91) - MEDIO
+
+RESUMEN: 5 errores (1 CRÍTICO, 1 ALTO, 2 MEDIOS, 1 BAJO)
+FIX TIME: 3-4 horas
+
+================================================================================
+ARCHIVO: PetShareCardService.php
+================================================================================
+
+Línea 13-90 | generate()
+  - Error 2.1: Memory exhaustion (28) - CRÍTICO
+  - Error 2.2: Sin límite de tamaño de foto (46-48) - CRÍTICO
+  - Error 2.4: makeDirectory sin validación (86) - MEDIO
+  - Error 2.5: Storage::path() usado incorrectamente (88) - CRÍTICO
+
+Línea 147-157 | mainPhotoAbsolute()
+  - Error 2.3: Race condition en acceso a archivos (147-156) - ALTO
+
+Línea 159-195 | regular(), bold(), fallbackFont()
+  - Error 2.6: Sin fallback si faltan fuentes TTF (161-194) - ALTO
+  - Error 2.7: Paths Windows hardcodeados (184) - BAJO
+
+Línea 201-227 | displayPhoneForce(), formatCrPhone()
+  - Error 2.8: preg_replace sin validación (210) - BAJO
+  - Error 2.9: mb_strtoupper sin validación (59) - BAJO
+  - Error 2.10: Acceso a propiedades sin null check (59, 64, 69) - MEDIO
+
+RESUMEN: 10 errores (3 CRÍTICOS, 2 ALTOS, 3 MEDIOS, 2 BAJOS)
+FIX TIME: 5-6 horas
+
+================================================================================
+ARCHIVO: WhatsAppService.php
+================================================================================
+
+Línea 17-27 | __construct()
+  - Error 3.7: Fallback inseguro en setting() (20-22) - MEDIO
+
+Línea 32-38 | setting() privado
+  - Error 3.8: Función helper sin existe (34-38) - BAJO
+
+Línea 43-109 | send()
+  - Error 3.1: Sin retry logic en API externa (61-67) - CRÍTICO
+  - Error 3.2: Sin validación de estructura respuesta (77) - ALTO
+  - Error 3.3: WhatsAppLog sin error handling (70-79, 97-105) - ALTO
+  - Error 3.9: Sin validación de phone format (58) - BAJO
+
+Línea 147-162 | sendPaymentUploadedToAdmin()
+  - Error 3.4: Acceso a $order->user->name sin null check (154-160) - CRÍTICO
+  - Error 3.5: number_format sin validación (158) - MEDIO
+  - Error 3.6: admin_notes sin sanitización (158) - BAJO
+
+Línea 167-182 | sendPaymentReceived()
+  - Error 3.4: Acceso a $order->user->phone sin null check (169) - CRÍTICO
+  - Error 3.5: number_format sin validación (178) - MEDIO
+  - Error 3.4: Acceso a $order->plan->name (179) - CRÍTICO
+
+Línea 187-202 | sendPaymentVerified()
+  - Error 3.4: Acceso a $order->user sin null check (189, 197-199) - CRÍTICO
+
+Línea 207-223 | sendPaymentRejected()
+  - Error 3.4: Acceso a $order->user sin null check (209) - CRÍTICO
+
+Línea 228-254 | sendPaymentReminder()
+  - Error 3.4: Acceso a $user->phone sin null check (230) - CRÍTICO
+
+Línea 259-273 | sendAccountBlocked()
+  - Error 3.4: Acceso a $user->phone sin null check (261) - CRÍTICO
+
+Línea 278-298 | sendQrScanned()
+  - Error 3.4: Acceso a $owner->phone sin null check (280) - CRÍTICO
+
+RESUMEN: 9 errores (3 CRÍTICOS, 3 ALTOS, 2 MEDIOS, 1 BAJO)
+FIX TIME: 4-5 horas
+
+================================================================================
+ARCHIVO: FacebookPoster.php
+================================================================================
+
+Línea 14-19 | __construct()
+  - Error 4.5: Sin validación de configuración (16-18) - CRÍTICO
+
+Línea 24-45 | postPhotoByUrl()
+  - Error 4.1: Sin retry logic en API (39-41) - CRÍTICO
+  - Error 4.6: mb_substr sin validación (36) - BAJO
+
+Línea 50-81 | postPhotoFile()
+  - Error 4.2: fopen/fclose con @ para suprimir errores (58-61, 72-74) - ALTO
+  - Error 4.3: Race condition en filesize (52) - MEDIO
+  - Error 4.4: Stream resource sin validación (64) - MEDIO
+  - Error 4.1: Sin retry logic en API (63-70) - CRÍTICO
+  - Error 4.6: mb_substr sin validación (69) - BAJO
+
+RESUMEN: 6 errores (2 CRÍTICOS, 2 ALTOS, 2 MEDIOS, 2 BAJOS)
+FIX TIME: 3-4 horas
+
+================================================================================
+ARCHIVO: app/Helpers/settings.php
+================================================================================
+
+Línea 5-17 | setting()
+  - Error 5.1: Sin documentación de comportamiento (15) - BAJO
+
+Línea 19-31 | setting_set()
+  - Error 5.2: Sin validación (27-30) - BAJO
+
+RESUMEN: 2 errores (0 CRÍTICOS, 0 ALTOS, 0 MEDIOS, 2 BAJOS)
+FIX TIME: 1 hora
+
+================================================================================
+ARCHIVO: app/Models/Setting.php
+================================================================================
+
+Línea 42-52 | get()
+  - Error 6.1: json_decode sin flags (82) - MEDIO
+
+Línea 77-86 | castValue()
+  - Error 6.1: json_decode sin JSON_THROW_ON_ERROR (82) - MEDIO
+
+Línea 104-107 | clearCache()
+  - Error 6.2: Cache::flush() demasiado agresivo (106) - ALTO
+
+RESUMEN: 2 errores (0 CRÍTICOS, 1 ALTO, 1 MEDIO, 0 BAJOS)
+FIX TIME: 1-2 horas
+
+================================================================================
+                        TABLA DE BÚSQUEDA RÁPIDA
+================================================================================
+
+ERROR CRÍTICO: RACE CONDITION EN SLUG
+  Archivo: PetQrService.php
+  Línea: 25-28
+  Descripción: Slug no verificado por unicidad
+  Fix: /home/user/qr-pet-tag/FIXES_RECOMENDADOS.md - Fix 4
+
+ERROR CRÍTICO: MEMORY EXHAUSTION - IMAGEN
+  Archivo: PetShareCardService.php
+  Línea: 28
+  Descripción: 1080x1350 píxeles sin validación de memoria
+  Fix: /home/user/qr-pet-tag/FIXES_RECOMENDADOS.md - Fix 2
+
+ERROR CRÍTICO: MEMORY EXHAUSTION - FOTOS
+  Archivo: PetShareCardService.php
+  Línea: 46-48
+  Descripción: Archivos grandes sin límite de tamaño
+  Fix: /home/user/qr-pet-tag/FIXES_RECOMENDADOS.md - Fix 2
+
+ERROR CRÍTICO: STORAGE::PATH() INCORRECTO
+  Archivo: PetShareCardService.php
+  Línea: 88
+  Descripción: Usa path() en lugar de put()
+  Fix: /home/user/qr-pet-tag/FIXES_RECOMENDADOS.md - Fix 2
+
+ERROR CRÍTICO: SIN RETRY EN TWILIO
+  Archivo: WhatsAppService.php
+  Línea: 61-67
+  Descripción: API externa sin reintentos
+  Fix: /home/user/qr-pet-tag/FIXES_RECOMENDADOS.md - Fix 3
+
+ERROR CRÍTICO: NULL CHECKS EN WHATSAPP
+  Archivo: WhatsAppService.php
+  Línea: 154-280 (múltiples métodos)
+  Descripción: Acceso a $order->user->name sin validación
+  Fix: /home/user/qr-pet-tag/FIXES_RECOMENDADOS.md - Fix 1
+
+ERROR CRÍTICO: SIN RETRY EN FACEBOOK
+  Archivo: FacebookPoster.php
+  Línea: 39-44, 63-70
+  Descripción: API externa sin reintentos
+  Fix: /home/user/qr-pet-tag/FIXES_RECOMENDADOS.md - Fix 5
+
+ERROR CRÍTICO: SIN VALIDACIÓN CONFIG FB
+  Archivo: FacebookPoster.php
+  Línea: 16-18
+  Descripción: Token y pageId no validados
+  Fix: /home/user/qr-pet-tag/FIXES_RECOMENDADOS.md - Fix 6
+
+================================================================================
+                        ORDEN DE IMPLEMENTACIÓN
+================================================================================
+
+PRIORIDAD 1 (Hoy/Mañana):
+  [ ] WhatsAppService - Null checks (1-2h)
+  [ ] PetQrService - Slug uniqueness (2h)
+
+PRIORIDAD 2 (Esta semana):
+  [ ] WhatsAppService - Retry logic (2h)
+  [ ] PetShareCardService - Memory + Storage (3h)
+  [ ] FacebookPoster - Retry + Config (3h)
+
+PRIORIDAD 3 (Próxima semana):
+  [ ] Setting Model - Improvements (1h)
+  [ ] Race conditions - File access (2h)
+  [ ] Fallback - TTF fonts (1h)
+
+PRIORIDAD 4 (Sprint siguiente):
+  [ ] Documentation - Helpers (1h)
+  [ ] Technical debt (3h)
+
+TOTAL ESTIMADO: 18-22 horas
+
+================================================================================
