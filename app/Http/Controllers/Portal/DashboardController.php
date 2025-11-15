@@ -19,47 +19,22 @@ class DashboardController extends Controller
 
         // =============== Métricas personales ===============
         $myPetIds = Pet::where('user_id', $u->id)->pluck('id');
-        $myQrIds = QrCode::whereIn('pet_id', $myPetIds)->pluck('id');
 
         $my = [
             'pets'         => $myPetIds->count(),
             'lost'         => Pet::where('user_id', $u->id)->where('is_lost', 1)->count(),
             'rewards'      => Reward::whereIn('pet_id', $myPetIds)->where('is_active', 1)->count(),
-            'scans_today'  => Scan::whereIn('qr_code_id', $myQrIds)
+            'scans_today'  => Scan::whereIn('qr_code_id', QrCode::whereIn('pet_id', $myPetIds)->pluck('id'))
                                   ->whereDate('created_at', now()->toDateString())
-                                  ->count(),
-            'scans_total'  => Scan::whereIn('qr_code_id', $myQrIds)->count(),
-            'scans_week'   => Scan::whereIn('qr_code_id', $myQrIds)
-                                  ->where('created_at', '>=', now()->subDays(7))
                                   ->count(),
         ];
 
-        // Últimos 10 escaneos de mis TAGs (ordenados por fecha)
+        // Últimos 7 escaneos de mis TAGs
         $myRecentScans = Scan::with(['qrCode.pet:id,name'])
-            ->whereIn('qr_code_id', $myQrIds)
-            ->latest('created_at')
-            ->take(10)
+            ->whereIn('qr_code_id', QrCode::whereIn('pet_id', $myPetIds)->pluck('id'))
+            ->latest('id')
+            ->take(7)
             ->get();
-
-        // Mascota más escaneada
-        $topScannedPet = null;
-        if ($myQrIds->isNotEmpty()) {
-            $topScanned = Scan::whereIn('qr_code_id', $myQrIds)
-                ->select('qr_code_id', \DB::raw('COUNT(*) as scan_count'))
-                ->groupBy('qr_code_id')
-                ->orderByDesc('scan_count')
-                ->first();
-
-            if ($topScanned) {
-                $qr = QrCode::with('pet:id,name')->find($topScanned->qr_code_id);
-                if ($qr && $qr->pet) {
-                    $topScannedPet = [
-                        'name' => $qr->pet->name,
-                        'scans' => $topScanned->scan_count,
-                    ];
-                }
-            }
-        }
 
         // =============== Si es admin: métricas globales + charts ===============
         $global = null;
@@ -108,7 +83,6 @@ class DashboardController extends Controller
             'u'             => $u,
             'my'            => $my,
             'myRecentScans' => $myRecentScans,
-            'topScannedPet' => $topScannedPet,
             'global'        => $global,
             'charts'        => $charts,
         ]);
