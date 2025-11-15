@@ -12,6 +12,9 @@ class PetShareCardService
 {
     public function generate(Pet $pet): string
     {
+        $currentLimit = ini_get('memory_limit');
+        ini_set('memory_limit', '256M');
+
         $m = new ImageManager(new Driver());
 
         // ===== DISEÑO MINIMALISTA Y LIMPIO =====
@@ -42,9 +45,13 @@ class PetShareCardService
         // Fondo gris para la foto
         $this->rect($img, $photoSize, $photoSize, $photoX, $photoY, $lightGray);
 
-        // Cargar y colocar foto
+        // Cargar y colocar foto con validación de tamaño
         $photoAbs = $this->mainPhotoAbsolute($pet);
         if ($photoAbs && is_file($photoAbs)) {
+            $fileSize = filesize($photoAbs);
+            if ($fileSize > 50 * 1024 * 1024) {
+                throw new \RuntimeException('La foto de la mascota es demasiado grande (máx 50MB)');
+            }
             $photo = $m->read($photoAbs)->cover($photoSize, $photoSize);
             $img->place($photo, 'top-left', $photoX, $photoY);
         } else {
@@ -86,6 +93,9 @@ class PetShareCardService
         Storage::disk('public')->makeDirectory($dir);
         $file = $dir . '/pet-' . $pet->id . '-' . time() . '.png';
         $img->save(Storage::disk('public')->path($file));
+
+        ini_set('memory_limit', $currentLimit);
+
         return $file;
     }
 

@@ -12,7 +12,7 @@ $publicUrl = $slug ? route('public.pet.show', $slug) : null;
 $qrImageUrl = ($qr && $qr->image && Storage::disk('public')->exists($qr->image)) ? Storage::url($qr->image) : null;
 $canDownloadQr = $qrImageUrl && (auth()->id() === $pet->user_id || $isAdmin);
 $photos = $pet->photos;
-$mainPhotoUrl = $pet->main_photo_url;
+$mainPhotoUrl = $pet->main_photo_url ?? asset('images/default-pet.jpg');
 $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'][$pet->sex ?? 'unknown'];
 @endphp
 

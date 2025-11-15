@@ -54,10 +54,6 @@ class User extends Authenticatable
         'plan_is_active',
         'notes',
         'tags',
-        'status',
-        'pending_since',
-        'status_changed_at',
-
     ];
 
     /**
@@ -88,8 +84,6 @@ class User extends Authenticatable
             'plan_expires_at'   => 'datetime',
             'plan_is_active'    => 'boolean',
             'tags'              => 'array',
-            'status_changed_at' => 'datetime',
-            'pending_since'     => 'datetime',
         ];
     }
 

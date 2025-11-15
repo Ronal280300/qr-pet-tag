@@ -22,10 +22,13 @@ class QrCode extends Model
         'image',
     ];
 
-    protected $casts = [
-        'is_activated' => 'boolean',
-        'activated_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_activated' => 'boolean',
+            'activated_at' => 'datetime',
+        ];
+    }
 
     public function pet()
     {
