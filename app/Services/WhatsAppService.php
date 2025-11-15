@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\WhatsAppLog;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Log;
 use Twilio\Rest\Client;
 
@@ -16,13 +17,24 @@ class WhatsAppService
     public function __construct()
     {
         // Primero intentar obtener de settings, luego fallback a config
-        $sid = setting('twilio_sid') ?: config('services.twilio.sid');
-        $token = setting('twilio_token') ?: config('services.twilio.token');
-        $this->from = setting('twilio_whatsapp_from') ?: config('services.twilio.whatsapp_from');
+        $sid = $this->setting('twilio_sid') ?: config('services.twilio.sid');
+        $token = $this->setting('twilio_token') ?: config('services.twilio.token');
+        $this->from = $this->setting('twilio_whatsapp_from') ?: config('services.twilio.whatsapp_from');
 
         if ($sid && $token) {
             $this->client = new Client($sid, $token);
         }
+    }
+
+    /**
+     * Helper para obtener settings (fallback si el helper global no está cargado)
+     */
+    private function setting(string $key, $default = null)
+    {
+        if (function_exists('setting')) {
+            return setting($key, $default);
+        }
+        return Setting::get($key, $default);
     }
 
     /**
@@ -31,7 +43,7 @@ class WhatsAppService
     public function send(string $to, string $message, string $type = 'general', ?int $orderId = null, ?int $userId = null): bool
     {
         // Verificar si WhatsApp está habilitado en configuración
-        if (!setting('twilio_enabled', true) || !setting('notifications_whatsapp_enabled', true)) {
+        if (!$this->setting('twilio_enabled', true) || !$this->setting('notifications_whatsapp_enabled', true)) {
             Log::info('WhatsApp notifications disabled in settings');
             return false;
         }
@@ -134,7 +146,7 @@ class WhatsAppService
      */
     public function sendPaymentUploadedToAdmin(Order $order): bool
     {
-        $adminPhone = setting('twilio_admin_phone') ?: config('services.twilio.admin_phone');
+        $adminPhone = $this->setting('twilio_admin_phone') ?: config('services.twilio.admin_phone');
         if (!$adminPhone) {
             return false;
         }
