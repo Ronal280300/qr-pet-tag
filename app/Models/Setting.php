@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class Setting extends Model
 {
@@ -111,7 +112,19 @@ class Setting extends Model
      */
     public static function getByGroup(string $group)
     {
-        return self::where('group', $group)->orderBy('order')->orderBy('label')->get();
+        $query = self::where('group', $group);
+
+        // Verificar si existe la columna 'order' antes de ordenar por ella
+        if (Schema::hasColumn('settings', 'order')) {
+            $query->orderBy('order');
+        }
+
+        // Verificar si existe la columna 'label' antes de ordenar por ella
+        if (Schema::hasColumn('settings', 'label')) {
+            $query->orderBy('label');
+        }
+
+        return $query->get();
     }
 
     /**
