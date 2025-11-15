@@ -219,6 +219,7 @@ class PetController extends Controller
 
     public function destroy(Pet $pet)
     {
+        $this->authorizePetOrAdmin($pet);
         $pet->delete();
         return redirect()->route('portal.pets.index')->with('status', 'Mascota eliminada.');
     }

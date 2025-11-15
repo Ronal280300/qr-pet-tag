@@ -100,11 +100,16 @@ class Setting extends Model
     }
 
     /**
-     * Limpiar cache de settings
+     * Limpiar cache de settings (solo settings, no toda la caché)
      */
     public static function clearCache(): void
     {
-        Cache::flush();
+        Cache::forget('settings.all');
+
+        $keys = self::pluck('key')->toArray();
+        foreach ($keys as $key) {
+            Cache::forget("setting.{$key}");
+        }
     }
 
     /**

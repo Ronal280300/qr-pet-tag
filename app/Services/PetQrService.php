@@ -21,15 +21,53 @@ class PetQrService
         $qr->pet_id = $pet->id;
     }
 
-    // Slug único (si falta)
+    // Slug único (si falta) - garantizar unicidad
     if (blank($qr->slug)) {
-        // Puedes ajustar el formato del slug a tu gusto
-        $qr->slug = Str::slug($pet->name . '-' . $pet->id . '-' . Str::lower(Str::random(6)));
+        $attempts = 0;
+        $maxAttempts = 10;
+
+        do {
+            $baseSlug = Str::slug($pet->name . '-' . $pet->id . '-' . Str::lower(Str::random(6)));
+            $exists = QrCodeModel::where('slug', $baseSlug)
+                ->where('id', '!=', $qr->id ?? 0)
+                ->exists();
+
+            if (!$exists) {
+                $qr->slug = $baseSlug;
+                break;
+            }
+
+            $attempts++;
+        } while ($attempts < $maxAttempts);
+
+        if (blank($qr->slug)) {
+            throw new \RuntimeException('No se pudo generar un slug único después de ' . $maxAttempts . ' intentos');
+        }
     }
 
     // >>> FIX PRINCIPAL: generar activation_code si falta <<<
     if (blank($qr->activation_code)) {
-        $qr->activation_code = QrCodeModel::generateActivationCode();
+        $attempts = 0;
+        $maxAttempts = 20;
+
+        do {
+            $code = QrCodeModel::generateActivationCode();
+            $exists = QrCodeModel::where('activation_code', $code)
+                ->where('id', '!=', $qr->id ?? 0)
+                ->exists();
+
+            if (!$exists) {
+                $qr->activation_code = $code;
+                break;
+            }
+
+            $attempts++;
+        } while ($attempts < $maxAttempts);
+
+        if (blank($qr->activation_code)) {
+            throw new \RuntimeException('No se pudo generar un código de activación único después de ' . $maxAttempts . ' intentos');
+        }
+
         $qr->is_activated   = false;     // por consistencia con tu modelo de activación
         $qr->activated_by   = null;
         $qr->activated_at   = null;

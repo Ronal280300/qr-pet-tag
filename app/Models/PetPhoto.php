@@ -11,10 +11,13 @@ class PetPhoto extends Model
         'pet_id', 'path', 'is_primary', 'sort_order',
     ];
 
-    protected $casts = [
-        'is_primary' => 'boolean',
-        'sort_order' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_primary' => 'boolean',
+            'sort_order' => 'integer',
+        ];
+    }
 
     public function pet()
     {

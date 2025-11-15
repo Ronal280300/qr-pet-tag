@@ -82,6 +82,18 @@ class OrderManagementController extends Controller
         try {
             DB::beginTransaction();
 
+            $order = Order::where('id', $order->id)->lockForUpdate()->first();
+
+            if (!$order) {
+                DB::rollBack();
+                return back()->with('error', 'Orden no encontrada.');
+            }
+
+            if ($order->status === 'verified' || $order->status === 'completed') {
+                DB::rollBack();
+                return back()->with('error', 'Esta orden ya fue verificada anteriormente.');
+            }
+
             $order->update([
                 'status' => 'verified',
                 'verified_at' => now(),
@@ -89,8 +101,8 @@ class OrderManagementController extends Controller
                 'admin_notes' => $request->admin_notes,
             ]);
 
-            // Actualizar datos del usuario
-            $user = $order->user;
+            // Actualizar datos del usuario con lock
+            $user = \App\Models\User::where('id', $order->user_id)->lockForUpdate()->first();
             $expiresAt = null;
 
             if ($order->plan->type === 'subscription') {
@@ -178,6 +190,11 @@ class OrderManagementController extends Controller
      */
     protected function sendVerificationEmail(Order $order)
     {
+        if (!$order->user || !$order->user->email) {
+            \Illuminate\Support\Facades\Log::warning('Cannot send verification email: Order has no user', ['order_id' => $order->id]);
+            return;
+        }
+
         try {
             // Cargar relación de mascotas para el template del email
             $order->load('pets');
@@ -202,7 +219,7 @@ class OrderManagementController extends Controller
 
         } catch (\Exception $e) {
             EmailLog::logEmail(
-                recipient: $order->user->email,
+                recipient: $order->user?->email ?? 'unknown',
                 subject: "Pago Verificado - Pedido #{$order->order_number}",
                 type: 'payment_verified',
                 orderId: $order->id,
@@ -218,6 +235,11 @@ class OrderManagementController extends Controller
      */
     protected function sendRejectionEmail(Order $order)
     {
+        if (!$order->user || !$order->user->email) {
+            \Illuminate\Support\Facades\Log::warning('Cannot send rejection email: Order has no user', ['order_id' => $order->id]);
+            return;
+        }
+
         try {
             Mail::send('emails.client.payment-rejected', ['order' => $order], function ($message) use ($order) {
                 $message->to($order->user->email)
@@ -239,7 +261,7 @@ class OrderManagementController extends Controller
 
         } catch (\Exception $e) {
             EmailLog::logEmail(
-                recipient: $order->user->email,
+                recipient: $order->user?->email ?? 'unknown',
                 subject: "Pago Rechazado - Pedido #{$order->order_number}",
                 type: 'payment_rejected',
                 orderId: $order->id,

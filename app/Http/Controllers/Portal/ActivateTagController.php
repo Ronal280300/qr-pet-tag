@@ -21,37 +21,48 @@ class ActivateTagController extends Controller
             'activation_code' => ['required', 'string'],
         ]);
 
-        $qr = QrCode::with('pet')->where('activation_code', $data['activation_code'])->first();
+        try {
+            return \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+                $qr = QrCode::with('pet')
+                    ->where('activation_code', $data['activation_code'])
+                    ->lockForUpdate()
+                    ->first();
 
-        if (!$qr) {
-            return back()->withErrors(['activation_code' => 'Código de activación inválido.'])->withInput();
+                if (!$qr) {
+                    return back()->withErrors(['activation_code' => 'Código de activación inválido.'])->withInput();
+                }
+
+                // El TAG debe tener una mascota precargada por el admin
+                if (!$qr->pet) {
+                    return back()->withErrors(['activation_code' => 'Este TAG aún no tiene una mascota asociada. Contáctanos.'])->withInput();
+                }
+
+                $pet = $qr->pet;
+                $pet = \App\Models\Pet::where('id', $pet->id)->lockForUpdate()->first();
+
+                // Si ya tiene dueño y no es el actual → bloquear
+                if (!is_null($pet->user_id) && $pet->user_id !== Auth::id()) {
+                    return back()->withErrors(['activation_code' => 'Este TAG ya pertenece a otra cuenta.'])->withInput();
+                }
+
+                // Asignar la mascota al usuario (reclamar)
+                $pet->user_id = Auth::id();
+                $pet->save();
+
+                // Marcar TAG como activado (si no lo está)
+                if (!$qr->is_activated) {
+                    $qr->is_activated = true;
+                }
+                $qr->activated_at = now();
+                $qr->activated_by = Auth::id();
+                $qr->save();
+
+                return redirect()->route('portal.pets.show', $pet)
+                    ->with('status', 'TAG activado. Ya puedes editar los datos de tu mascota.');
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error activating TAG: ' . $e->getMessage());
+            return back()->withErrors(['activation_code' => 'Error al activar el TAG. Intenta nuevamente.'])->withInput();
         }
-
-        // El TAG debe tener una mascota precargada por el admin
-        if (!$qr->pet) {
-            return back()->withErrors(['activation_code' => 'Este TAG aún no tiene una mascota asociada. Contáctanos.'])->withInput();
-        }
-
-        $pet = $qr->pet;
-
-        // Si ya tiene dueño y no es el actual → bloquear
-        if (!is_null($pet->user_id) && $pet->user_id !== Auth::id()) {
-            return back()->withErrors(['activation_code' => 'Este TAG ya pertenece a otra cuenta.'])->withInput();
-        }
-
-        // Asignar la mascota al usuario (reclamar)
-        $pet->user_id = Auth::id();
-        $pet->save();
-
-        // Marcar TAG como activado (si no lo está)
-        if (!$qr->is_activated) {
-            $qr->is_activated = true;
-        }
-        $qr->activated_at = now();
-        $qr->activated_by = Auth::id();
-        $qr->save();
-
-        return redirect()->route('portal.pets.show', $pet)
-            ->with('status', 'TAG activado. Ya puedes editar los datos de tu mascota.');
     }
 }
