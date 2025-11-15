@@ -37,14 +37,6 @@
     }
   }
 
-  @keyframes shimmer {
-    0% {
-      background-position: -1000px 0;
-    }
-    100% {
-      background-position: 1000px 0;
-    }
-  }
 
   @keyframes float {
     0%, 100% {
@@ -512,25 +504,6 @@
     transform: scale(1.2) rotate(10deg);
   }
 
-  /* Animación de carga para las imágenes */
-  .pet-thumb::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-    z-index: 1;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .pet-thumb.loading::before {
-    opacity: 1;
-  }
 </style>
 @endpush
 

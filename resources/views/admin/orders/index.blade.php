@@ -3,125 +3,6 @@
 @section('title', 'Gestión de Pedidos - Admin')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Gestión de Pedidos</h1>
-
-        <!-- Botón para mostrar/ocultar filtros -->
-        <button type="button" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
-            <i class="fa-solid fa-filter"></i> Filtros
-        </button>
-    </div>
-
-    <!-- Filtros expandibles -->
-    <div class="collapse {{ request()->hasAny(['status', 'search', 'date_from', 'date_to']) ? 'show' : '' }} mb-4" id="filterCollapse">
-        <div class="card">
-            <div class="card-body">
-                <form method="GET" class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Estado</label>
-                        <select name="status" class="form-select">
-                            <option value="">Todos los estados</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pendiente</option>
-                            <option value="payment_uploaded" {{ request('status') == 'payment_uploaded' ? 'selected' : '' }}>Pago Subido</option>
-                            <option value="verified" {{ request('status') == 'verified' ? 'selected' : '' }}>Verificado</option>
-                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completado</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rechazado</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Buscar</label>
-                        <input type="text" name="search" class="form-control" placeholder="Pedido, cliente o email..." value="{{ request('search') }}">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label">Desde</label>
-                        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label">Hasta</label>
-                        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
-                    </div>
-
-                    <div class="col-md-2 d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary flex-fill">
-                            <i class="fa-solid fa-search"></i> Buscar
-                        </button>
-                        @if(request()->hasAny(['status', 'search', 'date_from', 'date_to']))
-                        <a href="{{ route('portal.admin.orders.index') }}" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-times"></i>
-                        </a>
-                        @endif
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Estadísticas -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="text-muted">Total</h6>
-                    <h3>{{ $stats['total'] }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="text-muted">Pendientes</h6>
-                    <h3 class="text-warning">{{ $stats['pending'] }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="text-muted">Con Pago</h6>
-                    <h3 class="text-info">{{ $stats['payment_uploaded'] }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="text-muted">Verificados</h6>
-                    <h3 class="text-success">{{ $stats['verified'] }}</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabla de pedidos -->
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Pedido</th>
-                            <th>Cliente</th>
-                            <th>Plan</th>
-                            <th>Mascotas</th>
-                            <th>Total</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($orders as $order)
-                        <tr>
-                            <td><strong>{{ $order->order_number }}</strong></td>
-                            <td>@extends('layouts.app')
-
-@section('title', 'Gestión de Pedidos - Admin')
-
-@section('content')
 <div class="admin-orders-modern">
     <div class="container-fluid py-4">
         <!-- Header -->
@@ -338,18 +219,18 @@
                             <td>
                                 <div class="customer-info">
                                     <div class="customer-avatar">
-                                        {{ strtoupper(substr($order->user->name, 0, 1)) }}
+                                        {{ strtoupper(substr($order->user->name ?? 'U', 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div class="customer-name">{{ $order->user->name }}</div>
-                                        <div class="customer-email">{{ $order->user->email }}</div>
+                                        <div class="customer-name">{{ $order->user->name ?? 'N/A' }}</div>
+                                        <div class="customer-email">{{ $order->user->email ?? 'N/A' }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 <div class="plan-info">
                                     <i class="fa-solid fa-tag"></i>
-                                    {{ $order->plan->name }}
+                                    {{ $order->plan->name ?? 'N/A' }}
                                 </div>
                             </td>
                             <td class="text-center">
@@ -430,6 +311,7 @@
     --admin-warning: #F59E0B;
     --admin-danger: #EF4444;
     --admin-info: #3B82F6;
+    --admin-secondary: #6B7280;
     --admin-text: #1F2937;
     --admin-text-light: #6B7280;
     --admin-border: #E5E7EB;
@@ -662,7 +544,7 @@
 }
 
 .stat-pending::before {
-    background: linear-gradient(180deg, var(--admin-warning), #F97316);
+    background: linear-gradient(180deg, var(--admin-secondary), #4B5563);
 }
 
 .stat-payment::before {
@@ -670,7 +552,7 @@
 }
 
 .stat-verified::before {
-    background: linear-gradient(180deg, var(--admin-success), #059669);
+    background: linear-gradient(180deg, var(--admin-warning), #F97316);
 }
 
 .stat-icon {
@@ -686,7 +568,7 @@
 }
 
 .stat-pending .stat-icon {
-    color: var(--admin-warning);
+    color: var(--admin-secondary);
 }
 
 .stat-payment .stat-icon {
@@ -694,7 +576,7 @@
 }
 
 .stat-verified .stat-icon {
-    color: var(--admin-success);
+    color: var(--admin-warning);
 }
 
 .stat-content {
@@ -820,7 +702,7 @@
 
 .table-modern {
     width: 100%;
-    min-width: 1250px;
+    min-width: 900px;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: auto;
@@ -840,20 +722,6 @@
     border-bottom: 2px solid var(--admin-border);
     white-space: nowrap;
 }
-
-/* Column widths */
-.table-modern thead th:nth-child(1) { min-width: 150px; } /* Pedido */
-.table-modern thead th:nth-child(2) { min-width: 200px; } /* Cliente */
-.table-modern thead th:nth-child(3) { min-width: 160px; } /* Plan */
-.table-modern thead th:nth-child(4) { min-width: 100px; } /* Mascotas */
-.table-modern thead th:nth-child(5) { min-width: 120px; } /* Total */
-.table-modern thead th:nth-child(6) { min-width: 140px; } /* Estado */
-.table-modern thead th:nth-child(7) { min-width: 140px; } /* Fecha */
-.table-modern thead th:nth-child(8) { 
-    min-width: 140px; 
-    width: 140px;
-    text-align: center;
-} /* Acciones */
 
 .table-modern thead th.text-center {
     text-align: center;
@@ -894,15 +762,8 @@
     vertical-align: middle;
 }
 
-/* Ensure actions column doesn't shrink */
-.table-row-modern td:last-child {
-    min-width: 140px;
-    width: 140px;
-    white-space: nowrap;
-    text-align: center;
-}
-
-.table-row-modern td:nth-child(4) {
+.table-row-modern td:nth-child(4),
+.table-row-modern td:nth-child(8) {
     text-align: center;
 }
 
@@ -935,6 +796,7 @@
     justify-content: center;
     font-weight: 700;
     font-size: 16px;
+    flex-shrink: 0;
 }
 
 .customer-name {
@@ -984,62 +846,72 @@
     font-size: 14px;
 }
 
-/* Status Badges */
+/* Status Badges with Colors */
 .badge-modern {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
 }
 
-.badge-modern.bg-warning {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--admin-warning);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+.badge-modern.bg-secondary {
+    background: rgba(107, 114, 128, 0.15);
+    color: #374151;
+    border: 1px solid rgba(107, 114, 128, 0.3);
 }
 
 .badge-modern.bg-info {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--admin-info);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.15);
+    color: #1E40AF;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-modern.bg-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #B45309;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .badge-modern.bg-success {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--admin-success);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.15);
+    color: #065F46;
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .badge-modern.bg-danger {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--admin-danger);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.15);
+    color: #991B1B;
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.badge-modern.bg-secondary {
-    background: rgba(107, 114, 128, 0.1);
-    color: var(--admin-text-light);
-    border: 1px solid rgba(107, 114, 128, 0.2);
+.badge-modern.bg-dark {
+    background: rgba(31, 41, 55, 0.15);
+    color: #1F2937;
+    border: 1px solid rgba(31, 41, 55, 0.3);
 }
 
 .date-info {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .date-info i {
-    color: var(--admin-primary);
+    display: none;
+}
+
+.date-info span {
+    font-weight: 600;
+    color: var(--admin-text);
 }
 
 .date-info small {
     color: var(--admin-text-light);
     font-size: 12px;
-    margin-left: 4px;
 }
 
 .btn-view-modern {
@@ -1054,6 +926,7 @@
     font-weight: 600;
     text-decoration: none;
     transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
 .btn-view-modern:hover {
@@ -1114,8 +987,7 @@
     }
 
     .header-title {
-        flex-direction: column;
-        text-align: center;
+        text-align: left;
     }
 
     .header-title h1 {
@@ -1135,7 +1007,7 @@
     }
 
     .table-responsive-modern {
-        overflow-x: auto;
+        overflow-x: scroll;
         -webkit-overflow-scrolling: touch;
         position: relative;
     }
@@ -1153,12 +1025,12 @@
     }
 
     .table-modern {
-        min-width: 1250px;
+        min-width: 900px;
     }
 
     .table-row-modern td {
         font-size: 13px;
-        padding: 14px 16px;
+        padding: 14px 12px;
     }
 
     .table-header {
@@ -1200,43 +1072,17 @@
     .stat-value {
         font-size: 28px;
     }
+
+    .customer-info {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .customer-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
 }
 </style>
-@endsection
-                                {{ $order->user->name }}<br>
-                                <small class="text-muted">{{ $order->user->email }}</small>
-                            </td>
-                            <td>{{ $order->plan->name }}</td>
-                            <td class="text-center">{{ $order->pets_quantity }}</td>
-                            <td><strong>₡{{ number_format($order->total, 0, ',', '.') }}</strong></td>
-                            <td>
-                                <span class="badge {{ $order->status_badge_class }}">
-                                    {{ $order->status_label }}
-                                </span>
-                            </td>
-                            <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
-                            <td>
-                                <a href="{{ route('portal.admin.orders.show', $order) }}" class="btn btn-sm btn-primary">
-                                    Ver Detalle
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                No hay pedidos para mostrar
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Paginación -->
-            <div class="mt-3">
-                {{ $orders->links() }}
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
