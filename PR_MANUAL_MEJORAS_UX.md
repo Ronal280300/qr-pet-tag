@@ -10,28 +10,35 @@ Este PR incluye mejoras visuales y de funcionalidad en el sistema:
 4. ✅ Zona horaria configurada para Costa Rica
 5. ✅ Mensajes traducidos a español
 6. ✅ Encoding UTF-8 verificado en correos
+7. ✅ **FIX CRÍTICO:** Error de Settings corregido (columnas faltantes)
 
 ---
 
 ## 🚀 Cómo Aplicar en Producción
 
-### Opción 1: Merge desde GitHub (RECOMENDADO)
+### Opción 1: Merge desde Git (RECOMENDADO)
 
 ```bash
 # En tu servidor de producción
-cd /ruta/a/qr-pet-tag
+cd /home2/safewors/public_html/qr-pet-tag
 
 # Hacer pull de los cambios
 git fetch origin
 git merge origin/claude/project-analysis-review-01DBbiByxfc7fKoZKWkpxCce
 
+# ⚠️ IMPORTANTE: Ejecutar migración para agregar columnas faltantes
+php artisan migrate
+
+# Agregar timezone al .env
+nano .env
+# Agregar: APP_TIMEZONE=America/Costa_Rica
+# Guardar con Ctrl+X, Y, Enter
+
 # Limpiar caché de Laravel
 php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
-
-# Si usas npm/vite
-npm run build
+php artisan route:clear
 ```
 
 ### Opción 2: Aplicar Cambios Manualmente
@@ -229,6 +236,50 @@ a:
 
 ---
 
+### 8. **FIX CRÍTICO: Error de Settings (Columnas Faltantes)**
+
+⚠️ **Este fix es AUTOMÁTICO** si usas `git merge` + `php artisan migrate`
+
+**Problema:**
+En producción el módulo de settings daba error:
+```
+Column not found: 1054 Unknown column 'order' in 'order clause'
+```
+
+**Causa:**
+La tabla `settings` en producción no tenía las columnas `order` y `label`.
+
+**Solución incluida en este PR:**
+
+**a) Nueva migración agregada:**
+- `database/migrations/2025_11_15_200000_add_order_and_label_to_settings_table.php`
+- Esta migración agrega las columnas faltantes automáticamente
+
+**b) Modelo Setting mejorado:**
+- `app/Models/Setting.php`
+- Ahora verifica si existen las columnas antes de usarlas
+- No fallará aunque las columnas no existan
+
+**Aplicación:**
+```bash
+# Si usaste git merge, simplemente ejecuta:
+php artisan migrate
+
+# Deberías ver:
+# Running: 2025_11_15_200000_add_order_and_label_to_settings_table
+# Migrated: 2025_11_15_200000_add_order_and_label_to_settings_table
+```
+
+**Verificar:**
+```bash
+# Ir a Settings
+https://qr-pet-tag.safeworsolutions.com/portal/admin/settings
+
+# Debe cargar sin errores
+```
+
+---
+
 ## ✅ Verificación Post-Aplicación
 
 Después de aplicar los cambios, verifica:
@@ -260,6 +311,11 @@ Después de aplicar los cambios, verifica:
 5. **Idioma:**
    - Visitar páginas de login/register
    - Verificar que todo esté en español
+
+6. **Settings (FIX CRÍTICO):**
+   - Ir a https://qr-pet-tag.safeworsolutions.com/portal/admin/settings
+   - Debe cargar sin errores
+   - Verificar que puedes cambiar configuraciones
 
 ---
 
