@@ -16,6 +16,13 @@
     </div>
   </div>
 
+
+          {{-- Correo Electrónico --}}
+          <div class="mb-3">
+            <label class="form-label">Correo Electrónico</label>
+            <input type="email" name="email" class="form-control" value="{{ old('email', auth()->user()->email) }}" required>
+          </div>
+
   {{-- Grid de secciones --}}
   <div class="profile-sections">
     
@@ -63,6 +70,7 @@
             placeholder="tu@email.com"
           >
         </div>
+
 
         {{-- Teléfono (código + local) --}}
         @php

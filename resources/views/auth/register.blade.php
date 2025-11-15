@@ -936,9 +936,9 @@
           @error('name')<span class="invalid-feedback"><strong>{{ $message }}</strong></span>@enderror
         </div>
 
-        <!-- Email -->
+        <!-- Correo Electrónico -->
         <div class="input-group">
-          <label for="email" class="input-label">Email</label>
+          <label for="email" class="input-label">Correo Electrónico</label>
           <div class="input-wrapper">
             <svg class="input-icon" viewBox="0 0 24 24" fill="none">
               <path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 6.75A2.25 2.25 0 0 1 5.25 4.5h13.5A2.25 2.25 0 0 1 21 6.75v10.5A2.25 2.25 0 0 1 18.75 19.5H5.25A2.25 2.25 0 0 1 3 17.25V6.75Z" />

@@ -169,13 +169,13 @@ class Order extends Model
     public function getStatusBadgeClassAttribute(): string
     {
         return match($this->status) {
-            'pending' => 'bg-gray-500',
-            'payment_uploaded' => 'bg-yellow-500',
-            'verified' => 'bg-blue-500',
-            'rejected' => 'bg-red-500',
-            'completed' => 'bg-green-500',
-            'expired' => 'bg-gray-400',
-            default => 'bg-gray-500',
+            'pending' => 'bg-secondary',
+            'payment_uploaded' => 'bg-info',
+            'verified' => 'bg-warning',
+            'rejected' => 'bg-danger',
+            'completed' => 'bg-success',
+            'expired' => 'bg-dark',
+            default => 'bg-secondary',
         };
     }
 }

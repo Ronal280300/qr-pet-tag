@@ -219,18 +219,18 @@
                             <td>
                                 <div class="customer-info">
                                     <div class="customer-avatar">
-                                        {{ strtoupper(substr($order->user->name, 0, 1)) }}
+                                        {{ strtoupper(substr($order->user->name ?? 'U', 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div class="customer-name">{{ $order->user->name }}</div>
-                                        <div class="customer-email">{{ $order->user->email }}</div>
+                                        <div class="customer-name">{{ $order->user->name ?? 'N/A' }}</div>
+                                        <div class="customer-email">{{ $order->user->email ?? 'N/A' }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 <div class="plan-info">
                                     <i class="fa-solid fa-tag"></i>
-                                    {{ $order->plan->name }}
+                                    {{ $order->plan->name ?? 'N/A' }}
                                 </div>
                             </td>
                             <td class="text-center">
@@ -311,6 +311,7 @@
     --admin-warning: #F59E0B;
     --admin-danger: #EF4444;
     --admin-info: #3B82F6;
+    --admin-secondary: #6B7280;
     --admin-text: #1F2937;
     --admin-text-light: #6B7280;
     --admin-border: #E5E7EB;
@@ -543,7 +544,7 @@
 }
 
 .stat-pending::before {
-    background: linear-gradient(180deg, var(--admin-warning), #F97316);
+    background: linear-gradient(180deg, var(--admin-secondary), #4B5563);
 }
 
 .stat-payment::before {
@@ -551,7 +552,7 @@
 }
 
 .stat-verified::before {
-    background: linear-gradient(180deg, var(--admin-success), #059669);
+    background: linear-gradient(180deg, var(--admin-warning), #F97316);
 }
 
 .stat-icon {
@@ -567,7 +568,7 @@
 }
 
 .stat-pending .stat-icon {
-    color: var(--admin-warning);
+    color: var(--admin-secondary);
 }
 
 .stat-payment .stat-icon {
@@ -575,7 +576,7 @@
 }
 
 .stat-verified .stat-icon {
-    color: var(--admin-success);
+    color: var(--admin-warning);
 }
 
 .stat-content {
@@ -701,7 +702,7 @@
 
 .table-modern {
     width: 100%;
-    min-width: 1250px;
+    min-width: 900px;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: auto;
@@ -721,20 +722,6 @@
     border-bottom: 2px solid var(--admin-border);
     white-space: nowrap;
 }
-
-/* Column widths */
-.table-modern thead th:nth-child(1) { min-width: 150px; } /* Pedido */
-.table-modern thead th:nth-child(2) { min-width: 200px; } /* Cliente */
-.table-modern thead th:nth-child(3) { min-width: 160px; } /* Plan */
-.table-modern thead th:nth-child(4) { min-width: 100px; } /* Mascotas */
-.table-modern thead th:nth-child(5) { min-width: 120px; } /* Total */
-.table-modern thead th:nth-child(6) { min-width: 140px; } /* Estado */
-.table-modern thead th:nth-child(7) { min-width: 140px; } /* Fecha */
-.table-modern thead th:nth-child(8) { 
-    min-width: 140px; 
-    width: 140px;
-    text-align: center;
-} /* Acciones */
 
 .table-modern thead th.text-center {
     text-align: center;
@@ -775,15 +762,8 @@
     vertical-align: middle;
 }
 
-/* Ensure actions column doesn't shrink */
-.table-row-modern td:last-child {
-    min-width: 140px;
-    width: 140px;
-    white-space: nowrap;
-    text-align: center;
-}
-
-.table-row-modern td:nth-child(4) {
+.table-row-modern td:nth-child(4),
+.table-row-modern td:nth-child(8) {
     text-align: center;
 }
 
@@ -816,6 +796,7 @@
     justify-content: center;
     font-weight: 700;
     font-size: 16px;
+    flex-shrink: 0;
 }
 
 .customer-name {
@@ -865,62 +846,72 @@
     font-size: 14px;
 }
 
-/* Status Badges */
+/* Status Badges with Colors */
 .badge-modern {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
 }
 
-.badge-modern.bg-warning {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--admin-warning);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+.badge-modern.bg-secondary {
+    background: rgba(107, 114, 128, 0.15);
+    color: #374151;
+    border: 1px solid rgba(107, 114, 128, 0.3);
 }
 
 .badge-modern.bg-info {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--admin-info);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.15);
+    color: #1E40AF;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-modern.bg-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #B45309;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .badge-modern.bg-success {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--admin-success);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.15);
+    color: #065F46;
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .badge-modern.bg-danger {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--admin-danger);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.15);
+    color: #991B1B;
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.badge-modern.bg-secondary {
-    background: rgba(107, 114, 128, 0.1);
-    color: var(--admin-text-light);
-    border: 1px solid rgba(107, 114, 128, 0.2);
+.badge-modern.bg-dark {
+    background: rgba(31, 41, 55, 0.15);
+    color: #1F2937;
+    border: 1px solid rgba(31, 41, 55, 0.3);
 }
 
 .date-info {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .date-info i {
-    color: var(--admin-primary);
+    display: none;
+}
+
+.date-info span {
+    font-weight: 600;
+    color: var(--admin-text);
 }
 
 .date-info small {
     color: var(--admin-text-light);
     font-size: 12px;
-    margin-left: 4px;
 }
 
 .btn-view-modern {
@@ -935,6 +926,7 @@
     font-weight: 600;
     text-decoration: none;
     transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
 .btn-view-modern:hover {
@@ -995,8 +987,7 @@
     }
 
     .header-title {
-        flex-direction: column;
-        text-align: center;
+        text-align: left;
     }
 
     .header-title h1 {
@@ -1016,7 +1007,7 @@
     }
 
     .table-responsive-modern {
-        overflow-x: auto;
+        overflow-x: scroll;
         -webkit-overflow-scrolling: touch;
         position: relative;
     }
@@ -1034,12 +1025,12 @@
     }
 
     .table-modern {
-        min-width: 1250px;
+        min-width: 900px;
     }
 
     .table-row-modern td {
         font-size: 13px;
-        padding: 14px 16px;
+        padding: 14px 12px;
     }
 
     .table-header {
@@ -1080,6 +1071,17 @@
 
     .stat-value {
         font-size: 28px;
+    }
+
+    .customer-info {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .customer-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
     }
 }
 </style>

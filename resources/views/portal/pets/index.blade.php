@@ -3,6 +3,41 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/portal.css') }}">
 <style>
+
+  /* ===== Animaciones globales ===== */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
   /* ===== Variables y reset ===== */
   :root {
     --primary: #2563eb;
@@ -45,6 +80,7 @@
     gap: 1.5rem;
     margin-bottom: 2rem;
   }
+
 
   .header-title h1 {
     font-size: 2rem;

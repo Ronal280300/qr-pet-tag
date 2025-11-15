@@ -17,17 +17,23 @@
         </div>
       </h1>
     </div>
-    <div class="col-auto">
+    <div class="col-auto d-flex gap-2">
       @php
-        $unreadCount = $notifications->where('is_read', false)->count();
+        $unreadNotifications = $notifications->where('is_read', false);
+        $unreadCount = $unreadNotifications->count();
       @endphp
+
+      {{-- Botón de acciones masivas --}}
+      <div class="btn-group" id="bulkActionsGroup" style="display: none;">
+        <button type="button" class="btn btn-success btn-sm shadow-sm" onclick="markSelectedAsRead()">
+          <i class="fas fa-check-double me-1"></i>Marcar seleccionadas como leídas
+        </button>
+      </div>
+
       @if($unreadCount > 0)
-        <form method="POST" action="{{ route('portal.admin.notifications.readAll') }}" style="display: inline;">
-          @csrf
-          <button type="submit" class="btn btn-primary btn-sm shadow-sm" onclick="return confirm('¿Marcar todas las notificaciones como leídas?')">
-            <i class="fas fa-check-double me-1"></i>Marcar todas como leídas ({{ $unreadCount }})
-          </button>
-        </form>
+        <button type="button" class="btn btn-primary btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#confirmReadAllModal">
+          <i class="fas fa-check-double me-1"></i>Marcar todas como leídas ({{ $unreadCount }})
+        </button>
       @endif
     </div>
   </div>
@@ -98,65 +104,82 @@
       <p class="empty-state-text">Cuando recibas notificaciones, aparecerán aquí</p>
     </div>
   @else
-    <div class="notifications-container">
-      @foreach($notifications as $notification)
-        @php
-          $typeClass = match($notification->type) {
-            'new_order' => 'notification-new-order',
-            'payment_uploaded' => 'notification-payment',
-            default => 'notification-default'
-          };
-        @endphp
+    {{-- Sección: Notificaciones Nuevas --}}
+    @if($unreadNotifications->count() > 0)
+      <div class="section-header mb-3">
+        <h5 class="section-title">
+          <i class="fas fa-envelope-open-text me-2"></i>Nuevas
+          <span class="badge bg-warning text-dark ms-2">{{ $unreadNotifications->count() }}</span>
+        </h5>
+        @if($unreadNotifications->count() > 1)
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="selectAllNew" onchange="toggleAllCheckboxes('new', this.checked)">
+            <label class="form-check-label" for="selectAllNew">
+              Seleccionar todas
+            </label>
+          </div>
+        @endif
+      </div>
 
-        <div class="notification-card {{ $typeClass }} {{ $notification->is_read ? 'notification-read' : 'notification-unread' }}" data-id="{{ $notification->id }}">
-          <div class="notification-icon-wrapper">
-            <div class="notification-icon">
-              <i class="fas {{ $notification->icon ?? 'fa-bell' }}"></i>
+      <div class="notifications-container mb-5">
+        @foreach($unreadNotifications as $notification)
+          @php
+            $typeClass = match($notification->type) {
+              'new_order' => 'notification-new-order',
+              'payment_uploaded' => 'notification-payment',
+              default => 'notification-default'
+            };
+          @endphp
+
+          <div class="notification-card {{ $typeClass }} notification-unread" data-id="{{ $notification->id }}">
+            <div class="notification-checkbox">
+              <input type="checkbox" class="form-check-input notification-select new-notification"
+                     value="{{ $notification->id }}" onchange="updateBulkActions()">
             </div>
-            @if(!$notification->is_read)
+
+            <div class="notification-icon-wrapper">
+              <div class="notification-icon">
+                <i class="fas {{ $notification->icon ?? 'fa-bell' }}"></i>
+              </div>
               <div class="notification-pulse"></div>
-            @endif
-          </div>
+            </div>
 
-          <div class="notification-content">
-            <div class="notification-header">
-              <h6 class="notification-title">{{ $notification->title }}</h6>
-              @if(!$notification->is_read)
+            <div class="notification-content">
+              <div class="notification-header">
+                <h6 class="notification-title">{{ $notification->title }}</h6>
                 <span class="badge-new">Nuevo</span>
-              @endif
+              </div>
+
+              <p class="notification-message">{{ $notification->message }}</p>
+
+              <div class="notification-meta">
+                <span class="notification-time">
+                  <i class="far fa-clock me-1"></i>
+                  {{ $notification->created_at->diffForHumans() }}
+                </span>
+                @if($notification->order)
+                  <span class="notification-order">
+                    <i class="fas fa-shopping-cart me-1"></i>
+                    Orden #{{ $notification->order->order_number }}
+                  </span>
+                @endif
+                @if($notification->user)
+                  <span class="notification-user">
+                    <i class="fas fa-user me-1"></i>
+                    {{ $notification->user->name }}
+                  </span>
+                @endif
+              </div>
             </div>
 
-            <p class="notification-message">{{ $notification->message }}</p>
-
-            <div class="notification-meta">
-              <span class="notification-time">
-                <i class="far fa-clock me-1"></i>
-                {{ $notification->created_at->diffForHumans() }}
-              </span>
-              @if($notification->order)
-                <span class="notification-order">
-                  <i class="fas fa-shopping-cart me-1"></i>
-                  Orden #{{ $notification->order->order_number }}
-                </span>
+            <div class="notification-actions">
+              @if($notification->url)
+                <a href="{{ $notification->url }}" class="btn-action btn-action-primary" title="Ver detalles">
+                  <i class="fas fa-external-link-alt"></i>
+                  <span>Ver</span>
+                </a>
               @endif
-              @if($notification->user)
-                <span class="notification-user">
-                  <i class="fas fa-user me-1"></i>
-                  {{ $notification->user->name }}
-                </span>
-              @endif
-            </div>
-          </div>
 
-          <div class="notification-actions">
-            @if($notification->url)
-              <a href="{{ $notification->url }}" class="btn-action btn-action-primary" title="Ver detalles">
-                <i class="fas fa-external-link-alt"></i>
-                <span>Ver</span>
-              </a>
-            @endif
-
-            @if(!$notification->is_read)
               <form method="POST" action="{{ route('portal.admin.notifications.read', $notification) }}" class="d-inline">
                 @csrf
                 <button type="submit" class="btn-action btn-action-success" title="Marcar como leída">
@@ -164,15 +187,85 @@
                   <span>Marcar leída</span>
                 </button>
               </form>
-            @else
+            </div>
+          </div>
+        @endforeach
+      </div>
+    @endif
+
+    {{-- Sección: Historial (Notificaciones Leídas) --}}
+    @php
+      $readNotifications = $notifications->where('is_read', true);
+    @endphp
+
+    @if($readNotifications->count() > 0)
+      <div class="section-header mb-3 mt-5">
+        <h5 class="section-title">
+          <i class="fas fa-history me-2"></i>Historial
+          <span class="badge bg-secondary ms-2">{{ $readNotifications->count() }}</span>
+        </h5>
+      </div>
+
+      <div class="notifications-container">
+        @foreach($readNotifications as $notification)
+          @php
+            $typeClass = match($notification->type) {
+              'new_order' => 'notification-new-order',
+              'payment_uploaded' => 'notification-payment',
+              default => 'notification-default'
+            };
+          @endphp
+
+          <div class="notification-card {{ $typeClass }} notification-read" data-id="{{ $notification->id }}">
+            <div class="notification-icon-wrapper">
+              <div class="notification-icon notification-icon-muted">
+                <i class="fas {{ $notification->icon ?? 'fa-bell' }}"></i>
+              </div>
+            </div>
+
+            <div class="notification-content">
+              <div class="notification-header">
+                <h6 class="notification-title text-muted">{{ $notification->title }}</h6>
+              </div>
+
+              <p class="notification-message text-muted">{{ $notification->message }}</p>
+
+              <div class="notification-meta">
+                <span class="notification-time">
+                  <i class="far fa-clock me-1"></i>
+                  {{ $notification->created_at->diffForHumans() }}
+                </span>
+                @if($notification->order)
+                  <span class="notification-order">
+                    <i class="fas fa-shopping-cart me-1"></i>
+                    Orden #{{ $notification->order->order_number }}
+                  </span>
+                @endif
+                @if($notification->user)
+                  <span class="notification-user">
+                    <i class="fas fa-user me-1"></i>
+                    {{ $notification->user->name }}
+                  </span>
+                @endif
+              </div>
+            </div>
+
+            <div class="notification-actions">
+              @if($notification->url)
+                <a href="{{ $notification->url }}" class="btn-action btn-action-primary" title="Ver detalles">
+                  <i class="fas fa-external-link-alt"></i>
+                  <span>Ver</span>
+                </a>
+              @endif
+
               <span class="text-muted small">
                 <i class="fas fa-check-double"></i> Leída
               </span>
-            @endif
+            </div>
           </div>
-        </div>
-      @endforeach
-    </div>
+        @endforeach
+      </div>
+    @endif
 
     {{-- Paginación --}}
     <div class="mt-4">
@@ -181,7 +274,109 @@
   @endif
 </div>
 
+{{-- Modal de confirmación para marcar todas como leídas --}}
+<div class="modal fade" id="confirmReadAllModal" tabindex="-1" aria-labelledby="confirmReadAllModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmReadAllModalLabel">
+          <i class="fas fa-check-double me-2"></i>Confirmar acción
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">¿Estás seguro de que deseas marcar todas las notificaciones como leídas?</p>
+        <p class="text-muted small mb-0 mt-2">Se marcarán {{ $unreadCount }} notificaciones como leídas.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancelar
+        </button>
+        <form method="POST" action="{{ route('portal.admin.notifications.readAll') }}" class="d-inline">
+          @csrf
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-check-double me-1"></i>Sí, marcar todas
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Actualizar visibilidad del botón de acciones masivas
+function updateBulkActions() {
+  const selectedCheckboxes = document.querySelectorAll('.notification-select:checked');
+  const bulkActionsGroup = document.getElementById('bulkActionsGroup');
+
+  if (selectedCheckboxes.length > 0) {
+    bulkActionsGroup.style.display = 'block';
+  } else {
+    bulkActionsGroup.style.display = 'none';
+  }
+}
+
+// Seleccionar/deseleccionar todas las notificaciones de una sección
+function toggleAllCheckboxes(section, checked) {
+  const checkboxes = document.querySelectorAll(`.${section}-notification`);
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = checked;
+  });
+  updateBulkActions();
+}
+
+// Marcar notificaciones seleccionadas como leídas
+function markSelectedAsRead() {
+  const selectedCheckboxes = document.querySelectorAll('.notification-select:checked');
+  const notificationIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+  if (notificationIds.length === 0) {
+    return;
+  }
+
+  // Crear formulario y enviarlo
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '{{ route("portal.admin.notifications.readAll") }}';
+
+  // Token CSRF
+  const csrfInput = document.createElement('input');
+  csrfInput.type = 'hidden';
+  csrfInput.name = '_token';
+  csrfInput.value = '{{ csrf_token() }}';
+  form.appendChild(csrfInput);
+
+  // IDs de notificaciones
+  const idsInput = document.createElement('input');
+  idsInput.type = 'hidden';
+  idsInput.name = 'notification_ids';
+  idsInput.value = JSON.stringify(notificationIds);
+  form.appendChild(idsInput);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+</script>
+
 <style>
+/* Section Headers */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
 /* Header Icon */
 .notification-icon-header {
   width: 60px;
@@ -310,6 +505,35 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+}
+
+/* Notification Checkbox */
+.notification-checkbox {
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.notification-checkbox .form-check-input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  border: 2px solid #d1d5db;
+  transition: all 0.2s ease;
+}
+
+.notification-checkbox .form-check-input:checked {
+  background-color: #115DFC;
+  border-color: #115DFC;
+}
+
+.notification-checkbox .form-check-input:hover {
+  border-color: #115DFC;
+}
+
+/* Icon Muted for Read Notifications */
+.notification-icon-muted {
+  opacity: 0.6;
+  filter: grayscale(40%);
 }
 
 .notification-card::before {
