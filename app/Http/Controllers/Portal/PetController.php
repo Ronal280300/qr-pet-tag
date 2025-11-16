@@ -305,11 +305,15 @@ class PetController extends Controller
 
     public function generateQR(Pet $pet, PetQrService $qrService)
     {
-        $qr = QrCodeModel::firstOrCreate(
-            ['pet_id' => $pet->id],
-            ['slug' => null, 'image' => null, 'activation_code' => null]
-        );
+        $qr = QrCodeModel::firstOrNew(['pet_id' => $pet->id]);
 
+        // Si el QR ya existe (tiene slug), REGENERARLO completamente
+        if ($qr->exists && !blank($qr->slug)) {
+            $qrService->regenerateQR($qr, $pet);
+            return back()->with('status', 'QR regenerado correctamente. Nuevo código único creado.');
+        }
+
+        // Si no existe o no tiene slug, generar por primera vez
         $qrService->ensureSlugAndImage($qr, $pet);
 
         return back()->with('status', 'QR generado correctamente.');

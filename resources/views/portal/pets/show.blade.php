@@ -266,11 +266,11 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 
         <div class="qr-actions">
           @if($isAdmin)
-          <form action="{{ route('portal.pets.generate-qr',$pet) }}" method="POST" class="no-swipe" data-confirm="¿Quieres generar o regenerar el QR de esta mascota?">
+          <form action="{{ route('portal.pets.generate-qr',$pet) }}" method="POST" class="no-swipe" data-confirm="{{ $qr && !blank($qr->slug) ? '¿Regenerar el QR? Se creará un nuevo código único y el anterior dejará de funcionar.' : '¿Generar el QR de esta mascota?' }}">
             @csrf
             <button class="btn-qr btn-qr-primary">
-              <i class="fa-solid fa-bolt"></i>
-              <span>Generar QR</span>
+              <i class="fa-solid fa-{{ $qr && !blank($qr->slug) ? 'rotate' : 'bolt' }}"></i>
+              <span>{{ $qr && !blank($qr->slug) ? 'Regenerar QR' : 'Generar QR' }}</span>
             </button>
           </form>
           @endif
