@@ -5,8 +5,8 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Spatie\Image\Image;
-use Spatie\Image\Enums\Fit;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PetPhotoOptimizationService
 {
@@ -47,6 +47,9 @@ class PetPhotoOptimizationService
 
         $paths = [];
 
+        // Crear ImageManager con driver GD
+        $manager = new ImageManager(new Driver());
+
         // Generar cada tamaño
         foreach (self::SIZES as $sizeName => $config) {
             $filename = "{$sizeName}_{$uniqueName}.webp";
@@ -59,12 +62,15 @@ class PetPhotoOptimizationService
                 mkdir($directory, 0755, true);
             }
 
-            // Procesar imagen con Spatie
-            Image::load($file->getRealPath())
-                ->fit(Fit::Contain, $config['width'], $config['height'])
-                ->format('webp')
-                ->quality($config['quality'])
-                ->save($absolutePath);
+            // Procesar imagen con Intervention Image v3
+            $image = $manager->read($file->getRealPath());
+
+            // Redimensionar manteniendo aspecto (cover = recorta si es necesario)
+            $image->cover($config['width'], $config['height']);
+
+            // Convertir a WebP y guardar
+            $encoded = $image->toWebp($config['quality']);
+            file_put_contents($absolutePath, $encoded);
 
             $paths[$sizeName] = $fullPath;
         }
