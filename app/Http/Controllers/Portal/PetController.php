@@ -8,6 +8,8 @@ use App\Models\Reward;
 use App\Models\QrCode as QrCodeModel;
 use App\Models\PetPhoto;
 use App\Services\PetQrService;
+use App\Services\PetPhotoOptimizationService;
+use App\Jobs\OptimizePetPhotoJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -42,7 +44,7 @@ class PetController extends Controller
         return view('portal.pets.create');
     }
 
-    public function store(Request $request, PetQrService $qrService)
+    public function store(Request $request, PetQrService $qrService, PetPhotoOptimizationService $photoService)
     {
         $data = $request->validate([
             'name'               => ['required', 'string', 'max:120'],
@@ -50,12 +52,12 @@ class PetController extends Controller
             'zone'               => ['nullable', 'string', 'max:255'],
             'age'                => ['nullable', 'integer', 'min:0', 'max:50'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
-            'photo'              => ['nullable', 'image', 'max:4096'],
-            'photos.*'           => ['nullable', 'image', 'max:6144'],
+            'photo'              => ['nullable', 'image', 'max:10240'],
+            'photos.*'           => ['nullable', 'image', 'max:10240'],
 
             // NUEVOS CAMPOS
             'sex'            => 'nullable|in:male,female,unknown',
-            
+
             // CONTACTO DE EMERGENCIA
             'has_emergency_contact'    => 'nullable|boolean',
             'emergency_contact_name'   => 'nullable|string|max:120',
@@ -68,32 +70,46 @@ class PetController extends Controller
         $data['user_id'] = null;
         $data['is_lost'] = false;
 
-        DB::transaction(function () use ($request, $data, $qrService, &$pet) {
+        DB::transaction(function () use ($request, $data, $qrService, $photoService, &$pet) {
             if ($request->hasFile('photo')) {
-                $data['photo'] = $request->file('photo')->store('pets', 'public');
+                // OPTIMIZADO: Solo genera medium (rápido), thumb en background
+                $data['photo'] = $photoService->optimizeQuick($request->file('photo'), 'pets');
             }
 
             $pet = \App\Models\Pet::create($data);
 
-            // Fotos múltiples
+            // Fotos múltiples (MODO RÁPIDO)
             $sort = 1;
             foreach ($request->file('photos', []) as $file) {
                 if (!$file || !$file->isValid()) continue;
-                $path = $file->store('pets/photos', 'public');
-                \App\Models\PetPhoto::create([
+
+                // Solo medium primero
+                $mediumPath = $photoService->optimizeQuick($file, 'pets/photos');
+
+                $petPhoto = \App\Models\PetPhoto::create([
                     'pet_id'     => $pet->id,
-                    'path'       => $path,
+                    'path'       => $mediumPath,
                     'sort_order' => $sort++,
                 ]);
+
+                // Generar thumbnail en background
+                dispatch(function () use ($photoService, $mediumPath) {
+                    $photoService->generateThumb($mediumPath);
+                });
             }
 
             // Si no subieron fotos múltiples pero sí 'photo' legacy, la usamos como primera
             if ($sort === 1 && !empty($data['photo'])) {
-                \App\Models\PetPhoto::create([
+                $petPhoto = \App\Models\PetPhoto::create([
                     'pet_id'     => $pet->id,
                     'path'       => $data['photo'],
                     'sort_order' => $sort++,
                 ]);
+
+                // Generar thumbnail en background
+                dispatch(function () use ($photoService, $data) {
+                    $photoService->generateThumb($data['photo']);
+                });
             }
 
             // Generar/asegurar slug + imagen del QR
@@ -127,7 +143,7 @@ class PetController extends Controller
         return view('portal.pets.edit', compact('pet'));
     }
 
-    public function update(Request $request, Pet $pet)
+    public function update(Request $request, Pet $pet, PetPhotoOptimizationService $photoService)
     {
         $this->authorizePetOrAdmin($pet);
 
@@ -138,8 +154,8 @@ class PetController extends Controller
             'age'                => ['nullable', 'integer', 'min:0', 'max:50'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
 
-            'photo'              => ['nullable', 'image', 'max:4096'],
-            'photos.*'           => ['nullable', 'image', 'max:6144'],
+            'photo'              => ['nullable', 'image', 'max:10240'],
+            'photos.*'           => ['nullable', 'image', 'max:10240'],
             'delete_photos'      => ['nullable', 'string'],
 
             'species'        => ['nullable', Rule::in(['dog', 'cat', 'other'])],
@@ -150,7 +166,7 @@ class PetController extends Controller
             // Se normalizan abajo
             'is_neutered'    => ['nullable', 'boolean'],
             'rabies_vaccine' => ['nullable', 'boolean'],
-            
+
             // CONTACTO DE EMERGENCIA
             'has_emergency_contact'    => ['nullable', 'boolean'],
             'emergency_contact_name'   => ['nullable', 'string', 'max:120'],
@@ -160,7 +176,7 @@ class PetController extends Controller
         // Normalización de toggles (aunque no lleguen en la request)
         $data['is_neutered']    = $request->boolean('is_neutered');
         $data['rabies_vaccine'] = $request->boolean('rabies_vaccine');
-        
+
         // Contacto de emergencia
         $data['has_emergency_contact'] = $request->boolean('has_emergency_contact');
         if (!$data['has_emergency_contact']) {
@@ -168,46 +184,59 @@ class PetController extends Controller
             $data['emergency_contact_phone'] = null;
         }
 
-        DB::transaction(function () use ($request, $pet, $data) {
-            // 1) Eliminar fotos marcadas
+        DB::transaction(function () use ($request, $pet, $data, $photoService) {
+            // 1) Eliminar fotos marcadas (incluyendo todas sus versiones)
             if (!empty($data['delete_photos'])) {
                 $ids = array_filter(explode(',', $data['delete_photos']));
                 foreach ($pet->photos()->whereIn('id', $ids)->get() as $photo) {
-                    if (Storage::disk('public')->exists($photo->path)) {
-                        Storage::disk('public')->delete($photo->path);
-                    }
+                    $photoService->deleteAllVersions($photo->path);
                     $photo->delete();
                 }
             }
 
             // 2) Reemplazar foto principal (legado)
             if ($request->hasFile('photo')) {
-                if ($pet->photo && Storage::disk('public')->exists($pet->photo)) {
-                    Storage::disk('public')->delete($pet->photo);
+                if ($pet->photo) {
+                    $photoService->deleteAllVersions($pet->photo);
                 }
-                $data['photo'] = $request->file('photo')->store('pets', 'public');
+                // OPTIMIZADO: Solo genera medium (rápido), thumb en background
+                $mediumPath = $photoService->optimizeQuick($request->file('photo'), 'pets');
+                $data['photo'] = $mediumPath;
 
                 $maxSort = (int) $pet->photos()->max('sort_order');
-                PetPhoto::create([
+                $petPhoto = PetPhoto::create([
                     'pet_id'     => $pet->id,
                     'path'       => $data['photo'],
                     'sort_order' => $maxSort + 1,
                 ]);
+
+                // Generar thumbnail en background
+                dispatch(function () use ($photoService, $mediumPath) {
+                    $photoService->generateThumb($mediumPath);
+                });
             }
 
             // 3) Actualizar datos
             $pet->update($data);
 
-            // 4) Guardar nuevas fotos múltiples
+            // 4) Guardar nuevas fotos múltiples (MODO RÁPIDO)
             $sort = (int) $pet->photos()->max('sort_order');
             foreach ($request->file('photos', []) as $file) {
                 if (!$file || !$file->isValid()) continue;
-                $path = $file->store('pets/photos', 'public');
-                PetPhoto::create([
+
+                // OPTIMIZADO: Solo medium primero
+                $mediumPath = $photoService->optimizeQuick($file, 'pets/photos');
+
+                $petPhoto = PetPhoto::create([
                     'pet_id'     => $pet->id,
-                    'path'       => $path,
+                    'path'       => $mediumPath,
                     'sort_order' => ++$sort,
                 ]);
+
+                // Generar thumbnail en background
+                dispatch(function () use ($photoService, $mediumPath) {
+                    $photoService->generateThumb($mediumPath);
+                });
             }
         });
 
