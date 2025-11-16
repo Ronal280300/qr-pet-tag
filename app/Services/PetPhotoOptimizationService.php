@@ -4,8 +4,9 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Str;
+use Spatie\Image\Image;
+use Spatie\Image\Enums\Fit;
 
 class PetPhotoOptimizationService
 {
@@ -50,18 +51,20 @@ class PetPhotoOptimizationService
         foreach (self::SIZES as $sizeName => $config) {
             $filename = "{$sizeName}_{$uniqueName}.webp";
             $fullPath = "{$folder}/{$filename}";
+            $absolutePath = Storage::disk('public')->path($fullPath);
 
-            // Leer y procesar imagen
-            $image = Image::read($file->getRealPath());
+            // Asegurar que el directorio existe
+            $directory = dirname($absolutePath);
+            if (!is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
 
-            // Redimensionar manteniendo aspecto (cover = recorta si es necesario)
-            $image->cover($config['width'], $config['height']);
-
-            // Convertir a WebP con calidad especificada
-            $encoded = $image->toWebp($config['quality']);
-
-            // Guardar en storage/public
-            Storage::disk('public')->put($fullPath, $encoded);
+            // Procesar imagen con Spatie
+            Image::load($file->getRealPath())
+                ->fit(Fit::Contain, $config['width'], $config['height'])
+                ->format('webp')
+                ->quality($config['quality'])
+                ->save($absolutePath);
 
             $paths[$sizeName] = $fullPath;
         }
