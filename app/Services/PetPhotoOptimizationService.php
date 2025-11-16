@@ -12,23 +12,20 @@ class PetPhotoOptimizationService
 {
     /**
      * Tamaños predefinidos para las imágenes
+     * OPTIMIZADO: Solo 2 versiones para velocidad
      */
     private const SIZES = [
         'thumb' => [
             'width' => 150,
             'height' => 150,
-            'quality' => 85,
+            'quality' => 75, // Reducido de 85 a 75
         ],
         'medium' => [
-            'width' => 600,
-            'height' => 600,
-            'quality' => 85,
+            'width' => 800,
+            'height' => 800,
+            'quality' => 80, // Reducido de 85 a 80
         ],
-        'large' => [
-            'width' => 1200,
-            'height' => 1200,
-            'quality' => 90,
-        ],
+        // Removida versión 'large' para velocidad
     ];
 
     /**
@@ -76,6 +73,77 @@ class PetPhotoOptimizationService
         }
 
         return $paths;
+    }
+
+    /**
+     * Optimización RÁPIDA: Solo genera versión medium (para respuesta instantánea)
+     * Usar cuando el tiempo de respuesta es crítico
+     *
+     * @param UploadedFile $file Archivo subido
+     * @param string $folder Carpeta donde guardar
+     * @return string Ruta del archivo generado
+     */
+    public function optimizeQuick(UploadedFile $file, string $folder = 'pets'): string
+    {
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeName = Str::slug($originalName);
+        $uniqueName = $safeName . '-' . time() . '-' . Str::random(6);
+
+        $filename = "medium_{$uniqueName}.webp";
+        $fullPath = "{$folder}/{$filename}";
+        $absolutePath = Storage::disk('public')->path($fullPath);
+
+        // Asegurar que el directorio existe
+        $directory = dirname($absolutePath);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        // Crear ImageManager
+        $manager = new ImageManager(new Driver());
+
+        // Procesar solo versión medium
+        $image = $manager->read($file->getRealPath());
+        $image->cover(800, 800);
+        $encoded = $image->toWebp(80);
+        file_put_contents($absolutePath, $encoded);
+
+        return $fullPath;
+    }
+
+    /**
+     * Genera versión thumb de un archivo existente (para procesar después)
+     *
+     * @param string $mediumPath Ruta de la imagen medium
+     * @return string|null Ruta del thumbnail generado
+     */
+    public function generateThumb(string $mediumPath): ?string
+    {
+        if (!Storage::disk('public')->exists($mediumPath)) {
+            return null;
+        }
+
+        $basename = basename($mediumPath);
+        $folder = dirname($mediumPath);
+
+        // Remover prefijo medium_ si existe
+        $basename = preg_replace('/^medium_/', '', $basename);
+        $thumbFilename = "thumb_{$basename}";
+        $thumbPath = "{$folder}/{$thumbFilename}";
+        $absolutePath = Storage::disk('public')->path($thumbPath);
+
+        try {
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read(Storage::disk('public')->path($mediumPath));
+            $image->cover(150, 150);
+            $encoded = $image->toWebp(75);
+            file_put_contents($absolutePath, $encoded);
+
+            return $thumbPath;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Error generando thumbnail: " . $e->getMessage());
+            return null;
+        }
     }
 
     /**

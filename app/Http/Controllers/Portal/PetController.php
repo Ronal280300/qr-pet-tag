@@ -9,6 +9,7 @@ use App\Models\QrCode as QrCodeModel;
 use App\Models\PetPhoto;
 use App\Services\PetQrService;
 use App\Services\PetPhotoOptimizationService;
+use App\Jobs\OptimizePetPhotoJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -71,31 +72,44 @@ class PetController extends Controller
 
         DB::transaction(function () use ($request, $data, $qrService, $photoService, &$pet) {
             if ($request->hasFile('photo')) {
-                $optimizedPaths = $photoService->optimizeAndStore($request->file('photo'), 'pets');
-                $data['photo'] = $optimizedPaths['medium'];
+                // OPTIMIZADO: Solo genera medium (rápido), thumb en background
+                $data['photo'] = $photoService->optimizeQuick($request->file('photo'), 'pets');
             }
 
             $pet = \App\Models\Pet::create($data);
 
-            // Fotos múltiples
+            // Fotos múltiples (MODO RÁPIDO)
             $sort = 1;
             foreach ($request->file('photos', []) as $file) {
                 if (!$file || !$file->isValid()) continue;
-                $optimizedPaths = $photoService->optimizeAndStore($file, 'pets/photos');
-                \App\Models\PetPhoto::create([
+
+                // Solo medium primero
+                $mediumPath = $photoService->optimizeQuick($file, 'pets/photos');
+
+                $petPhoto = \App\Models\PetPhoto::create([
                     'pet_id'     => $pet->id,
-                    'path'       => $optimizedPaths['medium'],
+                    'path'       => $mediumPath,
                     'sort_order' => $sort++,
                 ]);
+
+                // Generar thumbnail en background
+                dispatch(function () use ($photoService, $mediumPath) {
+                    $photoService->generateThumb($mediumPath);
+                });
             }
 
             // Si no subieron fotos múltiples pero sí 'photo' legacy, la usamos como primera
             if ($sort === 1 && !empty($data['photo'])) {
-                \App\Models\PetPhoto::create([
+                $petPhoto = \App\Models\PetPhoto::create([
                     'pet_id'     => $pet->id,
                     'path'       => $data['photo'],
                     'sort_order' => $sort++,
                 ]);
+
+                // Generar thumbnail en background
+                dispatch(function () use ($photoService, $data) {
+                    $photoService->generateThumb($data['photo']);
+                });
             }
 
             // Generar/asegurar slug + imagen del QR
@@ -185,30 +199,44 @@ class PetController extends Controller
                 if ($pet->photo) {
                     $photoService->deleteAllVersions($pet->photo);
                 }
-                $optimizedPaths = $photoService->optimizeAndStore($request->file('photo'), 'pets');
-                $data['photo'] = $optimizedPaths['medium'];
+                // OPTIMIZADO: Solo genera medium (rápido), thumb en background
+                $mediumPath = $photoService->optimizeQuick($request->file('photo'), 'pets');
+                $data['photo'] = $mediumPath;
 
                 $maxSort = (int) $pet->photos()->max('sort_order');
-                PetPhoto::create([
+                $petPhoto = PetPhoto::create([
                     'pet_id'     => $pet->id,
                     'path'       => $data['photo'],
                     'sort_order' => $maxSort + 1,
                 ]);
+
+                // Generar thumbnail en background
+                dispatch(function () use ($photoService, $mediumPath) {
+                    $photoService->generateThumb($mediumPath);
+                });
             }
 
             // 3) Actualizar datos
             $pet->update($data);
 
-            // 4) Guardar nuevas fotos múltiples
+            // 4) Guardar nuevas fotos múltiples (MODO RÁPIDO)
             $sort = (int) $pet->photos()->max('sort_order');
             foreach ($request->file('photos', []) as $file) {
                 if (!$file || !$file->isValid()) continue;
-                $optimizedPaths = $photoService->optimizeAndStore($file, 'pets/photos');
-                PetPhoto::create([
+
+                // OPTIMIZADO: Solo medium primero
+                $mediumPath = $photoService->optimizeQuick($file, 'pets/photos');
+
+                $petPhoto = PetPhoto::create([
                     'pet_id'     => $pet->id,
-                    'path'       => $optimizedPaths['medium'],
+                    'path'       => $mediumPath,
                     'sort_order' => ++$sort,
                 ]);
+
+                // Generar thumbnail en background
+                dispatch(function () use ($photoService, $mediumPath) {
+                    $photoService->generateThumb($mediumPath);
+                });
             }
         });
 
