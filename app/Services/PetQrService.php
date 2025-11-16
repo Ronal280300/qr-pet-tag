@@ -11,6 +11,62 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class PetQrService
 {
     /**
+     * Regenera el QR completamente (nuevo slug + nueva imagen)
+     * Útil cuando la mascota pierde el collar y necesita un QR nuevo
+     */
+    public function regenerateQR(QrCodeModel $qr, Pet $pet): void
+    {
+        // Eliminar imagen anterior si existe
+        if (!blank($qr->image) && Storage::disk('public')->exists($qr->image)) {
+            Storage::disk('public')->delete($qr->image);
+        }
+
+        // Asegurar relación
+        $qr->pet_id = $pet->id;
+
+        // FORZAR generación de nuevo slug único
+        $attempts = 0;
+        $maxAttempts = 10;
+
+        do {
+            $baseSlug = Str::slug($pet->name . '-' . $pet->id . '-' . Str::lower(Str::random(6)));
+            $exists = QrCodeModel::where('slug', $baseSlug)
+                ->where('id', '!=', $qr->id ?? 0)
+                ->exists();
+
+            if (!$exists) {
+                $qr->slug = $baseSlug;
+                break;
+            }
+
+            $attempts++;
+        } while ($attempts < $maxAttempts);
+
+        if (blank($qr->slug)) {
+            throw new \RuntimeException('No se pudo generar un slug único después de ' . $maxAttempts . ' intentos');
+        }
+
+        // Guardar con el nuevo slug
+        $qr->save();
+
+        // Construir URL pública del perfil con el NUEVO slug
+        $url = url('/p/' . $qr->slug);
+
+        // Generar NUEVO archivo SVG y guardar en storage
+        $filename = 'qrcodes/' . $qr->slug . '.svg';
+        $svg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+            ->size(512)
+            ->margin(1)
+            ->generate($url);
+
+        Storage::disk('public')->put($filename, $svg);
+
+        // Actualizar ruta de imagen
+        $qr->image = $filename;
+        $qr->save();
+    }
+
+    /**
      * Asegura slug (si falta) y genera la imagen del QR
      * para el flujo normal de mascotas.
      */
