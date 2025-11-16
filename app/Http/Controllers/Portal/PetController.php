@@ -78,7 +78,7 @@ class PetController extends Controller
 
             $pet = \App\Models\Pet::create($data);
 
-            // Fotos múltiples (MODO RÁPIDO)
+            // Fotos múltiples ADICIONALES (MODO RÁPIDO) - máximo 3
             $sort = 1;
             foreach ($request->file('photos', []) as $file) {
                 if (!$file || !$file->isValid()) continue;
@@ -86,7 +86,7 @@ class PetController extends Controller
                 // Solo medium primero
                 $mediumPath = $photoService->optimizeQuick($file, 'pets/photos');
 
-                $petPhoto = \App\Models\PetPhoto::create([
+                \App\Models\PetPhoto::create([
                     'pet_id'     => $pet->id,
                     'path'       => $mediumPath,
                     'sort_order' => $sort++,
@@ -98,15 +98,10 @@ class PetController extends Controller
                 });
             }
 
-            // Si no subieron fotos múltiples pero sí 'photo' legacy, la usamos como primera
-            if ($sort === 1 && !empty($data['photo'])) {
-                $petPhoto = \App\Models\PetPhoto::create([
-                    'pet_id'     => $pet->id,
-                    'path'       => $data['photo'],
-                    'sort_order' => $sort++,
-                ]);
-
-                // Generar thumbnail en background
+            // FIX: Foto principal ya está en $data['photo'], NO crear PetPhoto adicional
+            // La foto principal va en Pet::photo, las adicionales en PetPhoto
+            if (!empty($data['photo'])) {
+                // Generar thumbnail para foto principal en background
                 dispatch(function () use ($photoService, $data) {
                     $photoService->generateThumb($data['photo']);
                 });
@@ -194,21 +189,19 @@ class PetController extends Controller
                 }
             }
 
-            // 2) Reemplazar foto principal (legado)
+            // 2) Reemplazar foto principal (solo actualiza campo 'photo', NO crea PetPhoto)
             if ($request->hasFile('photo')) {
+                // Eliminar versiones anteriores si existían
                 if ($pet->photo) {
                     $photoService->deleteAllVersions($pet->photo);
                 }
+
                 // OPTIMIZADO: Solo genera medium (rápido), thumb en background
                 $mediumPath = $photoService->optimizeQuick($request->file('photo'), 'pets');
                 $data['photo'] = $mediumPath;
 
-                $maxSort = (int) $pet->photos()->max('sort_order');
-                $petPhoto = PetPhoto::create([
-                    'pet_id'     => $pet->id,
-                    'path'       => $data['photo'],
-                    'sort_order' => $maxSort + 1,
-                ]);
+                // FIX: NO crear PetPhoto aquí - la foto principal solo va en Pet::photo
+                // Las fotos adicionales van en PetPhoto (tabla pet_photos)
 
                 // Generar thumbnail en background
                 dispatch(function () use ($photoService, $mediumPath) {

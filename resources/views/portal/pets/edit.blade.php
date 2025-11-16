@@ -301,6 +301,13 @@
       </div>
     </div>
   </form>
+
+  {{-- Pantalla de carga --}}
+  <div id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Procesando fotos...</div>
+    <div class="loading-subtext">Estamos optimizando las imágenes para que carguen más rápido. Esto tomará unos segundos.</div>
+  </div>
 </div>
 @endsection
 
@@ -625,6 +632,54 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 40%);
     border-top: 1px solid #eef1f5;
     margin-top: 18px
+  }
+
+  /* ==== Pantalla de carga ==== */
+  #loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  #loading-overlay.active {
+    display: flex;
+  }
+
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #115DFC;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #115DFC;
+    margin-top: 10px;
+  }
+
+  .loading-subtext {
+    font-size: 0.9rem;
+    color: #6b7280;
+    max-width: 300px;
+    text-align: center;
   }
 
 
@@ -1020,6 +1075,13 @@
           text: 'El máximo permitido es 3.'
         });
         e.preventDefault();
+        return;
+      }
+
+      // Mostrar pantalla de carga si hay fotos para procesar
+      const hasNewPhotos = filesBuffer.length > 0 || input.files.length > 0 || document.getElementById('photo').files.length > 0;
+      if (hasNewPhotos) {
+        document.getElementById('loading-overlay').classList.add('active');
       }
     });
 
