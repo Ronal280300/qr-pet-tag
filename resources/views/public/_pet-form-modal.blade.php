@@ -1920,11 +1920,34 @@
         syncSubmit();
     });
 
+    let isSubmitting = false;
+
     if (form) {
         form.addEventListener('submit', (e) => {
+            // Prevenir doble envío
+            if (isSubmitting) {
+                e.preventDefault();
+                return;
+            }
+
+            // Validar foto principal
             if (!hasMain()) {
                 e.preventDefault();
-                alert('Por favor selecciona una foto principal de tu mascota');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Foto principal requerida',
+                    text: 'Por favor selecciona una foto principal para tu mascota antes de continuar.',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            // Marcar como enviando y deshabilitar botón
+            isSubmitting = true;
+            if (submit) {
+                submit.disabled = true;
+                submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
             }
         });
     }
