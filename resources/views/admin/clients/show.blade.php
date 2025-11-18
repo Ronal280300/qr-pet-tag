@@ -241,7 +241,8 @@
 
                 <div id="petsCollapse" class="collapse show">
                     <div class="card-body p-0">
-                        <div class="table-responsive">
+                        {{-- TABLA PARA DESKTOP --}}
+                        <div class="table-responsive d-none d-md-block">
                             <table class="table table-modern mb-0">
                                 <thead>
                                     <tr>
@@ -255,7 +256,7 @@
                                                 <i class="fa-solid fa-dna me-2"></i>Especie
                                             </div>
                                         </th>
-                                        <th>
+                                        <th class="d-none d-lg-table-cell">
                                             <div class="th-content">
                                                 <i class="fa-regular fa-calendar me-2"></i>Enlace
                                             </div>
@@ -284,7 +285,7 @@
                                         <td>
                                             <span class="species-badge">{{ $p->species ?? '—' }}</span>
                                         </td>
-                                        <td>
+                                        <td class="d-none d-lg-table-cell">
                                             @if($p->activated_at)
                                             <span class="date-badge">
                                                 <i class="fa-regular fa-calendar-check me-1"></i>
@@ -309,15 +310,17 @@
                                             <div class="btn-group-actions">
                                                 <button class="btn btn-transfer"
                                                     data-bs-toggle="modal" data-bs-target="#transferModal"
-                                                    data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
+                                                    data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}"
+                                                    title="Transferir a otro cliente">
                                                     <i class="fa-solid fa-right-left me-1"></i>
-                                                    <span class="d-none d-lg-inline">Transferir</span>
+                                                    <span class="d-none d-xl-inline">Transferir</span>
                                                 </button>
                                                 <button class="btn btn-detach"
                                                     data-bs-toggle="modal" data-bs-target="#detachModal"
-                                                    data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
+                                                    data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}"
+                                                    title="Desvincular del cliente">
                                                     <i class="fa-solid fa-link-slash me-1"></i>
-                                                    <span class="d-none d-lg-inline">Desenlazar</span>
+                                                    <span class="d-none d-xl-inline">Desvincular</span>
                                                 </button>
                                             </div>
                                         </td>
@@ -335,6 +338,62 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        {{-- VISTA DE TARJETAS PARA MÓVILES --}}
+                        <div class="d-md-none">
+                            @forelse($pets as $p)
+                            <div class="pet-card-mobile">
+                                <div class="d-flex align-items-start justify-content-between mb-3">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <i class="fa-solid fa-circle pet-indicator"></i>
+                                            <h6 class="fw-bold mb-0">{{ $p->name }}</h6>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <span class="species-badge">
+                                                <i class="fa-solid fa-dna me-1"></i>{{ $p->species ?? '—' }}
+                                            </span>
+                                            @if($p->is_activated)
+                                            <span class="status-badge status-active" style="font-size:0.75rem;">
+                                                <i class="fa-solid fa-qrcode me-1"></i>QR Activo
+                                            </span>
+                                            @else
+                                            <span class="status-badge status-inactive" style="font-size:0.75rem;">
+                                                <i class="fa-solid fa-qrcode me-1"></i>Sin activar
+                                            </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if($p->activated_at)
+                                <div class="pet-info-mobile mb-3">
+                                    <i class="fa-regular fa-calendar-check text-primary"></i>
+                                    <span class="text-muted small">Enlazado: {{ \Carbon\Carbon::parse($p->activated_at)->format('d/m/Y H:i') }}</span>
+                                </div>
+                                @endif
+
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-transfer flex-fill"
+                                        data-bs-toggle="modal" data-bs-target="#transferModal"
+                                        data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
+                                        <i class="fa-solid fa-right-left me-1"></i>Transferir
+                                    </button>
+                                    <button class="btn btn-detach flex-fill"
+                                        data-bs-toggle="modal" data-bs-target="#detachModal"
+                                        data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
+                                        <i class="fa-solid fa-link-slash me-1"></i>Desvincular
+                                    </button>
+                                </div>
+                            </div>
+                            @empty
+                            <div class="empty-state-mobile">
+                                <i class="fa-solid fa-inbox fa-3x mb-3 text-muted"></i>
+                                <p class="mb-0 text-muted">No hay mascotas vinculadas</p>
+                            </div>
+                            @endforelse
+                        </div>
+
                         @if($pets->count() > 0)
                         <div class="table-footer">
                             <i class="fa-solid fa-info-circle me-2"></i>
@@ -1470,6 +1529,44 @@
         color: var(--secondary);
         font-weight: 500;
         margin-top: 0.25rem;
+    }
+
+    /* ===== VISTA MÓVIL - TARJETAS DE MASCOTAS ===== */
+    .pet-card-mobile {
+        padding: 1.25rem;
+        border-bottom: 2px solid #f0f0f0;
+        transition: var(--transition);
+        background: white;
+    }
+
+    .pet-card-mobile:hover {
+        background: linear-gradient(90deg, rgba(13, 110, 253, 0.03), transparent);
+    }
+
+    .pet-card-mobile:last-child {
+        border-bottom: none;
+    }
+
+    .pet-info-mobile {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .empty-state-mobile {
+        padding: 3rem 1.5rem;
+        text-align: center;
+    }
+
+    @media (max-width: 767px) {
+        .btn-transfer,
+        .btn-detach {
+            padding: 10px 16px;
+            font-size: 0.85rem;
+        }
     }
 </style>
 

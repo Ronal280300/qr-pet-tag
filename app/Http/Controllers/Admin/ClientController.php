@@ -112,30 +112,47 @@ class ClientController extends Controller
         // Solo clientes (no admins)
         abort_unless(!$user->is_admin, 403);
 
-        // Bloquea si aún tiene mascotas
-        if ($user->pets()->count() > 0) {
-            return back()->with('error', 'No se puede eliminar un cliente con mascotas vinculadas. Desenlaza sus mascotas primero.');
+        // Contar mascotas vinculadas
+        $petsCount = $user->pets()->count();
+
+        if ($petsCount > 0) {
+            return back()->with('error',
+                "No se puede eliminar el cliente porque tiene {$petsCount} " .
+                ($petsCount === 1 ? 'mascota vinculada' : 'mascotas vinculadas') . ". " .
+                "Por favor, desenlaza o transfiere las mascotas primero."
+            );
         }
 
+        $userName = $user->name;
         $user->delete();
 
         return redirect()
             ->route('portal.admin.clients.index')
-            ->with('success', 'Cliente eliminado correctamente.');
+            ->with('success', "Cliente \"{$userName}\" eliminado correctamente.");
     }
 
 
     public function detachPet(Request $request, User $user, Pet $pet)
     {
-        abort_unless(!$user->is_admin, 403);
-        abort_unless($pet->user_id === $user->id, 404);
+        // Validar que es un cliente (no admin)
+        abort_unless(!$user->is_admin, 403, 'No se puede operar sobre administradores.');
 
+        // Validar que la mascota pertenece al cliente
+        abort_unless(
+            $pet->user_id === $user->id,
+            404,
+            'La mascota no está vinculada a este cliente.'
+        );
+
+        $petName = $pet->name;
         $resetQr = (bool)$request->boolean('reset_qr');
 
         DB::transaction(function () use ($pet, $resetQr) {
+            // Desenlazar la mascota del cliente
             $pet->user_id = null;
             $pet->save();
 
+            // Resetear código QR si se solicitó
             if ($resetQr) {
                 DB::table('qr_codes')
                     ->where('pet_id', $pet->id)
@@ -148,7 +165,12 @@ class ClientController extends Controller
             }
         });
 
-        return back()->with('success', 'Mascota desenlazada del cliente.');
+        $message = "La mascota \"{$petName}\" ha sido desenlazada del cliente.";
+        if ($resetQr) {
+            $message .= " Su código QR ha sido restablecido.";
+        }
+
+        return back()->with('success', $message);
     }
     public function exportCsv(Request $request)
     {
@@ -320,23 +342,41 @@ class ClientController extends Controller
      */
     public function transferPet(Request $request, User $user, Pet $pet)
     {
-        abort_unless(!$user->is_admin, 403);
-        abort_unless($pet->user_id === $user->id, 404);
+        // Validar que es un cliente (no admin)
+        abort_unless(!$user->is_admin, 403, 'No se puede operar sobre administradores.');
+
+        // Validar que la mascota pertenece al cliente actual
+        abort_unless(
+            $pet->user_id === $user->id,
+            404,
+            'La mascota no está vinculada a este cliente.'
+        );
 
         $data = $request->validate([
             'to_user_id' => ['required', 'integer', 'exists:users,id'],
             'keep_qr'    => ['nullable', 'boolean'],
+        ], [
+            'to_user_id.required' => 'Debe seleccionar un cliente destino.',
+            'to_user_id.exists' => 'El cliente destino no existe.',
         ]);
 
-        $to = User::where('is_admin', false)->findOrFail($data['to_user_id']);
-        abort_if($to->id === $user->id, 422, 'El destino no puede ser el mismo cliente.');
+        $toClient = User::where('is_admin', false)->findOrFail($data['to_user_id']);
+        abort_if(
+            $toClient->id === $user->id,
+            422,
+            'No puede transferir a sí mismo. Seleccione un cliente diferente.'
+        );
 
-        DB::transaction(function () use ($pet, $to, $data) {
-            $pet->user_id = $to->id;
+        $petName = $pet->name;
+        $keepQr = (bool)($data['keep_qr'] ?? true);
+
+        DB::transaction(function () use ($pet, $toClient, $keepQr) {
+            // Transferir la mascota al nuevo cliente
+            $pet->user_id = $toClient->id;
             $pet->save();
 
-            // (Opcional) Resetear QR si NO se mantiene
-            if (!(bool)($data['keep_qr'] ?? true)) {
+            // Resetear QR si NO se mantiene activo
+            if (!$keepQr) {
                 DB::table('qr_codes')->where('pet_id', $pet->id)->update([
                     'is_activated' => 0,
                     'activated_at' => null,
@@ -346,7 +386,12 @@ class ClientController extends Controller
             }
         });
 
-        return back()->with('success', 'Mascota transferida correctamente.');
+        $message = "La mascota \"{$petName}\" ha sido transferida a {$toClient->name}.";
+        if (!$keepQr) {
+            $message .= " Su código QR ha sido restablecido.";
+        }
+
+        return back()->with('success', $message);
     }
 
 

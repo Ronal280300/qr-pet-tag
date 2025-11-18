@@ -223,14 +223,21 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
             // 👉 NUEVO: Gestión de Clientes
+            // ⚠️ IMPORTANTE: Las rutas estáticas DEBEN ir ANTES de las rutas dinámicas
             Route::get('clients', [ClientController::class, 'index'])->name('clients.index');        // listado + filtros
+            Route::get('clients-export', [ClientController::class, 'exportCsv'])->name('clients.export'); // exportar CSV
+            Route::post('clients/bulk', [ClientController::class, 'bulk'])->name('clients.bulk'); // acciones masivas
+            Route::post('clients/bulk/tags', [ClientController::class, 'bulkTags'])->name('clients.bulk.tags'); // notas/etiquetas masivas
+
+            // Rutas dinámicas (con parámetros)
             Route::get('clients/{user}', [ClientController::class, 'show'])->name('clients.show');   // detalle/edición
             Route::put('clients/{user}', [ClientController::class, 'update'])->name('clients.update'); // guardar cambios
+            Route::delete('clients/{user}', [ClientController::class, 'destroy'])->name('clients.destroy'); // eliminar cliente
             Route::post('clients/{user}/send-reminder', [ClientController::class, 'sendPaymentReminder'])->name('clients.send-reminder'); // recordatorio manual
+
+            // Gestión de mascotas del cliente
             Route::delete('clients/{user}/pets/{pet}', [ClientController::class, 'detachPet'])->name('clients.pets.detach'); // desenlazar mascota
-            Route::delete('clients/{user}', [ClientController::class, 'destroy'])->name('clients.destroy');
-            // 👉 Exportar clientes (CSV) preservando filtros ?q=&status=
-            Route::get('clients-export', [ClientController::class, 'exportCsv'])->name('clients.export');
+            Route::post('clients/{user}/pets/{pet}/transfer', [ClientController::class, 'transferPet'])->name('clients.pets.transfer'); // transferir mascota
 
             /*
             |--------------------------------------------------------------------------
@@ -274,21 +281,11 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::post('email-campaigns/{emailCampaign}/send', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'send'])->name('email-campaigns.send');
 
             Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+
             // 👉 Configuración del Sistema
             Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
             Route::put('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
             Route::post('settings/clear-cache', [\App\Http\Controllers\Admin\SettingsController::class, 'clearCache'])->name('settings.clear-cache');
             Route::post('settings/reset', [\App\Http\Controllers\Admin\SettingsController::class, 'reset'])->name('settings.reset');
-            // 👉 Acciones masivas
-            Route::post('clients/bulk', [ClientController::class, 'bulk'])->name('clients.bulk');
-
-            // 👉 Transferir mascota
-            Route::post('clients/{user}/pets/{pet}/transfer', [ClientController::class, 'transferPet'])
-                ->name('clients.pets.transfer');
-
-            Route::post('clients/bulk/status',   [ClientController::class, 'bulkStatus'])->name('clients.bulk.status');
-            Route::post('clients/bulk/tags',     [ClientController::class, 'bulkTags'])->name('clients.bulk.tags');
-            Route::post('clients/bulk/transfer', [ClientController::class, 'bulkTransfer'])->name('clients.bulk.transfer');
-            Route::post('clients/bulk/delete',   [ClientController::class, 'bulkDelete'])->name('clients.bulk.delete');
         });
 });
