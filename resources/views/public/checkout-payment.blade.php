@@ -588,6 +588,84 @@
             font-size: 1.75rem;
         }
     }
+
+    /* ===== PAYMENT METHOD CARDS ===== */
+    .payment-method-card,
+    .shipping-zone-card {
+        display: block;
+        padding: 1.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        background: white;
+        height: 100%;
+    }
+
+    .payment-method-card:hover,
+    .shipping-zone-card:hover {
+        border-color: #4e89e8;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(78, 137, 232, 0.2);
+    }
+
+    .payment-method-card.active,
+    .shipping-zone-card.active {
+        border-color: #4e89e8;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        box-shadow: 0 10px 30px rgba(78, 137, 232, 0.25);
+    }
+
+    .payment-method-icon,
+    .shipping-zone-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 1.75rem;
+    }
+
+    .payment-method-title,
+    .shipping-zone-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 0.5rem;
+    }
+
+    .payment-method-desc,
+    .shipping-zone-desc {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .shipping-zone-cost {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #4e89e8;
+        margin-bottom: 0.5rem;
+    }
+
+    .payment-info-section {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 @endpush
 
@@ -616,9 +694,10 @@
     <div class="row g-4">
         <!-- Columna Izquierda: Instrucciones -->
         <div class="col-lg-7">
-            <div class="payment-card">
+            <!-- SELECCIÓN DE MÉTODO DE PAGO -->
+            <div class="payment-card mb-4">
                 <div class="payment-header">
-                    <h2><i class="fa-solid fa-credit-card me-2"></i>Información de Pago</h2>
+                    <h2><i class="fa-solid fa-credit-card me-2"></i>Método de Pago</h2>
                 </div>
                 <div class="p-4">
                     <div class="modern-alert">
@@ -626,44 +705,96 @@
                             <i class="fa-solid fa-circle-info"></i>
                         </div>
                         <div class="modern-alert-content">
-                            <strong>Importante:</strong> Realiza la transferencia por el monto exacto y luego sube tu comprobante. Te contactaremos en menos de 24 horas.
+                            <strong>Importante:</strong> Selecciona tu método de pago preferido y realiza el pago por el monto exacto. Luego sube tu comprobante.
                         </div>
                     </div>
 
-                    <div class="section-title">
-                        <i class="fa-solid fa-building-columns"></i>
-                        <span>Datos Bancarios</span>
-                    </div>
-
-                    <div class="bank-info-box">
-                        <div class="bank-detail">
-                            <span class="bank-detail-label">Banco:</span>
-                            <span class="bank-detail-value">BAC SAN JOSÉ</span>
-                        </div>
-                        <div class="bank-detail">
-                            <span class="bank-detail-label">Cuenta IBAN:</span>
-                            <span class="bank-detail-value" title="Click para copiar">CR00 0000 0000 0000 0000</span>
-                        </div>
-                         <div class="bank-detail">
-                            <span class="bank-detail-label">Cuenta BAC:</span>
-                            <span class="bank-detail-value" title="Click para copiar">978151618</span>
-                        </div>
-                        <div class="bank-detail">
-                            <span class="bank-detail-label">Titular:</span>
-                            <span class="bank-detail-value">Ronaldo Segura Paniagua</span>
-                        </div>
-                        <div class="bank-detail">
-                            <span class="bank-detail-label">Monto a transferir:</span>
-                            <span class="bank-detail-value amount-highlight">₡{{ number_format($total, 0, ',', '.') }}</span>
+                    <div class="mt-4">
+                        <label class="form-label fw-bold">Selecciona tu método de pago:</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <input type="radio" name="payment_method" id="method_transfer" value="transfer" class="d-none payment-method-radio" checked>
+                                <label for="method_transfer" class="payment-method-card active">
+                                    <div class="payment-method-icon">
+                                        <i class="fa-solid fa-building-columns"></i>
+                                    </div>
+                                    <div class="payment-method-title">Transferencia Bancaria</div>
+                                    <div class="payment-method-desc">Transferencia o depósito bancario</div>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="radio" name="payment_method" id="method_sinpe" value="sinpe" class="d-none payment-method-radio">
+                                <label for="method_sinpe" class="payment-method-card">
+                                    <div class="payment-method-icon">
+                                        <i class="fa-solid fa-mobile-screen"></i>
+                                    </div>
+                                    <div class="payment-method-title">SINPE Móvil</div>
+                                    <div class="payment-method-desc">Pago inmediato desde tu celular</div>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="modern-alert warning">
-                        <div class="modern-alert-icon">
+                    <!-- INFORMACIÓN DE TRANSFERENCIA -->
+                    <div id="transfer-info" class="payment-info-section mt-4">
+                        <div class="section-title">
+                            <i class="fa-solid fa-building-columns"></i>
+                            <span>Datos Bancarios</span>
+                        </div>
+
+                        <div class="bank-info-box">
+                            <div class="bank-detail">
+                                <span class="bank-detail-label">Banco:</span>
+                                <span class="bank-detail-value">BAC SAN JOSÉ</span>
+                            </div>
+                            <div class="bank-detail">
+                                <span class="bank-detail-label">Cuenta IBAN:</span>
+                                <span class="bank-detail-value" title="Click para copiar">CR00 0000 0000 0000 0000</span>
+                            </div>
+                            <div class="bank-detail">
+                                <span class="bank-detail-label">Cuenta BAC:</span>
+                                <span class="bank-detail-value" title="Click para copiar">978151618</span>
+                            </div>
+                            <div class="bank-detail">
+                                <span class="bank-detail-label">Titular:</span>
+                                <span class="bank-detail-value">Ronaldo Segura Paniagua</span>
+                            </div>
+                            <div class="bank-detail">
+                                <span class="bank-detail-label">Monto a transferir:</span>
+                                <span class="bank-detail-value amount-highlight" id="transfer-amount">₡{{ number_format($total, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- INFORMACIÓN DE SINPE -->
+                    <div id="sinpe-info" class="payment-info-section mt-4" style="display: none;">
+                        <div class="section-title">
                             <i class="fa-solid fa-mobile-screen"></i>
+                            <span>Datos de SINPE Móvil</span>
                         </div>
-                        <div class="modern-alert-content">
-                            <strong>SINPE Móvil:</strong> También puedes usar el número <strong>8530-7943</strong>
+
+                        <div class="bank-info-box">
+                            <div class="bank-detail">
+                                <span class="bank-detail-label">Número SINPE:</span>
+                                <span class="bank-detail-value">8530-7943</span>
+                            </div>
+                            <div class="bank-detail">
+                                <span class="bank-detail-label">Nombre:</span>
+                                <span class="bank-detail-value">Ronaldo Segura Paniagua</span>
+                            </div>
+                            <div class="bank-detail">
+                                <span class="bank-detail-label">Monto a enviar:</span>
+                                <span class="bank-detail-value amount-highlight" id="sinpe-amount">₡{{ number_format($total, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="modern-alert warning mt-3">
+                            <div class="modern-alert-icon">
+                                <i class="fa-solid fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="modern-alert-content">
+                                <strong>Importante:</strong> En la descripción del SINPE, incluye el texto "Plan QR-Pet Tag" para poder identificar tu pago.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -673,6 +804,63 @@
             <form action="{{ route('checkout.upload') }}" method="POST" enctype="multipart/form-data" id="paymentForm" class="mt-4">
                 @csrf
                 {{-- Los datos del plan y cantidad ahora se manejan en sesión para mayor seguridad --}}
+
+                <!-- OPCIONES DE ENVÍO -->
+                <div class="payment-card mb-4">
+                    <div class="payment-header">
+                        <h2><i class="fa-solid fa-truck me-2"></i>Opciones de Envío</h2>
+                    </div>
+                    <div class="p-4">
+                        <div class="modern-alert">
+                            <div class="modern-alert-icon">
+                                <i class="fa-solid fa-box"></i>
+                            </div>
+                            <div class="modern-alert-content">
+                                <strong>Envío a través de Correos de Costa Rica</strong><br>
+                                Selecciona la zona de envío. El costo se sumará automáticamente al total.
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-bold">Selecciona tu zona de envío:</label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="radio" name="shipping_zone" id="zone_gam" value="gam" class="d-none shipping-zone-radio" checked>
+                                    <label for="zone_gam" class="shipping-zone-card active">
+                                        <div class="shipping-zone-icon">
+                                            <i class="fa-solid fa-city"></i>
+                                        </div>
+                                        <div class="shipping-zone-title">Dentro del GAM</div>
+                                        <div class="shipping-zone-cost">+ ₡1,500</div>
+                                        <div class="shipping-zone-desc">Gran Área Metropolitana</div>
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="radio" name="shipping_zone" id="zone_fuera_gam" value="fuera_gam" class="d-none shipping-zone-radio">
+                                    <label for="zone_fuera_gam" class="shipping-zone-card">
+                                        <div class="shipping-zone-icon">
+                                            <i class="fa-solid fa-map"></i>
+                                        </div>
+                                        <div class="shipping-zone-title">Fuera del GAM</div>
+                                        <div class="shipping-zone-cost">+ ₡3,500</div>
+                                        <div class="shipping-zone-desc">Resto de Costa Rica</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-bold" for="shipping_address">Dirección de Envío:</label>
+                            <textarea name="shipping_address"
+                                      id="shipping_address"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Ejemplo: San José, Escazú, del Banco Nacional 200m oeste, casa esquinera portón negro"
+                                      required></textarea>
+                            <small class="text-muted">Incluye provincia, cantón, distrito y señas exactas</small>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="payment-card">
                     <div class="p-4">
@@ -1339,5 +1527,81 @@ function simulateProgress() {
         }
     }, 200);
 }
+
+// ===== PAYMENT METHOD TOGGLE =====
+(() => {
+    const paymentRadios = document.querySelectorAll('.payment-method-radio');
+    const paymentCards = document.querySelectorAll('.payment-method-card');
+    const transferInfo = document.getElementById('transfer-info');
+    const sinpeInfo = document.getElementById('sinpe-info');
+
+    paymentRadios.forEach((radio, index) => {
+        radio.addEventListener('change', () => {
+            // Actualizar clases active
+            paymentCards.forEach(card => card.classList.remove('active'));
+            paymentCards[index].classList.add('active');
+
+            // Mostrar/ocultar información de pago
+            if (radio.value === 'transfer') {
+                transferInfo.style.display = 'block';
+                sinpeInfo.style.display = 'none';
+            } else if (radio.value === 'sinpe') {
+                transferInfo.style.display = 'none';
+                sinpeInfo.style.display = 'block';
+            }
+        });
+    });
+})();
+
+// ===== SHIPPING ZONE TOGGLE & TOTAL CALCULATION =====
+(() => {
+    const shippingRadios = document.querySelectorAll('.shipping-zone-radio');
+    const shippingCards = document.querySelectorAll('.shipping-zone-card');
+    const transferAmount = document.getElementById('transfer-amount');
+    const sinpeAmount = document.getElementById('sinpe-amount');
+    const summaryTotal = document.getElementById('summary-total');
+    const summaryShipping = document.getElementById('summary-shipping');
+
+    // Total base del plan (sin envío)
+    const baseTotal = {{ $total }};
+    const shippingCosts = {
+        'gam': 1500,
+        'fuera_gam': 3500
+    };
+
+    function updateTotal() {
+        const selectedZone = document.querySelector('.shipping-zone-radio:checked').value;
+        const shippingCost = shippingCosts[selectedZone];
+        const newTotal = baseTotal + shippingCost;
+
+        // Actualizar todos los displays de total
+        if (transferAmount) {
+            transferAmount.textContent = '₡' + newTotal.toLocaleString('es-CR');
+        }
+        if (sinpeAmount) {
+            sinpeAmount.textContent = '₡' + newTotal.toLocaleString('es-CR');
+        }
+        if (summaryTotal) {
+            summaryTotal.textContent = '₡' + newTotal.toLocaleString('es-CR');
+        }
+        if (summaryShipping) {
+            summaryShipping.textContent = '₡' + shippingCost.toLocaleString('es-CR');
+        }
+    }
+
+    shippingRadios.forEach((radio, index) => {
+        radio.addEventListener('change', () => {
+            // Actualizar clases active
+            shippingCards.forEach(card => card.classList.remove('active'));
+            shippingCards[index].classList.add('active');
+
+            // Recalcular total
+            updateTotal();
+        });
+    });
+
+    // Calcular total inicial
+    updateTotal();
+})();
 </script>
 @endsection
