@@ -235,7 +235,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
               <span class="tag-label">TAG:</span>
               <span class="tag-value">{{ $qr->activation_code }}</span>
             </span>
-            <button type="button" class="btn-copy-tag" onclick="copyTag()" title="Copiar TAG">
+            <button type="button" class="btn-copy-tag" onclick="copyTag(event)" title="Copiar TAG">
               <i class="fa-solid fa-copy"></i>
             </button>
           </div>
@@ -256,7 +256,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
         @if($publicUrl)
         <div class="qr-url-box">
           <input type="text" value="{{ $publicUrl }}" readonly class="qr-url-input" id="qrUrlInput">
-          <button type="button" class="btn-copy-url" onclick="copyQrUrl()" title="Copiar URL">
+          <button type="button" class="btn-copy-url" onclick="copyQrUrl(event)" title="Copiar URL">
             <i class="fa-solid fa-copy"></i>
           </button>
         </div>
@@ -309,22 +309,29 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 
         <form action="{{ route('portal.pets.reward.update', $pet) }}" method="POST" id="rewardForm" class="no-swipe">
           @csrf @method('PUT')
-          @php($activeVal = (int) (optional($pet->reward)->active ?? 0))
-          <input type="hidden" name="active" id="rwActive" value="{{ $activeVal }}">
+          @php($activeVal = 0)
+          <input type="hidden" name="active" id="rwActive" value="0">
 
-          <div class="reward-toggle">
+          <div class="reward-toggle {{ !$pet->is_lost ? 'disabled-toggle' : '' }}" id="rewardToggleContainer" {{ !$pet->is_lost ? 'title="La mascota debe estar marcada como perdida para activar la recompensa"' : '' }}>
             <span class="toggle-label">Mostrar en perfil público</span>
-            <div id="rwSwitch" class="modern-switch {{ $activeVal ? 'active' : '' }}" role="button" aria-pressed="{{ $activeVal ? 'true':'false' }}">
+            <div id="rwSwitch" class="modern-switch" role="button" aria-pressed="false">
               <span class="switch-slider"></span>
             </div>
           </div>
+
+          @if(!$pet->is_lost)
+          <div class="reward-info-message">
+            <i class="fa-solid fa-info-circle"></i>
+            <span>Marca la mascota como perdida para activar la recompensa</span>
+          </div>
+          @endif
 
           <div class="reward-inputs">
             <div class="input-group-reward">
               <label class="input-label">Monto</label>
               <div class="input-with-prefix">
                 <span class="input-prefix">₡</span>
-                <input type="text" inputmode="decimal" pattern="[0-9.,]*" name="amount" id="rwAmount" class="reward-input" value="{{ number_format((float) (optional($pet->reward)->amount ?? 0), 2, '.', '') }}" placeholder="0.00">
+                <input type="text" inputmode="decimal" pattern="[0-9.,]*" name="amount" id="rwAmount" class="reward-input" value="" placeholder="0.00">
               </div>
             </div>
 
@@ -420,13 +427,17 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 .btn-primary{background:linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%);color:#fff}
 
 /* Info Grid */
-.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.85rem;padding:1.25rem}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.85rem;padding:1.25rem}
 
-.info-card{background:linear-gradient(135deg,#f8fafc 0%,#fff 100%);border:2px solid #e8ecf4;border-radius:14px;padding:1rem;display:flex;align-items:center;gap:.75rem;transition:all .3s ease;animation:scaleIn .5s ease-out}
+.info-card{background:linear-gradient(135deg,#f8fafc 0%,#fff 100%);border:2px solid #e8ecf4;border-radius:14px;padding:.95rem 1rem;display:flex;align-items:center;gap:.75rem;transition:all .3s ease;animation:scaleIn .5s ease-out}
 
 .info-card:hover{border-color:#667eea;transform:translateY(-3px);box-shadow:0 6px 20px rgba(102,126,234,.12)}
 
-.info-icon{font-size:1.4rem;color:#667eea;min-width:32px;text-align:center;transition:transform .3s ease}
+.info-icon{font-size:1.35rem;color:#667eea;min-width:30px;text-align:center;transition:transform .3s ease}
+
+@media (min-width:992px){
+.info-icon{font-size:1.4rem;min-width:32px}
+}
 
 .info-card:hover .info-icon{transform:scale(1.1) rotate(5deg)}
 
@@ -434,7 +445,12 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 
 .info-label{font-size:.7rem;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem}
 
-.info-value{font-size:.9rem;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info-value{font-size:.88rem;font-weight:700;color:#111827;word-wrap:break-word;overflow-wrap:break-word;line-height:1.3}
+
+/* Desktop - más espacio horizontal */
+@media (min-width:992px){
+.info-value{font-size:.9rem;line-height:1.35}
+}
 
 /* Observaciones */
 .observations-card{margin:0 1.5rem 1.5rem;padding:1.5rem;background:linear-gradient(135deg,#fff 0%,#f8f9fa 100%);border:2px solid #e8ecf4;border-radius:16px;transition:all .3s ease;animation:fadeInUp .6s ease-out .3s both}
@@ -561,11 +577,27 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 .btn-qr-warning:hover{box-shadow:0 6px 20px rgba(251,191,36,.4)}
 
 /* Reward Card */
-.reward-toggle{display:flex;justify-content:space-between;align-items:center;padding:1rem;background:linear-gradient(135deg,#f8f9fa 0%,#f3f4f6 100%);border-radius:12px;margin-bottom:1.5rem}
+.reward-toggle{display:flex;justify-content:space-between;align-items:center;padding:1rem;background:linear-gradient(135deg,#f8f9fa 0%,#f3f4f6 100%);border-radius:12px;margin-bottom:1.5rem;cursor:pointer;user-select:none;transition:all .3s ease}
 
-.toggle-label{font-size:.95rem;font-weight:600;color:#374151}
+.reward-toggle:hover{background:linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%);transform:translateY(-1px)}
 
-.modern-switch{width:60px;height:32px;background:linear-gradient(135deg,#e5e7eb 0%,#d1d5db 100%);border-radius:999px;position:relative;cursor:pointer;transition:all .3s ease;box-shadow:inset 0 2px 6px rgba(0,0,0,.1)}
+.reward-toggle:active{transform:translateY(0)}
+
+.reward-toggle.disabled-toggle{opacity:.6;cursor:not-allowed;background:linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%)}
+
+.reward-toggle.disabled-toggle:hover{transform:translateY(0);background:linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%)}
+
+.reward-toggle.disabled-toggle .toggle-label{color:#9ca3af}
+
+.reward-toggle.disabled-toggle .modern-switch{opacity:.5}
+
+.reward-info-message{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border:2px solid #fbbf24;border-radius:10px;margin-bottom:1.5rem;font-size:.85rem;color:#92400e;font-weight:600}
+
+.reward-info-message i{color:#f59e0b;font-size:1rem}
+
+.toggle-label{font-size:.95rem;font-weight:600;color:#374151;cursor:pointer}
+
+.modern-switch{width:60px;height:32px;background:linear-gradient(135deg,#e5e7eb 0%,#d1d5db 100%);border-radius:999px;position:relative;cursor:pointer;transition:all .3s ease;box-shadow:inset 0 2px 6px rgba(0,0,0,.1);pointer-events:none}
 
 .modern-switch:hover{transform:scale(1.05)}
 
@@ -609,9 +641,17 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 .js-skel.is-loaded>img{opacity:1}
 
 /* Responsive */
+@media (min-width:1400px){
+.info-grid{grid-template-columns:repeat(auto-fit,minmax(165px,1fr))}
+}
+
 @media (max-width:1200px){
 .pet-name-hero{font-size:1.65rem}
-.info-grid{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}
+.info-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+}
+
+@media (max-width:992px){
+.info-grid{grid-template-columns:repeat(3,1fr)}
 }
 
 @media (max-width:768px){
@@ -668,17 +708,108 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Copiar TAG
-function copyTag(){const tag=document.getElementById('tagCode').dataset.tag;navigator.clipboard.writeText(tag).then(()=>{const btn=event.target.closest('.btn-copy-tag');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch(()=>alert('No se pudo copiar: '+tag))}
-
-// Copiar URL QR
-function copyQrUrl(){const input=document.getElementById('qrUrlInput');const url=input.value;navigator.clipboard.writeText(url).then(()=>{const btn=event.target.closest('.btn-copy-url');const originalHTML=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-check"></i>';btn.style.background='linear-gradient(135deg,#22c55e 0%,#16a34a 100%)';setTimeout(()=>{btn.innerHTML=originalHTML;btn.style.background='linear-gradient(135deg,#667eea 0%,#764ba2 100%)'},1500)}).catch(()=>alert('No se pudo copiar: '+url))}
-
 // Tooltips
 (function(){const list=[].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));list.forEach(el=>new bootstrap.Tooltip(el))})();
 
-// Recompensa switch
-(function(){const sw=document.getElementById('rwSwitch');const act=document.getElementById('rwActive');const amt=document.getElementById('rwAmount');const msg=document.getElementById('rwMessage');const form=document.getElementById('rewardForm');if(!sw||!act)return;function isOn(){return act.value==='1'}function setOn(on){sw.classList.toggle('active',on);sw.setAttribute('aria-pressed',on?'true':'false');act.value=on?'1':'0';setEnabled(on);if(on){if(!parseFloat((amt.value||'').replace(',','.')))amt.value='';amt.focus()}}function normalizeMoney(v){v=(v||'').toString().replace(/[^\d.,]/g,'').replace(',','.');const n=parseFloat(v);return isNaN(n)?'':n.toFixed(2)}function amountOk(){const n=parseFloat((amt.value||'').toString().replace(',','.'));return!isNaN(n)&&n>0}function setEnabled(enabled){[amt,msg].forEach(el=>{el.disabled=!enabled;el.style.opacity=enabled?1:.5})}setEnabled(isOn());sw.addEventListener('click',()=>setOn(!isOn()));amt.addEventListener('focus',e=>{const raw=(e.target.value||'').replace(',','.');const n=parseFloat(raw);if(!raw||isNaN(n)||n===0)e.target.value='';else e.target.select()});amt.addEventListener('blur',e=>{const v=normalizeMoney(e.target.value);e.target.value=v||'0.00'});form.addEventListener('submit',(e)=>{if(isOn()&&!amountOk()){e.preventDefault();amt.focus()}})})();
+// Recompensa switch - MEJORADO con validación de mascota perdida
+(function(){
+  const container = document.getElementById('rewardToggleContainer');
+  const sw = document.getElementById('rwSwitch');
+  const act = document.getElementById('rwActive');
+  const amt = document.getElementById('rwAmount');
+  const msg = document.getElementById('rwMessage');
+  const form = document.getElementById('rewardForm');
+  const isPetLost = {{ $pet->is_lost ? 'true' : 'false' }};
+  
+  if (!sw || !act || !container) return;
+  
+  function isOn() { return act.value === '1'; }
+  
+  function setOn(on) {
+    // Verificar si la mascota está perdida antes de activar
+    if (on && !isPetLost) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Mascota no está perdida',
+        text: 'Primero debes marcar la mascota como perdida/robada para activar la recompensa',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#667eea'
+      });
+      return;
+    }
+    
+    sw.classList.toggle('active', on);
+    sw.setAttribute('aria-pressed', on ? 'true' : 'false');
+    act.value = on ? '1' : '0';
+    setEnabled(on);
+    
+    // Limpiar campo si está vacío, pero NO hacer focus automático
+    if (on && !parseFloat((amt.value || '').replace(',', '.'))) {
+      amt.value = '';
+    }
+  }
+  
+  function normalizeMoney(v) {
+    v = (v || '').toString().replace(/[^\d.,]/g, '').replace(',', '.');
+    const n = parseFloat(v);
+    return isNaN(n) ? '' : n.toFixed(2);
+  }
+  
+  function amountOk() {
+    const n = parseFloat((amt.value || '').toString().replace(',', '.'));
+    return !isNaN(n) && n > 0;
+  }
+  
+  function setEnabled(enabled) {
+    // Si la mascota no está perdida, siempre deshabilitar
+    const shouldEnable = enabled && isPetLost;
+    [amt, msg].forEach(el => {
+      el.disabled = !shouldEnable;
+      el.style.opacity = shouldEnable ? 1 : .5;
+    });
+  }
+  
+  // Inicializar estado
+  setEnabled(isOn());
+  
+  // Click en todo el contenedor
+  container.addEventListener('click', (e) => {
+    // Evitar que el click en inputs active el toggle
+    if (e.target.tagName === 'INPUT') return;
+    setOn(!isOn());
+  });
+  
+  amt.addEventListener('focus', e => {
+    const raw = (e.target.value || '').replace(',', '.');
+    const n = parseFloat(raw);
+    if (!raw || isNaN(n) || n === 0) e.target.value = '';
+    else e.target.select();
+  });
+  
+  amt.addEventListener('blur', e => {
+    const v = normalizeMoney(e.target.value);
+    // Dejar vacío si no hay valor, no poner 0.00
+    e.target.value = v || '';
+  });
+  
+  form.addEventListener('submit', (e) => {
+    if (!isPetLost) {
+      e.preventDefault();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Mascota no está perdida',
+        text: 'No puedes configurar una recompensa si la mascota no está marcada como perdida',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#667eea'
+      });
+      return;
+    }
+    if (isOn() && !amountOk()) {
+      e.preventDefault();
+      amt.focus();
+    }
+  });
+})();
 
 // Evitar swipe en botones
 (function(){const stopSwipeZone=document.querySelectorAll('.no-swipe, .no-swipe *');const stopEvts=['click','mousedown','mouseup','touchstart','touchmove','touchend','pointerdown','pointerup'];stopSwipeZone.forEach(el=>{stopEvts.forEach(evt=>{el.addEventListener(evt,e=>{e.stopPropagation()},{passive:false})})})})();
