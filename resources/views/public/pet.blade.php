@@ -1067,21 +1067,69 @@ body {
     }).catch(()=>{});
   }
 
-  if (navigator.geolocation && (window.isSecureContext || location.protocol === 'https:' || ['localhost','127.0.0.1'].includes(location.hostname))) {
-    let done = false;
-    const timer = setTimeout(() => { if (!done) { done = true; send({ method:'ip' }); } }, 6000);
+  function showLocationAlert(){
+    const alertHTML = `
+      <div style="position:fixed;top:20px;left:50%;transform:translateX(-50%);
+                  background:#fbbf24;color:#78350f;padding:1rem 1.5rem;border-radius:12px;
+                  box-shadow:0 10px 40px rgba(0,0,0,.3);z-index:9999;max-width:90%;text-align:center;
+                  font-weight:600;animation:slideDown 0.4s ease-out;">
+        <i class="fa-solid fa-location-crosshairs" style="margin-right:8px;"></i>
+        Por favor, permite el acceso a tu ubicación para notificar al dueño
+      </div>
+    `;
+    const div = document.createElement('div');
+    div.innerHTML = alertHTML;
+    document.body.appendChild(div.firstElementChild);
 
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        if (done) return; done = true; clearTimeout(timer);
-        const c = pos.coords || {};
-        send({ method:'gps', lat:c.latitude, lng:c.longitude, accuracy: Math.round(c.accuracy || 0) });
-      },
-      _ => { if (done) return; done = true; clearTimeout(timer); send({ method:'ip' }); },
-      { enableHighAccuracy:true, timeout:12000, maximumAge:0 }
-    );
+    setTimeout(() => {
+      const alert = document.body.lastElementChild;
+      if(alert && alert.style.position === 'fixed'){
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => alert.remove(), 400);
+      }
+    }, 8000);
+  }
+
+  // UBICACIÓN OBLIGATORIA: Solo enviar si hay geolocalización disponible
+  if (navigator.geolocation && (window.isSecureContext || location.protocol === 'https:' || ['localhost','127.0.0.1'].includes(location.hostname))) {
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    function requestLocation(){
+      attempts++;
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          // ✅ Éxito: Enviar con GPS
+          const c = pos.coords || {};
+          send({ method:'gps', lat:c.latitude, lng:c.longitude, accuracy: Math.round(c.accuracy || 0) });
+          console.log('📍 Ubicación enviada con GPS');
+        },
+        error => {
+          // ❌ Error: El usuario denegó o falló
+          console.warn('Geolocalización denegada o falló:', error.message);
+          showLocationAlert();
+
+          // Reintentar hasta maxAttempts veces
+          if(attempts < maxAttempts){
+            setTimeout(() => {
+              console.log(`🔄 Reintentando solicitar ubicación (intento ${attempts + 1}/${maxAttempts})...`);
+              requestLocation();
+            }, 10000); // Reintentar cada 10 segundos
+          } else {
+            console.log('❌ Se alcanzó el máximo de intentos. No se enviará notificación sin ubicación.');
+          }
+        },
+        { enableHighAccuracy:true, timeout:15000, maximumAge:0 }
+      );
+    }
+
+    // Iniciar solicitud de ubicación
+    requestLocation();
   } else {
-    send({ method:'ip' });
+    // Navegador no soporta geolocalización o no es contexto seguro
+    console.warn('⚠️ Geolocalización no disponible. No se puede notificar al dueño sin ubicación precisa.');
+    showLocationAlert();
   }
 })();
 </script>
