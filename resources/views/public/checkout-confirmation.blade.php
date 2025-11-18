@@ -1604,23 +1604,15 @@ window.addEventListener('load', function() {
     }, 1500);
 });
 @endif
-// ===== Auto-abrir modal si hay mascotas pendientes y se acaba de registrar una
+// ===== Resetear formulario del modal cuando se cierra (si se usa)
 (() => {
-    @php
-        $justRegisteredPet = session('success') && str_contains(session('success'), 'registrada exitosamente');
-    @endphp
-    @if($justRegisteredPet && !$allPetsRegistered)
-        // Pequeño delay para que el usuario vea el mensaje de éxito primero
-        setTimeout(() => {
-            const modal = new bootstrap.Modal(document.getElementById('registerPetModal'));
-            modal.show();
-        }, 2000);
-    @endif
-
-    // Resetear formulario cuando se cierra el modal
     const modal = document.getElementById('registerPetModal');
+    if (!modal) return;
+
     modal.addEventListener('hidden.bs.modal', () => {
         const form = document.getElementById('checkout-pet-form');
+        if (!form) return;
+
         form.reset();
 
         // Limpiar preview de foto principal
@@ -1629,6 +1621,9 @@ window.addEventListener('load', function() {
         if (photoPreview) {
             photoPreview.src = '';
             photoPreview.classList.add('d-none');
+        }
+        if (photoDrop) {
+            photoDrop.classList.remove('has-photo');
         }
 
         // Limpiar fotos múltiples
@@ -1646,12 +1641,18 @@ window.addEventListener('load', function() {
         const medicalTextarea = document.getElementById('medical_conditions');
         if (medicalTextarea) {
             medicalTextarea.removeAttribute('disabled');
+            medicalTextarea.style.opacity = '1';
         }
 
         // Resetear zone preview
         const zonePreview = document.getElementById('zone-preview');
         if (zonePreview) {
-            zonePreview.textContent = '—';
+            zonePreview.textContent = 'No seleccionada';
+        }
+
+        const zone = document.getElementById('zone');
+        if (zone) {
+            zone.value = '';
         }
     });
 })();

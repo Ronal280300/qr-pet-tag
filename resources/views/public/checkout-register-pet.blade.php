@@ -276,43 +276,6 @@
           </div>
         </div>
 
-        {{-- ======================= FOTOS MÚLTIPLES ======================= --}}
-        <div class="form-section">
-          <div class="section-header">
-            <div class="section-icon-wrapper">
-              <div class="section-icon purple">
-                <i class="fa-solid fa-images"></i>
-              </div>
-              <div class="section-info">
-                <h2 class="section-title">Galería de fotos</h2>
-                <p class="section-description">Puedes seleccionar hasta 3 fotos adicionales</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="section-content">
-            <div class="upload-area">
-              <input type="file" id="photos" name="photos[]" class="d-none" multiple accept="image/*">
-              <label for="photos" class="upload-label">
-                <div class="upload-icon">
-                  <i class="fa-solid fa-cloud-arrow-up"></i>
-                </div>
-                <div class="upload-text">
-                  <span class="upload-title">Haz clic para seleccionar fotos</span>
-                  <span class="upload-subtitle">JPG, PNG · Máx. 100 MB por imagen · Hasta 3 fotos</span>
-                </div>
-              </label>
-            </div>
-
-            <div id="photosPreviewGrid" class="photos-grid d-none"></div>
-
-            <button type="button" id="btnClearPhotos" class="btn-clear-photos d-none">
-              <i class="fa-solid fa-trash"></i>
-              Eliminar todas las fotos
-            </button>
-          </div>
-        </div>
-
         {{-- ======================= FOTO PRINCIPAL ======================= --}}
         <div class="form-section">
           <div class="section-header">
@@ -350,6 +313,43 @@
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {{-- ======================= FOTOS MÚLTIPLES ======================= --}}
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon-wrapper">
+              <div class="section-icon purple">
+                <i class="fa-solid fa-images"></i>
+              </div>
+              <div class="section-info">
+                <h2 class="section-title">Galería de fotos (Opcional)</h2>
+                <p class="section-description">Puedes seleccionar hasta 3 fotos adicionales</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-content">
+            <div class="upload-area">
+              <input type="file" id="photos" name="photos[]" class="d-none" multiple accept="image/*">
+              <label for="photos" class="upload-label">
+                <div class="upload-icon">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div class="upload-text">
+                  <span class="upload-title">Haz clic para seleccionar fotos</span>
+                  <span class="upload-subtitle">JPG, PNG · Máx. 100 MB por imagen · Hasta 3 fotos</span>
+                </div>
+              </label>
+            </div>
+
+            <div id="photosPreviewGrid" class="photos-grid d-none"></div>
+
+            <button type="button" id="btnClearPhotos" class="btn-clear-photos d-none">
+              <i class="fa-solid fa-trash"></i>
+              Eliminar todas las fotos
+            </button>
           </div>
         </div>
 
@@ -1314,19 +1314,36 @@
       syncSubmit();
     });
 
+    let isSubmitting = false;
+
     form.addEventListener('submit', (e) => {
+      // Prevenir doble envío
+      if (isSubmitting) {
+        e.preventDefault();
+        return;
+      }
+
+      // Validar foto principal
       if (!hasMain()) {
         e.preventDefault();
         Swal.fire({
           icon: 'warning',
           title: 'Foto principal requerida',
-          text: 'Por favor selecciona una foto principal para tu mascota.',
+          text: 'Por favor selecciona una foto principal para tu mascota antes de continuar.',
           confirmButtonText: 'Entendido',
           confirmButtonColor: '#667eea'
         });
+        return;
       }
+
+      // Marcar como enviando y deshabilitar botón
+      isSubmitting = true;
+      submit.disabled = true;
+      submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Guardando...</span>';
+      submit.style.pointerEvents = 'none';
+      submit.style.opacity = '0.7';
     });
-    
+
     syncSubmit();
   })();
 </script>
