@@ -947,7 +947,11 @@
                 @if(optional($pet->reward)->active)
                   <span class="badge-item badge-reward">
                     <i class="fa-solid fa-medal"></i>
-                    Recompensa
+                    @if(optional($pet->reward)->amount)
+                      ₡{{ number_format((float)$pet->reward->amount, 0) }}
+                    @else
+                      Recompensa
+                    @endif
                   </span>
                 @endif
               </div>

@@ -61,7 +61,7 @@
                             @endif
                         </div>
 
-                        @if($qrCode->pet->reward->is_active && $qrCode->pet->reward->amount > 0)
+                        @if(optional($qrCode->pet->reward)->active && optional($qrCode->pet->reward)->amount > 0)
                             <div class="alert alert-info mt-3">
                                 <h5>Recompensa</h5>
                                 <p>Se ofrece una recompensa de ₡{{ number_format($qrCode->pet->reward->amount, 2) }}</p>

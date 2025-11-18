@@ -120,6 +120,9 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'payment_proof' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120', // 5MB max
+            'payment_method' => 'required|in:transfer,sinpe',
+            'shipping_zone' => 'required|in:gam,fuera_gam',
+            'shipping_address' => 'required|string|max:1000',
         ]);
 
         // Leer datos desde sesión para mayor seguridad
@@ -141,7 +144,13 @@ class CheckoutController extends Controller
             }
             $additionalPets = max(0, $petsQuantity - $plan->pets_included);
             $additionalCost = $additionalPets * $plan->additional_pet_price;
-            $total = $plan->calculateTotal($petsQuantity);
+            $planTotal = $plan->calculateTotal($petsQuantity);
+
+            // Calcular costo de envío
+            $shippingCost = $request->shipping_zone === 'gam' ? 1500 : 3500;
+
+            // Total final = plan + envío
+            $total = $planTotal + $shippingCost;
 
             // Guardar comprobante de pago
             $path = $request->file('payment_proof')->store('payment-proofs', 'public');
@@ -153,10 +162,16 @@ class CheckoutController extends Controller
                 'pets_quantity' => $petsQuantity,
                 'subtotal' => $plan->price,
                 'additional_pets_cost' => $additionalCost,
+                'shipping_cost' => $shippingCost,
                 'total' => $total,
                 'status' => 'payment_uploaded',
                 'payment_proof' => $path,
                 'payment_uploaded_at' => now(),
+                'payment_method' => $request->payment_method,
+                'sinpe_phone' => $request->payment_method === 'sinpe' ? Auth::user()->phone : null,
+                'payment_description' => $request->payment_method === 'sinpe' ? 'Plan QR-Pet Tag' : null,
+                'shipping_zone' => $request->shipping_zone,
+                'shipping_address' => $request->shipping_address,
                 'expires_at' => $plan->type === 'subscription'
                     ? now()->addMonths($plan->duration_months)
                     : null,

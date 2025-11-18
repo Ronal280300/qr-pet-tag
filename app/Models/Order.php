@@ -26,6 +26,13 @@ class Order extends Model
         'admin_notes',
         'expires_at',
         'auto_renew',
+        // Nuevos campos de pago y envío
+        'payment_method',        // 'transfer' o 'sinpe'
+        'sinpe_phone',           // Teléfono para SINPE
+        'payment_description',   // Descripción del pago
+        'shipping_zone',         // 'gam' o 'fuera_gam'
+        'shipping_cost',         // Costo del envío
+        'shipping_address',      // Dirección de envío
     ];
 
     protected function casts(): array
@@ -35,6 +42,7 @@ class Order extends Model
             'subtotal' => 'decimal:2',
             'additional_pets_cost' => 'decimal:2',
             'total' => 'decimal:2',
+            'shipping_cost' => 'decimal:2',
             'payment_uploaded_at' => 'datetime',
             'verified_at' => 'datetime',
             'expires_at' => 'datetime',
