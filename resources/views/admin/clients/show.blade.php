@@ -1747,9 +1747,9 @@
             // Actualizar el nombre de la mascota en el modal
             petNameLabel.textContent = petName;
 
-            // Construir la URL dinámica para el formulario
-            const baseUrl = "{{ route('portal.admin.clients.pets.detach', ['user' => $user->id, 'pet' => '__PET__']) }}";
-            const finalUrl = baseUrl.replace('__PET__', petId);
+            // Construir la URL completa manualmente
+            const userId = "{{ $user->id }}";
+            const finalUrl = `/portal/admin/clients/${userId}/pets/${petId}`;
 
             // Actualizar la acción del formulario
             detachForm.setAttribute('action', finalUrl);
@@ -1809,9 +1809,9 @@
             // Actualizar el nombre de la mascota en el modal
             transferPetNameLabel.textContent = petName;
 
-            // Construir la URL dinámica para el formulario
-            const baseUrl = "{{ route('portal.admin.clients.pets.transfer', ['user' => $user->id, 'pet' => '__PET__']) }}";
-            const finalUrl = baseUrl.replace('__PET__', petId);
+            // Construir la URL completa manualmente
+            const userId = "{{ $user->id }}";
+            const finalUrl = `/portal/admin/clients/${userId}/pets/${petId}/transfer`;
 
             // Actualizar la acción del formulario
             transferForm.setAttribute('action', finalUrl);
@@ -1912,60 +1912,44 @@
     })();
 
     (function() {
-        // --- Eliminar cliente (delegación de eventos) ---
+        // ==========================================
+        // ELIMINAR CLIENTE
+        // ==========================================
         const deleteForm = document.getElementById('deleteClientForm');
 
-        function confirmAndDelete() {
-            const run = (typeof Swal !== 'undefined') ?
-                () => Swal.fire({
-                    title: '¿Eliminar cliente?',
-                    html: 'Esta acción <b>no se puede deshacer</b>.<br>Solo se pueden eliminar clientes <b>sin mascotas vinculadas</b>.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#dc3545'
-                }).then(r => {
-                    if (r.isConfirmed) deleteForm.submit();
-                }) :
-                () => {
-                    if (confirm('¿Eliminar cliente?')) deleteForm.submit();
-                };
-
-            run();
-        }
-
-        // Delegación: captura clicks del item del menú o de cualquier botón equivalente
+        // Delegación: captura clicks del botón eliminar
         document.addEventListener('click', function(e) {
-            const trigger = e.target.closest('.js-delete-client, [data-action="delete-client"], [data-delete-client], #deleteClientBtn');
+            // Buscar si el elemento clicado o algún padre es el botón de eliminar
+            const trigger = e.target.closest('.js-delete-client');
             if (!trigger) return;
 
             e.preventDefault();
             e.stopPropagation();
 
-            const deleteForm = document.getElementById('deleteClientForm');
-            const run = (typeof Swal !== 'undefined') ?
-                () => Swal.fire({
-                    title: '¿Eliminar cliente?',
-                    html: 'Esta acción <b>no se puede deshacer</b>.<br>Solo se pueden eliminar clientes <b>sin mascotas vinculadas</b>.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#dc3545'
-                }).then(r => {
-                    if (r.isConfirmed) deleteForm.submit();
-                }) :
-                () => {
-                    if (confirm('¿Eliminar cliente?')) deleteForm.submit();
-                };
+            // Mostrar confirmación con SweetAlert
+            Swal.fire({
+                title: '¿Eliminar cliente?',
+                html: 'Esta acción <b>no se puede deshacer</b>.<br><br>Solo se pueden eliminar clientes <b>sin mascotas vinculadas</b>.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fa-solid fa-trash-can me-2"></i>Sí, eliminar',
+                cancelButtonText: '<i class="fa-solid fa-xmark me-2"></i>Cancelar',
+                customClass: {
+                    popup: 'swal-modern',
+                    confirmButton: 'btn-swal-confirm',
+                    cancelButton: 'btn-swal-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Enviar formulario para eliminar
+                    deleteForm.submit();
+                }
+            });
+        });
 
-            run();
-        }, true);
-
-
-
-        // (opcional) si algún HTML dejó el botón con disabled por cache, lo quitamos
+        // Quitar disabled del botón guardar si quedó por cache
         document.getElementById('saveBtn')?.removeAttribute('disabled');
     })();
 </script>
