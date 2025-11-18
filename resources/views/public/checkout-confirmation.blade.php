@@ -1604,6 +1604,86 @@ window.addEventListener('load', function() {
     }, 1500);
 });
 @endif
+// ===== AUTO-CONTINUAR: Alerta inteligente cuando se registra una mascota y quedan más pendientes
+(() => {
+    @php
+        $justRegisteredPet = session('success') && str_contains(session('success'), 'registrada exitosamente');
+        $hasPendingPets = !$allPetsRegistered;
+    @endphp
+
+    @if($justRegisteredPet && $hasPendingPets)
+        // El usuario acaba de registrar una mascota y AÚN quedan más por registrar
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Mascota registrada!',
+                    html: `
+                        <div style="text-align: left;">
+                            <p style="font-size: 16px; margin-bottom: 16px; color: #1f2937; line-height: 1.6;">
+                                <strong style="color: #10b981;">✅ ¡Excelente!</strong> Has registrado exitosamente <strong>{{ $registeredPets }} de {{ $totalPets }} mascotas</strong>.
+                            </p>
+
+                            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #fbbf24; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                                <p style="margin: 0; font-size: 15px; color: #92400e; font-weight: 600;">
+                                    <i class="fa-solid fa-info-circle"></i>
+                                    Aún te {{ $remainingPets > 1 ? 'faltan' : 'falta' }} <strong>{{ $remainingPets }} mascota{{ $remainingPets > 1 ? 's' : '' }}</strong> por registrar según tu plan.
+                                </p>
+                            </div>
+
+                            <p style="font-size: 14px; color: #64748b; margin: 0; line-height: 1.5;">
+                                ¿Quieres continuar registrando la siguiente mascota ahora?
+                            </p>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-paw"></i> Sí, registrar siguiente mascota',
+                    cancelButtonText: 'Lo haré después',
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#6b7280',
+                    customClass: {
+                        popup: 'modern-guide',
+                        confirmButton: 'swal2-confirm-large',
+                        cancelButton: 'swal2-cancel-small'
+                    },
+                    reverseButtons: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showClass: {
+                        popup: 'animate__animated animate__bounceIn animate__faster'
+                    },
+                    didOpen: () => {
+                        // Hacer que el botón de confirmar sea más prominente
+                        const confirmBtn = Swal.getConfirmButton();
+                        if (confirmBtn) {
+                            confirmBtn.style.fontSize = '16px';
+                            confirmBtn.style.padding = '16px 32px';
+                            confirmBtn.style.fontWeight = '700';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirigir inmediatamente al formulario de la siguiente mascota
+                        window.location.href = '{{ route('checkout.register-pet-form', $order) }}';
+                    } else {
+                        // Si decide hacerlo después, hacer scroll al botón de registrar
+                        const btnRegister = document.getElementById('btnRegisterPet');
+                        if (btnRegister) {
+                            btnRegister.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                            // Animar el botón para llamar la atención
+                            btnRegister.style.animation = 'pulse 1.5s infinite';
+                            setTimeout(() => {
+                                btnRegister.style.animation = '';
+                            }, 5000);
+                        }
+                    }
+                });
+            }, 800); // Pequeño delay para que cargue bien la página
+        });
+    @endif
+})();
+
 // ===== Resetear formulario del modal cuando se cierra (si se usa)
 (() => {
     const modal = document.getElementById('registerPetModal');
