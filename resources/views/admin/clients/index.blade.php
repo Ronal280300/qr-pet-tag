@@ -192,15 +192,15 @@
         </div>
     </div>
 
-    {{-- Cuerpo de la tarjeta / Tabla --}}
+    {{-- Cuerpo de la tarjeta / Tabla Desktop + Cards Mobile --}}
     <div class="card-body p-0">
-        <div class="table-responsive">
+        {{-- TABLA PARA DESKTOP Y TABLETS --}}
+        <div class="table-responsive d-none d-md-block">
             <table class="table table-modern-clients mb-0 align-middle">
                 <thead>
                 <tr>
                     <th style="width:30%">
                         <div class="th-content d-flex align-items-center gap-2">
-                            {{-- ✅ Master checkbox (dentro de “Cliente”, NO agrega columna extra) --}}
                             <input type="checkbox" id="chkAll" class="form-check-input me-1" />
                             <label for="chkAll" class="mb-0 cursor-pointer">
                                 <i class="fa-solid fa-user me-2"></i>Cliente
@@ -212,7 +212,7 @@
                             <i class="fa-solid fa-envelope me-2"></i>Email
                         </div>
                     </th>
-                    <th style="width:15%">
+                    <th style="width:15%" class="d-none d-lg-table-cell">
                         <div class="th-content">
                             <i class="fa-solid fa-phone me-2"></i>Teléfono
                         </div>
@@ -237,14 +237,8 @@
                 @forelse($clients as $c)
                     <tr class="client-row">
                         <td>
-                            {{-- 🔘 Checkbox por fila (dentro de la columna Cliente) --}}
                             <div class="d-flex align-items-center gap-3">
-                                <input type="checkbox"
-                                       class="form-check-input row-check"
-                                       value="{{ $c->id }}"
-                                       aria-label="Seleccionar {{ $c->name }}" />
-
-                                {{-- Avatar + nombre/ID --}}
+                                <input type="checkbox" class="form-check-input row-check" value="{{ $c->id }}" aria-label="Seleccionar {{ $c->name }}" />
                                 <div class="d-flex align-items-center gap-3 overflow-hidden">
                                     <div class="avatar-initials-modern" style="width:48px;height:48px;border-radius:14px;">
                                         <span class="avatar-text" style="font-size:1rem;">
@@ -252,9 +246,7 @@
                                         </span>
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="fw-semibold text-truncate" title="{{ $c->name }}">
-                                            {{ $c->name }}
-                                        </div>
+                                        <div class="fw-semibold text-truncate" title="{{ $c->name }}">{{ $c->name }}</div>
                                         <div class="text-muted small">ID: {{ $c->id }}</div>
                                         @if($c->currentPlan && $c->plan_is_active)
                                         <div class="small mt-1">
@@ -262,11 +254,6 @@
                                                 <i class="fa-solid fa-badge-check me-1"></i>{{ $c->currentPlan->name }}
                                                 @if($c->plan_expires_at)
                                                     - Vence: {{ $c->plan_expires_at->format('d/m/Y') }}
-                                                    @if($c->plan_expires_at->isPast())
-                                                        <i class="fa-solid fa-exclamation-triangle text-danger ms-1"></i>
-                                                    @elseif($c->plan_expires_at->diffInDays(now()) <= 3)
-                                                        <i class="fa-solid fa-clock text-warning ms-1"></i>
-                                                    @endif
                                                 @endif
                                             </span>
                                         </div>
@@ -275,17 +262,14 @@
                                 </div>
                             </div>
                         </td>
-
                         <td class="text-truncate">
                             <i class="fa-solid fa-envelope text-danger me-2"></i>
                             {{ $c->email }}
                         </td>
-
-                        <td class="text-truncate">
+                        <td class="text-truncate d-none d-lg-table-cell">
                             <i class="fa-solid fa-phone text-success me-2"></i>
                             {{ $c->phone ?: '—' }}
                         </td>
-
                         <td>
                             @php
                                 $stateMap = [
@@ -299,13 +283,11 @@
                                 <i class="fa-solid fa-circle-check me-1"></i>{{ $st['label'] }}
                             </span>
                         </td>
-
                         <td class="text-center">
                             <span class="badge rounded-pill bg-light border text-primary px-3 py-2">
                                 <i class="fa-solid fa-paw me-1"></i>{{ $c->pets_count ?? 0 }}
                             </span>
                         </td>
-
                         <td class="text-end">
                             <a href="{{ route('portal.admin.clients.show', $c) }}" class="btn btn-outline-primary btn-sm">
                                 <i class="fa-regular fa-pen-to-square me-1"></i><span> Editar</span>
@@ -322,6 +304,75 @@
                 @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- VISTA DE TARJETAS PARA MÓVILES --}}
+        <div class="d-md-none">
+            @forelse($clients as $c)
+            <div class="client-card-mobile">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <input type="checkbox" class="form-check-input row-check mt-1" value="{{ $c->id }}" aria-label="Seleccionar {{ $c->name }}" />
+                    <div class="avatar-initials-modern" style="width:56px;height:56px;border-radius:14px;">
+                        <span class="avatar-text" style="font-size:1.1rem;">
+                            {{ \Illuminate\Support\Str::of($c->name)->explode(' ')->map(fn($p)=>\Illuminate\Support\Str::substr($p,0,1))->take(2)->implode('') }}
+                        </span>
+                    </div>
+                    <div class="flex-grow-1 min-w-0">
+                        <h6 class="fw-bold mb-1">{{ $c->name }}</h6>
+                        <div class="text-muted small mb-2">ID: {{ $c->id }}</div>
+                        @php
+                            $stateMap = [
+                                'active' => ['label'=>'Activo','class'=>'bg-success-subtle text-success border-success'],
+                                'pending' => ['label'=>'Pendiente','class'=>'bg-warning-subtle text-warning border-warning'],
+                                'inactive' => ['label'=>'Inactivo','class'=>'bg-secondary-subtle text-secondary border-secondary'],
+                            ];
+                            $st = $stateMap[$c->status] ?? $stateMap['active'];
+                        @endphp
+                        <span class="badge px-2 py-1 border {{ $st['class'] }}" style="font-size:0.75rem;">
+                            <i class="fa-solid fa-circle-check me-1"></i>{{ $st['label'] }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="client-card-info">
+                    <div class="info-item">
+                        <i class="fa-solid fa-envelope text-danger"></i>
+                        <span class="text-truncate">{{ $c->email }}</span>
+                    </div>
+                    @if($c->phone)
+                    <div class="info-item">
+                        <i class="fa-solid fa-phone text-success"></i>
+                        <span>{{ $c->phone }}</span>
+                    </div>
+                    @endif
+                    <div class="info-item">
+                        <i class="fa-solid fa-paw text-primary"></i>
+                        <span><strong>{{ $c->pets_count ?? 0 }}</strong> {{ $c->pets_count === 1 ? 'mascota' : 'mascotas' }}</span>
+                    </div>
+                    @if($c->currentPlan && $c->plan_is_active)
+                    <div class="info-item">
+                        <i class="fa-solid fa-badge-check text-info"></i>
+                        <span>{{ $c->currentPlan->name }}
+                            @if($c->plan_expires_at)
+                                - Vence: {{ $c->plan_expires_at->format('d/m/Y') }}
+                            @endif
+                        </span>
+                    </div>
+                    @endif
+                </div>
+
+                <div class="mt-3">
+                    <a href="{{ route('portal.admin.clients.show', $c) }}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fa-regular fa-pen-to-square me-1"></i> Ver detalles
+                    </a>
+                </div>
+            </div>
+            @empty
+            <div class="empty-state-mobile">
+                <i class="fa-regular fa-folder-open fa-3x mb-3 text-muted"></i>
+                <p class="text-muted mb-0">No hay clientes que coincidan con el filtro.</p>
+            </div>
+            @endforelse
         </div>
 
         {{-- Paginación --}}
@@ -1489,20 +1540,6 @@
       font-size: 0.85rem;
     }
 
-    /* Hacer aún más compacto en móviles pequeños */
-    .table-modern-clients th,
-    .table-modern-clients td {
-      padding: 0.5rem 0.35rem;
-    }
-
-    .client-name {
-      font-size: 0.9rem;
-    }
-
-    .client-id {
-      font-size: 0.75rem;
-    }
-
     /* Bulkbar responsive */
     .bulkbar {
       flex-direction: column;
@@ -1519,6 +1556,55 @@
       font-size: 0.75rem;
       padding: 6px 10px;
     }
+  }
+
+  /* ===== VISTA MÓVIL - TARJETAS ===== */
+  .client-card-mobile {
+    padding: 1.25rem;
+    border-bottom: 2px solid #f0f0f0;
+    transition: var(--transition);
+    background: white;
+  }
+
+  .client-card-mobile:hover {
+    background: linear-gradient(90deg, rgba(13, 110, 253, 0.03), transparent);
+  }
+
+  .client-card-mobile:last-child {
+    border-bottom: none;
+  }
+
+  .client-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .info-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  .info-item span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .empty-state-mobile {
+    padding: 4rem 2rem;
+    text-align: center;
   }
 </style>
 
