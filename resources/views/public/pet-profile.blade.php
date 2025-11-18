@@ -49,7 +49,12 @@
 
                         <div class="text-center mt-4">
                             @if($qrCode->pet->user->phone)
-                                <a href="https://wa.me/506{{ $qrCode->pet->user->phone }}?text=Hola,%20encontré%20a%20tu%20mascota%20{{ $qrCode->pet->name }}" 
+                                @php
+                                    // Normalizar teléfono: extraer solo dígitos para WhatsApp
+                                    $phoneDigits = preg_replace('/\D+/', '', (string) $qrCode->pet->user->phone);
+                                    $waMessage = "Hola, encontré a tu mascota {$qrCode->pet->name}";
+                                @endphp
+                                <a href="https://wa.me/{{ $phoneDigits }}?text={{ rawurlencode($waMessage) }}"
                                    class="btn btn-success" target="_blank">
                                     <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
                                 </a>

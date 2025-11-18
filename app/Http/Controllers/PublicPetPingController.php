@@ -33,15 +33,16 @@ class PublicPetPingController extends Controller
 
     /**
      * Config de throttling (con fallbacks).
+     * NOTA: Valores aumentados significativamente para asegurar que SIEMPRE se notifique.
      */
     private function cfg(): array
     {
         return [
-            'perHour'   => (int) env('NOTIFY_MAX_PER_HOUR', (int) env('PING_MAX_MAILS_PER_HOUR', 6)),
-            'minGap'    => (int) env('NOTIFY_MIN_GAP_MINUTES', 10),   // minutos
-            'moveBreak' => (int) env('NOTIFY_MOVE_BREAK_METERS', 250), // m para romper enfriamiento
-            'dailyCap'  => (int) env('NOTIFY_DAILY_CAP', 30),
-            'dedupR'    => (int) env('NOTIFY_DEDUP_RADIUS_METERS', 150),
+            'perHour'   => (int) env('NOTIFY_MAX_PER_HOUR', (int) env('PING_MAX_MAILS_PER_HOUR', 999)),  // Aumentado a 999
+            'minGap'    => (int) env('NOTIFY_MIN_GAP_MINUTES', 1),    // Reducido a 1 minuto
+            'moveBreak' => (int) env('NOTIFY_MOVE_BREAK_METERS', 50),  // Reducido a 50m
+            'dailyCap'  => (int) env('NOTIFY_DAILY_CAP', 999),          // Aumentado a 999
+            'dedupR'    => (int) env('NOTIFY_DEDUP_RADIUS_METERS', 20), // Reducido a 20m
         ];
     }
 
@@ -197,13 +198,41 @@ class PublicPetPingController extends Controller
                     $mailed = true;
                     Log::info('Ping mailed', ['pet_id' => $pet->id, 'email' => $pet->user->email]);
 
+                    // Registrar envío exitoso en EmailLog
+                    \App\Models\EmailLog::create([
+                        'recipient'        => $pet->user->email,
+                        'subject'          => $subject,
+                        'type'             => 'scan_notification',
+                        'related_user_id'  => $pet->user->id,
+                        'status'           => 'sent',
+                        'error_message'    => null,
+                        'sent_at'          => now(),
+                    ]);
+
                     // Enviar WhatsApp al dueño
                     $whatsapp = app(WhatsAppService::class);
                     $whatsapp->sendQrScanned($pet->user, $pet->name, $locationHuman, $mapsUrl);
 
                 } catch (\Throwable $e) {
                     $why = 'mail_error';
-                    Log::error('Ping mail failed', ['pet_id' => $pet->id, 'err' => $e->getMessage()]);
+                    $errorMessage = $e->getMessage();
+                    Log::error('Ping mail failed', [
+                        'pet_id'       => $pet->id,
+                        'owner_email'  => $pet->user->email ?? 'N/A',
+                        'error'        => $errorMessage,
+                        'trace'        => $e->getTraceAsString(),
+                    ]);
+
+                    // Registrar fallo en EmailLog
+                    \App\Models\EmailLog::create([
+                        'recipient'        => $pet->user->email ?? 'unknown',
+                        'subject'          => $subject ?? 'QR Scan Notification',
+                        'type'             => 'scan_notification',
+                        'related_user_id'  => optional($pet->user)->id,
+                        'status'           => 'failed',
+                        'error_message'    => substr($errorMessage, 0, 500), // Limitar a 500 caracteres
+                        'sent_at'          => null,
+                    ]);
                 }
             }
         }
