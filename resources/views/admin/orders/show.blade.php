@@ -110,6 +110,12 @@
                                 <span class="detail-value">₡{{ number_format($order->additional_pets_cost, 0, ',', '.') }}</span>
                             </div>
                             @endif
+                            @if($order->shipping_cost > 0)
+                            <div class="detail-row">
+                                <span class="detail-label">Envío ({{ $order->shipping_zone === 'gam' ? 'GAM' : 'Fuera del GAM' }})</span>
+                                <span class="detail-value">₡{{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                            </div>
+                            @endif
                             <div class="detail-row total-row">
                                 <span class="detail-label">TOTAL</span>
                                 <span class="detail-value total-value">₡{{ number_format($order->total, 0, ',', '.') }}</span>
@@ -117,6 +123,85 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Payment & Shipping Information -->
+                @if($order->payment_method || $order->shipping_zone)
+                <div class="info-card-modern">
+                    <div class="card-header-modern">
+                        <div class="header-icon">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <h5>Información de Pago y Envío</h5>
+                    </div>
+                    <div class="card-body-modern">
+                        <div class="payment-shipping-grid">
+                            {{-- Payment Method Section --}}
+                            @if($order->payment_method)
+                            <div class="info-section">
+                                <div class="section-header">
+                                    <i class="fa-solid fa-money-bill-transfer"></i>
+                                    <strong>Método de Pago</strong>
+                                </div>
+                                <div class="section-content">
+                                    <span class="payment-badge {{ $order->payment_method === 'sinpe' ? 'badge-sinpe' : 'badge-transfer' }}">
+                                        @if($order->payment_method === 'sinpe')
+                                            <i class="fa-solid fa-mobile-screen"></i>
+                                            SINPE Móvil
+                                        @else
+                                            <i class="fa-solid fa-building-columns"></i>
+                                            Transferencia Bancaria
+                                        @endif
+                                    </span>
+
+                                    @if($order->payment_method === 'sinpe' && $order->sinpe_phone)
+                                        <div class="payment-detail">
+                                            <label>Teléfono SINPE:</label>
+                                            <span>{{ $order->sinpe_phone }}</span>
+                                        </div>
+                                    @endif
+
+                                    @if($order->payment_description)
+                                        <div class="payment-detail">
+                                            <label>Descripción:</label>
+                                            <span>{{ $order->payment_description }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- Shipping Section --}}
+                            @if($order->shipping_zone)
+                            <div class="info-section">
+                                <div class="section-header">
+                                    <i class="fa-solid fa-truck"></i>
+                                    <strong>Información de Envío</strong>
+                                </div>
+                                <div class="section-content">
+                                    <span class="shipping-badge {{ $order->shipping_zone === 'gam' ? 'badge-gam' : 'badge-fuera-gam' }}">
+                                        @if($order->shipping_zone === 'gam')
+                                            <i class="fa-solid fa-city"></i>
+                                            Dentro del GAM
+                                        @else
+                                            <i class="fa-solid fa-map"></i>
+                                            Fuera del GAM
+                                        @endif
+                                        <span class="shipping-cost">+ ₡{{ number_format($order->shipping_cost ?? 0, 0, ',', '.') }}</span>
+                                    </span>
+
+                                    @if($order->shipping_address)
+                                        <div class="shipping-address">
+                                            <label><i class="fa-solid fa-location-dot"></i> Dirección de envío:</label>
+                                            <p>{{ $order->shipping_address }}</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 @if($order->admin_notes)
                 <div class="notes-card-modern">
@@ -262,6 +347,22 @@
                                     <span><strong>Condiciones médicas:</strong> {{ $pet->medical_conditions }}</span>
                                 </div>
                                 @endif
+
+                                {{-- Pet Actions: Edit/Delete --}}
+                                <div class="pet-actions-admin">
+                                    <a href="{{ route('portal.pets.edit', $pet) }}" class="btn-pet-action edit" title="Editar mascota">
+                                        <i class="fa-solid fa-pen"></i>
+                                        <span>Editar</span>
+                                    </a>
+                                    <form method="POST" action="{{ route('portal.pets.destroy', $pet) }}" class="delete-pet-form" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="btn-pet-action delete" title="Eliminar mascota" onclick="confirmDeletePet(this, '{{ $pet->name }}')">
+                                            <i class="fa-solid fa-trash"></i>
+                                            <span>Eliminar</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                             @endforeach
                         </div>
@@ -985,6 +1086,206 @@
     margin-top: 2px;
 }
 
+/* Pet Actions (Edit/Delete) */
+.pet-actions-admin {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--order-border);
+}
+
+.btn-pet-action {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-pet-action.edit {
+    background: linear-gradient(135deg, var(--order-primary), var(--order-primary-dark));
+    color: white;
+    box-shadow: 0 2px 8px rgba(79, 137, 232, 0.2);
+}
+
+.btn-pet-action.edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 137, 232, 0.3);
+    color: white;
+}
+
+.btn-pet-action.delete {
+    background: linear-gradient(135deg, var(--order-danger), #DC2626);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.btn-pet-action.delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-pet-action i {
+    font-size: 14px;
+}
+
+/* Payment & Shipping Grid */
+.payment-shipping-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.info-section {
+    border: 1px solid var(--order-border);
+    border-radius: 12px;
+    padding: 16px;
+    background: var(--order-bg);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--order-border);
+}
+
+.section-header i {
+    color: var(--order-primary);
+    font-size: 18px;
+}
+
+.section-header strong {
+    font-size: 15px;
+    color: var(--order-text);
+}
+
+.section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Payment Badges */
+.payment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    align-self: flex-start;
+}
+
+.badge-sinpe {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.badge-transfer {
+    background: linear-gradient(135deg, var(--order-primary), var(--order-primary-dark));
+    color: white;
+    box-shadow: 0 2px 8px rgba(79, 137, 232, 0.2);
+}
+
+.payment-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--order-border);
+}
+
+.payment-detail label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--order-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.payment-detail span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--order-text);
+}
+
+/* Shipping Badges */
+.shipping-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    width: 100%;
+}
+
+.badge-gam {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.badge-fuera-gam {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.shipping-cost {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.shipping-address {
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--order-border);
+}
+
+.shipping-address label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--order-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.shipping-address label i {
+    color: var(--order-danger);
+}
+
+.shipping-address p {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--order-text);
+    margin: 0;
+    line-height: 1.6;
+}
+
 /* Actions Card */
 .actions-card-modern {
     background: white;
@@ -1474,6 +1775,41 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Confirmación para ELIMINAR mascota
+    window.confirmDeletePet = function(button, petName) {
+        const form = button.closest('form');
+
+        Swal.fire({
+            title: '¿Eliminar mascota?',
+            html: `<p>Estás a punto de eliminar a <strong>${petName}</strong> de esta orden.</p><p style="color: #EF4444; margin-top: 12px;"><i class="fa-solid fa-triangle-exclamation"></i> Esta acción no se puede deshacer.</p>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: '<i class="fa-solid fa-trash"></i> Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+                popup: 'swal-modern',
+                confirmButton: 'swal-btn-danger',
+                cancelButton: 'swal-btn-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Eliminando...',
+                    text: 'Por favor espera',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                form.submit();
+            }
+        });
+    };
 });
 </script>
 
