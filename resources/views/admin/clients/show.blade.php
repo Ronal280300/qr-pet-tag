@@ -275,6 +275,15 @@
                                 </thead>
                                 <tbody>
                                     @forelse($pets as $p)
+                                    {{-- Formulario oculto para desvincular --}}
+                                    <form id="detach-form-{{ $p->id }}" method="POST"
+                                          action="{{ route('portal.admin.clients.pets.detach', ['user' => $user->id, 'pet' => $p->id]) }}"
+                                          style="display: none;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="hidden" name="reset_qr" id="reset-qr-{{ $p->id }}" value="0">
+                                    </form>
+
                                     <tr class="pet-row">
                                         <td>
                                             <div class="pet-name">
@@ -308,16 +317,16 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group-actions">
-                                                <button class="btn btn-transfer"
-                                                    data-bs-toggle="modal" data-bs-target="#transferModal"
-                                                    data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}"
+                                                <button type="button" class="btn btn-transfer btn-transfer-pet"
+                                                    data-pet-id="{{ $p->id }}"
+                                                    data-pet-name="{{ $p->name }}"
                                                     title="Transferir a otro cliente">
                                                     <i class="fa-solid fa-right-left me-1"></i>
                                                     <span class="d-none d-xl-inline">Transferir</span>
                                                 </button>
-                                                <button class="btn btn-detach"
-                                                    data-bs-toggle="modal" data-bs-target="#detachModal"
-                                                    data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}"
+                                                <button type="button" class="btn btn-detach btn-detach-pet"
+                                                    data-pet-id="{{ $p->id }}"
+                                                    data-pet-name="{{ $p->name }}"
                                                     title="Desvincular del cliente">
                                                     <i class="fa-solid fa-link-slash me-1"></i>
                                                     <span class="d-none d-xl-inline">Desvincular</span>
@@ -342,6 +351,15 @@
                         {{-- VISTA DE TARJETAS PARA MÓVILES --}}
                         <div class="d-md-none">
                             @forelse($pets as $p)
+                            {{-- Formulario oculto para desvincular (móvil) --}}
+                            <form id="detach-form-mobile-{{ $p->id }}" method="POST"
+                                  action="{{ route('portal.admin.clients.pets.detach', ['user' => $user->id, 'pet' => $p->id]) }}"
+                                  style="display: none;">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="reset_qr" id="reset-qr-mobile-{{ $p->id }}" value="0">
+                            </form>
+
                             <div class="pet-card-mobile">
                                 <div class="d-flex align-items-start justify-content-between mb-3">
                                     <div class="flex-grow-1">
@@ -374,14 +392,14 @@
                                 @endif
 
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-transfer flex-fill"
-                                        data-bs-toggle="modal" data-bs-target="#transferModal"
-                                        data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
+                                    <button type="button" class="btn btn-transfer flex-fill btn-transfer-pet"
+                                        data-pet-id="{{ $p->id }}"
+                                        data-pet-name="{{ $p->name }}">
                                         <i class="fa-solid fa-right-left me-1"></i>Transferir
                                     </button>
-                                    <button class="btn btn-detach flex-fill"
-                                        data-bs-toggle="modal" data-bs-target="#detachModal"
-                                        data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
+                                    <button type="button" class="btn btn-detach flex-fill btn-detach-pet"
+                                        data-pet-id="{{ $p->id }}"
+                                        data-pet-name="{{ $p->name }}">
                                         <i class="fa-solid fa-link-slash me-1"></i>Desvincular
                                     </button>
                                 </div>
@@ -571,52 +589,12 @@
   @method('DELETE')
 </form>
 
-
-{{-- Modal Desenlazar --}}
-<div class="modal fade" id="detachModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form id="detachForm" method="POST" action="#">
-            @csrf @method('DELETE')
-            <div class="modal-content modal-modern">
-                <div class="modal-header border-0 pb-0">
-                    <div class="modal-icon-wrapper">
-                        <div class="modal-icon modal-icon-danger">
-                            <i class="fa-solid fa-link-slash"></i>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body text-center pt-2">
-                    <h5 class="modal-title-modern mb-3">Desenlazar mascota</h5>
-                    <p class="text-muted mb-4">
-                        ¿Estás seguro que deseas desenlazar a <strong id="petNameLabel" class="text-dark">esta mascota</strong> del cliente?
-                    </p>
-                    <div class="form-check-modern text-start">
-                        <input class="form-check-input-modern" type="checkbox" name="reset_qr" id="resetQr">
-                        <label class="form-check-label-modern" for="resetQr">
-                            <span class="check-title">Restablecer código QR</span>
-                            <span class="check-description">Dejar la mascota sin activar</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light btn-modal" data-bs-dismiss="modal">
-                        <i class="fa-solid fa-xmark me-2"></i>Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-danger btn-modal">
-                        <i class="fa-solid fa-link-slash me-2"></i>Desenlazar
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-{{-- Modal Transferir --}}
+{{-- Modal Transferir (único, compartido) --}}
 <div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form id="transferForm" method="POST" action="#">
+        <form id="transferForm" method="POST" action="{{ route('portal.admin.clients.pets.transfer', ['user' => $user->id, 'pet' => '__PET_ID__']) }}">
             @csrf
+            <input type="hidden" name="pet_id" id="transferPetIdInput">
             <div class="modal-content modal-modern">
                 <div class="modal-header border-0 pb-0">
                     <div class="modal-icon-wrapper">
@@ -1585,7 +1563,6 @@
 
         function formatPhoneCR(value) {
             value = String(value || '');
-            // Extraer solo dígitos, ignorando el prefijo 506 inicial si existe
             const digits = value.replace(/\D+/g, '').replace(/^506/, '').slice(0, 8);
             const part1 = digits.slice(0, 4);
             const part2 = digits.slice(4);
@@ -1614,11 +1591,10 @@
 
         phoneInput.addEventListener('blur', applyPhoneFormat);
 
-        // Aplicar formato inicial
         applyPhoneFormat();
 
         // ==========================================
-        // INDICADOR DE ESTADO DINÁMICO (ring-active/pending/inactive)
+        // INDICADOR DE ESTADO DINÁMICO
         // ==========================================
         const stateWrapper = document.querySelector('[data-state-wrapper]');
         const stateSelect = document.querySelector('[data-state-select]');
@@ -1636,10 +1612,7 @@
             }
         }
 
-        // Aplicar estado inicial
         updateStateRing();
-
-        // Actualizar cuando cambie el select
         stateSelect.addEventListener('change', updateStateRing);
 
         // ==========================================
@@ -1649,7 +1622,6 @@
         const saveButton = document.getElementById('saveBtn');
         const dirtyBadge = document.getElementById('dirtyBadge');
 
-        // Capturar estado inicial del formulario después de cargar
         let initialValues = {};
 
         function captureInitialValues() {
@@ -1660,7 +1632,6 @@
             }
         }
 
-        // Capturar valores iniciales al cargar
         window.addEventListener('load', () => {
             setTimeout(captureInitialValues, 100);
         });
@@ -1679,7 +1650,6 @@
                 }
             }
 
-            // Habilitar/deshabilitar botón y mostrar badge
             saveButton.disabled = !hasChanges;
 
             if (hasChanges) {
@@ -1691,20 +1661,17 @@
             return hasChanges;
         }
 
-        // Escuchar cambios en todos los inputs del formulario
         clientForm.addEventListener('input', checkFormChanges, true);
         clientForm.addEventListener('change', checkFormChanges, true);
 
         // ==========================================
-        // ANIMACIÓN AL ENVIAR FORMULARIO CON CONFIRMACIÓN
+        // ANIMACIÓN AL ENVIAR FORMULARIO
         // ==========================================
         clientForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevenir envío inmediato
+            e.preventDefault();
 
-            // Asegurar que el teléfono esté formateado
             applyPhoneFormat();
 
-            // Mostrar confirmación con Sweet Alert
             Swal.fire({
                 title: '¿Guardar cambios?',
                 text: "Se actualizará la información del cliente",
@@ -1721,67 +1688,52 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Deshabilitar botón y mostrar spinner
                     saveButton.disabled = true;
                     saveButton.querySelector('.btn-content').classList.add('d-none');
                     saveButton.querySelector('.btn-loading').classList.remove('d-none');
-
-                    // Enviar formulario
                     clientForm.submit();
                 }
             });
         });
 
         // ==========================================
-        // MODAL DESENLAZAR MASCOTA CON CONFIRMACIÓN
+        // DESVINCULAR MASCOTA - NUEVA LÓGICA SIMPLE
         // ==========================================
-        const detachModal = document.getElementById('detachModal');
-        const detachForm = document.getElementById('detachForm');
-        const petNameLabel = document.getElementById('petNameLabel');
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-detach-pet');
+            if (!btn) return;
 
-        detachModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget; // Botón que abrió el modal
-            const petId = button.getAttribute('data-pet-id');
-            const petName = button.getAttribute('data-pet-name');
-
-            console.log('🔍 Abriendo modal desenlazar:', { petId, petName });
-
-            // Actualizar el nombre de la mascota en el modal
-            petNameLabel.textContent = petName;
-
-            // Construir la URL completa manualmente
-            const userId = "{{ $user->id }}";
-            const finalUrl = `/portal/admin/clients/${userId}/pets/${petId}`;
-
-            console.log('✅ URL configurada para desenlazar:', finalUrl);
-
-            // Actualizar la acción del formulario
-            detachForm.setAttribute('action', finalUrl);
-            console.log('📝 Action del formulario:', detachForm.getAttribute('action'));
-        });
-
-        // Confirmar antes de desenlazar
-        detachForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // VALIDAR que el action esté configurado
-            const currentAction = detachForm.getAttribute('action');
-            if (!currentAction || currentAction === '#' || currentAction === '') {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo configurar la acción del formulario. Por favor, intenta de nuevo.',
-                    icon: 'error',
-                    confirmButtonColor: '#dc3545'
-                });
+            const petId = btn.getAttribute('data-pet-id');
+            const petName = btn.getAttribute('data-pet-name');
+
+            // Detectar si es móvil o desktop
+            const isMobile = window.innerWidth < 768;
+            const formId = isMobile ? `detach-form-mobile-${petId}` : `detach-form-${petId}`;
+            const resetQrId = isMobile ? `reset-qr-mobile-${petId}` : `reset-qr-${petId}`;
+
+            const detachForm = document.getElementById(formId);
+            const resetQrInput = document.getElementById(resetQrId);
+
+            if (!detachForm) {
+                console.error('Form not found:', formId);
                 return;
             }
 
-            const petName = petNameLabel.textContent;
-            const resetQr = document.getElementById('resetQr').checked;
-
+            // Mostrar confirmación con opción de resetear QR
             Swal.fire({
                 title: '¿Desenlazar mascota?',
-                html: `Se desenlazará <strong>${petName}</strong> del cliente.${resetQr ? '<br><br><span class="text-warning">⚠️ El código QR será restablecido</span>' : ''}`,
+                html: `
+                    <p class="mb-3">Se desenlazará <strong>${petName}</strong> del cliente.</p>
+                    <div class="form-check text-start" style="padding-left: 2.5rem;">
+                        <input class="form-check-input" type="checkbox" id="swalResetQr" style="width: 20px; height: 20px;">
+                        <label class="form-check-label" for="swalResetQr">
+                            <strong>Restablecer código QR</strong><br>
+                            <small class="text-muted">La mascota quedará sin activar</small>
+                        </label>
+                    </div>
+                `,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
@@ -1792,74 +1744,58 @@
                     popup: 'swal-modern',
                     confirmButton: 'btn-swal-confirm',
                     cancelButton: 'btn-swal-cancel'
+                },
+                preConfirm: () => {
+                    return document.getElementById('swalResetQr').checked;
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Cerrar modal y enviar formulario
-                    bootstrap.Modal.getInstance(detachModal).hide();
+                    // Establecer valor del checkbox reset_qr
+                    resetQrInput.value = result.value ? '1' : '0';
+                    // Enviar formulario
                     detachForm.submit();
                 }
             });
         });
 
-        // Limpiar checkbox y resetear action al cerrar modal
-        detachModal.addEventListener('hidden.bs.modal', function() {
-            const resetQrCheckbox = document.getElementById('resetQr');
-            if (resetQrCheckbox) {
-                resetQrCheckbox.checked = false;
-            }
-            // Resetear action del formulario
-            detachForm.setAttribute('action', '#');
-            console.log('🔄 Modal desenlazar cerrado, action reseteado');
-        });
-
         // ==========================================
-        // MODAL TRANSFERIR MASCOTA CON CONFIRMACIÓN
+        // TRANSFERIR MASCOTA - NUEVA LÓGICA SIMPLE
         // ==========================================
-        const transferModal = document.getElementById('transferModal');
+        const transferModal = new bootstrap.Modal(document.getElementById('transferModal'));
         const transferForm = document.getElementById('transferForm');
         const transferPetNameLabel = document.getElementById('transferPetNameLabel');
+        const transferPetIdInput = document.getElementById('transferPetIdInput');
         const transferClientSelect = document.getElementById('transferClientSelect');
 
-        transferModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const petId = button.getAttribute('data-pet-id');
-            const petName = button.getAttribute('data-pet-name');
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-transfer-pet');
+            if (!btn) return;
 
-            console.log('🔍 Abriendo modal transferir:', { petId, petName });
-
-            // Actualizar el nombre de la mascota en el modal
-            transferPetNameLabel.textContent = petName;
-
-            // Construir la URL completa manualmente
-            const userId = "{{ $user->id }}";
-            const finalUrl = `/portal/admin/clients/${userId}/pets/${petId}/transfer`;
-
-            console.log('✅ URL configurada para transferir:', finalUrl);
-
-            // Actualizar la acción del formulario
-            transferForm.setAttribute('action', finalUrl);
-            console.log('📝 Action del formulario:', transferForm.getAttribute('action'));
-
-            // Resetear select
-            transferClientSelect.value = '';
-        });
-
-        // Confirmar antes de transferir
-        transferForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // VALIDAR que el action esté configurado
-            const currentAction = transferForm.getAttribute('action');
-            if (!currentAction || currentAction === '#' || currentAction === '') {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo configurar la acción del formulario. Por favor, intenta de nuevo.',
-                    icon: 'error',
-                    confirmButtonColor: '#dc3545'
-                });
-                return;
-            }
+            const petId = btn.getAttribute('data-pet-id');
+            const petName = btn.getAttribute('data-pet-name');
+
+            // Actualizar datos del modal
+            transferPetNameLabel.textContent = petName;
+            transferPetIdInput.value = petId;
+
+            // Actualizar action del formulario con el petId correcto
+            const userId = "{{ $user->id }}";
+            const actionUrl = `/portal/admin/clients/${userId}/pets/${petId}/transfer`;
+            transferForm.setAttribute('action', actionUrl);
+
+            // Resetear selects
+            transferClientSelect.value = '';
+            document.getElementById('keepQr').checked = true;
+
+            // Mostrar modal
+            transferModal.show();
+        });
+
+        // Validar y confirmar transferencia
+        transferForm.addEventListener('submit', function(e) {
+            e.preventDefault();
 
             const petName = transferPetNameLabel.textContent;
             const selectedClient = transferClientSelect.options[transferClientSelect.selectedIndex];
@@ -1896,77 +1832,24 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Cerrar modal y enviar formulario
-                    bootstrap.Modal.getInstance(transferModal).hide();
+                    transferModal.hide();
                     transferForm.submit();
                 }
             });
         });
 
-        // Limpiar modal y resetear action al cerrar
-        transferModal.addEventListener('hidden.bs.modal', function() {
-            transferClientSelect.value = '';
-            document.getElementById('keepQr').checked = true;
-            // Resetear action del formulario
-            transferForm.setAttribute('action', '#');
-            console.log('🔄 Modal transferir cerrado, action reseteado');
-        });
-
-        // ==========================================
-        // ANIMACIONES SUAVES AL HACER SCROLL
-        // ==========================================
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observar elementos que deben animarse
-        document.querySelectorAll('.form-group-modern').forEach(el => {
-            observer.observe(el);
-        });
-
-        // ==========================================
-        // EFECTO DE FOCUS EN INPUTS
-        // ==========================================
-        const modernInputs = document.querySelectorAll('.form-control-modern, .form-select-modern');
-
-        modernInputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.closest('.input-wrapper, .status-select-wrapper')?.classList.add('focused');
-            });
-
-            input.addEventListener('blur', function() {
-                this.closest('.input-wrapper, .status-select-wrapper')?.classList.remove('focused');
-            });
-        });
-
-    })();
-
-    (function() {
         // ==========================================
         // ELIMINAR CLIENTE
         // ==========================================
         const deleteForm = document.getElementById('deleteClientForm');
 
-        // Delegación: captura clicks del botón eliminar
         document.addEventListener('click', function(e) {
-            // Buscar si el elemento clicado o algún padre es el botón de eliminar
             const trigger = e.target.closest('.js-delete-client');
             if (!trigger) return;
 
             e.preventDefault();
             e.stopPropagation();
 
-            // Mostrar confirmación con SweetAlert
             Swal.fire({
                 title: '¿Eliminar cliente?',
                 html: 'Esta acción <b>no se puede deshacer</b>.<br><br>Solo se pueden eliminar clientes <b>sin mascotas vinculadas</b>.',
@@ -1983,7 +1866,6 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Enviar formulario para eliminar
                     deleteForm.submit();
                 }
             });
