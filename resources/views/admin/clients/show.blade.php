@@ -306,12 +306,20 @@
                                             @endif
                                         </td>
                                         <td class="text-end">
-                                            <button class="btn btn-detach"
-                                                data-bs-toggle="modal" data-bs-target="#detachModal"
-                                                data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
-                                                <i class="fa-solid fa-link-slash me-1"></i>
-                                                <span class="d-none d-lg-inline">Desenlazar</span>
-                                            </button>
+                                            <div class="btn-group-actions">
+                                                <button class="btn btn-transfer"
+                                                    data-bs-toggle="modal" data-bs-target="#transferModal"
+                                                    data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
+                                                    <i class="fa-solid fa-right-left me-1"></i>
+                                                    <span class="d-none d-lg-inline">Transferir</span>
+                                                </button>
+                                                <button class="btn btn-detach"
+                                                    data-bs-toggle="modal" data-bs-target="#detachModal"
+                                                    data-pet-id="{{ $p->id }}" data-pet-name="{{ $p->name }}">
+                                                    <i class="fa-solid fa-link-slash me-1"></i>
+                                                    <span class="d-none d-lg-inline">Desenlazar</span>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     @empty
@@ -538,6 +546,66 @@
                     </button>
                     <button type="submit" class="btn btn-danger btn-modal">
                         <i class="fa-solid fa-link-slash me-2"></i>Desenlazar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Modal Transferir --}}
+<div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="transferForm" method="POST">
+            @csrf
+            <div class="modal-content modal-modern">
+                <div class="modal-header border-0 pb-0">
+                    <div class="modal-icon-wrapper">
+                        <div class="modal-icon modal-icon-primary">
+                            <i class="fa-solid fa-right-left"></i>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center pt-2">
+                    <h5 class="modal-title-modern mb-3">Transferir mascota</h5>
+                    <p class="text-muted mb-4">
+                        Transfiere a <strong id="transferPetNameLabel" class="text-dark">esta mascota</strong> a otro cliente
+                    </p>
+                    <div class="form-group-modern text-start mb-3">
+                        <label class="form-label-modern">
+                            <i class="fa-solid fa-user label-icon"></i>
+                            Seleccionar cliente destino
+                        </label>
+                        <select name="to_user_id" id="transferClientSelect" class="form-select form-select-modern" required>
+                            <option value="">Selecciona un cliente...</option>
+                            @php
+                                $otherClients = \App\Models\User::where('is_admin', false)
+                                    ->where('id', '!=', $user->id)
+                                    ->orderBy('name')
+                                    ->get(['id', 'name', 'email']);
+                            @endphp
+                            @foreach($otherClients as $client)
+                                <option value="{{ $client->id }}">
+                                    {{ $client->name }} ({{ $client->email }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-check-modern text-start">
+                        <input class="form-check-input-modern" type="checkbox" name="keep_qr" id="keepQr" checked>
+                        <label class="form-check-label-modern" for="keepQr">
+                            <span class="check-title">Mantener código QR activo</span>
+                            <span class="check-description">La mascota mantiene su activación actual</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light btn-modal" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-modal">
+                        <i class="fa-solid fa-right-left me-2"></i>Transferir
                     </button>
                 </div>
             </div>
@@ -1086,6 +1154,31 @@
         border-color: var(--secondary);
     }
 
+    .btn-group-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+    .btn-transfer {
+        padding: 8px 16px;
+        border: 2px solid #c9d1ff;
+        border-radius: 10px;
+        background: white;
+        color: var(--primary);
+        font-weight: 500;
+        font-size: 0.85rem;
+        transition: var(--transition);
+    }
+
+    .btn-transfer:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    }
+
     .btn-detach {
         padding: 8px 16px;
         border: 2px solid #ffc9c9;
@@ -1152,6 +1245,11 @@
     .modal-icon-danger {
         background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.2) 100%);
         color: var(--danger);
+    }
+
+    .modal-icon-primary {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 110, 253, 0.2) 100%);
+        color: var(--primary);
     }
 
     .modal-title-modern {
@@ -1290,10 +1388,16 @@
             padding: 12px 16px;
         }
 
+        .btn-group-actions {
+            gap: 6px;
+        }
+
+        .btn-transfer span,
         .btn-detach span {
             display: none !important;
         }
 
+        .btn-transfer,
         .btn-detach {
             padding: 8px 12px;
         }
@@ -1590,6 +1694,85 @@
             if (resetQrCheckbox) {
                 resetQrCheckbox.checked = false;
             }
+        });
+
+        // ==========================================
+        // MODAL TRANSFERIR MASCOTA CON CONFIRMACIÓN
+        // ==========================================
+        const transferModal = document.getElementById('transferModal');
+        const transferForm = document.getElementById('transferForm');
+        const transferPetNameLabel = document.getElementById('transferPetNameLabel');
+        const transferClientSelect = document.getElementById('transferClientSelect');
+
+        transferModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const petId = button.getAttribute('data-pet-id');
+            const petName = button.getAttribute('data-pet-name');
+
+            // Actualizar el nombre de la mascota en el modal
+            transferPetNameLabel.textContent = petName;
+
+            // Construir la URL dinámica para el formulario
+            const baseUrl = "{{ route('portal.admin.clients.pets.transfer', ['user' => $user->id, 'pet' => '__PET__']) }}";
+            const finalUrl = baseUrl.replace('__PET__', petId);
+
+            // Actualizar la acción del formulario
+            transferForm.setAttribute('action', finalUrl);
+
+            // Resetear select
+            transferClientSelect.value = '';
+        });
+
+        // Confirmar antes de transferir
+        transferForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const petName = transferPetNameLabel.textContent;
+            const selectedClient = transferClientSelect.options[transferClientSelect.selectedIndex];
+            const keepQr = document.getElementById('keepQr').checked;
+
+            if (!transferClientSelect.value) {
+                Swal.fire({
+                    title: 'Cliente requerido',
+                    text: 'Debes seleccionar un cliente destino',
+                    icon: 'warning',
+                    confirmButtonColor: '#0d6efd',
+                    confirmButtonText: 'Entendido',
+                    customClass: {
+                        popup: 'swal-modern',
+                        confirmButton: 'btn-swal-confirm'
+                    }
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: '¿Transferir mascota?',
+                html: `Se transferirá <strong>${petName}</strong> a:<br><br><strong>${selectedClient.text}</strong>${!keepQr ? '<br><br><span class="text-warning">⚠️ El código QR será restablecido</span>' : ''}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fa-solid fa-right-left me-2"></i>Sí, transferir',
+                cancelButtonText: '<i class="fa-solid fa-xmark me-2"></i>Cancelar',
+                customClass: {
+                    popup: 'swal-modern',
+                    confirmButton: 'btn-swal-confirm',
+                    cancelButton: 'btn-swal-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Cerrar modal y enviar formulario
+                    bootstrap.Modal.getInstance(transferModal).hide();
+                    transferForm.submit();
+                }
+            });
+        });
+
+        // Limpiar modal al cerrar
+        transferModal.addEventListener('hidden.bs.modal', function() {
+            transferClientSelect.value = '';
+            document.getElementById('keepQr').checked = true;
         });
 
         // ==========================================
