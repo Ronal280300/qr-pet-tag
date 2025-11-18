@@ -575,7 +575,7 @@
 {{-- Modal Desenlazar --}}
 <div class="modal fade" id="detachModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form id="detachForm" method="POST">
+        <form id="detachForm" method="POST" action="#">
             @csrf @method('DELETE')
             <div class="modal-content modal-modern">
                 <div class="modal-header border-0 pb-0">
@@ -615,7 +615,7 @@
 {{-- Modal Transferir --}}
 <div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form id="transferForm" method="POST">
+        <form id="transferForm" method="POST" action="#">
             @csrf
             <div class="modal-content modal-modern">
                 <div class="modal-header border-0 pb-0">
@@ -1744,6 +1744,8 @@
             const petId = button.getAttribute('data-pet-id');
             const petName = button.getAttribute('data-pet-name');
 
+            console.log('🔍 Abriendo modal desenlazar:', { petId, petName });
+
             // Actualizar el nombre de la mascota en el modal
             petNameLabel.textContent = petName;
 
@@ -1751,13 +1753,28 @@
             const userId = "{{ $user->id }}";
             const finalUrl = `/portal/admin/clients/${userId}/pets/${petId}`;
 
+            console.log('✅ URL configurada para desenlazar:', finalUrl);
+
             // Actualizar la acción del formulario
             detachForm.setAttribute('action', finalUrl);
+            console.log('📝 Action del formulario:', detachForm.getAttribute('action'));
         });
 
         // Confirmar antes de desenlazar
         detachForm.addEventListener('submit', function(e) {
             e.preventDefault();
+
+            // VALIDAR que el action esté configurado
+            const currentAction = detachForm.getAttribute('action');
+            if (!currentAction || currentAction === '#' || currentAction === '') {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo configurar la acción del formulario. Por favor, intenta de nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
 
             const petName = petNameLabel.textContent;
             const resetQr = document.getElementById('resetQr').checked;
@@ -1785,12 +1802,15 @@
             });
         });
 
-        // Limpiar checkbox al cerrar modal
+        // Limpiar checkbox y resetear action al cerrar modal
         detachModal.addEventListener('hidden.bs.modal', function() {
             const resetQrCheckbox = document.getElementById('resetQr');
             if (resetQrCheckbox) {
                 resetQrCheckbox.checked = false;
             }
+            // Resetear action del formulario
+            detachForm.setAttribute('action', '#');
+            console.log('🔄 Modal desenlazar cerrado, action reseteado');
         });
 
         // ==========================================
@@ -1806,6 +1826,8 @@
             const petId = button.getAttribute('data-pet-id');
             const petName = button.getAttribute('data-pet-name');
 
+            console.log('🔍 Abriendo modal transferir:', { petId, petName });
+
             // Actualizar el nombre de la mascota en el modal
             transferPetNameLabel.textContent = petName;
 
@@ -1813,8 +1835,11 @@
             const userId = "{{ $user->id }}";
             const finalUrl = `/portal/admin/clients/${userId}/pets/${petId}/transfer`;
 
+            console.log('✅ URL configurada para transferir:', finalUrl);
+
             // Actualizar la acción del formulario
             transferForm.setAttribute('action', finalUrl);
+            console.log('📝 Action del formulario:', transferForm.getAttribute('action'));
 
             // Resetear select
             transferClientSelect.value = '';
@@ -1823,6 +1848,18 @@
         // Confirmar antes de transferir
         transferForm.addEventListener('submit', function(e) {
             e.preventDefault();
+
+            // VALIDAR que el action esté configurado
+            const currentAction = transferForm.getAttribute('action');
+            if (!currentAction || currentAction === '#' || currentAction === '') {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo configurar la acción del formulario. Por favor, intenta de nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
 
             const petName = transferPetNameLabel.textContent;
             const selectedClient = transferClientSelect.options[transferClientSelect.selectedIndex];
@@ -1866,10 +1903,13 @@
             });
         });
 
-        // Limpiar modal al cerrar
+        // Limpiar modal y resetear action al cerrar
         transferModal.addEventListener('hidden.bs.modal', function() {
             transferClientSelect.value = '';
             document.getElementById('keepQr').checked = true;
+            // Resetear action del formulario
+            transferForm.setAttribute('action', '#');
+            console.log('🔄 Modal transferir cerrado, action reseteado');
         });
 
         // ==========================================
