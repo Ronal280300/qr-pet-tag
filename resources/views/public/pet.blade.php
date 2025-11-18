@@ -821,7 +821,7 @@ body {
         </a>
 
         @if($ownerPhone)
-        <a href="tel:{{ $digits }}" class="btn-contact btn-call">
+        <a href="tel:+{{ $digits }}" class="btn-contact btn-call">
           <i class="fa-solid fa-phone"></i>
           Llamar ahora
         </a>
@@ -1067,30 +1067,6 @@ body {
     }).catch(()=>{});
   }
 
-  function showLocationAlert(){
-    const alertHTML = `
-      <div style="position:fixed;top:20px;left:50%;transform:translateX(-50%);
-                  background:#fbbf24;color:#78350f;padding:1rem 1.5rem;border-radius:12px;
-                  box-shadow:0 10px 40px rgba(0,0,0,.3);z-index:9999;max-width:90%;text-align:center;
-                  font-weight:600;animation:slideDown 0.4s ease-out;">
-        <i class="fa-solid fa-location-crosshairs" style="margin-right:8px;"></i>
-        Por favor, permite el acceso a tu ubicación para notificar al dueño
-      </div>
-    `;
-    const div = document.createElement('div');
-    div.innerHTML = alertHTML;
-    document.body.appendChild(div.firstElementChild);
-
-    setTimeout(() => {
-      const alert = document.body.lastElementChild;
-      if(alert && alert.style.position === 'fixed'){
-        alert.style.opacity = '0';
-        alert.style.transform = 'translateX(-50%) translateY(-20px)';
-        setTimeout(() => alert.remove(), 400);
-      }
-    }, 8000);
-  }
-
   // UBICACIÓN OBLIGATORIA: Solo enviar si hay geolocalización disponible
   if (navigator.geolocation && (window.isSecureContext || location.protocol === 'https:' || ['localhost','127.0.0.1'].includes(location.hostname))) {
     let attempts = 0;
@@ -1108,7 +1084,6 @@ body {
         error => {
           // ❌ Error: El usuario denegó o falló
           console.warn('Geolocalización denegada o falló:', error.message);
-          showLocationAlert();
 
           // Reintentar hasta maxAttempts veces
           if(attempts < maxAttempts){
@@ -1129,7 +1104,6 @@ body {
   } else {
     // Navegador no soporta geolocalización o no es contexto seguro
     console.warn('⚠️ Geolocalización no disponible. No se puede notificar al dueño sin ubicación precisa.');
-    showLocationAlert();
   }
 })();
 </script>
