@@ -804,6 +804,8 @@
             <form action="{{ route('checkout.upload') }}" method="POST" enctype="multipart/form-data" id="paymentForm" class="mt-4">
                 @csrf
                 {{-- Los datos del plan y cantidad ahora se manejan en sesión para mayor seguridad --}}
+                {{-- Hidden input para payment_method (se actualiza desde los radio buttons de arriba) --}}
+                <input type="hidden" name="payment_method" id="payment_method_input" value="transfer">
 
                 <!-- OPCIONES DE ENVÍO -->
                 <div class="payment-card mb-4">
@@ -974,9 +976,13 @@
                             <strong>{{ $additionalPets }} x ₡{{ number_format($plan->additional_pet_price, 0, ',', '.') }}</strong>
                         </div>
                         @endif
+                        <div class="summary-row" id="summary-shipping-row">
+                            <span>Envío:</span>
+                            <strong id="summary-shipping">₡1,500</strong>
+                        </div>
                         <div class="summary-row">
                             <span class="h5 mb-0 fw-bold">TOTAL:</span>
-                            <span class="summary-total">₡{{ number_format($total, 0, ',', '.') }}</span>
+                            <span class="summary-total" id="summary-total">₡{{ number_format($total + 1500, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1534,12 +1540,16 @@ function simulateProgress() {
     const paymentCards = document.querySelectorAll('.payment-method-card');
     const transferInfo = document.getElementById('transfer-info');
     const sinpeInfo = document.getElementById('sinpe-info');
+    const paymentMethodInput = document.getElementById('payment_method_input');
 
     paymentRadios.forEach((radio, index) => {
         radio.addEventListener('change', () => {
             // Actualizar clases active
             paymentCards.forEach(card => card.classList.remove('active'));
             paymentCards[index].classList.add('active');
+
+            // Actualizar hidden input del formulario
+            paymentMethodInput.value = radio.value;
 
             // Mostrar/ocultar información de pago
             if (radio.value === 'transfer') {
