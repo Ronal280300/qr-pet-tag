@@ -7,22 +7,31 @@ use App\Models\Order;
 use App\Models\User;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Log;
-use Twilio\Rest\Client;
 
 class WhatsAppService
 {
     protected $client;
     protected $from;
+    protected $twilioAvailable = false;
 
     public function __construct()
     {
+        // Verificar si Twilio está instalado
+        if (!class_exists(\Twilio\Rest\Client::class)) {
+            Log::warning('Twilio SDK not installed. WhatsApp notifications disabled.');
+            $this->twilioAvailable = false;
+            return;
+        }
+
+        $this->twilioAvailable = true;
+
         // Primero intentar obtener de settings, luego fallback a config
         $sid = $this->setting('twilio_sid') ?: config('services.twilio.sid');
         $token = $this->setting('twilio_token') ?: config('services.twilio.token');
         $this->from = $this->setting('twilio_whatsapp_from') ?: config('services.twilio.whatsapp_from');
 
         if ($sid && $token) {
-            $this->client = new Client($sid, $token);
+            $this->client = new \Twilio\Rest\Client($sid, $token);
         }
     }
 
@@ -42,6 +51,12 @@ class WhatsAppService
      */
     public function send(string $to, string $message, string $type = 'general', ?int $orderId = null, ?int $userId = null): bool
     {
+        // Verificar si Twilio está disponible
+        if (!$this->twilioAvailable) {
+            Log::info('WhatsApp notifications disabled: Twilio SDK not available');
+            return false;
+        }
+
         // Verificar si WhatsApp está habilitado en configuración
         if (!$this->setting('twilio_enabled', true) || !$this->setting('notifications_whatsapp_enabled', true)) {
             Log::info('WhatsApp notifications disabled in settings');
