@@ -852,11 +852,23 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        max-width: 90%;
+        text-align: center;
     }
 
     .success-message.show {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
+    }
+
+    .success-message i {
+        flex-shrink: 0;
+        font-size: 1.25rem;
+    }
+
+    .success-message span {
+        line-height: 1.4;
+        font-size: 0.9375rem;
     }
 
     .address-wrapper {
@@ -870,6 +882,102 @@
     .form-control:focus {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(78, 137, 232, 0.15);
+    }
+
+    /* Modern Address Field Styles */
+    .modern-label {
+        font-size: 1rem;
+        color: #1f2937;
+        letter-spacing: -0.01em;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .required-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .modern-textarea {
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 18px 20px;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        resize: vertical;
+        min-height: 120px;
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        color: #1f2937;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modern-textarea::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    .modern-textarea:hover {
+        border-color: #cbd5e1;
+        background: white;
+    }
+
+    .modern-textarea:focus {
+        outline: none;
+        border-color: #4e89e8;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(78, 137, 232, 0.1), 0 8px 20px rgba(78, 137, 232, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .address-helper {
+        display: flex;
+        align-items: start;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left: 4px solid #f59e0b;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        color: #92400e;
+        line-height: 1.5;
+    }
+
+    .address-helper i {
+        color: #f59e0b;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .address-helper span {
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .modern-textarea {
+            font-size: 0.875rem;
+            padding: 16px 18px;
+            min-height: 100px;
+        }
+
+        .address-helper {
+            font-size: 0.8125rem;
+            padding: 10px 14px;
+        }
     }
 
     /* Smooth section transitions */
@@ -986,23 +1094,23 @@
                         </div>
 
                         <div class="mt-4">
-                            <label class="form-label fw-bold" for="shipping_address">
-                                <i class="fa-solid fa-location-dot me-2"></i>Dirección de Envío:
-                                <span class="badge bg-danger ms-2">Requerido</span>
+                            <label class="form-label fw-bold modern-label" for="shipping_address">
+                                <i class="fa-solid fa-location-dot me-2"></i>Dirección de Envío
+                                <span class="required-badge">*</span>
                             </label>
                             <div class="address-wrapper">
                                 <textarea name="shipping_address"
                                           id="shipping_address"
-                                          class="form-control"
-                                          rows="3"
-                                          placeholder="Ejemplo: San José, Escazú, del Banco Nacional 200m oeste, casa esquinera portón negro"
+                                          class="form-control modern-textarea"
+                                          rows="4"
+                                          placeholder="Provincia, cantón, distrito y señas exactas..."
                                           required></textarea>
                                 <i class="fa-solid fa-circle-check address-check-icon"></i>
                             </div>
-                            <small class="text-muted">
-                                <i class="fa-solid fa-info-circle me-1"></i>
-                                Incluye provincia, cantón, distrito y señas exactas
-                            </small>
+                            <div class="address-helper">
+                                <i class="fa-solid fa-lightbulb me-2"></i>
+                                <span>Ejemplo: San José, Escazú, de la iglesia 200m oeste, casa amarilla</span>
+                            </div>
                         </div>
                     </div>
                     </div>
@@ -1755,9 +1863,9 @@ function toggleSection(section) {
 }
 
 // Show success message
-function showSuccessMessage(message) {
+function showSuccessMessage(message, duration = 3000) {
     if (window.innerWidth >= 992) return;
-    
+
     // Create or get message element
     let messageEl = document.getElementById('successMessage');
     if (!messageEl) {
@@ -1766,13 +1874,13 @@ function showSuccessMessage(message) {
         messageEl.className = 'success-message';
         document.body.appendChild(messageEl);
     }
-    
+
     messageEl.innerHTML = `<i class="fa-solid fa-check-circle"></i><span>${message}</span>`;
     messageEl.classList.add('show');
-    
+
     setTimeout(() => {
         messageEl.classList.remove('show');
-    }, 3000);
+    }, duration);
 }
 
 // Auto-collapse sections after selection on mobile
@@ -2013,13 +2121,23 @@ function simulateProgress() {
             if (radio.value === 'transfer') {
                 transferInfo.style.display = 'block';
                 sinpeInfo.style.display = 'none';
+                // Auto-collapse on mobile para transferencia
+                autoCollapseAfterSelection('paymentMethod');
             } else if (radio.value === 'sinpe') {
                 transferInfo.style.display = 'none';
                 sinpeInfo.style.display = 'block';
-            }
 
-            // Auto-collapse on mobile
-            autoCollapseAfterSelection('paymentMethod');
+                // Para SINPE, NO colapsar automáticamente en mobile
+                // Mostrar mensaje especial y dar tiempo al usuario para revisar datos
+                if (window.innerWidth < 992) {
+                    showSuccessMessage('¡Revisa los datos de SINPE abajo! Cuando termines, toca el header para cerrar', 5000);
+
+                    // Scroll suave hacia la información de SINPE para que el usuario la vea
+                    setTimeout(() => {
+                        sinpeInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 500);
+                }
+            }
         });
     });
 })();
