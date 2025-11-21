@@ -15,6 +15,115 @@
         margin: 0 auto;
     }
 
+    /* ===== MOBILE REORDERING ===== */
+    @media (max-width: 991px) {
+        .mobile-section-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mobile-order-1 { order: 1; } /* Método de pago */
+        .mobile-order-2 { order: 2; } /* Envío */
+        .mobile-order-3 { order: 3; } /* Resumen (viene del sidebar) */
+        .mobile-order-4 { order: 4; } /* Upload */
+        .mobile-order-5 { order: 5; } /* Ayuda (viene del sidebar) */
+    }
+
+    /* ===== COLLAPSIBLE SECTIONS FOR MOBILE ===== */
+    @media (max-width: 991px) {
+        .collapsible-header {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #4e89e8 0%, #2563eb 100%);
+            color: white;
+            border-radius: 24px 24px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible-header:active {
+            transform: scale(0.98);
+        }
+
+        .collapsible-header h2 {
+            margin: 0;
+            font-size: 1.125rem;
+        }
+
+        .collapse-icon {
+            font-size: 1.25rem;
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible-header.collapsed .collapse-icon {
+            transform: rotate(-180deg);
+        }
+
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .payment-card.collapsible {
+            overflow: visible;
+        }
+
+        .payment-header.collapsible-header {
+            border-radius: 24px;
+            margin-bottom: 0;
+        }
+
+        .payment-card.collapsible.expanded .payment-header.collapsible-header {
+            border-radius: 24px 24px 0 0;
+        }
+
+        .completion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            animation: badgeSlideIn 0.4s ease;
+        }
+
+        @keyframes badgeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .payment-card.has-completion .payment-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+    }
+
+    /* Hide collapsible features on desktop */
+    @media (min-width: 992px) {
+        .collapse-icon {
+            display: none;
+        }
+    }
+
     /* Progress Steps Modernizado */
     .progress-steps {
         display: flex;
@@ -119,6 +228,7 @@
         overflow: hidden;
         border: 1px solid rgba(0, 0, 0, 0.04);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 1.5rem;
     }
 
     .payment-card:hover {
@@ -142,6 +252,15 @@
         font-size: 1.75rem;
         margin: 0;
         letter-spacing: -0.02em;
+    }
+
+    @media (max-width: 991px) {
+        .payment-header h2 {
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     }
 
     /* Alert Modernizado */
@@ -587,6 +706,22 @@
         .summary-total {
             font-size: 1.75rem;
         }
+
+        .bank-info-box {
+            padding: 20px;
+        }
+
+        .bank-detail {
+            padding: 12px 16px;
+        }
+
+        .payment-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .modern-alert {
+            padding: 16px;
+        }
     }
 
     /* ===== PAYMENT METHOD CARDS ===== */
@@ -666,6 +801,111 @@
             transform: translateY(0);
         }
     }
+
+    /* Visual feedback for completed address */
+    .form-control.address-complete {
+        border-color: #10b981 !important;
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+    }
+
+    .form-control.address-complete:focus {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+    }
+
+    .address-check-icon {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: #10b981;
+        font-size: 1.5rem;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    .address-check-icon.show {
+        opacity: 1;
+        animation: checkBounce 0.5s ease;
+    }
+
+    @keyframes checkBounce {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    .success-message {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 16px 24px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+        font-weight: 700;
+        z-index: 10000;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .success-message.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .address-wrapper {
+        position: relative;
+    }
+
+    .form-control {
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(78, 137, 232, 0.15);
+    }
+
+    /* Smooth section transitions */
+    .payment-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .payment-card.completed {
+        opacity: 0.85;
+        transform: scale(0.98);
+    }
+
+    .payment-card.completed:hover {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .payment-card.has-completion {
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    @media (max-width: 991px) {
+        .collapsible-header.collapsed {
+            border-radius: 24px !important;
+        }
+
+        .payment-card.has-completion .collapsible-header {
+            cursor: pointer;
+        }
+
+        .payment-card.has-completion .collapsible-header:hover {
+            opacity: 0.9;
+            transform: scale(1.01);
+        }
+    }
 </style>
 @endpush
 
@@ -693,19 +933,95 @@
 
     <div class="row g-4">
         <!-- Columna Izquierda: Instrucciones -->
-        <div class="col-lg-7">
-            <!-- SELECCIÓN DE MÉTODO DE PAGO -->
-            <div class="payment-card mb-4">
-                <div class="payment-header">
-                    <h2><i class="fa-solid fa-credit-card me-2"></i>Método de Pago</h2>
+        <div class="col-lg-7 mobile-section-container">
+            
+            <form action="{{ route('checkout.upload') }}" method="POST" enctype="multipart/form-data" id="paymentForm">
+                @csrf
+                <input type="hidden" name="payment_method" id="payment_method_input" value="transfer">
+
+                <!-- 1. OPCIONES DE ENVÍO -->
+                <div class="payment-card collapsible expanded mobile-order-1" id="shippingCard">
+                    <div class="payment-header collapsible-header" onclick="toggleSection('shipping')">
+                        <h2><i class="fa-solid fa-truck me-2"></i>1. Opciones de Envío</h2>
+                        <i class="fa-solid fa-chevron-up collapse-icon"></i>
+                    </div>
+                    <div class="collapsible-content" id="shippingContent">
+                    <div class="p-4">
+                        <div class="modern-alert">
+                            <div class="modern-alert-icon">
+                                <i class="fa-solid fa-box"></i>
+                            </div>
+                            <div class="modern-alert-content">
+                                <strong>Envío a través de Correos de Costa Rica</strong><br>
+                                Selecciona la zona de envío y completa tu dirección.
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-bold">Selecciona tu zona de envío:</label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="radio" name="shipping_zone" id="zone_gam" value="gam" class="d-none shipping-zone-radio" checked>
+                                    <label for="zone_gam" class="shipping-zone-card active">
+                                        <div class="shipping-zone-icon">
+                                            <i class="fa-solid fa-city"></i>
+                                        </div>
+                                        <div class="shipping-zone-title">Dentro del GAM</div>
+                                        <div class="shipping-zone-cost">+ ₡1,500</div>
+                                        <div class="shipping-zone-desc">Gran Área Metropolitana</div>
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="radio" name="shipping_zone" id="zone_fuera_gam" value="fuera_gam" class="d-none shipping-zone-radio">
+                                    <label for="zone_fuera_gam" class="shipping-zone-card">
+                                        <div class="shipping-zone-icon">
+                                            <i class="fa-solid fa-map"></i>
+                                        </div>
+                                        <div class="shipping-zone-title">Fuera del GAM</div>
+                                        <div class="shipping-zone-cost">+ ₡3,500</div>
+                                        <div class="shipping-zone-desc">Resto de Costa Rica</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-bold" for="shipping_address">
+                                <i class="fa-solid fa-location-dot me-2"></i>Dirección de Envío:
+                                <span class="badge bg-danger ms-2">Requerido</span>
+                            </label>
+                            <div class="address-wrapper">
+                                <textarea name="shipping_address"
+                                          id="shipping_address"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Ejemplo: San José, Escazú, del Banco Nacional 200m oeste, casa esquinera portón negro"
+                                          required></textarea>
+                                <i class="fa-solid fa-circle-check address-check-icon"></i>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                Incluye provincia, cantón, distrito y señas exactas
+                            </small>
+                        </div>
+                    </div>
+                    </div>
                 </div>
+
+            <!-- 2. SELECCIÓN DE MÉTODO DE PAGO -->
+            <div class="payment-card collapsible mobile-order-2" id="paymentMethodCard">
+                <div class="payment-header collapsible-header" onclick="toggleSection('paymentMethod')">
+                    <h2><i class="fa-solid fa-credit-card me-2"></i>2. Método de Pago</h2>
+                    <i class="fa-solid fa-chevron-down collapse-icon"></i>
+                </div>
+                <div class="collapsible-content collapsed" id="paymentMethodContent">
                 <div class="p-4">
                     <div class="modern-alert">
                         <div class="modern-alert-icon">
                             <i class="fa-solid fa-circle-info"></i>
                         </div>
                         <div class="modern-alert-content">
-                            <strong>Importante:</strong> Selecciona tu método de pago preferido y realiza el pago por el monto exacto. Luego sube tu comprobante.
+                            <strong>Importante:</strong> Selecciona tu método de pago preferido y realiza el pago por el monto exacto.
                         </div>
                     </div>
 
@@ -798,77 +1114,54 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
 
-            <!-- Upload Form -->
-            <form action="{{ route('checkout.upload') }}" method="POST" enctype="multipart/form-data" id="paymentForm" class="mt-4">
-                @csrf
-                {{-- Los datos del plan y cantidad ahora se manejan en sesión para mayor seguridad --}}
-                {{-- Hidden input para payment_method (se actualiza desde los radio buttons de arriba) --}}
-                <input type="hidden" name="payment_method" id="payment_method_input" value="transfer">
-
-                <!-- OPCIONES DE ENVÍO -->
-                <div class="payment-card mb-4">
-                    <div class="payment-header">
-                        <h2><i class="fa-solid fa-truck me-2"></i>Opciones de Envío</h2>
-                    </div>
+                <!-- RESUMEN MOBILE (Clonado aquí para móvil) -->
+                <div class="payment-card mobile-order-3 d-lg-none" id="mobileSummary">
                     <div class="p-4">
-                        <div class="modern-alert">
-                            <div class="modern-alert-icon">
-                                <i class="fa-solid fa-box"></i>
-                            </div>
-                            <div class="modern-alert-content">
-                                <strong>Envío a través de Correos de Costa Rica</strong><br>
-                                Selecciona la zona de envío. El costo se sumará automáticamente al total.
-                            </div>
+                        <div class="section-title">
+                            <i class="fa-solid fa-receipt"></i>
+                            <span>Resumen del Pedido</span>
                         </div>
 
-                        <div class="mt-4">
-                            <label class="form-label fw-bold">Selecciona tu zona de envío:</label>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <input type="radio" name="shipping_zone" id="zone_gam" value="gam" class="d-none shipping-zone-radio" checked>
-                                    <label for="zone_gam" class="shipping-zone-card active">
-                                        <div class="shipping-zone-icon">
-                                            <i class="fa-solid fa-city"></i>
-                                        </div>
-                                        <div class="shipping-zone-title">Dentro del GAM</div>
-                                        <div class="shipping-zone-cost">+ ₡1,500</div>
-                                        <div class="shipping-zone-desc">Gran Área Metropolitana</div>
-                                    </label>
-                                </div>
-                                <div class="col-md-6">
-                                    <input type="radio" name="shipping_zone" id="zone_fuera_gam" value="fuera_gam" class="d-none shipping-zone-radio">
-                                    <label for="zone_fuera_gam" class="shipping-zone-card">
-                                        <div class="shipping-zone-icon">
-                                            <i class="fa-solid fa-map"></i>
-                                        </div>
-                                        <div class="shipping-zone-title">Fuera del GAM</div>
-                                        <div class="shipping-zone-cost">+ ₡3,500</div>
-                                        <div class="shipping-zone-desc">Resto de Costa Rica</div>
-                                    </label>
-                                </div>
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span>Plan:</span>
+                                <strong>{{ $plan->name }}</strong>
                             </div>
-                        </div>
-
-                        <div class="mt-4">
-                            <label class="form-label fw-bold" for="shipping_address">Dirección de Envío:</label>
-                            <textarea name="shipping_address"
-                                      id="shipping_address"
-                                      class="form-control"
-                                      rows="3"
-                                      placeholder="Ejemplo: San José, Escazú, del Banco Nacional 200m oeste, casa esquinera portón negro"
-                                      required></textarea>
-                            <small class="text-muted">Incluye provincia, cantón, distrito y señas exactas</small>
+                            <div class="summary-row">
+                                <span>Tipo:</span>
+                                <strong>{{ $plan->type === 'one_time' ? 'Pago Único' : 'Suscripción' }}</strong>
+                            </div>
+                            <div class="summary-row">
+                                <span>Mascotas:</span>
+                                <strong>{{ $petsQuantity }}</strong>
+                            </div>
+                            @if($additionalPets > 0)
+                            <div class="summary-row">
+                                <span>Mascotas adicionales:</span>
+                                <strong>{{ $additionalPets }} x ₡{{ number_format($plan->additional_pet_price, 0, ',', '.') }}</strong>
+                            </div>
+                            @endif
+                            <div class="summary-row" id="summary-shipping-row-mobile">
+                                <span>Envío:</span>
+                                <strong class="summary-shipping-mobile">₡1,500</strong>
+                            </div>
+                            <div class="summary-row">
+                                <span class="h5 mb-0 fw-bold">TOTAL:</span>
+                                <span class="summary-total summary-total-mobile">₡{{ number_format($total + 1500, 0, ',', '.') }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="payment-card">
+                <!-- SUBIR COMPROBANTE -->
+                <div class="payment-card mobile-order-4">
                     <div class="p-4">
                         <div class="section-title">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <span>Subir Comprobante</span>
+                            <span>3. Subir Comprobante</span>
                         </div>
 
                         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('payment_proof').click()">
@@ -945,10 +1238,35 @@
                     </div>
                 </div>
             </form>
+
+            <!-- AYUDA MOBILE (aparece al final en móvil) -->
+            <div class="payment-card mobile-order-5 d-lg-none">
+                <div class="p-4">
+                    <div class="section-title">
+                        <i class="fa-solid fa-headset"></i>
+                        <span>4. ¿Necesitas Ayuda?</span>
+                    </div>
+                    <p class="text-muted mb-4">Estamos aquí para ayudarte en cada paso</p>
+
+                    <div class="help-buttons">
+                        <a href="https://wa.me/50670000000?text=Hola,%20necesito%20ayuda%20con%20mi%20pago%20del%20plan%20{{ urlencode($plan->name) }}"
+                           target="_blank"
+                           class="help-btn btn-whatsapp">
+                            <i class="fa-brands fa-whatsapp fs-5"></i>
+                            <span>WhatsApp</span>
+                        </a>
+                        <a href="mailto:soporte@qrpettag.com?subject=Ayuda con pago - {{ $plan->name }}"
+                           class="help-btn btn-email">
+                            <i class="fa-solid fa-envelope fs-5"></i>
+                            <span>Email</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Columna Derecha: Resumen -->
-        <div class="col-lg-5">
+        <!-- Columna Derecha: Resumen (Solo Desktop) -->
+        <div class="col-lg-5 d-none d-lg-block">
             <!-- Order Summary -->
             <div class="payment-card mb-4">
                 <div class="p-4">
@@ -1414,6 +1732,146 @@
 </style>
 
 <script>
+// ===== COLLAPSIBLE SECTIONS (MOBILE ONLY) =====
+function toggleSection(section) {
+    // Only work on mobile
+    if (window.innerWidth >= 992) return;
+    
+    const card = document.getElementById(section + 'Card');
+    const content = document.getElementById(section + 'Content');
+    const header = card.querySelector('.collapsible-header');
+    
+    if (content.classList.contains('collapsed')) {
+        // Expand
+        content.classList.remove('collapsed');
+        header.classList.remove('collapsed');
+        card.classList.add('expanded');
+    } else {
+        // Collapse
+        content.classList.add('collapsed');
+        header.classList.add('collapsed');
+        card.classList.remove('expanded');
+    }
+}
+
+// Show success message
+function showSuccessMessage(message) {
+    if (window.innerWidth >= 992) return;
+    
+    // Create or get message element
+    let messageEl = document.getElementById('successMessage');
+    if (!messageEl) {
+        messageEl = document.createElement('div');
+        messageEl.id = 'successMessage';
+        messageEl.className = 'success-message';
+        document.body.appendChild(messageEl);
+    }
+    
+    messageEl.innerHTML = `<i class="fa-solid fa-check-circle"></i><span>${message}</span>`;
+    messageEl.classList.add('show');
+    
+    setTimeout(() => {
+        messageEl.classList.remove('show');
+    }, 3000);
+}
+
+// Auto-collapse sections after selection on mobile
+function autoCollapseAfterSelection(sectionName) {
+    if (window.innerWidth >= 992) return;
+    
+    // Special handling for shipping - only collapse when BOTH zone and address are filled
+    if (sectionName === 'shipping') {
+        const shippingAddress = document.getElementById('shipping_address');
+        const selectedZone = document.querySelector('.shipping-zone-radio:checked');
+        
+        // Check if address has meaningful content (more than 10 characters)
+        if (!shippingAddress || !shippingAddress.value || shippingAddress.value.trim().length < 10) {
+            // Don't collapse - address not complete
+            return;
+        }
+        
+        if (!selectedZone) {
+            // Don't collapse - no zone selected
+            return;
+        }
+        
+        // Show success message
+        showSuccessMessage('¡Dirección guardada! Continúa con el método de pago');
+    } else if (sectionName === 'paymentMethod') {
+        showSuccessMessage('¡Método de pago seleccionado! Revisa tu resumen');
+    }
+    
+    setTimeout(() => {
+        const card = document.getElementById(sectionName + 'Card');
+        const content = document.getElementById(sectionName + 'Content');
+        const header = card.querySelector('.collapsible-header');
+        
+        content.classList.add('collapsed');
+        header.classList.add('collapsed');
+        card.classList.remove('expanded');
+        card.classList.add('has-completion');
+        
+        // Add completion badge
+        if (!header.querySelector('.completion-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'completion-badge';
+            badge.innerHTML = '<i class="fa-solid fa-check"></i> Completado';
+            header.appendChild(badge);
+        }
+        
+        // Scroll to next section smoothly
+        const nextSection = getNextSection(sectionName);
+        if (nextSection) {
+            setTimeout(() => {
+                nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Auto-expand next section
+                const nextContent = nextSection.querySelector('.collapsible-content');
+                const nextHeader = nextSection.querySelector('.collapsible-header');
+                if (nextContent && nextContent.classList.contains('collapsed')) {
+                    nextContent.classList.remove('collapsed');
+                    nextHeader.classList.remove('collapsed');
+                    nextSection.classList.add('expanded');
+                }
+            }, 400);
+        }
+    }, 800);
+}
+
+// Get next section to scroll to
+function getNextSection(currentSection) {
+    if (currentSection === 'shipping') {
+        return document.getElementById('paymentMethodCard');
+    } else if (currentSection === 'paymentMethod') {
+        return document.getElementById('mobileSummary');
+    }
+    return null;
+}
+
+// Check shipping completion on address input
+const shippingAddressField = document.getElementById('shipping_address');
+const addressCheckIcon = document.querySelector('.address-check-icon');
+
+shippingAddressField.addEventListener('input', function() {
+    if (this.value.trim().length >= 10) {
+        this.classList.add('address-complete');
+        if (addressCheckIcon) {
+            addressCheckIcon.classList.add('show');
+        }
+    } else {
+        this.classList.remove('address-complete');
+        if (addressCheckIcon) {
+            addressCheckIcon.classList.remove('show');
+        }
+    }
+});
+
+shippingAddressField.addEventListener('blur', function() {
+    if (this.value.trim().length >= 10) {
+        autoCollapseAfterSelection('shipping');
+    }
+});
+
 function previewFile(event) {
     const file = event.target.files[0];
     const submitBtn = document.getElementById('submitBtn');
@@ -1559,6 +2017,9 @@ function simulateProgress() {
                 transferInfo.style.display = 'none';
                 sinpeInfo.style.display = 'block';
             }
+
+            // Auto-collapse on mobile
+            autoCollapseAfterSelection('paymentMethod');
         });
     });
 })();
@@ -1571,6 +2032,10 @@ function simulateProgress() {
     const sinpeAmount = document.getElementById('sinpe-amount');
     const summaryTotal = document.getElementById('summary-total');
     const summaryShipping = document.getElementById('summary-shipping');
+    
+    // Mobile elements
+    const summaryTotalMobile = document.querySelector('.summary-total-mobile');
+    const summaryShippingMobile = document.querySelector('.summary-shipping-mobile');
 
     // Total base del plan (sin envío)
     const baseTotal = {{ $total }};
@@ -1584,7 +2049,7 @@ function simulateProgress() {
         const shippingCost = shippingCosts[selectedZone];
         const newTotal = baseTotal + shippingCost;
 
-        // Actualizar todos los displays de total
+        // Actualizar displays desktop
         if (transferAmount) {
             transferAmount.textContent = '₡' + newTotal.toLocaleString('es-CR');
         }
@@ -1597,6 +2062,14 @@ function simulateProgress() {
         if (summaryShipping) {
             summaryShipping.textContent = '₡' + shippingCost.toLocaleString('es-CR');
         }
+
+        // Actualizar displays mobile
+        if (summaryTotalMobile) {
+            summaryTotalMobile.textContent = '₡' + newTotal.toLocaleString('es-CR');
+        }
+        if (summaryShippingMobile) {
+            summaryShippingMobile.textContent = '₡' + shippingCost.toLocaleString('es-CR');
+        }
     }
 
     shippingRadios.forEach((radio, index) => {
@@ -1607,6 +2080,23 @@ function simulateProgress() {
 
             // Recalcular total
             updateTotal();
+
+            // NO auto-collapse here - let it collapse only when address is also filled
+            // Check if address is already filled
+            const shippingAddress = document.getElementById('shipping_address');
+            if (shippingAddress && shippingAddress.value.trim().length >= 10) {
+                autoCollapseAfterSelection('shipping');
+            } else {
+                // Focus on address field if not filled and scroll to it smoothly
+                if (window.innerWidth < 992) {
+                    setTimeout(() => {
+                        shippingAddress.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => {
+                            shippingAddress.focus();
+                        }, 500);
+                    }, 300);
+                }
+            }
         });
     });
 
