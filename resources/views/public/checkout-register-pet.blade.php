@@ -1417,7 +1417,8 @@
       }
       applyBufferToInput();
       refreshGrid();
-      input.value = '';
+      // FIX: NO limpiar input.value aquí porque también limpia input.files
+      // Los archivos deben persistir en el input para enviarse con el formulario
     });
 
     btnClear.addEventListener('click', () => {
@@ -1433,7 +1434,7 @@
       }).then((result) => {
         if (result.isConfirmed) {
           filesBuffer = [];
-          input.value = '';
+          applyBufferToInput(); // Aplica la lista vacía al input
           refreshGrid();
         }
       });
