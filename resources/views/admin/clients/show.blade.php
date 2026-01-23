@@ -312,6 +312,13 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group-actions">
+                                                <a href="{{ route('portal.pets.show', $p) }}"
+                                                   class="btn btn-view"
+                                                   title="Ver detalles de la mascota"
+                                                   target="_blank">
+                                                    <i class="fa-regular fa-eye me-1"></i>
+                                                    <span class="d-none d-xl-inline">Ver</span>
+                                                </a>
                                                 <button type="button" class="btn btn-transfer btn-transfer-pet"
                                                     data-pet-id="{{ $p->id }}"
                                                     data-pet-name="{{ $p->name }}"
@@ -387,6 +394,11 @@
                                 @endif
 
                                 <div class="d-flex gap-2">
+                                    <a href="{{ route('portal.pets.show', $p) }}"
+                                       class="btn btn-view flex-fill"
+                                       target="_blank">
+                                        <i class="fa-regular fa-eye me-1"></i>Ver
+                                    </a>
                                     <button type="button" class="btn btn-transfer flex-fill btn-transfer-pet"
                                         data-pet-id="{{ $p->id }}"
                                         data-pet-name="{{ $p->name }}">
@@ -609,7 +621,15 @@
                             <i class="fa-solid fa-user label-icon"></i>
                             Seleccionar cliente destino
                         </label>
-                        <select name="to_user_id" id="transferClientSelect" class="form-select form-select-modern" required>
+                        <div class="input-wrapper mb-2">
+                            <input type="text"
+                                   id="transferClientSearch"
+                                   class="form-control form-control-modern"
+                                   placeholder="🔍 Buscar cliente por nombre..."
+                                   autocomplete="off">
+                            <div class="input-focus-effect"></div>
+                        </div>
+                        <select name="to_user_id" id="transferClientSelect" class="form-select form-select-modern" required size="6" style="height: auto;">
                             <option value="">Selecciona un cliente...</option>
                             @php
                                 $otherClients = \App\Models\User::where('is_admin', false)
@@ -618,14 +638,19 @@
                                     ->get(['id', 'name', 'email']);
                             @endphp
                             @foreach($otherClients as $client)
-                                <option value="{{ $client->id }}">
+                                <option value="{{ $client->id }}" data-search="{{ strtolower($client->name . ' ' . $client->email) }}">
                                     {{ $client->name }} ({{ $client->email }})
                                 </option>
                             @endforeach
                         </select>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fa-solid fa-info-circle me-1"></i>
+                            <span id="transferClientCount">{{ $otherClients->count() }}</span> clientes disponibles
+                        </small>
                     </div>
+                    <input type="hidden" name="keep_qr" id="keepQrHidden" value="1">
                     <div class="form-check-modern text-start">
-                        <input class="form-check-input-modern" type="checkbox" name="keep_qr" id="keepQr" checked>
+                        <input class="form-check-input-modern" type="checkbox" id="keepQr" checked>
                         <label class="form-check-label-modern" for="keepQr">
                             <span class="check-title">Mantener código QR activo</span>
                             <span class="check-description">La mascota mantiene su activación actual</span>
@@ -1192,6 +1217,30 @@
         justify-content: flex-end;
     }
 
+    .btn-view {
+        padding: 8px 16px;
+        border: 2px solid #c9f4e8;
+        border-radius: 10px;
+        background: white;
+        color: var(--success);
+        font-weight: 500;
+        font-size: 0.85rem;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-view:hover {
+        background: var(--success);
+        border-color: var(--success);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+        text-decoration: none;
+    }
+
     .btn-transfer {
         padding: 8px 16px;
         border: 2px solid #c9d1ff;
@@ -1424,11 +1473,13 @@
             gap: 6px;
         }
 
+        .btn-view span,
         .btn-transfer span,
         .btn-detach span {
             display: none !important;
         }
 
+        .btn-view,
         .btn-transfer,
         .btn-detach {
             padding: 8px 12px;
@@ -1535,6 +1586,7 @@
     }
 
     @media (max-width: 767px) {
+        .btn-view,
         .btn-transfer,
         .btn-detach {
             padding: 10px 16px;
@@ -1882,12 +1934,60 @@ document.addEventListener('DOMContentLoaded', function() {
             // Resetear selects
             transferClientSelect.value = '';
             const keepQrCheckbox = document.getElementById('keepQr');
+            const keepQrHidden = document.getElementById('keepQrHidden');
             if (keepQrCheckbox) keepQrCheckbox.checked = true;
+            if (keepQrHidden) keepQrHidden.value = '1';
 
             // Mostrar modal
             transferModal.show();
             console.log('✓ TRANSFER: Modal abierto correctamente');
         });
+
+        // Sincronizar checkbox con campo hidden
+        const keepQrCheckbox = document.getElementById('keepQr');
+        const keepQrHidden = document.getElementById('keepQrHidden');
+        if (keepQrCheckbox && keepQrHidden) {
+            keepQrCheckbox.addEventListener('change', function() {
+                keepQrHidden.value = this.checked ? '1' : '0';
+                console.log('✓ TRANSFER: keep_qr actualizado a', keepQrHidden.value);
+            });
+        }
+
+        // Filtro de búsqueda para clientes
+        const transferClientSearch = document.getElementById('transferClientSearch');
+        const transferClientCount = document.getElementById('transferClientCount');
+        if (transferClientSearch && transferClientSelect && transferClientCount) {
+            transferClientSearch.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                const options = transferClientSelect.querySelectorAll('option');
+                let visibleCount = 0;
+
+                options.forEach(option => {
+                    if (!option.value) {
+                        // Opción "Selecciona un cliente..." siempre visible
+                        option.style.display = '';
+                        return;
+                    }
+
+                    const searchData = option.getAttribute('data-search') || '';
+                    if (searchTerm === '' || searchData.includes(searchTerm)) {
+                        option.style.display = '';
+                        visibleCount++;
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+
+                transferClientCount.textContent = visibleCount;
+                console.log('✓ TRANSFER: Filtrado - mostrando', visibleCount, 'clientes');
+            });
+
+            // Limpiar búsqueda al abrir modal
+            transferModalEl.addEventListener('show.bs.modal', function() {
+                transferClientSearch.value = '';
+                transferClientSearch.dispatchEvent(new Event('input'));
+            });
+        }
 
         // Validar y confirmar transferencia
         transferForm.addEventListener('submit', function(e) {
@@ -1896,8 +1996,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const petName = transferPetNameLabel.textContent;
             const selectedClient = transferClientSelect.options[transferClientSelect.selectedIndex];
-            const keepQrCheckbox = document.getElementById('keepQr');
-            const keepQr = keepQrCheckbox ? keepQrCheckbox.checked : true;
+            const keepQrHidden = document.getElementById('keepQrHidden');
+            const keepQr = keepQrHidden ? keepQrHidden.value === '1' : true;
 
             if (!transferClientSelect.value) {
                 Swal.fire({
