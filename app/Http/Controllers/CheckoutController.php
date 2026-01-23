@@ -302,7 +302,7 @@ class CheckoutController extends Controller
 
             $pet = \App\Models\Pet::create($data);
 
-            // Guardar fotos múltiples
+            // Guardar fotos múltiples (solo las adicionales, NO la foto principal)
             $sort = 1;
             foreach ($request->file('photos', []) as $file) {
                 if (!$file || !$file->isValid()) continue;
@@ -314,14 +314,9 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // Si no subieron fotos múltiples pero sí 'photo' legacy, usarla como primera
-            if ($sort === 1 && !empty($data['photo'])) {
-                \App\Models\PetPhoto::create([
-                    'pet_id'     => $pet->id,
-                    'path'       => $data['photo'],
-                    'sort_order' => $sort++,
-                ]);
-            }
+            // FIX: La foto principal ya está en Pet::photo, NO crear PetPhoto adicional
+            // La foto principal va en la columna 'photo' de la tabla pets
+            // Las fotos adicionales van en la tabla pet_photos
 
             // Generar QR code (mismo proceso que el admin)
             $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $pet->id]);

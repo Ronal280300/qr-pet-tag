@@ -896,6 +896,8 @@
 .photo-preview-area {
   position: relative;
   min-height: 280px;
+  aspect-ratio: 4 / 3;
+  max-height: 400px;
   border: 3px dashed var(--gray-300);
   border-radius: 20px;
   background: var(--gray-50);
