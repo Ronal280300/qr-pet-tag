@@ -1546,19 +1546,23 @@
 {{-- ===== JAVASCRIPT COMPLETO ===== --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    (function() {
-        console.log('✓ CLIENT SHOW: JavaScript cargado correctamente');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✓ CLIENT SHOW: DOM cargado - iniciando JavaScript');
 
-        // Inicializar tooltips de Bootstrap
+    // Inicializar tooltips de Bootstrap
+    try {
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
         console.log(`✓ CLIENT SHOW: ${tooltipList.length} tooltips inicializados`);
+    } catch (error) {
+        console.error('Error inicializando tooltips:', error);
+    }
 
-        // ==========================================
-        // MÁSCARA TELÉFONO COSTA RICA (+506 0000 0000)
-        // ==========================================
-        const phoneInput = document.getElementById('phoneCR');
-
+    // ==========================================
+    // MÁSCARA TELÉFONO COSTA RICA (+506 0000 0000)
+    // ==========================================
+    const phoneInput = document.getElementById('phoneCR');
+    if (phoneInput) {
         function formatPhoneCR(value) {
             value = String(value || '');
             const digits = value.replace(/\D+/g, '').replace(/^506/, '').slice(0, 8);
@@ -1590,13 +1594,16 @@
         phoneInput.addEventListener('blur', applyPhoneFormat);
 
         applyPhoneFormat();
+        console.log('✓ Máscara teléfono CR inicializada');
+    }
 
-        // ==========================================
-        // INDICADOR DE ESTADO DINÁMICO CON CONFIRMACIÓN
-        // ==========================================
-        const stateWrapper = document.querySelector('[data-state-wrapper]');
-        const stateSelect = document.querySelector('[data-state-select]');
+    // ==========================================
+    // INDICADOR DE ESTADO DINÁMICO CON CONFIRMACIÓN
+    // ==========================================
+    const stateWrapper = document.querySelector('[data-state-wrapper]');
+    const stateSelect = document.querySelector('[data-state-select]');
 
+    if (stateWrapper && stateSelect) {
         function updateStateRing() {
             stateWrapper.classList.remove('ring-active', 'ring-pending', 'ring-inactive');
 
@@ -1648,7 +1655,7 @@
                         // Usuario confirmó - actualizar estado original y anillo
                         stateSelect.setAttribute('data-original-status', newStatus);
                         updateStateRing();
-                        checkFormChanges(); // Detectar cambios en el formulario
+                        if (typeof checkFormChanges === 'function') checkFormChanges();
                     } else {
                         // Usuario canceló - revertir al valor anterior
                         stateSelect.value = oldStatus;
@@ -1660,14 +1667,17 @@
                 updateStateRing();
             }
         });
+        console.log('✓ Estado dinámico con confirmación inicializado');
+    }
 
-        // ==========================================
-        // DETECCIÓN DE CAMBIOS EN EL FORMULARIO
-        // ==========================================
-        const clientForm = document.getElementById('clientForm');
-        const saveButton = document.getElementById('saveBtn');
-        const dirtyBadge = document.getElementById('dirtyBadge');
+    // ==========================================
+    // DETECCIÓN DE CAMBIOS EN EL FORMULARIO
+    // ==========================================
+    const clientForm = document.getElementById('clientForm');
+    const saveButton = document.getElementById('saveBtn');
+    const dirtyBadge = document.getElementById('dirtyBadge');
 
+    if (clientForm && saveButton && dirtyBadge) {
         let initialValues = {};
 
         function captureInitialValues() {
@@ -1678,11 +1688,10 @@
             }
         }
 
-        window.addEventListener('load', () => {
-            setTimeout(captureInitialValues, 100);
-        });
+        // Capturar valores iniciales después de cargar
+        setTimeout(captureInitialValues, 100);
 
-        function checkFormChanges() {
+        window.checkFormChanges = function() {
             const currentFormData = new FormData(clientForm);
             let hasChanges = false;
 
@@ -1705,18 +1714,24 @@
             }
 
             return hasChanges;
-        }
+        };
 
         clientForm.addEventListener('input', checkFormChanges, true);
         clientForm.addEventListener('change', checkFormChanges, true);
+        console.log('✓ Detección de cambios en formulario inicializada');
+    }
 
-        // ==========================================
-        // ANIMACIÓN AL ENVIAR FORMULARIO
-        // ==========================================
+    // ==========================================
+    // ANIMACIÓN AL ENVIAR FORMULARIO
+    // ==========================================
+    if (clientForm && saveButton) {
         clientForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            applyPhoneFormat();
+            // Aplicar formato de teléfono si existe
+            if (phoneInput && typeof applyPhoneFormat === 'function') {
+                applyPhoneFormat();
+            }
 
             Swal.fire({
                 title: '¿Guardar cambios?',
@@ -1735,27 +1750,33 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     saveButton.disabled = true;
-                    saveButton.querySelector('.btn-content').classList.add('d-none');
-                    saveButton.querySelector('.btn-loading').classList.remove('d-none');
+                    const btnContent = saveButton.querySelector('.btn-content');
+                    const btnLoading = saveButton.querySelector('.btn-loading');
+                    if (btnContent) btnContent.classList.add('d-none');
+                    if (btnLoading) btnLoading.classList.remove('d-none');
                     clientForm.submit();
                 }
             });
         });
+        console.log('✓ Envío de formulario con confirmación inicializado');
+    }
 
-        // ==========================================
-        // DESVINCULAR MASCOTA - NUEVA LÓGICA SIMPLE
-        // ==========================================
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('.btn-detach-pet');
-            if (!btn) return;
+    // ==========================================
+    // DESVINCULAR MASCOTA
+    // ==========================================
+    console.log('✓ Registrando event listener para botones desvincular');
 
-            e.preventDefault();
-            e.stopPropagation();
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-detach-pet');
+        if (!btn) return;
 
-            const petId = btn.getAttribute('data-pet-id');
-            const petName = btn.getAttribute('data-pet-name');
+        e.preventDefault();
+        e.stopPropagation();
 
-            console.log('✓ DETACH: Botón desvincular clickeado', { petId, petName });
+        const petId = btn.getAttribute('data-pet-id');
+        const petName = btn.getAttribute('data-pet-name');
+
+        console.log('✓✓✓ DETACH: Botón desvincular CLICKEADO!', { petId, petName });
 
             // Detectar si es móvil o desktop
             const isMobile = window.innerWidth < 768;
@@ -1824,27 +1845,30 @@
             });
         });
 
-        // ==========================================
-        // TRANSFERIR MASCOTA - NUEVA LÓGICA SIMPLE
-        // ==========================================
-        const transferModal = new bootstrap.Modal(document.getElementById('transferModal'));
-        const transferForm = document.getElementById('transferForm');
-        const transferPetNameLabel = document.getElementById('transferPetNameLabel');
-        const transferPetIdInput = document.getElementById('transferPetIdInput');
-        const transferClientSelect = document.getElementById('transferClientSelect');
+    // ==========================================
+    // TRANSFERIR MASCOTA
+    // ==========================================
+    const transferModalEl = document.getElementById('transferModal');
+    const transferForm = document.getElementById('transferForm');
+    const transferPetNameLabel = document.getElementById('transferPetNameLabel');
+    const transferPetIdInput = document.getElementById('transferPetIdInput');
+    const transferClientSelect = document.getElementById('transferClientSelect');
 
-        console.log('✓ TRANSFER: Modal y formulario inicializados');
+    if (transferModalEl && transferForm && transferPetNameLabel && transferPetIdInput && transferClientSelect) {
+        const transferModal = new bootstrap.Modal(transferModalEl);
+        console.log('✓ TRANSFER: Modal y formulario inicializados correctamente');
 
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btn-transfer-pet');
             if (!btn) return;
 
             e.preventDefault();
+            e.stopPropagation();
 
             const petId = btn.getAttribute('data-pet-id');
             const petName = btn.getAttribute('data-pet-name');
 
-            console.log('✓ TRANSFER: Botón transferir clickeado', { petId, petName });
+            console.log('✓✓✓ TRANSFER: Botón transferir CLICKEADO!', { petId, petName });
 
             // Actualizar datos del modal
             transferPetNameLabel.textContent = petName;
@@ -1857,19 +1881,23 @@
 
             // Resetear selects
             transferClientSelect.value = '';
-            document.getElementById('keepQr').checked = true;
+            const keepQrCheckbox = document.getElementById('keepQr');
+            if (keepQrCheckbox) keepQrCheckbox.checked = true;
 
             // Mostrar modal
             transferModal.show();
+            console.log('✓ TRANSFER: Modal abierto correctamente');
         });
 
         // Validar y confirmar transferencia
         transferForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            console.log('✓ TRANSFER: Submit del formulario');
 
             const petName = transferPetNameLabel.textContent;
             const selectedClient = transferClientSelect.options[transferClientSelect.selectedIndex];
-            const keepQr = document.getElementById('keepQr').checked;
+            const keepQrCheckbox = document.getElementById('keepQr');
+            const keepQr = keepQrCheckbox ? keepQrCheckbox.checked : true;
 
             if (!transferClientSelect.value) {
                 Swal.fire({
@@ -1907,46 +1935,68 @@
                 }
             });
         });
-
-        // ==========================================
-        // ELIMINAR CLIENTE
-        // ==========================================
-        const deleteForm = document.getElementById('deleteClientForm');
-
-        console.log('✓ DELETE: Formulario de eliminación encontrado', { action: deleteForm?.action });
-
-        document.addEventListener('click', function(e) {
-            const trigger = e.target.closest('.js-delete-client');
-            if (!trigger) return;
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            console.log('✓ DELETE: Botón eliminar clickeado');
-
-            Swal.fire({
-                title: '¿Eliminar cliente?',
-                html: 'Esta acción <b>no se puede deshacer</b>.<br><br>Solo se pueden eliminar clientes <b>sin mascotas vinculadas</b>.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: '<i class="fa-solid fa-trash-can me-2"></i>Sí, eliminar',
-                cancelButtonText: '<i class="fa-solid fa-xmark me-2"></i>Cancelar',
-                customClass: {
-                    popup: 'swal-modern',
-                    confirmButton: 'btn-swal-confirm',
-                    cancelButton: 'btn-swal-cancel'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    deleteForm.submit();
-                }
-            });
+    } else {
+        console.error('✗ TRANSFER: No se pudieron inicializar elementos del modal', {
+            modal: !!transferModalEl,
+            form: !!transferForm,
+            label: !!transferPetNameLabel,
+            input: !!transferPetIdInput,
+            select: !!transferClientSelect
         });
+    }
 
-        // Quitar disabled del botón guardar si quedó por cache
-        document.getElementById('saveBtn')?.removeAttribute('disabled');
-    })();
+    // ==========================================
+    // ELIMINAR CLIENTE
+    // ==========================================
+    const deleteForm = document.getElementById('deleteClientForm');
+
+    console.log('✓ DELETE: Formulario de eliminación', {
+        encontrado: !!deleteForm,
+        action: deleteForm?.action
+    });
+
+    console.log('✓ Registrando event listener para botón eliminar cliente');
+
+    document.addEventListener('click', function(e) {
+        const trigger = e.target.closest('.js-delete-client');
+        if (!trigger) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log('✓✓✓ DELETE: Botón eliminar cliente CLICKEADO!');
+
+        if (!deleteForm) {
+            Swal.fire('Error', 'No se encontró el formulario de eliminación', 'error');
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Eliminar cliente?',
+            html: 'Esta acción <b>no se puede deshacer</b>.<br><br>Solo se pueden eliminar clientes <b>sin mascotas vinculadas</b>.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fa-solid fa-trash-can me-2"></i>Sí, eliminar',
+            cancelButtonText: '<i class="fa-solid fa-xmark me-2"></i>Cancelar',
+            customClass: {
+                popup: 'swal-modern',
+                confirmButton: 'btn-swal-confirm',
+                cancelButton: 'btn-swal-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log('✓ DELETE: Enviando formulario de eliminación');
+                deleteForm.submit();
+            }
+        });
+    });
+
+    // Quitar disabled del botón guardar si quedó por cache
+    if (saveButton) saveButton.removeAttribute('disabled');
+
+    console.log('✅ ===== TODOS LOS EVENT LISTENERS REGISTRADOS CORRECTAMENTE =====');
+});
 </script>
 @endsection
