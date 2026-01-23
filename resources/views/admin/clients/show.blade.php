@@ -1865,7 +1865,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <input class="form-check-input" type="checkbox" id="swalResetQr" style="width: 20px; height: 20px;">
                         <label class="form-check-label" for="swalResetQr">
                             <strong>Restablecer código QR</strong><br>
-                            <small class="text-muted">La mascota quedará sin activar (recomendado)</small>
+                            <small class="text-muted">La mascota quedará sin activar (opcional)</small>
                         </label>
                     </div>
                 `,
@@ -1879,17 +1879,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     popup: 'swal-modern',
                     confirmButton: 'btn-swal-confirm',
                     cancelButton: 'btn-swal-cancel'
-                },
-                preConfirm: () => {
-                    return document.getElementById('swalResetQr').checked;
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Establecer valor del checkbox reset_qr
-                    resetQrInput.value = result.value ? '1' : '0';
+                    // Obtener valor del checkbox
+                    const resetQrChecked = document.getElementById('swalResetQr')?.checked || false;
+                    resetQrInput.value = resetQrChecked ? '1' : '0';
                     console.log('DETACH: Enviando formulario', {
                         action: detachForm.action,
-                        resetQr: resetQrInput.value
+                        resetQr: resetQrInput.value,
+                        resetQrChecked: resetQrChecked
                     });
                     // Enviar formulario
                     detachForm.submit();
@@ -1953,33 +1952,45 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Filtro de búsqueda para clientes
+        // Filtro de búsqueda para clientes (compatible con móviles)
         const transferClientSearch = document.getElementById('transferClientSearch');
         const transferClientCount = document.getElementById('transferClientCount');
         if (transferClientSearch && transferClientSelect && transferClientCount) {
+            // Guardar todas las opciones originales
+            let allOptions = [];
+            const placeholder = transferClientSelect.querySelector('option[value=""]');
+
+            // Capturar todas las opciones menos el placeholder
+            transferClientSelect.querySelectorAll('option').forEach(option => {
+                if (option.value) {
+                    allOptions.push({
+                        element: option.cloneNode(true),
+                        searchData: option.getAttribute('data-search') || ''
+                    });
+                }
+            });
+
+            console.log('✓ TRANSFER: Guardadas', allOptions.length, 'opciones de clientes');
+
             transferClientSearch.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase().trim();
-                const options = transferClientSelect.querySelectorAll('option');
+
+                // Remover todas las opciones excepto el placeholder
+                while (transferClientSelect.options.length > 1) {
+                    transferClientSelect.remove(1);
+                }
+
+                // Filtrar y agregar opciones que coincidan
                 let visibleCount = 0;
-
-                options.forEach(option => {
-                    if (!option.value) {
-                        // Opción "Selecciona un cliente..." siempre visible
-                        option.style.display = '';
-                        return;
-                    }
-
-                    const searchData = option.getAttribute('data-search') || '';
-                    if (searchTerm === '' || searchData.includes(searchTerm)) {
-                        option.style.display = '';
+                allOptions.forEach(optionData => {
+                    if (searchTerm === '' || optionData.searchData.includes(searchTerm)) {
+                        transferClientSelect.appendChild(optionData.element.cloneNode(true));
                         visibleCount++;
-                    } else {
-                        option.style.display = 'none';
                     }
                 });
 
                 transferClientCount.textContent = visibleCount;
-                console.log('✓ TRANSFER: Filtrado - mostrando', visibleCount, 'clientes');
+                console.log('✓ TRANSFER: Filtrado - mostrando', visibleCount, 'de', allOptions.length, 'clientes');
             });
 
             // Limpiar búsqueda al abrir modal
