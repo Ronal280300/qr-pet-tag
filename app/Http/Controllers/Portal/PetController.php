@@ -92,19 +92,16 @@ class PetController extends Controller
                     'sort_order' => $sort++,
                 ]);
 
-                // Generar thumbnail en background
-                dispatch(function () use ($photoService, $mediumPath) {
-                    $photoService->generateThumb($mediumPath);
-                });
+                // FIX: Generar thumbnail síncronamente para evitar error de serialización
+                // Los thumbnails son pequeños y rápidos, no necesitan async
+                $photoService->generateThumb($mediumPath);
             }
 
             // FIX: Foto principal ya está en $data['photo'], NO crear PetPhoto adicional
             // La foto principal va en Pet::photo, las adicionales en PetPhoto
             if (!empty($data['photo'])) {
-                // Generar thumbnail para foto principal en background
-                dispatch(function () use ($photoService, $data) {
-                    $photoService->generateThumb($data['photo']);
-                });
+                // Generar thumbnail para foto principal síncronamente
+                $photoService->generateThumb($data['photo']);
             }
 
             // Generar/asegurar slug + imagen del QR
@@ -196,17 +193,15 @@ class PetController extends Controller
                     $photoService->deleteAllVersions($pet->photo);
                 }
 
-                // OPTIMIZADO: Solo genera medium (rápido), thumb en background
+                // OPTIMIZADO: Solo genera medium (rápido), thumb después
                 $mediumPath = $photoService->optimizeQuick($request->file('photo'), 'pets');
                 $data['photo'] = $mediumPath;
 
                 // FIX: NO crear PetPhoto aquí - la foto principal solo va en Pet::photo
                 // Las fotos adicionales van en PetPhoto (tabla pet_photos)
 
-                // Generar thumbnail en background
-                dispatch(function () use ($photoService, $mediumPath) {
-                    $photoService->generateThumb($mediumPath);
-                });
+                // Generar thumbnail síncronamente
+                $photoService->generateThumb($mediumPath);
             }
 
             // 3) Actualizar datos
@@ -226,10 +221,8 @@ class PetController extends Controller
                     'sort_order' => ++$sort,
                 ]);
 
-                // Generar thumbnail en background
-                dispatch(function () use ($photoService, $mediumPath) {
-                    $photoService->generateThumb($mediumPath);
-                });
+                // Generar thumbnail síncronamente
+                $photoService->generateThumb($mediumPath);
             }
         });
 
