@@ -70,7 +70,7 @@ class PetController extends Controller
         $data['user_id'] = null;
         $data['is_lost'] = false;
 
-        DB::transaction(function () use ($request, $data, $qrService, $photoService, &$pet) {
+        DB::transaction(function () use ($request, &$data, $qrService, $photoService, &$pet) {
             if ($request->hasFile('photo')) {
                 // OPTIMIZADO: Solo genera medium (rápido), thumb en background
                 $data['photo'] = $photoService->optimizeQuick($request->file('photo'), 'pets');
