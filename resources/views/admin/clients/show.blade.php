@@ -59,14 +59,7 @@
                                             </button>
                                         </form>
                                     </li>
-                                    <li><hr class="dropdown-divider"></li>
                                     @endif
-                                    <li>
-                                        <button type="button" class="dropdown-item js-delete-client">
-                                            <i class="fa-solid fa-trash-can me-2 text-danger"></i>
-                                            Eliminar cliente
-                                        </button>
-                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -214,6 +207,18 @@
                             </button>
                         </div>
                     </form>
+
+                    {{-- Botón eliminar cliente (separado del form) --}}
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-danger btn-modern w-100 js-delete-client">
+                            <i class="fa-solid fa-trash-can me-2"></i>
+                            Eliminar cliente
+                        </button>
+                        <div class="alert alert-warning mt-3 mb-0" style="font-size: 0.875rem;">
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                            <strong>Advertencia:</strong> Solo se pueden eliminar clientes sin mascotas vinculadas. Desenlaza o transfiere las mascotas primero.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1704,6 +1709,7 @@
             if (!btn) return;
 
             e.preventDefault();
+            e.stopPropagation();
 
             const petId = btn.getAttribute('data-pet-id');
             const petName = btn.getAttribute('data-pet-name');
@@ -1717,20 +1723,33 @@
             const resetQrInput = document.getElementById(resetQrId);
 
             if (!detachForm) {
-                console.error('Form not found:', formId);
+                console.error('DETACH: Form not found:', formId);
+                Swal.fire('Error', 'No se pudo encontrar el formulario de desenlace', 'error');
                 return;
             }
 
+            console.log('DETACH: Formulario encontrado', {
+                formId: formId,
+                action: detachForm.action,
+                method: detachForm.method,
+                petId: petId,
+                petName: petName
+            });
+
             // Mostrar confirmación con opción de resetear QR
             Swal.fire({
-                title: '¿Desenlazar mascota?',
+                title: '⚠️ Desenlazar mascota',
                 html: `
-                    <p class="mb-3">Se desenlazará <strong>${petName}</strong> del cliente.</p>
+                    <p class="mb-3">Se <strong>desenlazará</strong> a <strong class="text-primary">${petName}</strong> de este cliente.</p>
+                    <div class="alert alert-info text-start mb-3">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        <small>La mascota quedará sin dueño y deberá ser reasignada manualmente.</small>
+                    </div>
                     <div class="form-check text-start" style="padding-left: 2.5rem;">
                         <input class="form-check-input" type="checkbox" id="swalResetQr" style="width: 20px; height: 20px;">
                         <label class="form-check-label" for="swalResetQr">
                             <strong>Restablecer código QR</strong><br>
-                            <small class="text-muted">La mascota quedará sin activar</small>
+                            <small class="text-muted">La mascota quedará sin activar (recomendado)</small>
                         </label>
                     </div>
                 `,
@@ -1752,6 +1771,10 @@
                 if (result.isConfirmed) {
                     // Establecer valor del checkbox reset_qr
                     resetQrInput.value = result.value ? '1' : '0';
+                    console.log('DETACH: Enviando formulario', {
+                        action: detachForm.action,
+                        resetQr: resetQrInput.value
+                    });
                     // Enviar formulario
                     detachForm.submit();
                 }

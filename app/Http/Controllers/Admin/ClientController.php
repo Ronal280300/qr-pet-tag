@@ -102,6 +102,10 @@ class ClientController extends Controller
             $data['status_changed_at'] = now();
         }
 
+        // IMPORTANTE: El cambio de estado del cliente NO debe desvincular sus mascotas.
+        // Las mascotas mantienen su relación (user_id) independientemente del estado.
+        // Solo el middleware EnsureClientCanManagePets bloquea el ACCESO del cliente
+        // a gestionar mascotas cuando está inactivo, pero NO se desvinculan.
         $user->fill($data)->save();
 
         return back()->with('success', 'Cliente actualizado correctamente.');
