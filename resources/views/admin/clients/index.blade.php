@@ -1560,28 +1560,33 @@
 
   /* ===== VISTA MÓVIL - TARJETAS ===== */
   .client-card-mobile {
-    padding: 1.25rem;
-    border-bottom: 2px solid #f0f0f0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
     transition: var(--transition);
     background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
   }
 
   .client-card-mobile:hover {
-    background: linear-gradient(90deg, rgba(13, 110, 253, 0.03), transparent);
+    background: linear-gradient(90deg, rgba(13, 110, 253, 0.02), transparent);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
   }
 
   .client-card-mobile:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
   }
 
   .client-card-info {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    padding: 1rem;
+    gap: 0.65rem;
+    margin-top: 0.75rem;
+    padding: 0.875rem;
     background: #f8f9fa;
-    border-radius: 12px;
+    border-radius: 10px;
   }
 
   .info-item {
