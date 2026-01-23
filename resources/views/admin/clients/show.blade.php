@@ -44,24 +44,14 @@
                                 <i class="fa-solid fa-phone"></i>
                             </a>
                             @endif
-                            <div class="dropdown">
-                                <button class="btn btn-action" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" title="Más opciones">
-                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                            @if($user->currentPlan && $user->plan_is_active && $user->plan_expires_at)
+                            <form method="POST" action="{{ route('portal.admin.clients.send-reminder', $user) }}" style="display: inline;">
+                                @csrf
+                                <button type="submit" class="btn btn-action" data-bs-toggle="tooltip" title="Enviar recordatorio">
+                                    <i class="fa-solid fa-bell"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-modern" aria-labelledby="dropdownMenuButton">
-                                    @if($user->currentPlan && $user->plan_is_active && $user->plan_expires_at)
-                                    <li>
-                                        <form method="POST" action="{{ route('portal.admin.clients.send-reminder', $user) }}" style="display: inline;">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item">
-                                                <i class="fa-solid fa-bell me-2 text-warning"></i>
-                                                Enviar recordatorio de pago
-                                            </button>
-                                        </form>
-                                    </li>
-                                    @endif
-                                </ul>
-                            </div>
+                            </form>
+                            @endif
                         </div>
                     </div>
 
@@ -1557,9 +1547,12 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     (function() {
+        console.log('✓ CLIENT SHOW: JavaScript cargado correctamente');
+
         // Inicializar tooltips de Bootstrap
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        console.log(`✓ CLIENT SHOW: ${tooltipList.length} tooltips inicializados`);
 
         // ==========================================
         // MÁSCARA TELÉFONO COSTA RICA (+506 0000 0000)
@@ -1599,7 +1592,7 @@
         applyPhoneFormat();
 
         // ==========================================
-        // INDICADOR DE ESTADO DINÁMICO
+        // INDICADOR DE ESTADO DINÁMICO CON CONFIRMACIÓN
         // ==========================================
         const stateWrapper = document.querySelector('[data-state-wrapper]');
         const stateSelect = document.querySelector('[data-state-select]');
@@ -1617,8 +1610,56 @@
             }
         }
 
+        // Guardar estado inicial
+        const originalStatus = stateSelect.value;
+        stateSelect.setAttribute('data-original-status', originalStatus);
+
         updateStateRing();
-        stateSelect.addEventListener('change', updateStateRing);
+
+        // Listener con confirmación
+        stateSelect.addEventListener('change', function(e) {
+            const newStatus = e.target.value;
+            const oldStatus = e.target.getAttribute('data-original-status') || originalStatus;
+
+            // Etiquetas de estado para mensajes
+            const statusLabels = {
+                'active': 'Activo',
+                'pending': 'Pendiente',
+                'inactive': 'Inactivo'
+            };
+
+            if (newStatus !== oldStatus) {
+                Swal.fire({
+                    title: '¿Cambiar estado del cliente?',
+                    html: `Se cambiará el estado de <strong>${statusLabels[oldStatus]}</strong> a <strong>${statusLabels[newStatus]}</strong>.<br><br><small class="text-muted"><i class="fa-solid fa-info-circle me-1"></i>Nota: Las mascotas vinculadas NO serán desenlazadas.</small>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fa-solid fa-check me-2"></i>Sí, cambiar',
+                    cancelButtonText: '<i class="fa-solid fa-xmark me-2"></i>Cancelar',
+                    customClass: {
+                        popup: 'swal-modern',
+                        confirmButton: 'btn-swal-confirm',
+                        cancelButton: 'btn-swal-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Usuario confirmó - actualizar estado original y anillo
+                        stateSelect.setAttribute('data-original-status', newStatus);
+                        updateStateRing();
+                        checkFormChanges(); // Detectar cambios en el formulario
+                    } else {
+                        // Usuario canceló - revertir al valor anterior
+                        stateSelect.value = oldStatus;
+                        updateStateRing();
+                    }
+                });
+            } else {
+                // Sin cambio, solo actualizar anillo
+                updateStateRing();
+            }
+        });
 
         // ==========================================
         // DETECCIÓN DE CAMBIOS EN EL FORMULARIO
@@ -1714,6 +1755,8 @@
             const petId = btn.getAttribute('data-pet-id');
             const petName = btn.getAttribute('data-pet-name');
 
+            console.log('✓ DETACH: Botón desvincular clickeado', { petId, petName });
+
             // Detectar si es móvil o desktop
             const isMobile = window.innerWidth < 768;
             const formId = isMobile ? `detach-form-mobile-${petId}` : `detach-form-${petId}`;
@@ -1790,6 +1833,8 @@
         const transferPetIdInput = document.getElementById('transferPetIdInput');
         const transferClientSelect = document.getElementById('transferClientSelect');
 
+        console.log('✓ TRANSFER: Modal y formulario inicializados');
+
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btn-transfer-pet');
             if (!btn) return;
@@ -1798,6 +1843,8 @@
 
             const petId = btn.getAttribute('data-pet-id');
             const petName = btn.getAttribute('data-pet-name');
+
+            console.log('✓ TRANSFER: Botón transferir clickeado', { petId, petName });
 
             // Actualizar datos del modal
             transferPetNameLabel.textContent = petName;
@@ -1866,12 +1913,16 @@
         // ==========================================
         const deleteForm = document.getElementById('deleteClientForm');
 
+        console.log('✓ DELETE: Formulario de eliminación encontrado', { action: deleteForm?.action });
+
         document.addEventListener('click', function(e) {
             const trigger = e.target.closest('.js-delete-client');
             if (!trigger) return;
 
             e.preventDefault();
             e.stopPropagation();
+
+            console.log('✓ DELETE: Botón eliminar clickeado');
 
             Swal.fire({
                 title: '¿Eliminar cliente?',
