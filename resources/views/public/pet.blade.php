@@ -5,13 +5,12 @@
 @php
   use Illuminate\Support\Facades\Storage;
 
-  $photosRel = method_exists($pet,'photos') ? $pet->photos : collect();
+  // FIX: Usar all_photos que incluye foto principal + opcionales en orden correcto
+  $allPhotos = $pet->all_photos ?? collect();
   $gallery   = collect();
 
-  if ($photosRel && $photosRel->count() > 0) {
-      $gallery = $photosRel->map(fn($ph) => Storage::url($ph->path));
-  } elseif ($pet->photo && Storage::disk('public')->exists($pet->photo)) {
-      $gallery = collect([ Storage::url($pet->photo) ]);
+  if ($allPhotos->count() > 0) {
+      $gallery = $allPhotos->map(fn($ph) => Storage::url($ph->path));
   } else {
       $gallery = collect(['https://placehold.co/1200x1200?text='.urlencode($pet->name)]);
   }

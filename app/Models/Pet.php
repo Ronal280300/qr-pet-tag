@@ -108,23 +108,52 @@ class Pet extends Model
 
     /**
      * URL principal:
-     * 1) primera foto de pet_photos
-     * 2) foto antigua 'photo'
+     * 1) foto principal 'photo'
+     * 2) primera foto de pet_photos
      * 3) placeholder
      */
     public function getMainPhotoUrlAttribute(): string
     {
-        $first = $this->photos()->first();
-
-        if ($first && $first->path) {
-            return Storage::url($first->path);
-        }
-
+        // Priorizar foto principal (campo 'photo') primero
         if ($this->photo && Storage::disk('public')->exists($this->photo)) {
             return Storage::url($this->photo);
         }
 
+        // Si no hay foto principal, usar primera foto opcional
+        $first = $this->photos()->first();
+        if ($first && $first->path) {
+            return Storage::url($first->path);
+        }
+
+        // Placeholder
         return 'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    }
+
+    /**
+     * Obtiene TODAS las fotos en orden: principal primero, luego opcionales
+     * Retorna una colección con objetos stdClass que tienen 'path' e 'is_main'
+     */
+    public function getAllPhotosAttribute()
+    {
+        $allPhotos = collect();
+
+        // 1. Agregar foto principal primero (si existe)
+        if ($this->photo && Storage::disk('public')->exists($this->photo)) {
+            $allPhotos->push((object)[
+                'path' => $this->photo,
+                'is_main' => true,
+            ]);
+        }
+
+        // 2. Agregar fotos opcionales
+        foreach ($this->photos as $photo) {
+            $allPhotos->push((object)[
+                'path' => $photo->path,
+                'is_main' => false,
+            ]);
+        }
+
+        return $allPhotos;
     }
 
     /* ===================== Helpers ===================== */
