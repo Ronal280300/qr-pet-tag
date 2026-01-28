@@ -47,11 +47,14 @@ class RegisterController extends Controller
     protected function registered(\Illuminate\Http\Request $request, $user)
     {
         // Procesar activación de mascota si hay token en sesión
-        $activated = \App\Http\Controllers\PetActivationController::processAfterRegistration($user);
+        if (session()->has('pet_activation_token')) {
+            $activated = \App\Http\Controllers\PetActivationController::processAfterRegistration($user);
 
-        if ($activated) {
-            // Agregar mensaje de éxito
-            session()->flash('status', '¡Bienvenido! Tu mascota ha sido ligada exitosamente a tu cuenta.');
+            if ($activated) {
+                // Agregar mensaje de éxito
+                session()->flash('status', '¡Bienvenido! Tu mascota ha sido ligada exitosamente a tu cuenta.');
+            }
+            // Si falla, processAfterRegistration ya habrá guardado el mensaje de error en sesión
         }
     }
 
