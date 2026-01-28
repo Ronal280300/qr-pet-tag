@@ -148,25 +148,35 @@
                 </div>
               </div>
 
-              <div class="col-12 col-md-6">
+              <div class="col-12">
                 <div class="form-group">
-                  <label class="form-label">
+                  <label class="form-label mb-3">
                     <i class="fa-solid fa-cake-candles label-icon"></i>
                     Edad
                   </label>
-                  <div class="age-input-group">
-                    <div class="input-with-icon flex-grow-1">
-                      <i class="fa-solid fa-calendar-days input-icon"></i>
-                      <input type="number" name="age" min="0" max="50" class="form-input" placeholder="0" id="ageInputCheckout">
+                  <div class="age-inputs-dual">
+                    <div class="age-field">
+                      <label class="age-sublabel">Años</label>
+                      <div class="input-with-icon">
+                        <i class="fa-solid fa-calendar-days input-icon"></i>
+                        <input type="number" name="age_years" min="0" max="50"
+                               class="form-input" placeholder="0" id="ageYearsInputCheckout"
+                               value="{{ old('age_years', 0) }}">
+                      </div>
                     </div>
-                    <select name="age_unit" class="form-select age-unit-select" id="ageUnitSelectCheckout">
-                      <option value="years">Años</option>
-                      <option value="months">Meses</option>
-                    </select>
+                    <div class="age-field">
+                      <label class="age-sublabel">Meses</label>
+                      <div class="input-with-icon">
+                        <i class="fa-solid fa-calendar-alt input-icon"></i>
+                        <input type="number" name="age_months" min="0" max="11"
+                               class="form-input" placeholder="0" id="ageMonthsInputCheckout"
+                               value="{{ old('age_months', 0) }}">
+                      </div>
+                    </div>
                   </div>
                   <small class="text-muted mt-2 d-block">
                     <i class="fa-solid fa-info-circle me-1"></i>
-                    Para cachorros menores de 1 año, selecciona "Meses"
+                    Puedes ingresar años, meses o ambos (Ej: 1 año y 6 meses)
                   </small>
                 </div>
               </div>
@@ -1144,50 +1154,31 @@
   }
 }
 
-/* Age Input Group */
-.age-input-group {
+/* Age Dual Fields */
+.age-inputs-dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.age-field {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.age-input-group .input-with-icon {
-  flex: 1;
-  min-width: 0;
+.age-sublabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.age-unit-select {
-  width: 140px;
-  height: 56px;
-  padding: 0 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 16px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #374151;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.age-unit-select:hover {
-  border-color: #667eea;
-}
-
-.age-unit-select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-}
-
-@media (max-width: 768px) {
-  .age-input-group {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .age-unit-select {
-    width: 100%;
+@media (max-width: 576px) {
+  .age-inputs-dual {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 </style>
@@ -1502,35 +1493,24 @@
     });
   })();
 
-  // Validación de edad: si selecciona meses, máximo 11
+  // Validación de edad: años y meses separados
   (function() {
-    const ageInput = document.getElementById('ageInputCheckout');
-    const ageUnitSelect = document.getElementById('ageUnitSelectCheckout');
+    const yearsInput = document.getElementById('ageYearsInputCheckout');
+    const monthsInput = document.getElementById('ageMonthsInputCheckout');
 
-    if (ageInput && ageUnitSelect) {
-      ageUnitSelect.addEventListener('change', function() {
-        if (this.value === 'months') {
-          ageInput.max = 11;
-          if (parseInt(ageInput.value) > 11) {
-            ageInput.value = 11;
-          }
-          ageInput.placeholder = '0-11';
-        } else {
-          ageInput.max = 50;
-          ageInput.placeholder = '0';
-        }
-      });
-
-      // Validar en tiempo real
-      ageInput.addEventListener('input', function() {
-        const unit = ageUnitSelect.value;
+    if (yearsInput) {
+      yearsInput.addEventListener('input', function() {
         const value = parseInt(this.value);
+        if (isNaN(value) || value < 0) this.value = 0;
+        if (value > 50) this.value = 50;
+      });
+    }
 
-        if (unit === 'months' && value > 11) {
-          this.value = 11;
-        } else if (unit === 'years' && value > 50) {
-          this.value = 50;
-        }
+    if (monthsInput) {
+      monthsInput.addEventListener('input', function() {
+        const value = parseInt(this.value);
+        if (isNaN(value) || value < 0) this.value = 0;
+        if (value > 11) this.value = 11;
       });
     }
   })();

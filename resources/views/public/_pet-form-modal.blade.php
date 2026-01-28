@@ -1354,50 +1354,31 @@
     }
 }
 
-/* Age Input Group */
-.age-input-group-modal {
+/* Age Dual Fields (Modal) */
+.age-inputs-dual-modal {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.age-field-modal {
     display: flex;
-    gap: 12px;
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.age-input-group-modal .pet-input-icon {
-    flex: 1;
-    min-width: 0;
+.age-sublabel-modal {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.age-unit-modal {
-    width: 140px;
-    height: 54px;
-    padding: 0 16px;
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 500;
-    color: #495057;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.age-unit-modal:hover {
-    border-color: #0d6efd;
-}
-
-.age-unit-modal:focus {
-    outline: none;
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
-}
-
-@media (max-width: 768px) {
-    .age-input-group-modal {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .age-unit-modal {
-        width: 100%;
+@media (max-width: 576px) {
+    .age-inputs-dual-modal {
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
 }
 </style>
@@ -1566,20 +1547,30 @@
 
                             <div class="col-12">
                                 <div class="pet-form-group">
-                                    <label class="pet-label">Edad</label>
-                                    <div class="age-input-group-modal">
-                                        <div class="pet-input-icon flex-grow-1">
-                                            <i class="fa-solid fa-cake-candles"></i>
-                                            <input type="number" name="age" min="0" max="50" class="pet-input" placeholder="Ej: 3" id="ageInputModal">
+                                    <label class="pet-label mb-3">Edad</label>
+                                    <div class="age-inputs-dual-modal">
+                                        <div class="age-field-modal">
+                                            <label class="age-sublabel-modal">Años</label>
+                                            <div class="pet-input-icon">
+                                                <i class="fa-solid fa-calendar-days"></i>
+                                                <input type="number" name="age_years" min="0" max="50"
+                                                       class="pet-input" placeholder="0" id="ageYearsInputModal"
+                                                       value="{{ old('age_years', 0) }}">
+                                            </div>
                                         </div>
-                                        <select name="age_unit" class="pet-select age-unit-modal" id="ageUnitSelectModal">
-                                            <option value="years">Años</option>
-                                            <option value="months">Meses</option>
-                                        </select>
+                                        <div class="age-field-modal">
+                                            <label class="age-sublabel-modal">Meses</label>
+                                            <div class="pet-input-icon">
+                                                <i class="fa-solid fa-calendar-alt"></i>
+                                                <input type="number" name="age_months" min="0" max="11"
+                                                       class="pet-input" placeholder="0" id="ageMonthsInputModal"
+                                                       value="{{ old('age_months', 0) }}">
+                                            </div>
+                                        </div>
                                     </div>
                                     <small class="text-muted mt-2 d-block">
                                         <i class="fa-solid fa-info-circle me-1"></i>
-                                        Para cachorros menores de 1 año, selecciona "Meses"
+                                        Puedes ingresar años, meses o ambos (Ej: 1 año y 6 meses)
                                     </small>
                                 </div>
                             </div>
@@ -2201,35 +2192,24 @@
   }
 })();
 
-// Validación de edad: si selecciona meses, máximo 11
+// Validación de edad: años y meses separados
 (function() {
-  const ageInput = document.getElementById('ageInputModal');
-  const ageUnitSelect = document.getElementById('ageUnitSelectModal');
+  const yearsInput = document.getElementById('ageYearsInputModal');
+  const monthsInput = document.getElementById('ageMonthsInputModal');
 
-  if (ageInput && ageUnitSelect) {
-    ageUnitSelect.addEventListener('change', function() {
-      if (this.value === 'months') {
-        ageInput.max = 11;
-        if (parseInt(ageInput.value) > 11) {
-          ageInput.value = 11;
-        }
-        ageInput.placeholder = '0-11';
-      } else {
-        ageInput.max = 50;
-        ageInput.placeholder = 'Ej: 3';
-      }
-    });
-
-    // Validar en tiempo real
-    ageInput.addEventListener('input', function() {
-      const unit = ageUnitSelect.value;
+  if (yearsInput) {
+    yearsInput.addEventListener('input', function() {
       const value = parseInt(this.value);
+      if (isNaN(value) || value < 0) this.value = 0;
+      if (value > 50) this.value = 50;
+    });
+  }
 
-      if (unit === 'months' && value > 11) {
-        this.value = 11;
-      } else if (unit === 'years' && value > 50) {
-        this.value = 50;
-      }
+  if (monthsInput) {
+    monthsInput.addEventListener('input', function() {
+      const value = parseInt(this.value);
+      if (isNaN(value) || value < 0) this.value = 0;
+      if (value > 11) this.value = 11;
     });
   }
 })();

@@ -22,8 +22,9 @@ class Pet extends Model
         'name',
         'breed',
         'zone',
-        'age',
-        'age_unit',       // years | months
+        'age',            // mantener por compatibilidad legacy
+        'age_years',      // años (0-50)
+        'age_months',     // meses adicionales (0-11)
         'medical_conditions',
         'photo',          // compatibilidad: foto única antigua
         'is_lost',
@@ -171,20 +172,29 @@ class Pet extends Model
         return $str ?: ($this->zone ?: null);
     }
 
-    // Edad legible: "3 años" o "6 meses"
+    // Edad legible: "3 años", "6 meses", "1 año y 6 meses"
     public function getAgeDisplayAttribute(): ?string
     {
-        if (!$this->age) {
+        $years = $this->age_years ?? 0;
+        $months = $this->age_months ?? 0;
+
+        // Si ambos son 0 o null, no mostrar nada
+        if ($years == 0 && $months == 0) {
             return null;
         }
 
-        $unit = $this->age_unit ?? 'years';
-        $age = $this->age;
+        $parts = [];
 
-        if ($unit === 'months') {
-            return $age . ($age == 1 ? ' mes' : ' meses');
+        // Agregar años si existen
+        if ($years > 0) {
+            $parts[] = $years . ($years == 1 ? ' año' : ' años');
         }
 
-        return $age . ($age == 1 ? ' año' : ' años');
+        // Agregar meses si existen
+        if ($months > 0) {
+            $parts[] = $months . ($months == 1 ? ' mes' : ' meses');
+        }
+
+        return implode(' y ', $parts);
     }
 }
