@@ -52,9 +52,9 @@
                 <div class="form-group">
                   <label class="form-label">
                     <i class="fa-solid fa-dna label-icon"></i>
-                    Raza
+                    Raza <span class="text-danger">*</span>
                   </label>
-                  <input type="text" name="breed" class="form-input" placeholder="Ej: Labrador, Poodle...">
+                  <input type="text" name="breed" class="form-input" placeholder="Ej: Labrador, Poodle..." required>
                 </div>
               </div>
 
@@ -145,7 +145,7 @@
                 <div class="form-group">
                   <label class="form-label">
                     <i class="fa-solid fa-cake-candles label-icon"></i>
-                    Edad
+                    Edad <span class="text-danger">*</span>
                   </label>
                   <div class="age-inputs-dual">
                     <div class="age-field">
@@ -181,7 +181,7 @@
                 <i class="fa-solid fa-map-location-dot"></i>
               </div>
               <div class="section-info">
-                <h2 class="section-title">Ubicación</h2>
+                <h2 class="section-title">Ubicación <span class="text-danger">*</span></h2>
                 <p class="section-description">Se utiliza para mostrar la zona en el perfil público</p>
               </div>
             </div>

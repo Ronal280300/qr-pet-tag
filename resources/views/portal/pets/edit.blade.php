@@ -41,8 +41,8 @@
               <input type="text" name="name" class="form-control modern" value="{{ $pet->name }}" required>
             </div>
             <div class="col-12 col-lg-6">
-              <label class="form-label">Raza</label>
-              <input type="text" name="breed" class="form-control modern" value="{{ $pet->breed }}">
+              <label class="form-label">Raza <span class="text-danger">*</span></label>
+              <input type="text" name="breed" class="form-control modern" value="{{ $pet->breed }}" required>
             </div>
 
             {{-- Sexo (segmented) --}}
@@ -105,7 +105,7 @@
 
 
             <div class="col-12 col-lg-8">
-              <label class="form-label">Edad</label>
+              <label class="form-label">Edad <span class="text-danger">*</span></label>
               <div class="age-inputs-dual">
                 <div class="age-field">
                   <label class="age-sublabel">Años</label>
@@ -113,7 +113,7 @@
                     <i class="fa-solid fa-calendar-days input-icon"></i>
                     <input type="number" name="age_years" min="0" max="50"
                            class="form-input" placeholder="0" id="ageYearsInputEdit"
-                           value="{{ old('age_years', $pet->age_years ?? 0) }}">
+                           value="{{ old('age_years', $pet->age_years) }}">
                   </div>
                 </div>
                 <div class="age-field">
@@ -122,7 +122,7 @@
                     <i class="fa-solid fa-calendar-alt input-icon"></i>
                     <input type="number" name="age_months" min="0" max="11"
                            class="form-input" placeholder="0" id="ageMonthsInputEdit"
-                           value="{{ old('age_months', $pet->age_months ?? 0) }}">
+                           value="{{ old('age_months', $pet->age_months) }}">
                   </div>
                 </div>
               </div>
@@ -134,7 +134,7 @@
 
             {{-- Ubicación CR --}}
             <div class="col-12">
-              <label class="form-label">Ubicación</label>
+              <label class="form-label">Ubicación <span class="text-danger">*</span></label>
               <div class="row g-2" id="cr-geo"
                 data-current-province="{{ $zProvince }}"
                 data-current-canton="{{ $zCanton }}"

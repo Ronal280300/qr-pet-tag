@@ -59,9 +59,9 @@
                 <div class="form-group">
                   <label class="form-label">
                     <i class="fa-solid fa-dna label-icon"></i>
-                    Raza
+                    Raza <span style="color: #ef4444;">*</span>
                   </label>
-                  <input type="text" name="breed" class="form-input" placeholder="Ej: Labrador, Poodle...">
+                  <input type="text" name="breed" class="form-input" placeholder="Ej: Labrador, Poodle..." required>
                 </div>
               </div>
 
@@ -152,7 +152,7 @@
                 <div class="form-group">
                   <label class="form-label mb-3">
                     <i class="fa-solid fa-cake-candles label-icon"></i>
-                    Edad
+                    Edad <span style="color: #ef4444;">*</span>
                   </label>
                   <div class="age-inputs-dual">
                     <div class="age-field">
@@ -161,7 +161,7 @@
                         <i class="fa-solid fa-calendar-days input-icon"></i>
                         <input type="number" name="age_years" min="0" max="50"
                                class="form-input" placeholder="0" id="ageYearsInputCheckout"
-                               value="{{ old('age_years', 0) }}">
+                               value="{{ old('age_years') }}">
                       </div>
                     </div>
                     <div class="age-field">
@@ -170,7 +170,7 @@
                         <i class="fa-solid fa-calendar-alt input-icon"></i>
                         <input type="number" name="age_months" min="0" max="11"
                                class="form-input" placeholder="0" id="ageMonthsInputCheckout"
-                               value="{{ old('age_months', 0) }}">
+                               value="{{ old('age_months') }}">
                       </div>
                     </div>
                   </div>
@@ -192,7 +192,7 @@
                 <i class="fa-solid fa-map-location-dot"></i>
               </div>
               <div class="section-info">
-                <h2 class="section-title">Ubicación</h2>
+                <h2 class="section-title">Ubicación <span style="color: #ef4444;">*</span></h2>
                 <p class="section-description">Se utiliza para mostrar la zona en el perfil público</p>
               </div>
             </div>
