@@ -79,13 +79,29 @@ class PetController extends Controller
             'emergency_contact_phone'  => 'nullable|string|max:20',
             'is_neutered'    => 'nullable|boolean',
             'rabies_vaccine' => 'nullable|boolean',
+
+            // INVITACIÓN (Solo admin)
+            'send_invitation'  => 'nullable|boolean',
+            'pending_email'    => 'nullable|required_if:send_invitation,1|email',
+            'pending_plan_id'  => 'nullable|required_if:send_invitation,1|exists:plans,id',
         ]);
 
         // Mascota nueva SIEMPRE sin dueño (queda para que el cliente la ligue al activar el TAG)
         $data['user_id'] = null;
         $data['is_lost'] = false;
 
-        DB::transaction(function () use ($request, &$data, $qrService, $photoService, &$pet) {
+        // Si es admin y marcó enviar invitación, configurar campos pending
+        $sendInvitation = $request->boolean('send_invitation') && Auth::user()->is_admin;
+
+        if ($sendInvitation) {
+            $data['pending_email'] = $request->input('pending_email');
+            $data['pending_plan_id'] = $request->input('pending_plan_id');
+            $data['pending_token'] = \Illuminate\Support\Str::random(64);
+            $data['is_pending_registration'] = true;
+            $data['pending_sent_at'] = now();
+        }
+
+        DB::transaction(function () use ($request, &$data, $qrService, $photoService, &$pet, $sendInvitation) {
             if ($request->hasFile('photo')) {
                 // OPTIMIZADO: Solo genera medium (rápido), thumb en background
                 $data['photo'] = $photoService->optimizeQuick($request->file('photo'), 'pets');
@@ -122,7 +138,23 @@ class PetController extends Controller
             // Generar/asegurar slug + imagen del QR
             $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $pet->id]);
             $qrService->ensureSlugAndImage($qr, $pet);
+
+            // Si es invitación, enviar email
+            if ($sendInvitation) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($data['pending_email'])
+                        ->send(new \App\Mail\PetInvitationMail($pet));
+                } catch (\Exception $e) {
+                    \Log::error('Error enviando invitación de mascota: ' . $e->getMessage());
+                }
+            }
         });
+
+        if ($sendInvitation) {
+            return redirect()
+                ->route('portal.pets.show', $pet)
+                ->with('status', 'Mascota creada e invitación enviada a ' . $data['pending_email']);
+        }
 
         return redirect()
             ->route('portal.pets.show', $pet)

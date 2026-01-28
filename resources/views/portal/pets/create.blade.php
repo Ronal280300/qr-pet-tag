@@ -429,6 +429,95 @@
           </div>
         </div>
 
+        {{-- Sección de invitación (solo admin) --}}
+        @if(Auth::user()->is_admin)
+        <div class="admin-invitation-section">
+          <div class="section-header-invitation">
+            <div class="section-icon-invitation">
+              <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div>
+              <h3 class="section-title-invitation">Invitación al Cliente</h3>
+              <p class="section-subtitle-invitation">Envía una invitación al cliente para que se registre y gestione su mascota</p>
+            </div>
+          </div>
+
+          <div class="invitation-toggle">
+            <label class="invitation-switch">
+              <input type="checkbox" id="sendInvitation" name="send_invitation" value="1">
+              <span class="slider-invitation"></span>
+            </label>
+            <div class="invitation-toggle-label">
+              <strong>Enviar invitación al correo del cliente</strong>
+              <small>Al activar esta opción, se enviará un email al cliente con un link para registrarse y reclamar su mascota</small>
+            </div>
+          </div>
+
+          <div id="invitationFields" class="invitation-fields" style="display: none;">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-envelope label-icon"></i>
+                    Email del cliente <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-at input-icon"></i>
+                    <input
+                      type="email"
+                      name="pending_email"
+                      id="pendingEmail"
+                      class="form-input"
+                      placeholder="cliente@ejemplo.com"
+                    >
+                  </div>
+                  <small class="form-text">Se enviará la invitación a este correo</small>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fa-solid fa-box label-icon"></i>
+                    Plan a asignar <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-layer-group input-icon"></i>
+                    <select name="pending_plan_id" id="pendingPlanId" class="form-input">
+                      <option value="">Selecciona un plan...</option>
+                      @foreach(\App\Models\Plan::where('is_active', true)->orderBy('price')->get() as $plan)
+                        <option value="{{ $plan->id }}" data-price="{{ $plan->price }}">
+                          {{ $plan->name }} - ₡{{ number_format($plan->price, 0, ',', '.') }}
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <small class="form-text">Este plan se activará cuando el cliente complete su registro</small>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="invitation-info-box">
+                  <div class="info-icon">
+                    <i class="fa-solid fa-lightbulb"></i>
+                  </div>
+                  <div class="info-content">
+                    <strong>¿Cómo funciona?</strong>
+                    <ul>
+                      <li>Se enviará un email al cliente con un link único</li>
+                      <li>El cliente hace clic y se registra en la plataforma</li>
+                      <li>Al completar el registro, la mascota se liga automáticamente a su cuenta</li>
+                      <li>Se crea una orden automáticamente con el plan seleccionado</li>
+                      <li>El cliente podrá gestionar su mascota inmediatamente</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
+
         {{-- Botones de acción --}}
         <div class="form-actions">
           <button type="submit" class="btn-submit">
@@ -1244,6 +1333,195 @@
     min-height: 220px;
   }
 }
+
+/* ===== Sección de Invitación (Admin) ===== */
+.admin-invitation-section {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid #bfdbfe;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.section-header-invitation {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.section-icon-invitation {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.section-title-invitation {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.section-subtitle-invitation {
+  font-size: 14px;
+  color: var(--gray-600);
+  margin: 4px 0 0 0;
+}
+
+.invitation-toggle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.invitation-switch {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.invitation-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-invitation {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--gray-300);
+  transition: 0.3s;
+  border-radius: 34px;
+}
+
+.slider-invitation:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.invitation-switch input:checked + .slider-invitation {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.invitation-switch input:checked + .slider-invitation:before {
+  transform: translateX(24px);
+}
+
+.invitation-toggle-label {
+  flex: 1;
+}
+
+.invitation-toggle-label strong {
+  display: block;
+  font-size: 15px;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.invitation-toggle-label small {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+.invitation-fields {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.invitation-info-box {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #fbbf24;
+  border-radius: 12px;
+}
+
+.invitation-info-box .info-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.invitation-info-box .info-content {
+  flex: 1;
+}
+
+.invitation-info-box strong {
+  display: block;
+  font-size: 15px;
+  color: var(--gray-900);
+  margin-bottom: 8px;
+}
+
+.invitation-info-box ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+.invitation-info-box ul li {
+  margin-bottom: 4px;
+}
+
+@media (max-width: 768px) {
+  .admin-invitation-section {
+    padding: 16px;
+  }
+
+  .section-header-invitation {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .invitation-toggle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .invitation-info-box {
+    flex-direction: column;
+  }
+}
 </style>
 @endsection
 
@@ -1574,4 +1852,46 @@
     }
   })();
 </script>
+
+{{-- Script para manejar invitación al cliente (solo admin) --}}
+@if(Auth::user()->is_admin)
+<script>
+  (function() {
+    const sendInvitation = document.getElementById('sendInvitation');
+    const invitationFields = document.getElementById('invitationFields');
+    const pendingEmail = document.getElementById('pendingEmail');
+    const pendingPlanId = document.getElementById('pendingPlanId');
+
+    if (sendInvitation && invitationFields) {
+      sendInvitation.addEventListener('change', function() {
+        if (this.checked) {
+          invitationFields.style.display = 'block';
+          pendingEmail.required = true;
+          pendingPlanId.required = true;
+        } else {
+          invitationFields.style.display = 'none';
+          pendingEmail.required = false;
+          pendingPlanId.required = false;
+          pendingEmail.value = '';
+          pendingPlanId.value = '';
+        }
+      });
+    }
+
+    // Validación antes de enviar el formulario
+    const form = document.querySelector('form');
+    if (form && sendInvitation) {
+      form.addEventListener('submit', function(e) {
+        if (sendInvitation.checked) {
+          if (!pendingEmail.value || !pendingPlanId.value) {
+            e.preventDefault();
+            alert('Por favor completa el email del cliente y selecciona un plan antes de enviar la invitación.');
+            return false;
+          }
+        }
+      });
+    }
+  })();
+</script>
+@endif
 @endpush

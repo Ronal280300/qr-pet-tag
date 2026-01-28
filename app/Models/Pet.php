@@ -44,6 +44,14 @@ class Pet extends Model
         'has_emergency_contact',    // bool
         'emergency_contact_name',   // string
         'emergency_contact_phone',  // string
+
+        // ===== REGISTRO PENDIENTE (Admin crea mascota para cliente no registrado) =====
+        'pending_email',            // email del cliente invitado
+        'pending_token',            // token único para el link
+        'pending_plan_id',          // plan seleccionado por admin
+        'is_pending_registration',  // flag para mascotas pendientes
+        'pending_sent_at',          // cuándo se envió la invitación
+        'pending_completed_at',     // cuándo se completó el registro
     ];
 
     /**
@@ -61,6 +69,11 @@ class Pet extends Model
             'pending_activation' => 'boolean',
             'last_fb_posted_at' => 'datetime',
             'has_emergency_contact' => 'boolean',
+
+            // ===== REGISTRO PENDIENTE =====
+            'is_pending_registration' => 'boolean',
+            'pending_sent_at' => 'datetime',
+            'pending_completed_at' => 'datetime',
         ];
     }
 
@@ -94,6 +107,11 @@ class Pet extends Model
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function pendingPlan()
+    {
+        return $this->belongsTo(Plan::class, 'pending_plan_id');
     }
 
     /* ===================== Fotos múltiples ===================== */

@@ -112,6 +112,13 @@ Auth::routes();
 
 /*
 |--------------------------------------------------------------------------
+| Activación de mascotas por invitación (sin auth)
+|--------------------------------------------------------------------------
+*/
+Route::get('/pet/activate/{token}', [\App\Http\Controllers\PetActivationController::class, 'activate'])->name('pet.activate');
+
+/*
+|--------------------------------------------------------------------------
 | Portal (usuarios autenticados)
 |--------------------------------------------------------------------------
 |

@@ -27,11 +27,32 @@ class RegisterController extends Controller
 
     /**
      * Redirect: nuevos usuarios siempre van a planes
+     * EXCEPTO si vienen de una invitación de mascota (se redirige al portal)
      */
     protected function redirectTo()
     {
+        // Si hay token de activación de mascota, redirigir al dashboard
+        if (session()->has('pet_activation_token')) {
+            return route('portal.dashboard');
+        }
+
         // Usuarios nuevos (registro) siempre van a ver los planes disponibles
         return route('plans.index');
+    }
+
+    /**
+     * The user has been registered.
+     * Procesar activación de mascota si viene de invitación
+     */
+    protected function registered(\Illuminate\Http\Request $request, $user)
+    {
+        // Procesar activación de mascota si hay token en sesión
+        $activated = \App\Http\Controllers\PetActivationController::processAfterRegistration($user);
+
+        if ($activated) {
+            // Agregar mensaje de éxito
+            session()->flash('status', '¡Bienvenido! Tu mascota ha sido ligada exitosamente a tu cuenta.');
+        }
     }
 
     /**
