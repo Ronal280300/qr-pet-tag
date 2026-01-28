@@ -1353,6 +1353,53 @@
         font-size: 0.875rem;
     }
 }
+
+/* Age Input Group */
+.age-input-group-modal {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.age-input-group-modal .pet-input-icon {
+    flex: 1;
+    min-width: 0;
+}
+
+.age-unit-modal {
+    width: 140px;
+    height: 54px;
+    padding: 0 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #495057;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.age-unit-modal:hover {
+    border-color: #0d6efd;
+}
+
+.age-unit-modal:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+@media (max-width: 768px) {
+    .age-input-group-modal {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .age-unit-modal {
+        width: 100%;
+    }
+}
 </style>
 
 <div class="modal fade" id="registerPetModal" tabindex="-1" aria-labelledby="registerPetModalLabel" aria-hidden="true">
@@ -1519,11 +1566,21 @@
 
                             <div class="col-12">
                                 <div class="pet-form-group">
-                                    <label class="pet-label">Edad (años)</label>
-                                    <div class="pet-input-icon">
-                                        <i class="fa-solid fa-cake-candles"></i>
-                                        <input type="number" name="age" min="0" max="50" class="pet-input" placeholder="Ej: 3">
+                                    <label class="pet-label">Edad</label>
+                                    <div class="age-input-group-modal">
+                                        <div class="pet-input-icon flex-grow-1">
+                                            <i class="fa-solid fa-cake-candles"></i>
+                                            <input type="number" name="age" min="0" max="50" class="pet-input" placeholder="Ej: 3" id="ageInputModal">
+                                        </div>
+                                        <select name="age_unit" class="pet-select age-unit-modal" id="ageUnitSelectModal">
+                                            <option value="years">Años</option>
+                                            <option value="months">Meses</option>
+                                        </select>
                                     </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="fa-solid fa-info-circle me-1"></i>
+                                        Para cachorros menores de 1 año, selecciona "Meses"
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -2139,6 +2196,39 @@
       if(extras && !checkFileInput(extras)){
         e.preventDefault();
         alert('Una o más fotos adicionales superan el límite de 100 MB.');
+      }
+    });
+  }
+})();
+
+// Validación de edad: si selecciona meses, máximo 11
+(function() {
+  const ageInput = document.getElementById('ageInputModal');
+  const ageUnitSelect = document.getElementById('ageUnitSelectModal');
+
+  if (ageInput && ageUnitSelect) {
+    ageUnitSelect.addEventListener('change', function() {
+      if (this.value === 'months') {
+        ageInput.max = 11;
+        if (parseInt(ageInput.value) > 11) {
+          ageInput.value = 11;
+        }
+        ageInput.placeholder = '0-11';
+      } else {
+        ageInput.max = 50;
+        ageInput.placeholder = 'Ej: 3';
+      }
+    });
+
+    // Validar en tiempo real
+    ageInput.addEventListener('input', function() {
+      const unit = ageUnitSelect.value;
+      const value = parseInt(this.value);
+
+      if (unit === 'months' && value > 11) {
+        this.value = 11;
+      } else if (unit === 'years' && value > 50) {
+        this.value = 50;
       }
     });
   }
