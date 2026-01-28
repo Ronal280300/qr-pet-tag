@@ -50,20 +50,9 @@ class PetController extends Controller
             'name'               => ['required', 'string', 'max:120'],
             'breed'              => ['nullable', 'string', 'max:120'],
             'zone'               => ['nullable', 'string', 'max:255'],
-            'age'                => [
-                'nullable',
-                'integer',
-                'min:0',
-                function ($attribute, $value, $fail) use ($request) {
-                    $unit = $request->input('age_unit', 'years');
-                    if ($unit === 'months' && $value > 11) {
-                        $fail('La edad en meses no puede ser mayor a 11.');
-                    } elseif ($unit === 'years' && $value > 50) {
-                        $fail('La edad en años no puede ser mayor a 50.');
-                    }
-                },
-            ],
-            'age_unit'           => ['nullable', 'in:years,months'],
+            'age'                => ['nullable', 'integer', 'min:0', 'max:50'], // mantener por compatibilidad
+            'age_years'          => ['nullable', 'integer', 'min:0', 'max:50'],
+            'age_months'         => ['nullable', 'integer', 'min:0', 'max:11'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
             'photo'              => ['nullable', 'image', 'max:10240'],
             'photos.*'           => ['nullable', 'image', 'max:10240'],
@@ -156,20 +145,9 @@ class PetController extends Controller
             'name'               => ['required', 'string', 'max:120'],
             'breed'              => ['nullable', 'string', 'max:120'],
             'zone'               => ['nullable', 'string', 'max:255'],
-            'age'                => [
-                'nullable',
-                'integer',
-                'min:0',
-                function ($attribute, $value, $fail) use ($request) {
-                    $unit = $request->input('age_unit', 'years');
-                    if ($unit === 'months' && $value > 11) {
-                        $fail('La edad en meses no puede ser mayor a 11.');
-                    } elseif ($unit === 'years' && $value > 50) {
-                        $fail('La edad en años no puede ser mayor a 50.');
-                    }
-                },
-            ],
-            'age_unit'           => ['nullable', 'in:years,months'],
+            'age'                => ['nullable', 'integer', 'min:0', 'max:50'], // mantener por compatibilidad
+            'age_years'          => ['nullable', 'integer', 'min:0', 'max:50'],
+            'age_months'         => ['nullable', 'integer', 'min:0', 'max:11'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
 
             'photo'              => ['nullable', 'image', 'max:10240'],
