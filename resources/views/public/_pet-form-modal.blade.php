@@ -1470,8 +1470,8 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <div class="pet-form-group">
-                                    <label class="pet-label">Raza</label>
-                                    <input type="text" name="breed" class="pet-input" placeholder="Ej: Labrador, Poodle, Mestizo">
+                                    <label class="pet-label">Raza<span class="required">*</span></label>
+                                    <input type="text" name="breed" class="pet-input" placeholder="Ej: Labrador, Poodle, Mestizo" required>
                                 </div>
                             </div>
 
@@ -1547,7 +1547,7 @@
 
                             <div class="col-12">
                                 <div class="pet-form-group">
-                                    <label class="pet-label mb-3">Edad</label>
+                                    <label class="pet-label mb-3">Edad<span class="required">*</span></label>
                                     <div class="age-inputs-dual-modal">
                                         <div class="age-field-modal">
                                             <label class="age-sublabel-modal">Años</label>
@@ -1555,7 +1555,7 @@
                                                 <i class="fa-solid fa-calendar-days"></i>
                                                 <input type="number" name="age_years" min="0" max="50"
                                                        class="pet-input" placeholder="0" id="ageYearsInputModal"
-                                                       value="{{ old('age_years', 0) }}">
+                                                       value="{{ old('age_years') }}">
                                             </div>
                                         </div>
                                         <div class="age-field-modal">
@@ -1564,7 +1564,7 @@
                                                 <i class="fa-solid fa-calendar-alt"></i>
                                                 <input type="number" name="age_months" min="0" max="11"
                                                        class="pet-input" placeholder="0" id="ageMonthsInputModal"
-                                                       value="{{ old('age_months', 0) }}">
+                                                       value="{{ old('age_months') }}">
                                             </div>
                                         </div>
                                     </div>
@@ -1584,7 +1584,7 @@
                                 <i class="fa-solid fa-map-location-dot"></i>
                             </div>
                             <div class="pet-section-title">
-                                <h3>Ubicación</h3>
+                                <h3>Ubicación<span class="required">*</span></h3>
                                 <p>Provincia, cantón y distrito</p>
                             </div>
                         </div>

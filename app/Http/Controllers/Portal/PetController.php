@@ -48,13 +48,26 @@ class PetController extends Controller
     {
         $data = $request->validate([
             'name'               => ['required', 'string', 'max:120'],
-            'breed'              => ['nullable', 'string', 'max:120'],
-            'zone'               => ['nullable', 'string', 'max:255'],
+            'breed'              => ['required', 'string', 'max:120'],
+            'zone'               => ['required', 'string', 'max:255'],
             'age'                => ['nullable', 'integer', 'min:0', 'max:50'], // mantener por compatibilidad
-            'age_years'          => ['nullable', 'integer', 'min:0', 'max:50'],
+            'age_years'          => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:50',
+                function ($attribute, $value, $fail) use ($request) {
+                    $years = $request->input('age_years');
+                    $months = $request->input('age_months');
+                    // Al menos uno debe tener un valor mayor a 0
+                    if (($years === null || $years == 0) && ($months === null || $months == 0)) {
+                        $fail('Debe ingresar la edad en años, meses o ambos.');
+                    }
+                },
+            ],
             'age_months'         => ['nullable', 'integer', 'min:0', 'max:11'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
-            'photo'              => ['nullable', 'image', 'max:10240'],
+            'photo'              => ['required', 'image', 'max:10240'],
             'photos.*'           => ['nullable', 'image', 'max:10240'],
 
             // NUEVOS CAMPOS
@@ -143,10 +156,23 @@ class PetController extends Controller
 
         $data = $request->validate([
             'name'               => ['required', 'string', 'max:120'],
-            'breed'              => ['nullable', 'string', 'max:120'],
-            'zone'               => ['nullable', 'string', 'max:255'],
+            'breed'              => ['required', 'string', 'max:120'],
+            'zone'               => ['required', 'string', 'max:255'],
             'age'                => ['nullable', 'integer', 'min:0', 'max:50'], // mantener por compatibilidad
-            'age_years'          => ['nullable', 'integer', 'min:0', 'max:50'],
+            'age_years'          => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:50',
+                function ($attribute, $value, $fail) use ($request) {
+                    $years = $request->input('age_years');
+                    $months = $request->input('age_months');
+                    // Al menos uno debe tener un valor mayor a 0
+                    if (($years === null || $years == 0) && ($months === null || $months == 0)) {
+                        $fail('Debe ingresar la edad en años, meses o ambos.');
+                    }
+                },
+            ],
             'age_months'         => ['nullable', 'integer', 'min:0', 'max:11'],
             'medical_conditions' => ['nullable', 'string', 'max:500'],
 
