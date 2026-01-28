@@ -119,13 +119,15 @@ class PetActivationController extends Controller
                     $order = Order::create([
                         'user_id' => $user->id,
                         'plan_id' => $plan->id,
+                        'pets_quantity' => 1, // Una mascota por defecto
+                        'subtotal' => $plan->price, // Precio base del plan
+                        'additional_pets_cost' => 0, // Sin mascotas adicionales
+                        'total' => $plan->price, // Total = subtotal + additional_pets_cost + shipping_cost
                         'status' => 'verified', // Directamente verificada
-                        'total_price' => $plan->price,
-                        'payment_method' => 'admin_assignment', // Método especial
-                        'payment_status' => 'paid',
+                        'payment_method' => 'admin_assignment', // Método especial para identificar origen
                         'verified_at' => now(),
-                        'verified_by' => 'system', // Indicar que fue el sistema
-                        'notes' => 'Orden creada automáticamente por invitación de admin para mascota: ' . $pet->name,
+                        'verified_by' => null, // Null porque es asignación automática del sistema
+                        'admin_notes' => 'Orden creada automáticamente por invitación de administrador para mascota: ' . $pet->name,
                     ]);
 
                     // Ligar mascota a la orden
@@ -255,13 +257,15 @@ class PetActivationController extends Controller
                     $order = Order::create([
                         'user_id' => $user->id,
                         'plan_id' => $plan->id,
-                        'status' => 'verified',
-                        'total_price' => $plan->price,
-                        'payment_method' => 'admin_assignment',
-                        'payment_status' => 'paid',
+                        'pets_quantity' => 1, // Una mascota por defecto
+                        'subtotal' => $plan->price, // Precio base del plan
+                        'additional_pets_cost' => 0, // Sin mascotas adicionales
+                        'total' => $plan->price, // Total = subtotal + additional_pets_cost + shipping_cost
+                        'status' => 'verified', // Directamente verificada
+                        'payment_method' => 'admin_assignment', // Método especial para identificar origen
                         'verified_at' => now(),
-                        'verified_by' => 'system',
-                        'notes' => 'Orden creada automáticamente por invitación de admin para mascota: ' . $pet->name,
+                        'verified_by' => null, // Null porque es asignación automática del sistema
+                        'admin_notes' => 'Orden creada automáticamente por invitación de administrador para mascota: ' . $pet->name,
                     ]);
 
                     $pet->order_id = $order->id;
