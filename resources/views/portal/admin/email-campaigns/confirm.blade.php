@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Confirmar Envío de Campaña')
+@section('page-title', 'Confirmar Envío de Campaña')
 
 @section('content')
 <div class="email-campaign-confirm-page">

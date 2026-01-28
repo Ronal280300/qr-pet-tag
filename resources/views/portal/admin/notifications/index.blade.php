@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Notificaciones')
+@section('page-title', 'Notificaciones')
 
 @section('content')
-<div class="container-fluid py-4">
   {{-- Header --}}
   <div class="row align-items-center mb-4">
     <div class="col">

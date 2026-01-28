@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Configuración de Planes - Admin')
+@section('page-title', 'Configuración de Planes - Admin')
 
 @section('content')
 <div class="plans-config-modern">

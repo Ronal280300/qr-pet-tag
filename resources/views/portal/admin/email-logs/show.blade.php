@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Detalle Email Log')
+@section('page-title', 'Detalle Email Log')
 
 @section('content')
-<div class="container-fluid py-4">
   {{-- Header --}}
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>

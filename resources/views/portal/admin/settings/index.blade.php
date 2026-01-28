@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Configuración del Sistema')
+@section('page-title', 'Configuración del Sistema')
 
 @section('content')
 <div class="container-fluid py-4">

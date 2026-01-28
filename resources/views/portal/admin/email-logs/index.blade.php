@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Logs de Correos')
+@section('page-title', 'Logs de Correos')
 
 @section('content')
 <div class="email-logs-page">

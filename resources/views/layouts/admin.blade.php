@@ -428,7 +428,11 @@
         <i class="fa-solid fa-bell"></i>
         <span>Notificaciones</span>
         @php
-          $unreadCount = Auth::user()->unreadNotifications->count() ?? 0;
+          try {
+            $unreadCount = Auth::user()->unreadNotifications->count() ?? 0;
+          } catch (\Exception $e) {
+            $unreadCount = 0;
+          }
         @endphp
         @if($unreadCount > 0)
           <span class="badge bg-danger">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
