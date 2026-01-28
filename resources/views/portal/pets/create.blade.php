@@ -145,12 +145,22 @@
                 <div class="form-group">
                   <label class="form-label">
                     <i class="fa-solid fa-cake-candles label-icon"></i>
-                    Edad (años)
+                    Edad
                   </label>
-                  <div class="input-with-icon">
-                    <i class="fa-solid fa-calendar-days input-icon"></i>
-                    <input type="number" name="age" min="0" max="50" class="form-input" placeholder="0">
+                  <div class="age-input-group">
+                    <div class="input-with-icon flex-grow-1">
+                      <i class="fa-solid fa-calendar-days input-icon"></i>
+                      <input type="number" name="age" min="0" max="50" class="form-input" placeholder="0" id="ageInput">
+                    </div>
+                    <select name="age_unit" class="form-select age-unit-select" id="ageUnitSelect">
+                      <option value="years">Años</option>
+                      <option value="months">Meses</option>
+                    </select>
                   </div>
+                  <small class="text-muted mt-2 d-block">
+                    <i class="fa-solid fa-info-circle me-1"></i>
+                    Para cachorros menores de 1 año, selecciona "Meses"
+                  </small>
                 </div>
               </div>
             </div>
@@ -635,6 +645,42 @@
 
 .input-with-icon .form-input {
   padding-left: 48px;
+}
+
+/* ===== Age Input Group ===== */
+.age-input-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.age-input-group .input-with-icon {
+  flex: 1;
+  min-width: 0;
+}
+
+.age-unit-select {
+  width: 140px;
+  height: 56px;
+  padding: 0 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gray-700);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.age-unit-select:hover {
+  border-color: var(--primary);
+}
+
+.age-unit-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
 /* ===== Gender Selector ===== */
@@ -1499,5 +1545,40 @@
       document.querySelector("input[name=\"emergency_contact_phone\"]").value = "";
     }
   }
+</script>
+
+<script>
+  // Validación de edad: si selecciona meses, máximo 11
+  (function() {
+    const ageInput = document.getElementById('ageInput');
+    const ageUnitSelect = document.getElementById('ageUnitSelect');
+
+    if (ageInput && ageUnitSelect) {
+      ageUnitSelect.addEventListener('change', function() {
+        if (this.value === 'months') {
+          ageInput.max = 11;
+          if (parseInt(ageInput.value) > 11) {
+            ageInput.value = 11;
+          }
+          ageInput.placeholder = '0-11';
+        } else {
+          ageInput.max = 50;
+          ageInput.placeholder = '0';
+        }
+      });
+
+      // Validar en tiempo real
+      ageInput.addEventListener('input', function() {
+        const unit = ageUnitSelect.value;
+        const value = parseInt(this.value);
+
+        if (unit === 'months' && value > 11) {
+          this.value = 11;
+        } else if (unit === 'years' && value > 50) {
+          this.value = 50;
+        }
+      });
+    }
+  })();
 </script>
 @endpush

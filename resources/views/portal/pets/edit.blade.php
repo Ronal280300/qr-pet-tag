@@ -106,10 +106,20 @@
 
             <div class="col-12 col-lg-4">
               <label class="form-label">Edad</label>
-              <div class="input-icon">
-                <i class="fa-solid fa-cake-candles"></i>
-                <input type="number" name="age" min="0" max="50" class="form-control modern" value="{{ $pet->age }}">
+              <div class="age-input-group-edit">
+                <div class="input-icon flex-grow-1">
+                  <i class="fa-solid fa-cake-candles"></i>
+                  <input type="number" name="age" min="0" max="50" class="form-control modern" value="{{ $pet->age }}" id="ageInputEdit">
+                </div>
+                <select name="age_unit" class="form-select modern age-unit-select-edit" id="ageUnitSelectEdit">
+                  <option value="years" {{ ($pet->age_unit ?? 'years') === 'years' ? 'selected' : '' }}>Años</option>
+                  <option value="months" {{ ($pet->age_unit ?? 'years') === 'months' ? 'selected' : '' }}>Meses</option>
+                </select>
               </div>
+              <small class="text-muted mt-1 d-block">
+                <i class="fa-solid fa-info-circle me-1"></i>
+                Para cachorros menores de 1 año, selecciona "Meses"
+              </small>
             </div>
 
             {{-- Ubicación CR --}}
@@ -762,6 +772,42 @@
   .switch input:checked~.state::before {
     content: attr(data-on);
   }
+
+  /* Age Input Group */
+  .age-input-group-edit {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .age-input-group-edit .input-icon {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .age-unit-select-edit {
+    width: 140px;
+    height: 48px;
+    padding: 0 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #374151;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .age-unit-select-edit:hover {
+    border-color: #115DFC;
+  }
+
+  .age-unit-select-edit:focus {
+    outline: none;
+    border-color: #115DFC;
+    box-shadow: 0 0 0 3px rgba(17, 93, 252, 0.1);
+  }
 </style>
 @endpush
 
@@ -1103,5 +1149,44 @@
       if (phoneInput) phoneInput.value = "";
     }
   }
+
+  // Validación de edad: si selecciona meses, máximo 11
+  (function() {
+    const ageInput = document.getElementById('ageInputEdit');
+    const ageUnitSelect = document.getElementById('ageUnitSelectEdit');
+
+    if (ageInput && ageUnitSelect) {
+      // Establecer máximo correcto al cargar
+      if (ageUnitSelect.value === 'months') {
+        ageInput.max = 11;
+        ageInput.placeholder = '0-11';
+      }
+
+      ageUnitSelect.addEventListener('change', function() {
+        if (this.value === 'months') {
+          ageInput.max = 11;
+          if (parseInt(ageInput.value) > 11) {
+            ageInput.value = 11;
+          }
+          ageInput.placeholder = '0-11';
+        } else {
+          ageInput.max = 50;
+          ageInput.placeholder = '0';
+        }
+      });
+
+      // Validar en tiempo real
+      ageInput.addEventListener('input', function() {
+        const unit = ageUnitSelect.value;
+        const value = parseInt(this.value);
+
+        if (unit === 'months' && value > 11) {
+          this.value = 11;
+        } else if (unit === 'years' && value > 50) {
+          this.value = 50;
+        }
+      });
+    }
+  })();
 </script>
 @endpush

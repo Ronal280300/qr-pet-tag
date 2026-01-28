@@ -23,6 +23,7 @@ class Pet extends Model
         'breed',
         'zone',
         'age',
+        'age_unit',       // years | months
         'medical_conditions',
         'photo',          // compatibilidad: foto única antigua
         'is_lost',
@@ -37,7 +38,7 @@ class Pet extends Model
         'color',          // texto libre
         'is_neutered',    // bool
         'rabies_vaccine', // bool
-        
+
         // ===== CONTACTO DE EMERGENCIA =====
         'has_emergency_contact',    // bool
         'emergency_contact_name',   // string
@@ -168,5 +169,22 @@ class Pet extends Model
         ];
         $str = implode(', ', array_filter($parts));
         return $str ?: ($this->zone ?: null);
+    }
+
+    // Edad legible: "3 años" o "6 meses"
+    public function getAgeDisplayAttribute(): ?string
+    {
+        if (!$this->age) {
+            return null;
+        }
+
+        $unit = $this->age_unit ?? 'years';
+        $age = $this->age;
+
+        if ($unit === 'months') {
+            return $age . ($age == 1 ? ' mes' : ' meses');
+        }
+
+        return $age . ($age == 1 ? ' año' : ' años');
     }
 }
