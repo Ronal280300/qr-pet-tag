@@ -1,11 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Gestión de Clientes')
+@section('page-title', 'Gestión de Clientes')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 @endpush
 
 @section('content')
-<div class="container clients-page-modern py-4">
+<div class="clients-page-modern">
 
   {{-- Header con animación --}}
   <div class="page-header mb-4">

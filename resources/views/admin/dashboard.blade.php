@@ -1,13 +1,23 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Panel Admin | Métricas')
+@section('title', 'Dashboard')
+@section('page-title', 'Dashboard')
 
 @section('content')
-<div class="container my-4">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h1 class="h3 fw-bold mb-0">Panel de administración</h1>
-    <small class="text-muted">Actualizado: {{ now()->format('Y-m-d H:i') }}</small>
+{{-- Welcome banner --}}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="alert alert-light border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+      <div class="d-flex align-items-center">
+        <div class="flex-grow-1">
+          <h4 class="alert-heading fw-bold mb-2">¡Bienvenido, {{ Auth::user()->name }}! 👋</h4>
+          <p class="mb-0">Aquí tienes un resumen general del sistema. Última actualización: {{ now()->format('d/m/Y H:i') }}</p>
+        </div>
+        <i class="fa-solid fa-chart-line fa-3x opacity-50 d-none d-md-block"></i>
+      </div>
+    </div>
   </div>
+</div>
 
   {{-- KPIs --}}
   <div class="row g-3 mb-4">
