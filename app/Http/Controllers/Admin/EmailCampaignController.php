@@ -50,13 +50,19 @@ class EmailCampaignController extends Controller
         $filterType = $request->input('filter_type');
         $noScansDays = $request->input('no_scans_days', 30);
         $paymentDueDays = $request->input('payment_due_days', 5);
+        $filterConfig = $request->input('filter_config', []);
+
+        // Si es selección manual, agregar los user_ids al filter_config
+        if ($filterType === 'manual' && $request->has('manual_user_ids')) {
+            $filterConfig['user_ids'] = $request->input('manual_user_ids');
+        }
 
         // Crear campaña temporal para usar el método getFilteredRecipients
         $tempCampaign = new EmailCampaign([
             'filter_type' => $filterType,
             'no_scans_days' => $noScansDays,
             'payment_due_days' => $paymentDueDays,
-            'filter_config' => $request->input('filter_config', []),
+            'filter_config' => $filterConfig,
         ]);
 
         $recipients = $tempCampaign->getFilteredRecipients();
@@ -75,6 +81,34 @@ class EmailCampaignController extends Controller
     }
 
     /**
+     * Buscar usuarios para selección manual
+     */
+    public function searchUsers(Request $request)
+    {
+        $query = $request->input('q', '');
+
+        $users = User::where('status', 'active')
+            ->where(function($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('email', 'like', "%{$query}%");
+            })
+            ->withCount('pets')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'users' => $users->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'pets_count' => $user->pets_count,
+                ];
+            }),
+        ]);
+    }
+
+    /**
      * Guardar nueva campaña
      */
     public function store(Request $request)
@@ -82,15 +116,28 @@ class EmailCampaignController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email_template_id' => 'required|exists:email_templates,id',
-            'filter_type' => 'required|in:all,no_scans,payment_due,custom',
+            'filter_type' => 'required|in:all,has_pets,no_pets,with_lost_pets,no_scans,verified_email,unverified_email,payment_due,has_orders,no_orders,manual,custom',
             'no_scans_days' => 'nullable|integer|min:1',
             'payment_due_days' => 'nullable|integer|min:1',
             'filter_config' => 'nullable|array',
+            'manual_user_ids' => 'nullable|array',
+            'manual_user_ids.*' => 'nullable|exists:users,id',
             'send_now' => 'nullable|boolean',
         ]);
 
         $validated['created_by'] = auth()->id();
         $validated['status'] = 'draft';
+
+        // Si es selección manual, guardar los IDs en filter_config
+        if ($validated['filter_type'] === 'manual' && $request->has('manual_user_ids')) {
+            $validated['filter_config'] = array_merge(
+                $validated['filter_config'] ?? [],
+                ['user_ids' => $request->input('manual_user_ids')]
+            );
+        }
+
+        // Remover manual_user_ids del array ya que no es un campo de la tabla
+        unset($validated['manual_user_ids']);
 
         $campaign = EmailCampaign::create($validated);
 
@@ -150,6 +197,11 @@ class EmailCampaignController extends Controller
             // Si vienen usuarios seleccionados manualmente, filtrar solo esos
             if ($request->has('selected_recipients')) {
                 $selectedIds = $request->input('selected_recipients', []);
+
+                // Si viene como JSON string, decodificarlo
+                if (is_string($selectedIds)) {
+                    $selectedIds = json_decode($selectedIds, true) ?? [];
+                }
 
                 if (empty($selectedIds)) {
                     return redirect()

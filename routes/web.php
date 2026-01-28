@@ -277,6 +277,7 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             // Email Marketing - Campañas
             Route::resource('email-campaigns', \App\Http\Controllers\Admin\EmailCampaignController::class);
             Route::get('email-campaigns/preview/recipients', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'previewRecipients'])->name('email-campaigns.preview-recipients');
+            Route::get('email-campaigns/search/users', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'searchUsers'])->name('email-campaigns.search-users');
             Route::get('email-campaigns/{emailCampaign}/confirm', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'confirm'])->name('email-campaigns.confirm');
             Route::post('email-campaigns/{emailCampaign}/send', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'send'])->name('email-campaigns.send');
 

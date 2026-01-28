@@ -67,11 +67,35 @@
                   @case('all')
                     Todos los Clientes
                     @break
+                  @case('has_pets')
+                    Clientes con Mascotas
+                    @break
+                  @case('no_pets')
+                    Clientes sin Mascotas
+                    @break
+                  @case('with_lost_pets')
+                    Clientes con Mascotas Perdidas
+                    @break
                   @case('no_scans')
                     Sin Escaneos ({{ $emailCampaign->no_scans_days }} días)
                     @break
+                  @case('verified_email')
+                    Email Verificado
+                    @break
+                  @case('unverified_email')
+                    Email No Verificado
+                    @break
                   @case('payment_due')
                     Pago por Vencer ({{ $emailCampaign->payment_due_days }} días)
+                    @break
+                  @case('has_orders')
+                    Clientes con Pedidos
+                    @break
+                  @case('no_orders')
+                    Clientes sin Pedidos
+                    @break
+                  @case('manual')
+                    Selección Manual
                     @break
                   @case('custom')
                     Filtro Personalizado

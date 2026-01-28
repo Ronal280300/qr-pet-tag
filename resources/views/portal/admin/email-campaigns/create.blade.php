@@ -6,956 +6,675 @@
 <div class="email-campaign-create-page">
   <div class="container-fluid py-4">
     {{-- Header --}}
-    <div class="page-header">
-      <div class="header-content">
-        <div class="header-icon">
-          <i class="fas fa-paper-plane"></i>
+    <div class="page-header mb-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <div class="header-icon">
+            <i class="fas fa-paper-plane"></i>
+          </div>
+          <div>
+            <h1 class="h3 mb-1">Crear Campaña de Email</h1>
+            <p class="text-muted mb-0">Configura y envía emails masivos a tus clientes</p>
+          </div>
         </div>
-        <div class="header-text">
-          <h1 class="header-title">Crear Campaña de Email</h1>
-          <p class="header-subtitle">Configura una nueva campaña de email marketing</p>
-        </div>
-      </div>
-      <div class="header-actions">
-        <a href="{{ route('portal.admin.email-campaigns.index') }}" class="btn-back">
-          <i class="fas fa-arrow-left"></i>
-          <span>Volver</span>
+        <a href="{{ route('portal.admin.email-campaigns.index') }}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-2"></i>
+          Volver
         </a>
       </div>
     </div>
 
-    <div class="form-card">
-      <form method="POST" action="{{ route('portal.admin.email-campaigns.store') }}" id="campaignForm">
-        @csrf
+    <div class="row">
+      <div class="col-12 col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <form method="POST" action="{{ route('portal.admin.email-campaigns.store') }}" id="campaignForm">
+              @csrf
 
-        {{-- Nombre de campaña --}}
-        <div class="form-group">
-          <label for="name" class="form-label">
-            <i class="fas fa-tag"></i>
-            Nombre de la Campaña
-            <span class="required">*</span>
-          </label>
-          <input type="text" 
-                 class="form-input" 
-                 id="name" 
-                 name="name" 
-                 required
-                 placeholder="Ej: Recordatorio de Pago Mayo 2025">
-          <div class="form-help">Un nombre descriptivo para identificar esta campaña</div>
-        </div>
+              {{-- Nombre de campaña --}}
+              <div class="mb-4">
+                <label for="name" class="form-label fw-bold">
+                  <i class="fas fa-tag text-primary me-2"></i>
+                  Nombre de la Campaña
+                  <span class="text-danger">*</span>
+                </label>
+                <input type="text"
+                       class="form-control form-control-lg"
+                       id="name"
+                       name="name"
+                       required
+                       placeholder="Ej: Recordatorio de Pago Mayo 2025">
+                <small class="form-text text-muted">Un nombre descriptivo para identificar esta campaña internamente</small>
+              </div>
 
-        {{-- Plantilla --}}
-        <div class="form-group">
-          <label for="email_template_id" class="form-label">
-            <i class="fas fa-file-alt"></i>
-            Plantilla de Email
-            <span class="required">*</span>
-          </label>
-          <select class="form-select" id="email_template_id" name="email_template_id" required>
-            <option value="">Seleccionar plantilla...</option>
-            @foreach($templates as $template)
-              <option value="{{ $template->id }}">{{ $template->name }} - {{ $template->category }}</option>
-            @endforeach
-          </select>
-          <div class="form-help">
-            <a href="{{ route('portal.admin.email-templates.create') }}" target="_blank" class="link-create">
-              <i class="fas fa-plus"></i>
-              Crear nueva plantilla
-            </a>
+              {{-- Plantilla --}}
+              <div class="mb-4">
+                <label for="email_template_id" class="form-label fw-bold">
+                  <i class="fas fa-file-alt text-primary me-2"></i>
+                  Plantilla de Email
+                  <span class="text-danger">*</span>
+                </label>
+                <select class="form-select form-select-lg" id="email_template_id" name="email_template_id" required>
+                  <option value="">Selecciona una plantilla...</option>
+                  @foreach($templates as $template)
+                    <option value="{{ $template->id }}">{{ $template->name }}</option>
+                  @endforeach
+                </select>
+                <small class="form-text text-muted">El contenido que se enviará a los destinatarios</small>
+              </div>
+
+              <hr class="my-4">
+
+              {{-- FILTROS DE DESTINATARIOS --}}
+              <h5 class="fw-bold mb-3">
+                <i class="fas fa-users text-primary me-2"></i>
+                Filtros de Destinatarios
+              </h5>
+
+              <div class="row g-3">
+                {{-- Columna 1: Filtros Generales --}}
+                <div class="col-md-6">
+                  <div class="filter-section mb-3">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Generales</h6>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_all" value="all" checked>
+                      <label class="form-check-label" for="filter_all">
+                        <strong>Todos los clientes activos</strong>
+                        <small class="d-block text-muted">Enviar a todos los usuarios registrados</small>
+                      </label>
+                    </div>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_has_pets" value="has_pets">
+                      <label class="form-check-label" for="filter_has_pets">
+                        <strong>Clientes con mascotas</strong>
+                        <small class="d-block text-muted">Solo usuarios que tienen mascotas registradas</small>
+                      </label>
+                    </div>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_no_pets" value="no_pets">
+                      <label class="form-check-label" for="filter_no_pets">
+                        <strong>Clientes sin mascotas</strong>
+                        <small class="d-block text-muted">Usuarios que aún no han registrado mascotas</small>
+                      </label>
+                    </div>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_lost_pets" value="with_lost_pets">
+                      <label class="form-check-label" for="filter_lost_pets">
+                        <strong>Clientes con mascotas perdidas</strong>
+                        <small class="d-block text-muted">Usuarios con mascotas marcadas como perdidas</small>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="filter-section mb-3">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Actividad</h6>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_no_scans" value="no_scans">
+                      <label class="form-check-label" for="filter_no_scans">
+                        <strong>Sin escaneos recientes</strong>
+                        <small class="d-block text-muted">QR sin escanear en X días</small>
+                      </label>
+                    </div>
+                    <div class="ms-4 mt-2" id="no_scans_config" style="display:none;">
+                      <input type="number" class="form-control form-control-sm" name="no_scans_days" min="1" value="30" placeholder="Días">
+                    </div>
+                  </div>
+                </div>
+
+                {{-- Columna 2: Email, Pedidos, Manual --}}
+                <div class="col-md-6">
+                  <div class="filter-section mb-3">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Email y Verificación</h6>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_verified" value="verified_email">
+                      <label class="form-check-label" for="filter_verified">
+                        <strong>Email verificado</strong>
+                        <small class="d-block text-muted">Solo usuarios con email confirmado</small>
+                      </label>
+                    </div>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_unverified" value="unverified_email">
+                      <label class="form-check-label" for="filter_unverified">
+                        <strong>Email no verificado</strong>
+                        <small class="d-block text-muted">Usuarios que no han verificado su email</small>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="filter-section mb-3">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Pedidos y Pagos</h6>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_payment_due" value="payment_due">
+                      <label class="form-check-label" for="filter_payment_due">
+                        <strong>Pago próximo a vencer</strong>
+                        <small class="d-block text-muted">Suscripción vence en X días</small>
+                      </label>
+                    </div>
+                    <div class="ms-4 mt-2" id="payment_due_config" style="display:none;">
+                      <input type="number" class="form-control form-control-sm" name="payment_due_days" min="1" value="5" placeholder="Días">
+                    </div>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_has_orders" value="has_orders">
+                      <label class="form-check-label" for="filter_has_orders">
+                        <strong>Clientes con pedidos</strong>
+                        <small class="d-block text-muted">Usuarios que han realizado compras</small>
+                      </label>
+                    </div>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_no_orders" value="no_orders">
+                      <label class="form-check-label" for="filter_no_orders">
+                        <strong>Clientes sin pedidos</strong>
+                        <small class="d-block text-muted">Usuarios que no han comprado</small>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="filter-section">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Selección Manual</h6>
+
+                    <div class="form-check filter-option">
+                      <input class="form-check-input" type="radio" name="filter_type" id="filter_manual" value="manual">
+                      <label class="form-check-label" for="filter_manual">
+                        <strong>Selección manual de usuarios</strong>
+                        <small class="d-block text-muted">Elige manualmente los destinatarios</small>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {{-- SELECCIÓN MANUAL --}}
+              <div id="manual_selection_area" class="mt-4" style="display:none;">
+                <div class="card bg-light border-0">
+                  <div class="card-body">
+                    <h6 class="fw-bold mb-3">
+                      <i class="fas fa-search me-2"></i>
+                      Buscar y Seleccionar Usuarios
+                    </h6>
+
+                    <div class="input-group mb-3">
+                      <span class="input-group-text"><i class="fas fa-search"></i></span>
+                      <input type="text"
+                             class="form-control"
+                             id="user_search_input"
+                             placeholder="Buscar por nombre o email..."
+                             autocomplete="off">
+                    </div>
+
+                    <div id="search_results" class="mb-3" style="display:none;">
+                      <div class="list-group" id="search_results_list"></div>
+                    </div>
+
+                    <div id="selected_users_area">
+                      <h6 class="fw-bold mb-2">Usuarios seleccionados: <span id="selected_count" class="badge bg-primary">0</span></h6>
+                      <div id="selected_users_list" class="d-flex flex-wrap gap-2">
+                        <p class="text-muted mb-0">Ningún usuario seleccionado. Usa el buscador arriba.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              {{-- Botones de Acción --}}
+              <div class="d-flex gap-3">
+                <button type="button" class="btn btn-lg btn-primary" id="previewBtn">
+                  <i class="fas fa-eye me-2"></i>
+                  Previsualizar Destinatarios
+                </button>
+                <button type="submit" name="send_now" value="0" class="btn btn-lg btn-outline-secondary">
+                  <i class="fas fa-save me-2"></i>
+                  Guardar como Borrador
+                </button>
+                <button type="submit" name="send_now" value="1" class="btn btn-lg btn-success">
+                  <i class="fas fa-paper-plane me-2"></i>
+                  Crear y Enviar Ahora
+                </button>
+              </div>
+
+              {{-- Hidden field for manual user IDs --}}
+              <input type="hidden" name="manual_user_ids" id="manual_user_ids_input" value="[]">
+            </form>
           </div>
         </div>
+      </div>
 
-        {{-- Tipo de filtro --}}
-        <div class="form-group">
-          <label class="form-label">
-            <i class="fas fa-filter"></i>
-            Filtro de Destinatarios
-            <span class="required">*</span>
-          </label>
-          <div class="info-note">
-            <i class="fas fa-info-circle"></i>
-            Nota: Siempre se excluyen usuarios inactivos automáticamente
+      {{-- Panel lateral con preview --}}
+      <div class="col-12 col-lg-4">
+        <div class="card shadow-sm sticky-top" style="top: 20px;">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+              <i class="fas fa-users me-2"></i>
+              Destinatarios
+            </h5>
           </div>
-
-          <div class="filters-grid">
-            {{-- Column 1 --}}
-            <div class="filters-column">
-              <div class="filter-section">
-                <h3 class="filter-section-title">
-                  <i class="fas fa-users"></i>
-                  Filtros Generales
-                </h3>
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="all" id="filter_all" checked>
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-blue">
-                          <i class="fas fa-users"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Todos los Clientes Activos</strong>
-                          <span class="filter-desc">Todos los usuarios activos registrados</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="has_pets">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-green">
-                          <i class="fas fa-paw"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Con Mascotas</strong>
-                          <span class="filter-desc">Clientes que tienen mascotas registradas</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="no_pets">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-orange">
-                          <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Sin Mascotas</strong>
-                          <span class="filter-desc">Clientes sin mascotas (posible abandono)</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="with_lost_pets">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-red">
-                          <i class="fas fa-search"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Con Mascotas Perdidas</strong>
-                          <span class="filter-desc">Clientes con mascotas marcadas como perdidas</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div class="filter-section">
-                <h3 class="filter-section-title">
-                  <i class="fas fa-chart-line"></i>
-                  Actividad
-                </h3>
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="no_scans" id="filter_no_scans">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-gray">
-                          <i class="fas fa-qrcode"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Sin Lecturas de QR</strong>
-                          <span class="filter-desc">Sin escaneos en X días</span>
-                        </div>
-                      </div>
-                      <div class="filter-config" id="no_scans_config" style="display:none;">
-                        <label class="config-label">Días sin escanear:</label>
-                        <input type="number" class="config-input" name="no_scans_days" value="30" min="1">
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {{-- Column 2 --}}
-            <div class="filters-column">
-              <div class="filter-section">
-                <h3 class="filter-section-title">
-                  <i class="fas fa-envelope-open-text"></i>
-                  Email y Verificación
-                </h3>
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="verified_email">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-green">
-                          <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Email Verificado</strong>
-                          <span class="filter-desc">Solo con email confirmado</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="unverified_email">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-orange">
-                          <i class="fas fa-times-circle"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Email No Verificado</strong>
-                          <span class="filter-desc">Recordatorio para verificar email</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div class="filter-section">
-                <h3 class="filter-section-title">
-                  <i class="fas fa-shopping-cart"></i>
-                  Pedidos y Pagos
-                </h3>
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="payment_due" id="filter_payment">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-orange">
-                          <i class="fas fa-credit-card"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Pago Próximo a Vencer</strong>
-                          <span class="filter-desc">Suscripción vence pronto</span>
-                        </div>
-                      </div>
-                      <div class="filter-config" id="payment_due_config" style="display:none;">
-                        <label class="config-label">Días antes del vencimiento:</label>
-                        <input type="number" class="config-input" name="payment_due_days" value="5" min="1">
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="has_orders">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-green">
-                          <i class="fas fa-shopping-bag"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Con Pedidos</strong>
-                          <span class="filter-desc">Clientes que han realizado compras</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="no_orders">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-red">
-                          <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Sin Pedidos</strong>
-                          <span class="filter-desc">Registrados pero sin compras</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div class="filter-section">
-                <h3 class="filter-section-title">
-                  <i class="fas fa-hand-pointer"></i>
-                  Selección Manual
-                </h3>
-                <div class="filter-options">
-                  <label class="filter-option">
-                    <input class="filter-radio" type="radio" name="filter_type" value="manual" id="filter_manual">
-                    <div class="filter-content">
-                      <div class="filter-header">
-                        <div class="filter-icon filter-icon-purple">
-                          <i class="fas fa-mouse-pointer"></i>
-                        </div>
-                        <div class="filter-info">
-                          <strong class="filter-title">Selección Manual</strong>
-                          <span class="filter-desc">Elige usuarios específicos</span>
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-                </div>
+          <div class="card-body">
+            <div id="recipients_preview">
+              <div class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                <p class="mb-0">Selecciona un filtro y haz clic en "Previsualizar Destinatarios" para ver la lista</p>
               </div>
             </div>
           </div>
         </div>
-
-        {{-- Preview de destinatarios --}}
-        <div class="form-group">
-          <button type="button" class="btn-preview" id="previewBtn">
-            <i class="fas fa-eye"></i>
-            <span>Previsualizar Destinatarios</span>
-          </button>
-          
-          <div id="previewResult" class="preview-result" style="display:none;">
-            <div class="preview-header">
-              <i class="fas fa-users"></i>
-              <strong>Total de destinatarios:</strong>
-              <span class="preview-count" id="recipientCount">0</span>
-            </div>
-            <div id="recipientList" class="preview-list"></div>
-          </div>
-        </div>
-
-        {{-- Acciones --}}
-        <div class="form-actions">
-          <button type="submit" name="send_now" value="0" class="btn-draft">
-            <i class="fas fa-save"></i>
-            <span>Guardar como Borrador</span>
-          </button>
-          <button type="submit" name="send_now" value="1" class="btn-send">
-            <i class="fas fa-paper-plane"></i>
-            <span>Crear y Enviar Ahora</span>
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Mostrar/ocultar configuración de filtros
-  document.querySelectorAll('input[name="filter_type"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      document.getElementById('no_scans_config').style.display = 'none';
-      document.getElementById('payment_due_config').style.display = 'none';
-
-      if (this.value === 'no_scans') {
-        document.getElementById('no_scans_config').style.display = 'block';
-      } else if (this.value === 'payment_due') {
-        document.getElementById('payment_due_config').style.display = 'block';
-      }
-    });
-  });
-
-  // Previsualizar destinatarios
-  document.getElementById('previewBtn').addEventListener('click', function() {
-    const filterType = document.querySelector('input[name="filter_type"]:checked').value;
-    const noScansDays = document.querySelector('input[name="no_scans_days"]').value;
-    const paymentDueDays = document.querySelector('input[name="payment_due_days"]').value;
-
-    fetch('{{ route("portal.admin.email-campaigns.preview-recipients") }}?' + new URLSearchParams({
-      filter_type: filterType,
-      no_scans_days: noScansDays,
-      payment_due_days: paymentDueDays
-    }))
-    .then(r => r.json())
-    .then(data => {
-      document.getElementById('recipientCount').textContent = data.count;
-      document.getElementById('previewResult').style.display = 'block';
-
-      let list = '<ul class="recipient-list">';
-      data.recipients.slice(0, 10).forEach(r => {
-        list += `<li class="recipient-item"><i class="fas fa-user"></i> ${r.name} <span class="recipient-email">(${r.email})</span></li>`;
-      });
-      if (data.count > 10) {
-        list += `<li class="recipient-more">... y ${data.count - 10} más</li>`;
-      }
-      list += '</ul>';
-      document.getElementById('recipientList').innerHTML = list;
-    });
-  });
-});
-</script>
-
 <style>
-.email-campaign-create-page {
-  background: #f8f9fa;
-  min-height: 100vh;
-}
-
-/* ========== Header ========== */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.header-icon {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #115DFC 0%, #0047CC 100%);
-  border-radius: 18px;
+.page-header .header-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
   color: white;
-  box-shadow: 0 8px 20px rgba(17, 93, 252, 0.3);
-  flex-shrink: 0;
-}
-
-.header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.header-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.header-subtitle {
-  font-size: 14px;
-  color: #6c757d;
-  margin: 0;
-  font-weight: 500;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.btn-back {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background: white;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  color: #424242;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.btn-back:hover {
-  background: #f5f5f5;
-  border-color: #115DFC;
-  color: #115DFC;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-}
-
-.btn-back i {
-  font-size: 16px;
-}
-
-/* ========== Form Card ========== */
-.form-card {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.form-group {
-  margin-bottom: 32px;
-}
-
-.form-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 10px;
-}
-
-.form-label i {
-  color: #115DFC;
-  font-size: 16px;
-}
-
-.required {
-  color: #F44336;
-  font-weight: 700;
-}
-
-.form-input,
-.form-select {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #424242;
-  transition: all 0.3s ease;
-  background: white;
-}
-
-.form-input:focus,
-.form-select:focus {
-  outline: none;
-  border-color: #115DFC;
-  box-shadow: 0 0 0 3px rgba(17, 93, 252, 0.1);
-}
-
-.form-help {
-  font-size: 13px;
-  color: #757575;
-  margin-top: 8px;
-  line-height: 1.5;
-}
-
-.link-create {
-  color: #115DFC;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.link-create:hover {
-  color: #0047CC;
-  text-decoration: underline;
-}
-
-.link-create i {
-  margin-right: 4px;
-}
-
-/* ========== Info Note ========== */
-.info-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #e3f2fd;
-  border-left: 4px solid #2196F3;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #1976D2;
-  margin-bottom: 20px;
-}
-
-.info-note i {
-  font-size: 14px;
-}
-
-/* ========== Filters Grid ========== */
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-.filters-column {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.filter-section {
-  background: #fafafa;
-  border-radius: 12px;
-  padding: 20px;
-  border: 2px solid #f0f0f0;
-}
-
-.filter-section-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 16px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.filter-section-title i {
-  color: #115DFC;
-  font-size: 16px;
-}
-
-.filter-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  font-size: 24px;
 }
 
 .filter-option {
-  background: white;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: block;
-  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  border: 2px solid transparent;
 }
 
 .filter-option:hover {
-  border-color: #115DFC;
-  transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(17, 93, 252, 0.1);
+  background: #f8f9fa;
 }
 
-.filter-radio {
-  display: none;
-}
-
-.filter-radio:checked + .filter-content {
-  border-left: 4px solid #115DFC;
-  padding-left: 12px;
-}
-
-.filter-radio:checked ~ .filter-content .filter-icon {
-  transform: scale(1.1);
-}
-
-.filter-content {
-  transition: all 0.3s ease;
-}
-
-.filter-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.filter-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: white;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.filter-icon-blue {
-  background: linear-gradient(135deg, #115DFC 0%, #3466ff 100%);
-}
-
-.filter-icon-green {
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
-}
-
-.filter-icon-orange {
-  background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);
-}
-
-.filter-icon-red {
-  background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
-}
-
-.filter-icon-gray {
-  background: linear-gradient(135deg, #757575 0%, #9E9E9E 100%);
-}
-
-.filter-icon-purple {
-  background: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%);
-}
-
-.filter-info {
-  flex: 1;
-}
-
-.filter-title {
-  display: block;
-  font-size: 14px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 4px;
-}
-
-.filter-desc {
-  display: block;
-  font-size: 12px;
-  color: #757575;
-  line-height: 1.4;
-}
-
-/* Filter Config */
-.filter-config {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.config-label {
-  display: block;
-  font-size: 12px;
+.filter-option input[type="radio"]:checked ~ label {
+  color: #667eea;
   font-weight: 600;
-  color: #616161;
-  margin-bottom: 6px;
 }
 
-.config-input {
-  width: 100%;
+.filter-option input[type="radio"]:checked {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+.filter-section {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+#search_results_list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-user-item {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.search-user-item:hover {
+  background: #e9ecef !important;
+}
+
+.selected-user-badge {
+  background: #667eea;
+  color: white;
   padding: 8px 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #424242;
-  transition: all 0.3s ease;
-}
-
-.config-input:focus {
-  outline: none;
-  border-color: #115DFC;
-  box-shadow: 0 0 0 3px rgba(17, 93, 252, 0.1);
-}
-
-/* ========== Preview ========== */
-.btn-preview {
+  border-radius: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
-  border: none;
-  border-radius: 12px;
-  color: white;
+  gap: 8px;
   font-size: 14px;
-  font-weight: 600;
+}
+
+.selected-user-badge .remove-user {
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.25);
+  opacity: 0.8;
+  transition: opacity 0.2s;
 }
 
-.btn-preview:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.35);
-}
-
-.btn-preview i {
-  font-size: 16px;
-}
-
-.preview-result {
-  margin-top: 20px;
-  background: white;
-  border: 2px solid #e3f2fd;
-  border-left: 4px solid #2196F3;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.preview-header {
-  padding: 16px 20px;
-  background: #e3f2fd;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: #1976D2;
-}
-
-.preview-header i {
-  font-size: 18px;
-}
-
-.preview-count {
-  margin-left: auto;
-  padding: 4px 12px;
-  background: #115DFC;
-  color: white;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.preview-list {
-  padding: 20px;
-}
-
-.recipient-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.selected-user-badge .remove-user:hover {
+  opacity: 1;
 }
 
 .recipient-item {
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  background: #fafafa;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: #424242;
+  border-left: 4px solid #667eea;
+  transition: all 0.2s;
 }
 
-.recipient-item i {
-  color: #115DFC;
-  font-size: 14px;
+.recipient-item:hover {
+  background: #f8f9fa;
 }
 
-.recipient-email {
-  color: #757575;
-  font-size: 12px;
+.recipient-item input[type="checkbox"]:checked ~ div {
+  opacity: 1;
 }
 
-.recipient-more {
-  padding: 10px 12px;
-  text-align: center;
-  color: #9e9e9e;
-  font-size: 13px;
-  font-style: italic;
-}
-
-/* ========== Form Actions ========== */
-.form-actions {
-  display: flex;
-  gap: 12px;
-  padding-top: 8px;
-}
-
-.btn-draft,
-.btn-send {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px 32px;
-  border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-draft {
-  background: white;
-  color: #616161;
-  border: 2px solid #e0e0e0;
-}
-
-.btn-draft:hover {
-  background: #f5f5f5;
-  border-color: #bdbdbd;
-  color: #424242;
-}
-
-.btn-send {
-  background: linear-gradient(135deg, #115DFC 0%, #3466ff 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(17, 93, 252, 0.25);
-}
-
-.btn-send:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(17, 93, 252, 0.35);
-}
-
-.btn-draft i,
-.btn-send i {
-  font-size: 16px;
-}
-
-/* ========== Responsive ========== */
-@media (max-width: 992px) {
-  .filters-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-  }
-
-  .header-content {
-    gap: 16px;
-  }
-
-  .header-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 24px;
-  }
-
-  .header-title {
-    font-size: 24px;
-  }
-
-  .header-subtitle {
-    font-size: 13px;
-  }
-
-  .header-actions {
-    width: 100%;
-  }
-
-  .btn-back {
-    width: 100%;
-    justify-content: center;
-    padding: 14px 20px;
-  }
-
-  .form-card {
-    padding: 24px;
-  }
-
-  .filter-section {
-    padding: 16px;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .btn-draft,
-  .btn-send {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .form-card {
-    padding: 20px;
-  }
-
-  .filter-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .form-input,
-  .form-select {
-    font-size: 16px; /* Prevent zoom on iOS */
-  }
+.recipient-item input[type="checkbox"]:not(:checked) ~ div {
+  opacity: 0.6;
 }
 </style>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Variables globales
+  let selectedManualUsers = [];
+  let recipientsData = [];
+
+  // Referencias a elementos
+  const filterRadios = document.querySelectorAll('input[name="filter_type"]');
+  const noScansConfig = document.getElementById('no_scans_config');
+  const paymentDueConfig = document.getElementById('payment_due_config');
+  const manualSelectionArea = document.getElementById('manual_selection_area');
+  const userSearchInput = document.getElementById('user_search_input');
+  const searchResults = document.getElementById('search_results');
+  const searchResultsList = document.getElementById('search_results_list');
+  const selectedUsersList = document.getElementById('selected_users_list');
+  const selectedCount = document.getElementById('selected_count');
+  const manualUserIdsInput = document.getElementById('manual_user_ids_input');
+  const previewBtn = document.getElementById('previewBtn');
+  const recipientsPreview = document.getElementById('recipients_preview');
+
+  // Mostrar/ocultar configuraciones según filtro
+  filterRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      // Ocultar todas las configs
+      noScansConfig.style.display = 'none';
+      paymentDueConfig.style.display = 'none';
+      manualSelectionArea.style.display = 'none';
+
+      // Mostrar config específica
+      if (this.value === 'no_scans') {
+        noScansConfig.style.display = 'block';
+      } else if (this.value === 'payment_due') {
+        paymentDueConfig.style.display = 'block';
+      } else if (this.value === 'manual') {
+        manualSelectionArea.style.display = 'block';
+      }
+    });
+  });
+
+  // Búsqueda de usuarios (debounced)
+  let searchTimeout;
+  userSearchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
+
+    if (query.length < 2) {
+      searchResults.style.display = 'none';
+      return;
+    }
+
+    searchTimeout = setTimeout(() => {
+      searchUsers(query);
+    }, 300);
+  });
+
+  // Función para buscar usuarios
+  function searchUsers(query) {
+    fetch(`{{ route('portal.admin.email-campaigns.search-users') }}?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        displaySearchResults(data.users);
+      })
+      .catch(err => {
+        console.error('Error searching users:', err);
+      });
+  }
+
+  // Mostrar resultados de búsqueda
+  function displaySearchResults(users) {
+    if (users.length === 0) {
+      searchResultsList.innerHTML = '<div class="list-group-item text-muted">No se encontraron usuarios</div>';
+      searchResults.style.display = 'block';
+      return;
+    }
+
+    searchResultsList.innerHTML = users.map(user => {
+      const isSelected = selectedManualUsers.includes(user.id);
+      return `
+        <a href="javascript:void(0)"
+           class="list-group-item list-group-item-action search-user-item d-flex justify-content-between align-items-center ${isSelected ? 'bg-light' : ''}"
+           data-user-id="${user.id}"
+           data-user-name="${user.name}"
+           data-user-email="${user.email}">
+          <div>
+            <strong>${user.name}</strong>
+            <br>
+            <small class="text-muted">${user.email}</small>
+            <br>
+            <small class="text-info"><i class="fas fa-paw me-1"></i>${user.pets_count} mascota(s)</small>
+          </div>
+          ${isSelected ? '<span class="badge bg-success">Seleccionado</span>' : '<i class="fas fa-plus-circle text-primary"></i>'}
+        </a>
+      `;
+    }).join('');
+
+    searchResults.style.display = 'block';
+
+    // Agregar eventos a los resultados
+    document.querySelectorAll('.search-user-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const userId = parseInt(this.dataset.userId);
+        const userName = this.dataset.userName;
+        const userEmail = this.dataset.userEmail;
+
+        if (selectedManualUsers.includes(userId)) {
+          removeUser(userId);
+        } else {
+          addUser(userId, userName, userEmail);
+        }
+
+        // Actualizar display
+        displaySearchResults(users);
+      });
+    });
+  }
+
+  // Agregar usuario a la selección
+  function addUser(id, name, email) {
+    if (!selectedManualUsers.includes(id)) {
+      selectedManualUsers.push(id);
+      updateSelectedUsersDisplay();
+      updateManualUserIdsInput();
+    }
+  }
+
+  // Remover usuario de la selección
+  function removeUser(id) {
+    selectedManualUsers = selectedManualUsers.filter(userId => userId !== id);
+    updateSelectedUsersDisplay();
+    updateManualUserIdsInput();
+  }
+
+  // Actualizar display de usuarios seleccionados
+  function updateSelectedUsersDisplay() {
+    selectedCount.textContent = selectedManualUsers.length;
+
+    if (selectedManualUsers.length === 0) {
+      selectedUsersList.innerHTML = '<p class="text-muted mb-0">Ningún usuario seleccionado. Usa el buscador arriba.</p>';
+      return;
+    }
+
+    // Obtener nombres de usuarios seleccionados
+    const badges = selectedManualUsers.map((userId, index) => {
+      // Buscar info del usuario en el DOM o en resultados anteriores
+      const userItem = document.querySelector(`.search-user-item[data-user-id="${userId}"]`);
+      const userName = userItem ? userItem.dataset.userName : `Usuario #${userId}`;
+
+      return `
+        <span class="selected-user-badge">
+          <span>${userName}</span>
+          <i class="fas fa-times remove-user" data-user-id="${userId}"></i>
+        </span>
+      `;
+    }).join('');
+
+    selectedUsersList.innerHTML = badges;
+
+    // Agregar eventos de remover
+    document.querySelectorAll('.remove-user').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const userId = parseInt(this.dataset.userId);
+        removeUser(userId);
+      });
+    });
+  }
+
+  // Actualizar input hidden con IDs
+  function updateManualUserIdsInput() {
+    manualUserIdsInput.value = JSON.stringify(selectedManualUsers);
+  }
+
+  // PREVIEW DE DESTINATARIOS
+  previewBtn.addEventListener('click', function() {
+    const filterType = document.querySelector('input[name="filter_type"]:checked').value;
+    const noScansDays = document.querySelector('input[name="no_scans_days"]')?.value || 30;
+    const paymentDueDays = document.querySelector('input[name="payment_due_days"]')?.value || 5;
+
+    // Mostrar loading
+    recipientsPreview.innerHTML = `
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 text-muted">Obteniendo destinatarios...</p>
+      </div>
+    `;
+
+    // Preparar parámetros
+    const params = new URLSearchParams({
+      filter_type: filterType,
+      no_scans_days: noScansDays,
+      payment_due_days: paymentDueDays
+    });
+
+    // Si es manual, agregar los IDs
+    if (filterType === 'manual') {
+      params.append('manual_user_ids', JSON.stringify(selectedManualUsers));
+    }
+
+    // Hacer fetch
+    fetch(`{{ route('portal.admin.email-campaigns.preview-recipients') }}?${params}`)
+      .then(res => res.json())
+      .then(data => {
+        recipientsData = data.recipients;
+        displayRecipients(data);
+      })
+      .catch(err => {
+        console.error('Error loading recipients:', err);
+        recipientsPreview.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Error al cargar destinatarios. Intenta nuevamente.
+          </div>
+        `;
+      });
+  });
+
+  // Mostrar destinatarios con checkboxes
+  function displayRecipients(data) {
+    if (data.count === 0) {
+      recipientsPreview.innerHTML = `
+        <div class="alert alert-warning">
+          <i class="fas fa-info-circle me-2"></i>
+          No se encontraron destinatarios con este filtro.
+        </div>
+      `;
+      return;
+    }
+
+    let html = `
+      <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">
+            <span class="badge bg-primary fs-6">${data.count}</span>
+            <span class="ms-2">destinatario(s)</span>
+          </h6>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-primary" id="selectAllRecipients">
+              <i class="fas fa-check-square me-1"></i>
+              Todos
+            </button>
+            <button type="button" class="btn btn-outline-secondary" id="deselectAllRecipients">
+              <i class="fas fa-square me-1"></i>
+              Ninguno
+            </button>
+          </div>
+        </div>
+        <small class="text-muted d-block mb-3">
+          <i class="fas fa-info-circle me-1"></i>
+          Desmarca los usuarios a los que NO quieras enviar el email
+        </small>
+      </div>
+      <div class="recipients-list">
+    `;
+
+    data.recipients.forEach(user => {
+      html += `
+        <div class="recipient-item p-3 mb-2 border rounded">
+          <div class="form-check">
+            <input class="form-check-input recipient-checkbox"
+                   type="checkbox"
+                   value="${user.id}"
+                   id="recipient_${user.id}"
+                   checked>
+            <label class="form-check-label d-flex justify-content-between align-items-start w-100" for="recipient_${user.id}">
+              <div>
+                <strong>${user.name}</strong>
+                <br>
+                <small class="text-muted">${user.email}</small>
+                <br>
+                <small class="text-info"><i class="fas fa-paw me-1"></i>${user.pets_count} mascota(s)</small>
+              </div>
+            </label>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    recipientsPreview.innerHTML = html;
+
+    // Eventos para seleccionar/deseleccionar todos
+    document.getElementById('selectAllRecipients').addEventListener('click', function() {
+      document.querySelectorAll('.recipient-checkbox').forEach(cb => cb.checked = true);
+    });
+
+    document.getElementById('deselectAllRecipients').addEventListener('click', function() {
+      document.querySelectorAll('.recipient-checkbox').forEach(cb => cb.checked = false);
+    });
+  }
+
+  // Antes de enviar el formulario, agregar selected_recipients
+  document.getElementById('campaignForm').addEventListener('submit', function(e) {
+    // Si hay preview activo, obtener destinatarios seleccionados
+    const checkedRecipients = Array.from(document.querySelectorAll('.recipient-checkbox:checked'))
+      .map(cb => cb.value);
+
+    if (checkedRecipients.length > 0) {
+      // Crear input hidden con los IDs seleccionados
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'selected_recipients';
+      input.value = JSON.stringify(checkedRecipients);
+      this.appendChild(input);
+    }
+  });
+});
+</script>
+@endpush
 @endsection
