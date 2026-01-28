@@ -386,37 +386,12 @@
               </a>
             </li>
 
-            {{-- Admin --}}
+            {{-- Admin - Ahora es un link directo --}}
             @if(Auth::user()->is_admin)
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
-                <i class="fa-solid fa-screwdriver-wrench me-1"></i> Admin
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('portal.admin.dashboard') }}">
+                <i class="fa-solid fa-screwdriver-wrench me-2"></i>Admin
               </a>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{{ route('portal.admin.dashboard') }}"><i class="fa-solid fa-chart-simple"></i> Panel de administración</a></li>
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.orders.index') }}"><i class="fa-solid fa-shopping-cart"></i> Gestionar Órdenes</a></li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.plan-settings.index') }}"><i class="fa-solid fa-gear"></i> Configurar Planes</a></li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.clients.index') }}"><i class="fa-solid fa-users"></i> Gestionar Clientes</a></li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.email-logs.index') }}"><i class="fa-solid fa-envelope"></i> Logs de Correos</a></li>
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.email-templates.index') }}"><i class="fa-solid fa-file-code"></i> Plantillas de Email</a></li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.email-campaigns.index') }}"><i class="fa-solid fa-paper-plane"></i> Campañas de Email</a></li>
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.tags.index') }}"><i class="fa-solid fa-tags"></i> Inventario de TAGs</a></li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.activate-tag') }}"><i class="fa-solid fa-bolt"></i> Activar TAG</a></li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.tags.export') }}"><i class="fa-solid fa-file-csv"></i> Exportar TAGs (CSV)</a></li>
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item" href="{{ route('portal.admin.settings.index') }}"><i class="fa-solid fa-cog"></i> Configuración</a></li>
-              </ul>
             </li>
             @endif
 

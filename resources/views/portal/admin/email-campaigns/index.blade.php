@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Campañas de Email')
+@section('page-title', 'Campañas de Email')
 
 @section('content')
 <div class="email-campaigns-page">
-  <div class="container-fluid py-4">
     {{-- Header --}}
     <div class="page-header">
       <div class="header-content">
