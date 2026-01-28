@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Crear Campaña de Email')
+@section('page-title', 'Crear Campaña de Email')
 
 @section('content')
 <div class="email-campaign-create-page">

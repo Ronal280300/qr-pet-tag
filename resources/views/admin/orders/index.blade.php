@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Gestión de Pedidos - Admin')
+@section('page-title', 'Gestión de Pedidos - Admin')
 
 @section('content')
 <div class="admin-orders-modern">

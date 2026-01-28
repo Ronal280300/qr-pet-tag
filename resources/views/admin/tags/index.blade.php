@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Admin | Inventario de TAGs')
+@section('page-title', 'Admin | Inventario de TAGs')
 
 @section('content')
 <div class="container my-4">

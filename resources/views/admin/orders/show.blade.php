@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Pedido #' . $order->order_number)
+@section('page-title', 'Pedido #' . $order->order_number)')
 
 @section('content')
 <div class="order-detail-modern">
