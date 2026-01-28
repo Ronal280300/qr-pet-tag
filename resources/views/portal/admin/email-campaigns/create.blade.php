@@ -274,96 +274,491 @@
 </div>
 
 <style>
+/* ========== Página Principal ========== */
+.email-campaign-create-page {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* ========== Header ========== */
+.page-header {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
+}
+
 .page-header .header-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
+  font-size: 28px;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
+.page-header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-header p {
+  color: #6c757d;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ========== Cards ========== */
+.card {
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+}
+
+.card-body {
+  padding: 32px;
+  background: white;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 24px;
+  border: none;
+}
+
+.card-header h5 {
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* ========== Formularios ========== */
+.form-label {
+  font-weight: 700;
+  color: #2d3436;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-control,
+.form-select {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  outline: none;
+}
+
+.form-control-lg {
+  padding: 16px 20px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+
+.form-select-lg {
+  padding: 16px 20px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+
+small.form-text {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+/* ========== Filtros ========== */
 .filter-option {
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  transition: all 0.2s;
-  border: 2px solid transparent;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  border: 2px solid #e9ecef;
+  background: white;
+  cursor: pointer;
 }
 
 .filter-option:hover {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  border-color: #667eea;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.filter-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
 }
 
 .filter-option input[type="radio"]:checked ~ label {
   color: #667eea;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.filter-option input[type="radio"]:checked {
-  background-color: #667eea;
-  border-color: #667eea;
+.filter-option label {
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.filter-option strong {
+  font-size: 15px;
+  color: #2d3436;
+}
+
+.filter-option small {
+  font-size: 13px;
+  color: #636e72;
+  font-weight: 500;
 }
 
 .filter-section {
-  padding: 16px;
-  background: #f8f9fa;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  border-radius: 16px;
+  border: 2px solid #e9ecef;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.filter-section h6 {
+  font-size: 12px;
+  font-weight: 800;
+  color: #667eea;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+/* ========== Búsqueda y Selección Manual ========== */
+#manual_selection_area .card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  border: 2px solid #e9ecef;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+}
+
+.input-group {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
+  overflow: hidden;
+}
+
+.input-group-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  font-size: 16px;
+  padding: 12px 16px;
 }
 
 #search_results_list {
-  max-height: 300px;
+  max-height: 350px;
   overflow-y: auto;
+  border-radius: 12px;
+}
+
+#search_results_list::-webkit-scrollbar {
+  width: 8px;
+}
+
+#search_results_list::-webkit-scrollbar-track {
+  background: #f1f3f5;
+  border-radius: 4px;
+}
+
+#search_results_list::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
 }
 
 .search-user-item {
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  margin-bottom: 8px;
+  border-radius: 12px;
 }
 
 .search-user-item:hover {
-  background: #e9ecef !important;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%) !important;
+  border-color: #667eea !important;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.search-user-item strong {
+  color: #2d3436;
+  font-size: 15px;
 }
 
 .selected-user-badge {
-  background: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 8px 12px;
-  border-radius: 20px;
+  padding: 10px 16px;
+  border-radius: 25px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.selected-user-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .selected-user-badge .remove-user {
   cursor: pointer;
-  opacity: 0.8;
-  transition: opacity 0.2s;
+  opacity: 0.9;
+  transition: all 0.2s;
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 
 .selected-user-badge .remove-user:hover {
   opacity: 1;
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
 }
 
+#selected_count {
+  font-size: 18px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* ========== Preview Recipients ========== */
 .recipient-item {
   border-left: 4px solid #667eea;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .recipient-item:hover {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
 }
 
-.recipient-item input[type="checkbox"]:checked ~ div {
+.recipient-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.recipient-item input[type="checkbox"]:checked ~ label {
   opacity: 1;
 }
 
-.recipient-item input[type="checkbox"]:not(:checked) ~ div {
-  opacity: 0.6;
+.recipient-item input[type="checkbox"]:not(:checked) ~ label {
+  opacity: 0.5;
+}
+
+.recipient-item label {
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.recipient-item strong {
+  font-size: 15px;
+  color: #2d3436;
+}
+
+/* ========== Botones ========== */
+.btn {
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border: none;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #43A047 0%, #5CB860 100%);
+}
+
+.btn-outline-secondary {
+  background: white;
+  border: 2px solid #e9ecef;
+  color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background: #f8f9fa;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.btn-outline-primary,
+.btn-outline-secondary.btn-group-sm {
+  border: 2px solid #667eea;
+  color: #667eea;
+  background: white;
+}
+
+.btn-outline-primary:hover {
+  background: #667eea;
+  color: white;
+}
+
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+
+.btn-group-sm .btn {
+  font-size: 13px;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+/* ========== Iconos ========== */
+.fas,
+.far {
+  transition: transform 0.2s ease;
+}
+
+.btn:hover .fas,
+.btn:hover .far {
+  transform: scale(1.1);
+}
+
+/* ========== Sticky Sidebar ========== */
+.sticky-top {
+  position: sticky;
+  top: 20px;
+  z-index: 100;
+}
+
+/* ========== Scrollbar personalizado ========== */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f3f5;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+}
+
+/* ========== Animations ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card,
+.page-header {
+  animation: fadeInUp 0.5s ease;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 992px) {
+  .card-body {
+    padding: 24px;
+  }
+
+  .btn-lg {
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 26px;
+  }
+
+  .filter-option {
+    padding: 12px;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 12px;
+  }
 }
 </style>
 

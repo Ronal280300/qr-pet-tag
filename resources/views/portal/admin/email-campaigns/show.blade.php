@@ -25,6 +25,15 @@
             <span>Enviar Campaña</span>
           </a>
         @endif
+        @if(in_array($emailCampaign->status, ['sending', 'sent']))
+          <form method="POST" action="{{ route('portal.admin.email-campaigns.stop', $emailCampaign) }}" style="display: inline;">
+            @csrf
+            <button type="button" class="btn-stop" onclick="confirmStop(this.form)">
+              <i class="fas fa-stop-circle"></i>
+              <span>Detener Campaña</span>
+            </button>
+          </form>
+        @endif
         <a href="{{ route('portal.admin.email-campaigns.index') }}" class="btn-back">
           <i class="fas fa-arrow-left"></i>
           <span>Volver</span>
@@ -98,18 +107,21 @@
                     'sending' => 'status-sending',
                     'sent' => 'status-sent',
                     'failed' => 'status-failed',
+                    'stopped' => 'status-stopped',
                   ];
                   $statusLabels = [
                     'draft' => 'Borrador',
                     'sending' => 'Enviando',
                     'sent' => 'Enviada',
                     'failed' => 'Fallida',
+                    'stopped' => 'Detenida',
                   ];
                   $statusIcons = [
                     'draft' => 'fa-file-alt',
                     'sending' => 'fa-spinner fa-spin',
                     'sent' => 'fa-check-circle',
                     'failed' => 'fa-exclamation-circle',
+                    'stopped' => 'fa-stop-circle',
                   ];
                 @endphp
                 <span class="status-badge {{ $statusClasses[$emailCampaign->status] ?? 'status-draft' }}">
@@ -301,6 +313,12 @@
                         Fallido
                       </span>
                       @break
+                    @case('stopped')
+                      <span class="recipient-badge badge-stopped">
+                        <i class="fas fa-stop-circle"></i>
+                        Detenido
+                      </span>
+                      @break
                   @endswitch
                 </div>
 
@@ -429,6 +447,32 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(76, 175, 80, 0.35);
   color: white;
+}
+
+.btn-stop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #F44336 0%, #E57373 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.25);
+}
+
+.btn-stop:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(244, 67, 54, 0.35);
+  background: linear-gradient(135deg, #E53935 0%, #EF5350 100%);
+}
+
+.btn-stop i {
+  font-size: 16px;
 }
 
 .btn-back {
@@ -681,6 +725,11 @@
 
 .status-failed {
   background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
+  color: white;
+}
+
+.status-stopped {
+  background: linear-gradient(135deg, #FF6F00 0%, #FF8F00 100%);
   color: white;
 }
 
@@ -995,6 +1044,11 @@
   color: #C62828;
 }
 
+.badge-stopped {
+  background: #fff3e0;
+  color: #E65100;
+}
+
 .recipient-meta {
   display: flex;
   flex-direction: column;
@@ -1182,4 +1236,27 @@
   }
 }
 </style>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmStop(form) {
+  Swal.fire({
+    title: '¿Detener campaña?',
+    text: 'Se detendrá el envío de emails pendientes. Esta acción no se puede deshacer.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#F44336',
+    cancelButtonColor: '#9E9E9E',
+    confirmButtonText: 'Sí, detener',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      form.submit();
+    }
+  });
+}
+</script>
+@endpush
 @endsection

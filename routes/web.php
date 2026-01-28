@@ -280,6 +280,7 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::get('email-campaigns/search/users', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'searchUsers'])->name('email-campaigns.search-users');
             Route::get('email-campaigns/{emailCampaign}/confirm', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'confirm'])->name('email-campaigns.confirm');
             Route::post('email-campaigns/{emailCampaign}/send', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'send'])->name('email-campaigns.send');
+            Route::post('email-campaigns/{emailCampaign}/stop', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'stop'])->name('email-campaigns.stop');
 
             Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 
