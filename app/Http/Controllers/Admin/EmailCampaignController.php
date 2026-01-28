@@ -54,7 +54,14 @@ class EmailCampaignController extends Controller
 
         // Si es selección manual, agregar los user_ids al filter_config
         if ($filterType === 'manual' && $request->has('manual_user_ids')) {
-            $filterConfig['user_ids'] = $request->input('manual_user_ids');
+            $manualUserIds = $request->input('manual_user_ids');
+
+            // Decodificar si viene como JSON string
+            if (is_string($manualUserIds)) {
+                $manualUserIds = json_decode($manualUserIds, true) ?? [];
+            }
+
+            $filterConfig['user_ids'] = $manualUserIds;
         }
 
         // Crear campaña temporal para usar el método getFilteredRecipients
@@ -113,6 +120,14 @@ class EmailCampaignController extends Controller
      */
     public function store(Request $request)
     {
+        // Decodificar manual_user_ids si viene como JSON string
+        if ($request->has('manual_user_ids') && is_string($request->input('manual_user_ids'))) {
+            $decoded = json_decode($request->input('manual_user_ids'), true);
+            if (is_array($decoded)) {
+                $request->merge(['manual_user_ids' => $decoded]);
+            }
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email_template_id' => 'required|exists:email_templates,id',
@@ -323,6 +338,50 @@ class EmailCampaignController extends Controller
             'status' => 'sent',
             'completed_at' => now(),
         ]);
+    }
+
+    /**
+     * Detener campaña en progreso
+     */
+    public function stop(EmailCampaign $emailCampaign)
+    {
+        // Solo se pueden detener campañas que están enviando o ya fueron enviadas
+        if (!in_array($emailCampaign->status, ['sending', 'sent'])) {
+            return redirect()
+                ->back()
+                ->with('error', 'Solo se pueden detener campañas en estado "Enviando" o "Enviada"');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Actualizar todos los destinatarios pendientes a estado "stopped"
+            $emailCampaign->recipients()
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'stopped',
+                    'error_message' => 'Campaña detenida manualmente por el administrador',
+                ]);
+
+            // Actualizar el estado de la campaña
+            $emailCampaign->update([
+                'status' => 'stopped',
+                'completed_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('portal.admin.email-campaigns.show', $emailCampaign)
+                ->with('success', 'Campaña detenida exitosamente. Los emails pendientes no serán enviados.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->with('error', 'Error al detener la campaña: ' . $e->getMessage());
+        }
     }
 
     /**
