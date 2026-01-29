@@ -220,37 +220,90 @@
     <!-- Header -->
     <div class="header">
       <div class="pet-icon">🐾</div>
-      <h1>¡Te invitamos a gestionar tu mascota!</h1>
-      <p>Hemos registrado una mascota para ti</p>
+      <h1>¡Te invitamos a gestionar {{ $petsCount > 1 ? 'tus mascotas' : 'tu mascota' }}!</h1>
+      <p>Hemos registrado {{ $petsCount > 1 ? $petsCount . ' mascotas' : 'una mascota' }} para ti</p>
     </div>
 
     <!-- Content -->
     <div class="content">
       <!-- Pet Info -->
-      <div class="pet-info">
-        <h2>🐶 {{ $pet->name }}</h2>
+      @if($petsCount > 1)
+        <!-- Múltiples mascotas -->
+        <div class="pet-info">
+          <h2>🐾 Tus {{ $petsCount }} Mascotas</h2>
+          <p style="color: #475569; margin-bottom: 16px;">Hemos registrado las siguientes mascotas para ti:</p>
 
-        @if($pet->breed)
-        <div class="pet-detail">
-          <span class="pet-detail-label">Raza:</span>
-          <span class="pet-detail-value">{{ $pet->breed }}</span>
-        </div>
-        @endif
+          @foreach($pets as $index => $petItem)
+          <div style="background: white; border: 2px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+            <h3 style="color: #1e40af; font-size: 18px; margin-bottom: 10px;">{{ $index + 1 }}. {{ $petItem->name }}</h3>
 
-        @if($pet->age_display)
-        <div class="pet-detail">
-          <span class="pet-detail-label">Edad:</span>
-          <span class="pet-detail-value">{{ $pet->age_display }}</span>
-        </div>
-        @endif
+            @if($petItem->species)
+            <div class="pet-detail">
+              <span class="pet-detail-label">Especie:</span>
+              <span class="pet-detail-value">
+                @if($petItem->species === 'dog') Perro
+                @elseif($petItem->species === 'cat') Gato
+                @else Otro
+                @endif
+              </span>
+            </div>
+            @endif
 
-        @if($pet->zone)
-        <div class="pet-detail">
-          <span class="pet-detail-label">Ubicación:</span>
-          <span class="pet-detail-value">{{ $pet->zone }}</span>
+            @if($petItem->breed)
+            <div class="pet-detail">
+              <span class="pet-detail-label">Raza:</span>
+              <span class="pet-detail-value">{{ $petItem->breed }}</span>
+            </div>
+            @endif
+
+            @if($petItem->sex)
+            <div class="pet-detail">
+              <span class="pet-detail-label">Sexo:</span>
+              <span class="pet-detail-value">
+                @if($petItem->sex === 'male') Macho
+                @elseif($petItem->sex === 'female') Hembra
+                @else No especificado
+                @endif
+              </span>
+            </div>
+            @endif
+
+            @if($petItem->age_years || $petItem->age_months)
+            <div class="pet-detail">
+              <span class="pet-detail-label">Edad:</span>
+              <span class="pet-detail-value">{{ $petItem->age_years ?? 0 }} años{{ $petItem->age_months ? ', ' . $petItem->age_months . ' meses' : '' }}</span>
+            </div>
+            @endif
+          </div>
+          @endforeach
         </div>
-        @endif
-      </div>
+      @else
+        <!-- Una sola mascota (flujo original) -->
+        <div class="pet-info">
+          <h2>🐶 {{ $pet->name }}</h2>
+
+          @if($pet->breed)
+          <div class="pet-detail">
+            <span class="pet-detail-label">Raza:</span>
+            <span class="pet-detail-value">{{ $pet->breed }}</span>
+          </div>
+          @endif
+
+          @if($pet->age_display)
+          <div class="pet-detail">
+            <span class="pet-detail-label">Edad:</span>
+            <span class="pet-detail-value">{{ $pet->age_display }}</span>
+          </div>
+          @endif
+
+          @if($pet->zone)
+          <div class="pet-detail">
+            <span class="pet-detail-label">Ubicación:</span>
+            <span class="pet-detail-value">{{ $pet->zone }}</span>
+          </div>
+          @endif
+        </div>
+      @endif
 
       <!-- Plan Info -->
       <div class="plan-box">
@@ -262,7 +315,7 @@
       <!-- CTA Button -->
       <div style="text-align: center;">
         <a href="{{ $activationUrl }}" class="cta-button">
-          ✨ Reclamar mi mascota
+          ✨ Reclamar {{ $petsCount > 1 ? 'mis mascotas' : 'mi mascota' }}
         </a>
       </div>
 
@@ -273,7 +326,7 @@
         <div class="step">
           <div class="step-number">1</div>
           <div class="step-text">
-            Haz clic en el botón "Reclamar mi mascota"
+            Haz clic en el botón "Reclamar {{ $petsCount > 1 ? 'mis mascotas' : 'mi mascota' }}"
           </div>
         </div>
 
@@ -287,14 +340,14 @@
         <div class="step">
           <div class="step-number">3</div>
           <div class="step-text">
-            Tu mascota se ligará automáticamente a tu cuenta
+            {{ $petsCount > 1 ? 'Tus mascotas se ligarán' : 'Tu mascota se ligará' }} automáticamente a tu cuenta
           </div>
         </div>
 
         <div class="step">
           <div class="step-number">4</div>
           <div class="step-text">
-            ¡Listo! Podrás gestionar toda la información de {{ $pet->name }}
+            ¡Listo! Podrás gestionar toda la información de {{ $petsCount > 1 ? 'tus ' . $petsCount . ' mascotas' : $pet->name }}
           </div>
         </div>
       </div>

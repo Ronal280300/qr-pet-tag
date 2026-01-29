@@ -88,38 +88,65 @@ class PetActivationController extends Controller
     }
 
     /**
-     * Completar activación de mascota (asignar al usuario y crear orden)
+     * Completar activación de mascota(s) - asignar al usuario y crear orden
+     * Maneja tanto una sola mascota como múltiples mascotas del mismo grupo
      */
     protected function completePetActivation(User $user, Pet $pet)
     {
         DB::beginTransaction();
 
         try {
-            Log::info('Iniciando activación de mascota', [
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'pet_id' => $pet->id,
-                'pet_name' => $pet->name,
-                'pending_plan_id' => $pet->pending_plan_id
-            ]);
+            // Detectar si es invitación múltiple (grupo de mascotas)
+            $petsToActivate = [];
 
-            // 1. Asignar mascota al usuario
-            $pet->user_id = $user->id;
-            $pet->is_pending_registration = false;
-            $pet->pending_completed_at = now();
-            $pet->save();
+            if ($pet->pending_group_token) {
+                // Buscar TODAS las mascotas del grupo
+                $petsToActivate = Pet::where('pending_group_token', $pet->pending_group_token)
+                    ->where('is_pending_registration', true)
+                    ->whereNull('pending_completed_at')
+                    ->get();
 
-            Log::info('Mascota asignada al usuario', ['pet_id' => $pet->id, 'user_id' => $user->id]);
+                Log::info('Activación de grupo de mascotas', [
+                    'user_id' => $user->id,
+                    'group_token' => $pet->pending_group_token,
+                    'pets_count' => $petsToActivate->count()
+                ]);
+            } else {
+                // Solo una mascota (flujo antiguo)
+                $petsToActivate = collect([$pet]);
 
-            // 2. Crear orden con el plan seleccionado
+                Log::info('Activación de mascota individual', [
+                    'user_id' => $user->id,
+                    'pet_id' => $pet->id,
+                    'pet_name' => $pet->name
+                ]);
+            }
+
+            // 1. Asignar TODAS las mascotas al usuario
+            foreach ($petsToActivate as $petToActivate) {
+                $petToActivate->user_id = $user->id;
+                $petToActivate->is_pending_registration = false;
+                $petToActivate->pending_completed_at = now();
+                $petToActivate->save();
+
+                Log::info('Mascota asignada al usuario', [
+                    'pet_id' => $petToActivate->id,
+                    'pet_name' => $petToActivate->name,
+                    'user_id' => $user->id
+                ]);
+            }
+
+            // 2. Crear UNA orden para TODAS las mascotas
             if ($pet->pending_plan_id) {
                 $plan = Plan::find($pet->pending_plan_id);
 
                 if ($plan) {
+                    $petsCount = $petsToActivate->count();
+
                     $order = Order::create([
                         'user_id' => $user->id,
                         'plan_id' => $plan->id,
-                        'pets_quantity' => 1, // Una mascota por defecto
+                        'pets_quantity' => $petsCount, // Cantidad real de mascotas
                         'subtotal' => $plan->price, // Precio base del plan
                         'additional_pets_cost' => 0, // Sin mascotas adicionales
                         'total' => $plan->price, // Total = subtotal + additional_pets_cost + shipping_cost
@@ -127,17 +154,20 @@ class PetActivationController extends Controller
                         'payment_method' => 'admin_assignment', // Método especial para identificar origen
                         'verified_at' => now(),
                         'verified_by' => null, // Null porque es asignación automática del sistema
-                        'admin_notes' => 'Orden creada automáticamente por invitación de administrador para mascota: ' . $pet->name,
+                        'admin_notes' => 'Orden creada automáticamente por invitación de administrador. Mascotas: ' . $petsToActivate->pluck('name')->join(', '),
                     ]);
 
-                    // Ligar mascota a la orden
-                    $pet->order_id = $order->id;
-                    $pet->save();
+                    // Ligar TODAS las mascotas a la misma orden
+                    foreach ($petsToActivate as $petToActivate) {
+                        $petToActivate->order_id = $order->id;
+                        $petToActivate->save();
+                    }
 
-                    Log::info('Orden creada y ligada a mascota', [
+                    Log::info('Orden creada y ligada a mascotas', [
                         'order_id' => $order->id,
-                        'pet_id' => $pet->id,
-                        'plan_id' => $plan->id
+                        'pets_count' => $petsCount,
+                        'plan_id' => $plan->id,
+                        'pets_names' => $petsToActivate->pluck('name')->toArray()
                     ]);
                 } else {
                     Log::warning('Plan no encontrado', ['pending_plan_id' => $pet->pending_plan_id]);
@@ -151,12 +181,20 @@ class PetActivationController extends Controller
             session()->forget('pet_activation_email');
 
             Log::info('Activación completada exitosamente', [
-                'pet_id' => $pet->id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'pets_count' => $petsToActivate->count()
             ]);
 
-            return redirect()->route('portal.pets.show', $pet)
-                ->with('status', '¡Bienvenido! Tu mascota ' . $pet->name . ' ha sido ligada exitosamente a tu cuenta.');
+            // Mensaje de éxito personalizado
+            $petsCount = $petsToActivate->count();
+            if ($petsCount > 1) {
+                $message = "¡Bienvenido! Tus {$petsCount} mascotas (" . $petsToActivate->pluck('name')->join(', ') . ") han sido ligadas exitosamente a tu cuenta.";
+            } else {
+                $message = '¡Bienvenido! Tu mascota ' . $pet->name . ' ha sido ligada exitosamente a tu cuenta.';
+            }
+
+            return redirect()->route('portal.pets.index')
+                ->with('status', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -236,28 +274,57 @@ class PetActivationController extends Controller
 
         DB::beginTransaction();
         try {
-            Log::info('Procesando activación después del registro', [
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'pet_id' => $pet->id,
-                'pet_name' => $pet->name
-            ]);
+            // Detectar si es invitación múltiple (grupo de mascotas)
+            $petsToActivate = [];
 
-            // Asignar mascota al usuario
-            $pet->user_id = $user->id;
-            $pet->is_pending_registration = false;
-            $pet->pending_completed_at = now();
-            $pet->save();
+            if ($pet->pending_group_token) {
+                // Buscar TODAS las mascotas del grupo
+                $petsToActivate = Pet::where('pending_group_token', $pet->pending_group_token)
+                    ->where('is_pending_registration', true)
+                    ->whereNull('pending_completed_at')
+                    ->get();
 
-            // Crear orden con el plan seleccionado
+                Log::info('Procesando activación de grupo después del registro', [
+                    'user_id' => $user->id,
+                    'group_token' => $pet->pending_group_token,
+                    'pets_count' => $petsToActivate->count()
+                ]);
+            } else {
+                // Solo una mascota (flujo antiguo)
+                $petsToActivate = collect([$pet]);
+
+                Log::info('Procesando activación de mascota individual después del registro', [
+                    'user_id' => $user->id,
+                    'pet_id' => $pet->id,
+                    'pet_name' => $pet->name
+                ]);
+            }
+
+            // Asignar TODAS las mascotas al usuario
+            foreach ($petsToActivate as $petToActivate) {
+                $petToActivate->user_id = $user->id;
+                $petToActivate->is_pending_registration = false;
+                $petToActivate->pending_completed_at = now();
+                $petToActivate->save();
+
+                Log::info('Mascota asignada en processAfterRegistration', [
+                    'pet_id' => $petToActivate->id,
+                    'pet_name' => $petToActivate->name,
+                    'user_id' => $user->id
+                ]);
+            }
+
+            // Crear UNA orden para TODAS las mascotas
             if ($pet->pending_plan_id) {
                 $plan = Plan::find($pet->pending_plan_id);
 
                 if ($plan) {
+                    $petsCount = $petsToActivate->count();
+
                     $order = Order::create([
                         'user_id' => $user->id,
                         'plan_id' => $plan->id,
-                        'pets_quantity' => 1, // Una mascota por defecto
+                        'pets_quantity' => $petsCount, // Cantidad real de mascotas
                         'subtotal' => $plan->price, // Precio base del plan
                         'additional_pets_cost' => 0, // Sin mascotas adicionales
                         'total' => $plan->price, // Total = subtotal + additional_pets_cost + shipping_cost
@@ -265,16 +332,20 @@ class PetActivationController extends Controller
                         'payment_method' => 'admin_assignment', // Método especial para identificar origen
                         'verified_at' => now(),
                         'verified_by' => null, // Null porque es asignación automática del sistema
-                        'admin_notes' => 'Orden creada automáticamente por invitación de administrador para mascota: ' . $pet->name,
+                        'admin_notes' => 'Orden creada automáticamente por invitación de administrador. Mascotas: ' . $petsToActivate->pluck('name')->join(', '),
                     ]);
 
-                    $pet->order_id = $order->id;
-                    $pet->save();
+                    // Ligar TODAS las mascotas a la misma orden
+                    foreach ($petsToActivate as $petToActivate) {
+                        $petToActivate->order_id = $order->id;
+                        $petToActivate->save();
+                    }
 
                     Log::info('Orden creada en processAfterRegistration', [
                         'order_id' => $order->id,
-                        'pet_id' => $pet->id,
-                        'user_id' => $user->id
+                        'pets_count' => $petsCount,
+                        'user_id' => $user->id,
+                        'pets_names' => $petsToActivate->pluck('name')->toArray()
                     ]);
                 }
             }
@@ -285,7 +356,7 @@ class PetActivationController extends Controller
 
             Log::info('Activación después de registro completada', [
                 'user_id' => $user->id,
-                'pet_id' => $pet->id
+                'pets_count' => $petsToActivate->count()
             ]);
 
             return true;

@@ -486,14 +486,27 @@
                     <select name="pending_plan_id" id="pendingPlanId" class="form-input">
                       <option value="">Selecciona un plan...</option>
                       @foreach(\App\Models\Plan::where('is_active', true)->orderBy('price')->get() as $plan)
-                        <option value="{{ $plan->id }}" data-price="{{ $plan->price }}">
-                          {{ $plan->name }} - ₡{{ number_format($plan->price, 0, ',', '.') }}
+                        <option
+                          value="{{ $plan->id }}"
+                          data-price="{{ $plan->price }}"
+                          data-pets-included="{{ $plan->pets_included }}">
+                          {{ $plan->name }} - ₡{{ number_format($plan->price, 0, ',', '.') }} ({{ $plan->pets_included }} mascota{{ $plan->pets_included > 1 ? 's' : '' }})
                         </option>
                       @endforeach
                     </select>
                   </div>
                   <small class="form-text">Este plan se activará cuando el cliente complete su registro</small>
                 </div>
+              </div>
+
+              <!-- Contenedor dinámico para múltiples mascotas -->
+              <div class="col-12" id="multiplePetsContainer" style="display: none;">
+                <div class="multiple-pets-header">
+                  <i class="fa-solid fa-paw"></i>
+                  <h4>Datos de las Mascotas</h4>
+                  <span class="pets-count-badge" id="petsCountBadge"></span>
+                </div>
+                <div id="petsFormsContainer"></div>
               </div>
 
               <div class="col-12">
@@ -1522,6 +1535,149 @@
     flex-direction: column;
   }
 }
+
+/* ===== Estilos para formularios dinámicos de múltiples mascotas ===== */
+.multiple-pets-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #86efac;
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+}
+
+.multiple-pets-header i {
+  font-size: 24px;
+  color: #16a34a;
+}
+
+.multiple-pets-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gray-900);
+  flex: 1;
+}
+
+.pets-count-badge {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#petsFormsContainer {
+  background: white;
+  border: 2px solid #86efac;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 0;
+}
+
+.pet-form-card {
+  padding: 20px;
+  border-bottom: 2px dashed #d1d5db;
+  transition: background-color 0.2s;
+}
+
+.pet-form-card:last-child {
+  border-bottom: none;
+  border-radius: 0 0 10px 10px;
+}
+
+.pet-form-card:hover {
+  background: #f9fafb;
+}
+
+.pet-form-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.pet-number-badge {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.pet-form-header h5 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.dynamic-pet-field {
+  margin-bottom: 16px;
+}
+
+.dynamic-pet-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--gray-700);
+  font-size: 14px;
+}
+
+.dynamic-pet-field .text-danger {
+  color: #ef4444;
+}
+
+.dynamic-pet-field input,
+.dynamic-pet-field select,
+.dynamic-pet-field textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.dynamic-pet-field input:focus,
+.dynamic-pet-field select:focus,
+.dynamic-pet-field textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dynamic-pet-field small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+@media (max-width: 768px) {
+  .multiple-pets-header {
+    padding: 12px;
+  }
+
+  .multiple-pets-header h4 {
+    font-size: 16px;
+  }
+
+  .pet-form-card {
+    padding: 16px;
+  }
+}
 </style>
 @endsection
 
@@ -1861,6 +2017,12 @@
     const invitationFields = document.getElementById('invitationFields');
     const pendingEmail = document.getElementById('pendingEmail');
     const pendingPlanId = document.getElementById('pendingPlanId');
+    const multiplePetsContainer = document.getElementById('multiplePetsContainer');
+    const petsFormsContainer = document.getElementById('petsFormsContainer');
+    const petsCountBadge = document.getElementById('petsCountBadge');
+
+    // Variable para almacenar el número de mascotas del plan seleccionado
+    let petsIncluded = 1;
 
     if (sendInvitation && invitationFields) {
       sendInvitation.addEventListener('change', function() {
@@ -1874,8 +2036,132 @@
           pendingPlanId.required = false;
           pendingEmail.value = '';
           pendingPlanId.value = '';
+          multiplePetsContainer.style.display = 'none';
+          petsFormsContainer.innerHTML = '';
         }
       });
+    }
+
+    // Cuando se selecciona un plan, generar formularios dinámicos
+    if (pendingPlanId) {
+      pendingPlanId.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        petsIncluded = parseInt(selectedOption.getAttribute('data-pets-included')) || 1;
+
+        if (this.value && sendInvitation.checked) {
+          generatePetForms(petsIncluded);
+          multiplePetsContainer.style.display = 'block';
+          petsCountBadge.textContent = `${petsIncluded} mascota${petsIncluded > 1 ? 's' : ''}`;
+        } else {
+          multiplePetsContainer.style.display = 'none';
+          petsFormsContainer.innerHTML = '';
+        }
+      });
+    }
+
+    // Función para generar formularios dinámicos de mascotas
+    function generatePetForms(count) {
+      petsFormsContainer.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        const petCard = document.createElement('div');
+        petCard.className = 'pet-form-card';
+        petCard.innerHTML = `
+          <div class="pet-form-header">
+            <div class="pet-number-badge">${i + 1}</div>
+            <h5>Mascota ${i + 1}</h5>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="dynamic-pet-field">
+                <label>Nombre <span class="text-danger">*</span></label>
+                <input type="text" name="pets[${i}][name]" class="form-control" placeholder="Ej: Max" required>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="dynamic-pet-field">
+                <label>Especie <span class="text-danger">*</span></label>
+                <select name="pets[${i}][species]" class="form-control" required>
+                  <option value="">Selecciona...</option>
+                  <option value="dog">Perro</option>
+                  <option value="cat">Gato</option>
+                  <option value="other">Otro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="dynamic-pet-field">
+                <label>Raza</label>
+                <input type="text" name="pets[${i}][breed]" class="form-control" placeholder="Ej: Labrador">
+                <small>Opcional</small>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="dynamic-pet-field">
+                <label>Sexo</label>
+                <select name="pets[${i}][sex]" class="form-control">
+                  <option value="">No especificado</option>
+                  <option value="male">Macho</option>
+                  <option value="female">Hembra</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="dynamic-pet-field">
+                <label>Edad (años)</label>
+                <input type="number" name="pets[${i}][age_years]" class="form-control" min="0" max="50" placeholder="0">
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="dynamic-pet-field">
+                <label>Meses</label>
+                <input type="number" name="pets[${i}][age_months]" class="form-control" min="0" max="11" placeholder="0">
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="dynamic-pet-field">
+                <label>Tamaño</label>
+                <select name="pets[${i}][size]" class="form-control">
+                  <option value="">No especificado</option>
+                  <option value="small">Pequeño</option>
+                  <option value="medium">Mediano</option>
+                  <option value="large">Grande</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="dynamic-pet-field">
+                <label>Color</label>
+                <input type="text" name="pets[${i}][color]" class="form-control" placeholder="Ej: Café, Blanco">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="dynamic-pet-field">
+                <label>Zona/Barrio</label>
+                <input type="text" name="pets[${i}][zone]" class="form-control" placeholder="Ej: Escazú Centro">
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="dynamic-pet-field">
+                <label>Condiciones Médicas</label>
+                <textarea name="pets[${i}][medical_conditions]" class="form-control" rows="2" placeholder="Alergias, medicamentos, condiciones especiales..."></textarea>
+                <small>Información importante para quien encuentre la mascota</small>
+              </div>
+            </div>
+          </div>
+        `;
+        petsFormsContainer.appendChild(petCard);
+      }
     }
 
     // Validación antes de enviar el formulario
@@ -1886,6 +2172,35 @@
           if (!pendingEmail.value || !pendingPlanId.value) {
             e.preventDefault();
             alert('Por favor completa el email del cliente y selecciona un plan antes de enviar la invitación.');
+            return false;
+          }
+
+          // Validar que se hayan llenado los datos mínimos de todas las mascotas
+          const petNameInputs = document.querySelectorAll('input[name^="pets"][name$="[name]"]');
+          const petSpeciesSelects = document.querySelectorAll('select[name^="pets"][name$="[species]"]');
+
+          let allPetsValid = true;
+          petNameInputs.forEach((input, index) => {
+            if (!input.value.trim()) {
+              allPetsValid = false;
+              input.style.borderColor = '#ef4444';
+            } else {
+              input.style.borderColor = '#d1d5db';
+            }
+          });
+
+          petSpeciesSelects.forEach((select, index) => {
+            if (!select.value) {
+              allPetsValid = false;
+              select.style.borderColor = '#ef4444';
+            } else {
+              select.style.borderColor = '#d1d5db';
+            }
+          });
+
+          if (!allPetsValid) {
+            e.preventDefault();
+            alert('Por favor completa el nombre y especie de todas las mascotas antes de continuar.');
             return false;
           }
         }

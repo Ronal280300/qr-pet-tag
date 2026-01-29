@@ -48,6 +48,7 @@ class Pet extends Model
         // ===== REGISTRO PENDIENTE (Admin crea mascota para cliente no registrado) =====
         'pending_email',            // email del cliente invitado
         'pending_token',            // token único para el link
+        'pending_group_token',      // token de grupo para múltiples mascotas
         'pending_plan_id',          // plan seleccionado por admin
         'is_pending_registration',  // flag para mascotas pendientes
         'pending_sent_at',          // cuándo se envió la invitación
