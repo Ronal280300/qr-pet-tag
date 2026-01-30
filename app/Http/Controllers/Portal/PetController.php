@@ -171,73 +171,142 @@ class PetController extends Controller
 
     /**
      * Crear múltiples mascotas con invitación (flujo nuevo para planes con múltiples mascotas)
+     *
+     * El formulario principal es la mascota #1, los formularios dinámicos son #2, #3, etc.
      */
     protected function storeMultiplePetsWithInvitation(Request $request, PetQrService $qrService, PetPhotoOptimizationService $photoService)
     {
-        // Validar datos de invitación
-        $request->validate([
+        // Validar formulario principal (mascota #1)
+        $mainData = $request->validate([
+            'name'               => ['required', 'string', 'max:120'],
+            'breed'              => ['required', 'string', 'max:120'],
+            'zone'               => ['required', 'string', 'max:255'],
+            'age_years'          => ['nullable', 'integer', 'min:0', 'max:50'],
+            'age_months'         => ['nullable', 'integer', 'min:0', 'max:11'],
+            'medical_conditions' => ['nullable', 'string', 'max:500'],
+            'photo'              => ['required', 'image', 'max:10240'],
+            'sex'                => 'nullable|in:male,female,unknown',
+            'is_neutered'        => 'nullable|boolean',
+            'rabies_vaccine'     => 'nullable|boolean',
+            'has_emergency_contact'    => 'nullable|boolean',
+            'emergency_contact_name'   => 'nullable|string|max:120',
+            'emergency_contact_phone'  => 'nullable|string|max:20',
+
+            // Datos de invitación
             'pending_email'    => 'required|email',
             'pending_plan_id'  => 'required|exists:plans,id',
-            'pets'             => 'required|array|min:1',
+        ]);
+
+        // Validar mascotas adicionales (pets[1], pets[2], etc.)
+        $request->validate([
+            'pets'             => 'nullable|array',
             'pets.*.name'      => 'required|string|max:120',
-            'pets.*.species'   => 'required|in:dog,cat,other',
-            'pets.*.breed'     => 'nullable|string|max:120',
+            'pets.*.breed'     => 'required|string|max:120',
+            'pets.*.zone'      => 'required|string|max:255',
             'pets.*.sex'       => 'nullable|in:male,female,unknown',
             'pets.*.age_years' => 'nullable|integer|min:0|max:50',
             'pets.*.age_months' => 'nullable|integer|min:0|max:11',
-            'pets.*.size'      => 'nullable|in:small,medium,large',
-            'pets.*.color'     => 'nullable|string|max:100',
-            'pets.*.zone'      => 'nullable|string|max:255',
+            'pets.*.is_neutered' => 'nullable|boolean',
+            'pets.*.rabies_vaccine' => 'nullable|boolean',
             'pets.*.medical_conditions' => 'nullable|string|max:500',
+            'pets.*.has_emergency_contact' => 'nullable|boolean',
+            'pets.*.emergency_contact_name' => 'nullable|string|max:120',
+            'pets.*.emergency_contact_phone' => 'nullable|string|max:20',
         ]);
 
-        $petsData = $request->input('pets');
+        $additionalPetsData = $request->input('pets', []);
         $pendingEmail = $request->input('pending_email');
         $pendingPlanId = $request->input('pending_plan_id');
 
         // Generar tokens únicos
-        $pendingGroupToken = \Illuminate\Support\Str::random(64); // Token de grupo para todas las mascotas
-        $pendingToken = \Illuminate\Support\Str::random(64);      // Token individual para el email
+        $pendingGroupToken = \Illuminate\Support\Str::random(64);
+        $pendingToken = \Illuminate\Support\Str::random(64);
 
         $createdPets = [];
 
-        DB::transaction(function () use ($petsData, $pendingEmail, $pendingPlanId, $pendingGroupToken, $pendingToken, $qrService, &$createdPets) {
-            foreach ($petsData as $index => $petData) {
-                // Preparar datos de la mascota
-                $data = [
+        DB::transaction(function () use ($request, $mainData, $additionalPetsData, $pendingEmail, $pendingPlanId, $pendingGroupToken, $pendingToken, $qrService, $photoService, &$createdPets) {
+
+            // 1. Crear mascota principal (del formulario original)
+            $mainPetData = [
+                'user_id' => null,
+                'is_lost' => false,
+                'name' => $mainData['name'],
+                'breed' => $mainData['breed'],
+                'zone' => $mainData['zone'],
+                'sex' => $mainData['sex'] ?? null,
+                'age_years' => $mainData['age_years'] ?? 0,
+                'age_months' => $mainData['age_months'] ?? 0,
+                'is_neutered' => $request->boolean('is_neutered'),
+                'rabies_vaccine' => $request->boolean('rabies_vaccine'),
+                'medical_conditions' => $mainData['medical_conditions'] ?? null,
+                'has_emergency_contact' => $request->boolean('has_emergency_contact'),
+                'emergency_contact_name' => $mainData['emergency_contact_name'] ?? null,
+                'emergency_contact_phone' => $mainData['emergency_contact_phone'] ?? null,
+
+                // Campos de invitación
+                'pending_email' => $pendingEmail,
+                'pending_plan_id' => $pendingPlanId,
+                'pending_group_token' => $pendingGroupToken,
+                'pending_token' => $pendingToken, // Solo la primera tiene token
+                'is_pending_registration' => true,
+                'pending_sent_at' => now(),
+            ];
+
+            // Procesar foto principal
+            if ($request->hasFile('photo')) {
+                $mainPetData['photo'] = $photoService->optimizeQuick($request->file('photo'), 'pets');
+            }
+
+            $mainPet = \App\Models\Pet::create($mainPetData);
+
+            // Generar thumbnail para foto principal
+            if (!empty($mainPetData['photo'])) {
+                $photoService->generateThumb($mainPetData['photo']);
+            }
+
+            // Generar QR code
+            $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $mainPet->id]);
+            $qrService->ensureSlugAndImage($qr, $mainPet);
+
+            $createdPets[] = $mainPet;
+
+            // 2. Crear mascotas adicionales (del array dinámico)
+            foreach ($additionalPetsData as $index => $petData) {
+                $additionalPetData = [
                     'user_id' => null,
                     'is_lost' => false,
                     'name' => $petData['name'],
-                    'species' => $petData['species'],
-                    'breed' => $petData['breed'] ?? null,
+                    'breed' => $petData['breed'],
+                    'zone' => $petData['zone'],
                     'sex' => $petData['sex'] ?? null,
                     'age_years' => $petData['age_years'] ?? 0,
                     'age_months' => $petData['age_months'] ?? 0,
-                    'size' => $petData['size'] ?? null,
-                    'color' => $petData['color'] ?? null,
-                    'zone' => $petData['zone'] ?? 'Por definir',
+                    'is_neutered' => isset($petData['is_neutered']) && $petData['is_neutered'] == '1',
+                    'rabies_vaccine' => isset($petData['rabies_vaccine']) && $petData['rabies_vaccine'] == '1',
                     'medical_conditions' => $petData['medical_conditions'] ?? null,
+                    'has_emergency_contact' => isset($petData['has_emergency_contact']) && $petData['has_emergency_contact'] == '1',
+                    'emergency_contact_name' => $petData['emergency_contact_name'] ?? null,
+                    'emergency_contact_phone' => $petData['emergency_contact_phone'] ?? null,
 
-                    // Campos de invitación
+                    // Campos de invitación (mismo grupo, sin token individual)
                     'pending_email' => $pendingEmail,
                     'pending_plan_id' => $pendingPlanId,
                     'pending_group_token' => $pendingGroupToken,
-                    'pending_token' => ($index === 0) ? $pendingToken : null, // Solo la primera tiene token individual
+                    'pending_token' => null, // Solo la primera mascota tiene token
                     'is_pending_registration' => true,
                     'pending_sent_at' => now(),
                 ];
 
-                // Crear mascota
-                $pet = \App\Models\Pet::create($data);
+                $additionalPet = \App\Models\Pet::create($additionalPetData);
 
                 // Generar QR code
-                $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $pet->id]);
-                $qrService->ensureSlugAndImage($qr, $pet);
+                $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $additionalPet->id]);
+                $qrService->ensureSlugAndImage($qr, $additionalPet);
 
-                $createdPets[] = $pet;
+                $createdPets[] = $additionalPet;
             }
 
-            // Enviar email de invitación (solo una vez) con todas las mascotas
+            // 3. Enviar email de invitación (solo una vez) con TODAS las mascotas
             try {
                 \Illuminate\Support\Facades\Mail::to($pendingEmail)
                     ->send(new \App\Mail\PetInvitationMail($createdPets[0], $createdPets));
