@@ -2700,86 +2700,19 @@
         return;
       }
 
-      console.log(`[DEBUG] Cargando provincias desde API...`);
-      // Cargar provincias
-      fetch(`${API}/provincias.json`)
-        .then(r => r.json())
-        .then(data => {
-          console.log(`[DEBUG] Provincias cargadas:`, data.length);
-          $prov.innerHTML = '<option value="">Selecciona provincia</option>';
-          data.forEach(p => {
-            $prov.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
-          });
-          $prov.disabled = false;
-          console.log(`[DEBUG] Select de provincia habilitado para pet ${petIndex}`);
-        })
-        .catch(error => {
-          console.error(`[ERROR] Error al cargar provincias:`, error);
-          $prov.innerHTML = '<option value="">Error al cargar provincias</option>';
-        });
-
-      // Eventos de cascada
-      $prov.addEventListener('change', function() {
-        console.log(`[DEBUG] Provincia seleccionada para pet ${petIndex}:`, this.value);
-        if (!this.value) {
-          $cant.innerHTML = '<option value="">Selecciona cantón</option>';
-          $dist.innerHTML = '<option value="">Selecciona distrito</option>';
-          $cant.disabled = true;
-          $dist.disabled = true;
-          updateZone();
-          return;
+      // Función auxiliar para llenar un select desde un objeto
+      function fillSelect($sel, dataObject, placeholder) {
+        $sel.innerHTML = `<option value="">${placeholder}</option>`;
+        // La API devuelve un objeto como {"1": "San José", "2": "Alajuela"}
+        for (const [id, name] of Object.entries(dataObject)) {
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = name;
+          $sel.appendChild(opt);
         }
+      }
 
-        console.log(`[DEBUG] Cargando cantones para provincia ${this.value}...`);
-        fetch(`${API}/provincia/${this.value}/cantones.json`)
-          .then(r => r.json())
-          .then(data => {
-            console.log(`[DEBUG] Cantones cargados:`, data.length);
-            $cant.innerHTML = '<option value="">Selecciona cantón</option>';
-            data.forEach(c => {
-              $cant.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
-            });
-            $cant.disabled = false;
-            $dist.innerHTML = '<option value="">Selecciona distrito</option>';
-            $dist.disabled = true;
-            updateZone();
-          })
-          .catch(error => {
-            console.error(`[ERROR] Error al cargar cantones:`, error);
-          });
-      });
-
-      $cant.addEventListener('change', function() {
-        console.log(`[DEBUG] Cantón seleccionado para pet ${petIndex}:`, this.value);
-        if (!this.value) {
-          $dist.innerHTML = '<option value="">Selecciona distrito</option>';
-          $dist.disabled = true;
-          updateZone();
-          return;
-        }
-
-        console.log(`[DEBUG] Cargando distritos para cantón ${this.value}...`);
-        fetch(`${API}/canton/${this.value}/distritos.json`)
-          .then(r => r.json())
-          .then(data => {
-            console.log(`[DEBUG] Distritos cargados:`, data.length);
-            $dist.innerHTML = '<option value="">Selecciona distrito</option>';
-            data.forEach(d => {
-              $dist.innerHTML += `<option value="${d.id}">${d.nombre}</option>`;
-            });
-            $dist.disabled = false;
-            updateZone();
-          })
-          .catch(error => {
-            console.error(`[ERROR] Error al cargar distritos:`, error);
-          });
-      });
-
-      $dist.addEventListener('change', function() {
-        console.log(`[DEBUG] Distrito seleccionado para pet ${petIndex}:`, this.value);
-        updateZone();
-      });
-
+      // Función para actualizar el campo zone
       function updateZone() {
         const provText = $prov.selectedOptions[0]?.text || '';
         const cantText = $cant.selectedOptions[0]?.text || '';
@@ -2792,6 +2725,89 @@
         $zone.value = fullZone;
         if ($preview) $preview.textContent = fullZone;
       }
+
+      console.log(`[DEBUG] Cargando provincias desde API...`);
+      // Cargar provincias
+      fetch(`${API}/provincias.json`)
+        .then(r => {
+          if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+          return r.json();
+        })
+        .then(data => {
+          console.log(`[DEBUG] Provincias recibidas:`, data);
+          console.log(`[DEBUG] Tipo de data:`, typeof data, Array.isArray(data) ? 'es array' : 'es objeto');
+          fillSelect($prov, data, 'Selecciona provincia');
+          $prov.disabled = false;
+          console.log(`[DEBUG] Select de provincia habilitado para pet ${petIndex}`);
+        })
+        .catch(error => {
+          console.error(`[ERROR] Error al cargar provincias:`, error);
+          $prov.innerHTML = '<option value="">Error al cargar provincias</option>';
+        });
+
+      // Eventos de cascada
+      $prov.addEventListener('change', function() {
+        console.log(`[DEBUG] Provincia seleccionada para pet ${petIndex}:`, this.value);
+        $cant.disabled = true;
+        $dist.disabled = true;
+        $dist.innerHTML = '<option value="">Selecciona distrito</option>';
+        updateZone();
+
+        if (!this.value) {
+          $cant.innerHTML = '<option value="">Selecciona cantón</option>';
+          return;
+        }
+
+        console.log(`[DEBUG] Cargando cantones para provincia ${this.value}...`);
+        fetch(`${API}/provincia/${this.value}/cantones.json`)
+          .then(r => {
+            if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+            return r.json();
+          })
+          .then(data => {
+            console.log(`[DEBUG] Cantones recibidos:`, data);
+            fillSelect($cant, data, 'Selecciona cantón');
+            $cant.disabled = false;
+            updateZone();
+          })
+          .catch(error => {
+            console.error(`[ERROR] Error al cargar cantones:`, error);
+            $cant.innerHTML = '<option value="">Error al cargar cantones</option>';
+          });
+      });
+
+      $cant.addEventListener('change', function() {
+        console.log(`[DEBUG] Cantón seleccionado para pet ${petIndex}:`, this.value);
+        $dist.disabled = true;
+        updateZone();
+
+        if (!this.value) {
+          $dist.innerHTML = '<option value="">Selecciona distrito</option>';
+          return;
+        }
+
+        console.log(`[DEBUG] Cargando distritos para cantón ${this.value}...`);
+        fetch(`${API}/canton/${this.value}/distritos.json`)
+          .then(r => {
+            if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+            return r.json();
+          })
+          .then(data => {
+            console.log(`[DEBUG] Distritos recibidos:`, data);
+            fillSelect($dist, data, 'Selecciona distrito');
+            $dist.disabled = false;
+            updateZone();
+          })
+          .catch(error => {
+            console.error(`[ERROR] Error al cargar distritos:`, error);
+            $dist.innerHTML = '<option value="">Error al cargar distritos</option>';
+          });
+      });
+
+      $dist.addEventListener('change', function() {
+        console.log(`[DEBUG] Distrito seleccionado para pet ${petIndex}:`, this.value);
+        updateZone();
+      });
     }
 
     // Validación antes de enviar el formulario
