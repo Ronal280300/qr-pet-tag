@@ -19,6 +19,33 @@
         </div>
       </div>
 
+      {{-- Mostrar errores de validación --}}
+      @if($errors->any())
+      <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #ef4444; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: start; gap: 16px;">
+          <div style="flex-shrink: 0; width: 48px; height: 48px; background: #ef4444; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+          </div>
+          <div style="flex: 1;">
+            <h5 style="margin: 0 0 12px 0; color: #991b1b; font-weight: 700; font-size: 18px;">
+              <i class="fa-solid fa-circle-exclamation me-2"></i>
+              Corrige los siguientes errores
+            </h5>
+            <ul style="margin: 0; padding-left: 20px; color: #7f1d1d;">
+              @foreach($errors->all() as $error)
+                <li style="margin-bottom: 6px;">{{ $error }}</li>
+              @endforeach
+            </ul>
+            <p style="margin: 12px 0 0 0; color: #991b1b; font-size: 14px;">
+              <i class="fa-solid fa-info-circle me-1"></i>
+              <strong>No te preocupes:</strong> Tus datos se han conservado. Solo corrige los campos marcados y vuelve a enviar.
+            </p>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="position: absolute; top: 16px; right: 16px;"></button>
+      </div>
+      @endif
+
       <form action="{{ route('portal.pets.store') }}" method="POST" enctype="multipart/form-data" id="pet-form">
         @csrf
 
@@ -44,7 +71,7 @@
                     <i class="fa-solid fa-tag label-icon"></i>
                     Nombre *
                   </label>
-                  <input type="text" name="name" class="form-input" placeholder="Ej: Max, Luna..." required>
+                  <input type="text" name="name" class="form-input" placeholder="Ej: Max, Luna..." value="{{ old('name') }}" required>
                 </div>
               </div>
 
@@ -54,7 +81,7 @@
                     <i class="fa-solid fa-dna label-icon"></i>
                     Raza <span class="text-danger">*</span>
                   </label>
-                  <input type="text" name="breed" class="form-input" placeholder="Ej: Labrador, Poodle..." required>
+                  <input type="text" name="breed" class="form-input" placeholder="Ej: Labrador, Poodle..." value="{{ old('breed') }}" required>
                 </div>
               </div>
 
@@ -152,14 +179,14 @@
                       <label class="age-sublabel">Años</label>
                       <div class="input-with-icon">
                         <i class="fa-solid fa-calendar-days input-icon"></i>
-                        <input type="number" name="age_years" min="0" max="50" class="form-input" placeholder="0" id="ageYearsInput">
+                        <input type="number" name="age_years" min="0" max="50" class="form-input" placeholder="0" id="ageYearsInput" value="{{ old('age_years') }}">
                       </div>
                     </div>
                     <div class="age-field">
                       <label class="age-sublabel">Meses</label>
                       <div class="input-with-icon">
                         <i class="fa-solid fa-calendar-alt input-icon"></i>
-                        <input type="number" name="age_months" min="0" max="11" class="form-input" placeholder="0" id="ageMonthsInput">
+                        <input type="number" name="age_months" min="0" max="11" class="form-input" placeholder="0" id="ageMonthsInput" value="{{ old('age_months') }}">
                       </div>
                     </div>
                   </div>
@@ -469,6 +496,7 @@
                       id="pendingEmail"
                       class="form-input"
                       placeholder="cliente@ejemplo.com"
+                      value="{{ old('pending_email') }}"
                     >
                   </div>
                   <small class="form-text">Se enviará la invitación a este correo</small>
@@ -2417,6 +2445,43 @@
             </div>
           </div>
 
+          {{-- ======================= GALERÍA DE FOTOS ======================= --}}
+          <div class="form-section" style="margin-bottom: 24px;">
+            <div class="section-header">
+              <div class="section-icon-wrapper">
+                <div class="section-icon purple">
+                  <i class="fa-solid fa-images"></i>
+                </div>
+                <div class="section-info">
+                  <h2 class="section-title">Galería de fotos</h2>
+                  <p class="section-description">Puedes seleccionar hasta 3 fotos adicionales</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-content">
+              <div class="upload-area">
+                <input type="file" id="photos-${i}" name="pets[${i}][photos][]" class="d-none" multiple accept="image/*">
+                <label for="photos-${i}" class="upload-label">
+                  <div class="upload-icon">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <div class="upload-text">
+                    <span class="upload-title">Haz clic para seleccionar fotos</span>
+                    <span class="upload-subtitle">JPG, PNG · Máx. 6 MB por imagen · Hasta 3 fotos</span>
+                  </div>
+                </label>
+              </div>
+
+              <div id="photosPreviewGrid-${i}" class="photos-grid d-none"></div>
+
+              <button type="button" id="btnClearPhotos-${i}" class="btn-clear-photos d-none">
+                <i class="fa-solid fa-trash"></i>
+                Eliminar todas las fotos
+              </button>
+            </div>
+          </div>
+
           {{-- ======================= FOTO PRINCIPAL ======================= --}}
           <div class="form-section" style="margin-bottom: 24px;">
             <div class="section-header">
@@ -2519,8 +2584,101 @@
         });
       }
 
+      // Galería de fotos (múltiples fotos opcionales)
+      initializeGallery(petIndex);
+
       // Inicializar selectores de ubicación CR
       initializeLocationSelectors(petIndex);
+    }
+
+    // Inicializar galería de fotos para cada mascota adicional
+    function initializeGallery(petIndex) {
+      const MAX = 3;
+      const input = document.getElementById(`photos-${petIndex}`);
+      const grid = document.getElementById(`photosPreviewGrid-${petIndex}`);
+      const btnClear = document.getElementById(`btnClearPhotos-${petIndex}`);
+      let filesBuffer = [];
+
+      if (!input || !grid || !btnClear) return;
+
+      function refreshGrid() {
+        grid.innerHTML = '';
+        if (filesBuffer.length === 0) {
+          grid.classList.add('d-none');
+          btnClear.classList.add('d-none');
+          return;
+        }
+        grid.classList.remove('d-none');
+        btnClear.classList.remove('d-none');
+
+        filesBuffer.forEach((file, idx) => {
+          const url = URL.createObjectURL(file);
+          const cell = document.createElement('div');
+          cell.className = 'ph';
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = `Foto ${idx+1}`;
+          const rm = document.createElement('button');
+          rm.type = 'button';
+          rm.className = 'ph-remove';
+          rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+          rm.addEventListener('click', () => removeAt(idx));
+          cell.appendChild(img);
+          cell.appendChild(rm);
+          grid.appendChild(cell);
+        });
+      }
+
+      function applyBufferToInput() {
+        const dt = new DataTransfer();
+        filesBuffer.forEach(f => dt.items.add(f));
+        input.files = dt.files;
+      }
+
+      function removeAt(i) {
+        filesBuffer.splice(i, 1);
+        applyBufferToInput();
+        refreshGrid();
+      }
+
+      input.addEventListener('change', (e) => {
+        const incoming = Array.from(e.target.files || []);
+        const totalIfAdded = filesBuffer.length + incoming.length;
+        if (totalIfAdded > MAX) {
+          const allowed = Math.max(0, MAX - filesBuffer.length);
+          Swal.fire({
+            icon: 'warning',
+            title: 'Máximo 3 fotos adicionales',
+            text: `Puedes añadir ${allowed} foto(s) más.`,
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#667eea'
+          });
+          if (allowed > 0) filesBuffer = filesBuffer.concat(incoming.slice(0, allowed));
+        } else {
+          filesBuffer = filesBuffer.concat(incoming);
+        }
+        applyBufferToInput();
+        refreshGrid();
+      });
+
+      btnClear.addEventListener('click', () => {
+        Swal.fire({
+          title: '¿Eliminar todas las fotos?',
+          text: "Esta acción no se puede deshacer",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            filesBuffer = [];
+            applyBufferToInput();
+            refreshGrid();
+          }
+        });
+      });
     }
 
     // Inicializar selectores de ubicación de Costa Rica
@@ -2612,7 +2770,13 @@
         if (sendInvitation.checked) {
           if (!pendingEmail.value || !pendingPlanId.value) {
             e.preventDefault();
-            alert('Por favor completa el email del cliente y selecciona un plan antes de enviar la invitación.');
+            Swal.fire({
+              icon: 'warning',
+              title: 'Campos incompletos',
+              text: 'Por favor completa el email del cliente y selecciona un plan antes de enviar la invitación.',
+              confirmButtonText: 'Entendido',
+              confirmButtonColor: '#667eea'
+            });
             return false;
           }
 
@@ -2620,13 +2784,16 @@
           const petNameInputs = document.querySelectorAll('input[name^="pets"][name$="[name]"]');
           const petBreedInputs = document.querySelectorAll('input[name^="pets"][name$="[breed]"]');
           const petZoneInputs = document.querySelectorAll('input[name^="pets"][name$="[zone]"]');
+          const petPhotoInputs = document.querySelectorAll('input[name^="pets"][name$="[photo]"]');
 
+          let missingFields = [];
           let allPetsValid = true;
 
-          petNameInputs.forEach((input) => {
+          petNameInputs.forEach((input, index) => {
             if (!input.value.trim()) {
               allPetsValid = false;
               input.style.borderColor = '#ef4444';
+              if (!missingFields.includes('nombre')) missingFields.push('nombre');
             } else {
               input.style.borderColor = '#d1d5db';
             }
@@ -2636,23 +2803,61 @@
             if (!input.value.trim()) {
               allPetsValid = false;
               input.style.borderColor = '#ef4444';
+              if (!missingFields.includes('raza')) missingFields.push('raza');
             } else {
               input.style.borderColor = '#d1d5db';
             }
           });
 
           petZoneInputs.forEach((input) => {
-            if (!input.value.trim()) {
+            if (!input.value.trim() || input.value === 'No seleccionada') {
               allPetsValid = false;
-              input.style.borderColor = '#ef4444';
+              const petIndex = input.name.match(/pets\[(\d+)\]/)[1];
+              const provinceSelect = document.getElementById(`cr-province-${petIndex}`);
+              if (provinceSelect) provinceSelect.style.borderColor = '#ef4444';
+              if (!missingFields.includes('ubicación')) missingFields.push('ubicación');
             } else {
-              input.style.borderColor = '#d1d5db';
+              const petIndex = input.name.match(/pets\[(\d+)\]/)[1];
+              const provinceSelect = document.getElementById(`cr-province-${petIndex}`);
+              if (provinceSelect) provinceSelect.style.borderColor = '#d1d5db';
+            }
+          });
+
+          petPhotoInputs.forEach((input) => {
+            if (!input.files || input.files.length === 0) {
+              allPetsValid = false;
+              const petIndex = input.name.match(/pets\[(\d+)\]/)[1];
+              const photoPreview = document.getElementById(`photoDrop-${petIndex}`);
+              if (photoPreview) photoPreview.style.borderColor = '#ef4444';
+              if (!missingFields.includes('foto principal')) missingFields.push('foto principal');
+            } else {
+              const petIndex = input.name.match(/pets\[(\d+)\]/)[1];
+              const photoPreview = document.getElementById(`photoDrop-${petIndex}`);
+              if (photoPreview) photoPreview.style.borderColor = 'transparent';
             }
           });
 
           if (!allPetsValid) {
             e.preventDefault();
-            alert('Por favor completa el nombre, raza y zona de todas las mascotas adicionales antes de continuar.');
+            const fieldsText = missingFields.join(', ');
+            Swal.fire({
+              icon: 'error',
+              title: 'Faltan campos obligatorios',
+              html: `<p>Por favor completa los siguientes campos en todas las mascotas adicionales:</p>
+                     <p class="text-danger font-weight-bold">${fieldsText}</p>
+                     <p class="text-muted mt-3"><small>Los campos con borde rojo requieren atención</small></p>`,
+              confirmButtonText: 'Entendido',
+              confirmButtonColor: '#667eea',
+              width: '500px'
+            });
+
+            // Scroll al primer campo inválido
+            const firstInvalidInput = document.querySelector('input[style*="border-color: rgb(239, 68, 68)"]');
+            if (firstInvalidInput) {
+              firstInvalidInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setTimeout(() => firstInvalidInput.focus(), 500);
+            }
+
             return false;
           }
         }
@@ -2661,4 +2866,131 @@
   })();
 </script>
 @endif
+
+{{-- Restaurar valores old() en formularios dinámicos después de error de validación --}}
+@if($errors->any() && old('pets'))
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Esperar a que el DOM esté completamente cargado
+    setTimeout(function() {
+      const oldPets = @json(old('pets', []));
+      const oldPlanId = "{{ old('pending_plan_id') }}";
+
+      if (Object.keys(oldPets).length > 0 && oldPlanId) {
+        // Marcar el checkbox de invitación
+        const sendInvitationCheckbox = document.getElementById('send_invitation');
+        if (sendInvitationCheckbox) {
+          sendInvitationCheckbox.checked = true;
+          sendInvitationCheckbox.dispatchEvent(new Event('change'));
+        }
+
+        // Esperar a que se muestren los campos de invitación
+        setTimeout(function() {
+          // Seleccionar el plan
+          const planSelect = document.getElementById('pendingPlanId');
+          if (planSelect) {
+            planSelect.value = oldPlanId;
+            planSelect.dispatchEvent(new Event('change'));
+          }
+
+          // Esperar a que se generen los formularios dinámicos
+          setTimeout(function() {
+            // Restaurar valores en cada formulario dinámico
+            Object.keys(oldPets).forEach(function(index) {
+              const petData = oldPets[index];
+              const i = parseInt(index) + 1; // El índice en old() es 0-based, pero los IDs son 1-based
+
+              // Restaurar campos básicos
+              if (petData.name) {
+                const nameInput = document.querySelector(`input[name="pets[${index}][name]"]`);
+                if (nameInput) nameInput.value = petData.name;
+              }
+
+              if (petData.breed) {
+                const breedInput = document.querySelector(`input[name="pets[${index}][breed]"]`);
+                if (breedInput) breedInput.value = petData.breed;
+              }
+
+              // Restaurar sexo
+              if (petData.sex) {
+                const sexInput = document.querySelector(`input[name="pets[${index}][sex]"][value="${petData.sex}"]`);
+                if (sexInput) sexInput.checked = true;
+              }
+
+              // Restaurar edad
+              if (petData.age_years) {
+                const ageYearsInput = document.querySelector(`input[name="pets[${index}][age_years]"]`);
+                if (ageYearsInput) ageYearsInput.value = petData.age_years;
+              }
+
+              if (petData.age_months) {
+                const ageMonthsInput = document.querySelector(`input[name="pets[${index}][age_months]"]`);
+                if (ageMonthsInput) ageMonthsInput.value = petData.age_months;
+              }
+
+              // Restaurar checkboxes
+              if (petData.is_neutered == '1') {
+                const neuteredInput = document.getElementById(`is_neutered_${i}`);
+                if (neuteredInput) neuteredInput.checked = true;
+              }
+
+              if (petData.rabies_vaccine == '1') {
+                const rabiesInput = document.getElementById(`rabies_vaccine_${i}`);
+                if (rabiesInput) rabiesInput.checked = true;
+              }
+
+              // Restaurar observaciones médicas
+              if (petData.medical_conditions) {
+                const medicalInput = document.getElementById(`medical_conditions_${i}`);
+                if (medicalInput) medicalInput.value = petData.medical_conditions;
+              }
+
+              // Restaurar contacto de emergencia
+              if (petData.has_emergency_contact == '1') {
+                const emergencyToggle = document.getElementById(`has_emergency_contact_${i}`);
+                if (emergencyToggle) {
+                  emergencyToggle.checked = true;
+                  emergencyToggle.dispatchEvent(new Event('change'));
+                }
+
+                if (petData.emergency_contact_name) {
+                  const emergencyNameInput = document.querySelector(`input[name="pets[${index}][emergency_contact_name]"]`);
+                  if (emergencyNameInput) emergencyNameInput.value = petData.emergency_contact_name;
+                }
+
+                if (petData.emergency_contact_phone) {
+                  const emergencyPhoneInput = document.querySelector(`input[name="pets[${index}][emergency_contact_phone]"]`);
+                  if (emergencyPhoneInput) emergencyPhoneInput.value = petData.emergency_contact_phone;
+                }
+              }
+
+              // Restaurar zona (solo el valor, no los selectores porque requieren llamadas API)
+              if (petData.zone) {
+                const zoneInput = document.getElementById(`zone-${i}`);
+                if (zoneInput) {
+                  zoneInput.value = petData.zone;
+                  const zonePreview = document.getElementById(`zone-preview-${i}`);
+                  if (zonePreview) zonePreview.textContent = petData.zone;
+                }
+              }
+            });
+
+            // Mostrar mensaje de error en la parte superior
+            Swal.fire({
+              icon: 'error',
+              title: 'Revisa los errores en el formulario',
+              html: '<p>Se encontraron errores en el formulario. Por favor, corrígelos y vuelve a intentar.</p><p class="text-muted mt-2"><small>Tus datos se han conservado para que no tengas que volver a llenarlos.</small></p>',
+              confirmButtonText: 'Entendido',
+              confirmButtonColor: '#667eea',
+              toast: false,
+              position: 'center'
+            });
+          }, 500);
+        }, 300);
+      }
+    }, 100);
+  });
+</script>
+@endif
+
 @endpush
