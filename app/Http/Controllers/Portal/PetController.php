@@ -203,6 +203,7 @@ class PetController extends Controller
             'pets.*.name'      => 'required|string|max:120',
             'pets.*.breed'     => 'required|string|max:120',
             'pets.*.zone'      => 'required|string|max:255',
+            'pets.*.photo'     => 'required|image|max:10240',
             'pets.*.sex'       => 'nullable|in:male,female,unknown',
             'pets.*.age_years' => 'nullable|integer|min:0|max:50',
             'pets.*.age_months' => 'nullable|integer|min:0|max:11',
@@ -297,7 +298,17 @@ class PetController extends Controller
                     'pending_sent_at' => now(),
                 ];
 
+                // Procesar foto principal de la mascota adicional
+                if (isset($petData['photo']) && $petData['photo'] instanceof \Illuminate\Http\UploadedFile) {
+                    $additionalPetData['photo'] = $photoService->optimizeQuick($petData['photo'], 'pets');
+                }
+
                 $additionalPet = \App\Models\Pet::create($additionalPetData);
+
+                // Generar thumbnail para foto principal
+                if (!empty($additionalPetData['photo'])) {
+                    $photoService->generateThumb($additionalPetData['photo']);
+                }
 
                 // Generar QR code
                 $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $additionalPet->id]);

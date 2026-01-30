@@ -2068,7 +2068,7 @@
       });
     }
 
-    // Función para generar formularios dinámicos de mascotas ADICIONALES
+    // Función para generar formularios dinámicos IDÉNTICOS al original
     // El formulario original ya es la mascota #1, aquí generamos #2, #3, etc.
     function generatePetForms(totalPets) {
       petsFormsContainer.innerHTML = '';
@@ -2085,121 +2085,523 @@
             <h5>Mascota ${i + 1}</h5>
           </div>
 
-          <div class="row g-3">
-            <!-- Nombre y Raza -->
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-tag"></i> Nombre <span class="text-danger">*</span></label>
-                <input type="text" name="pets[${i}][name]" class="form-control" placeholder="Ej: Max, Luna..." required>
+          <!-- Replicación EXACTA del formulario original -->
+
+          {{-- ======================= DATOS BÁSICOS ======================= --}}
+          <div class="form-section" style="margin-bottom: 24px;">
+            <div class="section-header">
+              <div class="section-icon-wrapper">
+                <div class="section-icon primary">
+                  <i class="fa-solid fa-id-card"></i>
+                </div>
+                <div class="section-info">
+                  <h2 class="section-title">Datos básicos</h2>
+                  <p class="section-description">Nombre, raza y sexo</p>
+                </div>
               </div>
             </div>
 
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-dna"></i> Raza <span class="text-danger">*</span></label>
-                <input type="text" name="pets[${i}][breed]" class="form-control" placeholder="Ej: Labrador, Poodle..." required>
+            <div class="section-content">
+              <div class="row g-4">
+                <div class="col-12 col-lg-6">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fa-solid fa-tag label-icon"></i>
+                      Nombre *
+                    </label>
+                    <input type="text" name="pets[${i}][name]" class="form-input" placeholder="Ej: Max, Luna..." required>
+                  </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fa-solid fa-dna label-icon"></i>
+                      Raza <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" name="pets[${i}][breed]" class="form-input" placeholder="Ej: Labrador, Poodle..." required>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label mb-3">
+                    <i class="fa-solid fa-venus-mars label-icon"></i>
+                    Sexo
+                  </label>
+                  <div class="gender-selector">
+                    <input type="radio" id="sex_m_${i}" name="pets[${i}][sex]" value="male" class="gender-input" checked>
+                    <label for="sex_m_${i}" class="gender-option">
+                      <i class="fa-solid fa-mars"></i>
+                      <span>Macho</span>
+                    </label>
+
+                    <input type="radio" id="sex_f_${i}" name="pets[${i}][sex]" value="female" class="gender-input">
+                    <label for="sex_f_${i}" class="gender-option">
+                      <i class="fa-solid fa-venus"></i>
+                      <span>Hembra</span>
+                    </label>
+
+                    <input type="radio" id="sex_u_${i}" name="pets[${i}][sex]" value="unknown" class="gender-input">
+                    <label for="sex_u_${i}" class="gender-option">
+                      <i class="fa-solid fa-circle-question"></i>
+                      <span>Desconocido</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {{-- ======================= SALUD ======================= --}}
+          <div class="form-section" style="margin-bottom: 24px;">
+            <div class="section-header">
+              <div class="section-icon-wrapper">
+                <div class="section-icon success">
+                  <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div class="section-info">
+                  <h2 class="section-title">Salud</h2>
+                  <p class="section-description">Esterilización, vacunas y edad</p>
+                </div>
               </div>
             </div>
 
-            <!-- Sexo -->
-            <div class="col-12">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-venus-mars"></i> Sexo</label>
-                <select name="pets[${i}][sex]" class="form-control">
-                  <option value="male">Macho</option>
-                  <option value="female">Hembra</option>
-                  <option value="unknown">Desconocido</option>
-                </select>
+            <div class="section-content">
+              <div class="row g-4">
+                <div class="col-12 col-md-6">
+                  <div class="toggle-card">
+                    <div class="toggle-info">
+                      <div class="toggle-icon">
+                        <i class="fa-solid fa-scissors"></i>
+                      </div>
+                      <div>
+                        <label class="toggle-label" for="is_neutered_${i}">Esterilizado</label>
+                        <p class="toggle-description">¿Está esterilizada tu mascota?</p>
+                      </div>
+                    </div>
+                    <input type="hidden" name="pets[${i}][is_neutered]" value="0">
+                    <label class="modern-switch">
+                      <input id="is_neutered_${i}" type="checkbox" name="pets[${i}][is_neutered]" value="1">
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="toggle-card">
+                    <div class="toggle-info">
+                      <div class="toggle-icon">
+                        <i class="fa-solid fa-syringe"></i>
+                      </div>
+                      <div>
+                        <label class="toggle-label" for="rabies_vaccine_${i}">Vacuna antirrábica</label>
+                        <p class="toggle-description">¿Tiene la vacuna al día?</p>
+                      </div>
+                    </div>
+                    <input type="hidden" name="pets[${i}][rabies_vaccine]" value="0">
+                    <label class="modern-switch">
+                      <input id="rabies_vaccine_${i}" type="checkbox" name="pets[${i}][rabies_vaccine]" value="1">
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fa-solid fa-cake-candles label-icon"></i>
+                      Edad <span class="text-danger">*</span>
+                    </label>
+                    <div class="age-inputs-dual">
+                      <div class="age-field">
+                        <label class="age-sublabel">Años</label>
+                        <div class="input-with-icon">
+                          <i class="fa-solid fa-calendar-days input-icon"></i>
+                          <input type="number" name="pets[${i}][age_years]" min="0" max="50" class="form-input" placeholder="0">
+                        </div>
+                      </div>
+                      <div class="age-field">
+                        <label class="age-sublabel">Meses</label>
+                        <div class="input-with-icon">
+                          <i class="fa-solid fa-calendar-alt input-icon"></i>
+                          <input type="number" name="pets[${i}][age_months]" min="0" max="11" class="form-input" placeholder="0">
+                        </div>
+                      </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                      <i class="fa-solid fa-info-circle me-1"></i>
+                      Ejemplo: 1 año y 6 meses, o solo años, o solo meses
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {{-- ======================= UBICACIÓN ======================= --}}
+          <div class="form-section" style="margin-bottom: 24px;">
+            <div class="section-header">
+              <div class="section-icon-wrapper">
+                <div class="section-icon info">
+                  <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <div class="section-info">
+                  <h2 class="section-title">Ubicación <span class="text-danger">*</span></h2>
+                  <p class="section-description">Se utiliza para mostrar la zona en el perfil público</p>
+                </div>
               </div>
             </div>
 
-            <!-- Esterilizado y Vacuna -->
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label>
-                  <input type="checkbox" name="pets[${i}][is_neutered]" value="1" style="width: auto; margin-right: 8px;">
-                  <i class="fa-solid fa-scissors"></i> Esterilizado
+            <div class="section-content">
+              <div class="row g-4" id="cr-geo-${i}">
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fa-solid fa-map label-icon"></i>
+                      Provincia
+                    </label>
+                    <div class="input-with-icon">
+                      <i class="fa-solid fa-location-dot input-icon"></i>
+                      <select id="cr-province-${i}" class="form-input" disabled>
+                        <option value="">Selecciona provincia</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fa-solid fa-city label-icon"></i>
+                      Cantón
+                    </label>
+                    <div class="input-with-icon">
+                      <i class="fa-solid fa-building input-icon"></i>
+                      <select id="cr-canton-${i}" class="form-input" disabled>
+                        <option value="">Selecciona cantón</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fa-solid fa-house label-icon"></i>
+                      Distrito
+                    </label>
+                    <div class="input-with-icon">
+                      <i class="fa-solid fa-map-pin input-icon"></i>
+                      <select id="cr-district-${i}" class="form-input" disabled>
+                        <option value="">Selecciona distrito</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <input type="hidden" name="pets[${i}][zone]" id="zone-${i}" value="">
+
+                <div class="col-12">
+                  <div class="zone-preview">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                    <span>Ubicación seleccionada:</span>
+                    <code id="zone-preview-${i}">No seleccionada</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {{-- ======================= OBSERVACIONES MÉDICAS ======================= --}}
+          <div class="form-section" style="margin-bottom: 24px;">
+            <div class="section-header">
+              <div class="section-icon-wrapper">
+                <div class="section-icon warning">
+                  <i class="fa-solid fa-notes-medical"></i>
+                </div>
+                <div class="section-info">
+                  <h2 class="section-title">Observaciones médicas</h2>
+                  <p class="section-description">Alergias, medicación, comportamiento especial</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-content">
+              <div class="toggle-card mb-3">
+                <div class="toggle-info">
+                  <div class="toggle-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                  </div>
+                  <div>
+                    <label class="toggle-label" for="no-medical-${i}">Sin observaciones</label>
+                    <p class="toggle-description">Mi mascota no tiene condiciones especiales</p>
+                  </div>
+                </div>
+                <label class="modern-switch">
+                  <input id="no-medical-${i}" type="checkbox" class="no-medical-toggle">
+                  <span class="switch-slider"></span>
                 </label>
               </div>
+
+              <div class="form-group">
+                <textarea name="pets[${i}][medical_conditions]" id="medical_conditions_${i}" rows="5" class="form-textarea"
+                  placeholder="Ej: Alérgica a pollo. Toma medicamento para el corazón 2 veces al día. Puede ser nerviosa con extraños."></textarea>
+              </div>
+            </div>
+          </div>
+
+          {{-- ======================= CONTACTO DE EMERGENCIA ======================= --}}
+          <div class="form-section" style="margin-bottom: 24px;">
+            <div class="section-header">
+              <div class="section-icon-wrapper">
+                <div class="section-icon danger">
+                  <i class="fa-solid fa-phone-volume"></i>
+                </div>
+                <div class="section-info">
+                  <h2 class="section-title">Contacto de Emergencia (Opcional)</h2>
+                  <p class="section-description">Si el dueño no responde, mostrar otro contacto en el perfil público</p>
+                </div>
+              </div>
             </div>
 
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label>
-                  <input type="checkbox" name="pets[${i}][rabies_vaccine]" value="1" style="width: auto; margin-right: 8px;">
-                  <i class="fa-solid fa-syringe"></i> Vacuna antirrábica
+            <div class="section-content">
+              <div class="toggle-card mb-4">
+                <div class="toggle-info">
+                  <div class="toggle-icon">
+                    <i class="fa-solid fa-user-nurse"></i>
+                  </div>
+                  <div>
+                    <label class="toggle-label" for="has_emergency_contact_${i}">Habilitar Contacto de Emergencia</label>
+                    <p class="toggle-description">Se mostrará como contacto secundario en caso de emergencia</p>
+                  </div>
+                </div>
+                <input type="hidden" name="pets[${i}][has_emergency_contact]" value="0">
+                <label class="modern-switch">
+                  <input id="has_emergency_contact_${i}" type="checkbox" name="pets[${i}][has_emergency_contact]" value="1"
+                         class="emergency-contact-toggle">
+                  <span class="switch-slider"></span>
                 </label>
               </div>
-            </div>
 
-            <!-- Edad -->
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-cake-candles"></i> Edad (años)</label>
-                <input type="number" name="pets[${i}][age_years]" class="form-control" min="0" max="50" placeholder="0">
+              <div id="emergency-fields-${i}" class="row g-4" style="display: none;">
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fa-solid fa-user label-icon"></i>
+                      Nombre del contacto
+                    </label>
+                    <input type="text" name="pets[${i}][emergency_contact_name]" class="form-input"
+                           placeholder="Ej: María González">
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fa-solid fa-mobile-screen label-icon"></i>
+                      Teléfono del contacto
+                    </label>
+                    <input type="text" name="pets[${i}][emergency_contact_phone]" class="form-input"
+                           placeholder="Ej: +506 8765-4321">
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="alert alert-info">
+                    <i class="fa-solid fa-circle-info me-2"></i>
+                    <strong>Nota:</strong> Este contacto aparecerá como alternativa en el perfil público
+                    de la mascota con la etiqueta "Contacto de Emergencia".
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {{-- ======================= FOTO PRINCIPAL ======================= --}}
+          <div class="form-section" style="margin-bottom: 24px;">
+            <div class="section-header">
+              <div class="section-icon-wrapper">
+                <div class="section-icon orange">
+                  <i class="fa-solid fa-image"></i>
+                </div>
+                <div class="section-info">
+                  <h2 class="section-title">Foto principal *</h2>
+                  <p class="section-description">Esta será la foto de perfil de tu mascota</p>
+                </div>
               </div>
             </div>
 
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-calendar-alt"></i> Edad (meses)</label>
-                <input type="number" name="pets[${i}][age_months]" class="form-control" min="0" max="11" placeholder="0">
-              </div>
-            </div>
+            <div class="section-content">
+              <div class="main-photo-uploader">
+                <div class="photo-preview-area" id="photoDrop-${i}">
+                  <img id="photoPreview-${i}" src="" alt="Vista previa" class="d-none">
+                  <div class="photo-placeholder">
+                    <i class="fa-solid fa-image"></i>
+                    <p>Arrastra una imagen aquí o haz clic en "Seleccionar imagen"</p>
+                    <span>JPG, PNG · Máx. 4 MB</span>
+                  </div>
+                </div>
 
-            <!-- Zona (simplificado) -->
-            <div class="col-12">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-map-location-dot"></i> Zona/Ubicación <span class="text-danger">*</span></label>
-                <input type="text" name="pets[${i}][zone]" class="form-control" placeholder="Ej: San José, Escazú, Centro" required>
-                <small>Provincia, cantón o distrito donde vive la mascota</small>
-              </div>
-            </div>
-
-            <!-- Condiciones Médicas -->
-            <div class="col-12">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-notes-medical"></i> Observaciones médicas</label>
-                <textarea name="pets[${i}][medical_conditions]" class="form-control" rows="3" placeholder="Ej: Alérgica a pollo. Toma medicamento para el corazón..."></textarea>
-                <small>Alergias, medicación, comportamiento especial</small>
-              </div>
-            </div>
-
-            <!-- Contacto de Emergencia -->
-            <div class="col-12">
-              <div class="dynamic-pet-field">
-                <label>
-                  <input type="checkbox" name="pets[${i}][has_emergency_contact]" value="1" class="emergency-toggle-${i}" style="width: auto; margin-right: 8px;">
-                  <i class="fa-solid fa-phone-volume"></i> Habilitar Contacto de Emergencia
-                </label>
-              </div>
-            </div>
-
-            <div class="col-md-6 emergency-fields-${i}" style="display: none;">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-user"></i> Nombre del contacto</label>
-                <input type="text" name="pets[${i}][emergency_contact_name]" class="form-control" placeholder="Ej: María González">
-              </div>
-            </div>
-
-            <div class="col-md-6 emergency-fields-${i}" style="display: none;">
-              <div class="dynamic-pet-field">
-                <label><i class="fa-solid fa-mobile-screen"></i> Teléfono del contacto</label>
-                <input type="text" name="pets[${i}][emergency_contact_phone]" class="form-control" placeholder="Ej: +506 8765-4321">
+                <div class="photo-actions">
+                  <input id="photo-${i}" name="pets[${i}][photo]" type="file" accept="image/*" class="d-none" required>
+                  <label for="photo-${i}" class="btn-photo-action primary">
+                    <i class="fa-solid fa-image"></i>
+                    Seleccionar imagen
+                  </label>
+                  <button type="button" id="btnClearPhoto-${i}" class="btn-photo-action secondary">
+                    <i class="fa-solid fa-xmark"></i>
+                    Quitar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         `;
         petsFormsContainer.appendChild(petCard);
 
-        // Agregar evento para toggle de contacto de emergencia
-        const emergencyToggle = petCard.querySelector(`.emergency-toggle-${i}`);
-        const emergencyFields = petCard.querySelectorAll(`.emergency-fields-${i}`);
+        // Agregar funcionalidad JavaScript para esta mascota
+        initializePetForm(i);
+      }
+    }
+
+    // Inicializar funcionalidad de cada formulario
+    function initializePetForm(petIndex) {
+      // Toggle de contacto de emergencia
+      const emergencyToggle = document.getElementById(`has_emergency_contact_${petIndex}`);
+      const emergencyFields = document.getElementById(`emergency-fields-${petIndex}`);
+      if (emergencyToggle) {
         emergencyToggle.addEventListener('change', function() {
-          emergencyFields.forEach(field => {
-            field.style.display = this.checked ? 'block' : 'none';
-          });
+          emergencyFields.style.display = this.checked ? 'block' : 'none';
         });
+      }
+
+      // Toggle de sin observaciones médicas
+      const noMedicalToggle = document.getElementById(`no-medical-${petIndex}`);
+      const medicalTextarea = document.getElementById(`medical_conditions_${petIndex}`);
+      if (noMedicalToggle && medicalTextarea) {
+        noMedicalToggle.addEventListener('change', function() {
+          if (this.checked) {
+            medicalTextarea.value = '';
+            medicalTextarea.setAttribute('disabled', 'disabled');
+            medicalTextarea.style.opacity = '0.5';
+          } else {
+            medicalTextarea.removeAttribute('disabled');
+            medicalTextarea.style.opacity = '1';
+          }
+        });
+      }
+
+      // Preview de foto principal
+      const photoInput = document.getElementById(`photo-${petIndex}`);
+      const photoPreview = document.getElementById(`photoPreview-${petIndex}`);
+      const photoDrop = document.getElementById(`photoDrop-${petIndex}`);
+      const btnClearPhoto = document.getElementById(`btnClearPhoto-${petIndex}`);
+
+      if (photoInput && photoPreview) {
+        photoInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              photoPreview.src = e.target.result;
+              photoPreview.classList.remove('d-none');
+              photoDrop.querySelector('.photo-placeholder').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        btnClearPhoto.addEventListener('click', function() {
+          photoInput.value = '';
+          photoPreview.src = '';
+          photoPreview.classList.add('d-none');
+          photoDrop.querySelector('.photo-placeholder').style.display = 'block';
+        });
+      }
+
+      // Inicializar selectores de ubicación CR
+      initializeLocationSelectors(petIndex);
+    }
+
+    // Inicializar selectores de ubicación de Costa Rica
+    function initializeLocationSelectors(petIndex) {
+      const API = 'https://ubicaciones.paginasweb.cr';
+      const $prov = document.getElementById(`cr-province-${petIndex}`);
+      const $cant = document.getElementById(`cr-canton-${petIndex}`);
+      const $dist = document.getElementById(`cr-district-${petIndex}`);
+      const $zone = document.getElementById(`zone-${petIndex}`);
+      const $preview = document.getElementById(`zone-preview-${petIndex}`);
+
+      if (!$prov || !$cant || !$dist) return;
+
+      // Cargar provincias
+      fetch(`${API}/provincias.json`)
+        .then(r => r.json())
+        .then(data => {
+          $prov.innerHTML = '<option value="">Selecciona provincia</option>';
+          data.forEach(p => {
+            $prov.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
+          });
+          $prov.disabled = false;
+        });
+
+      // Eventos de cascada
+      $prov.addEventListener('change', function() {
+        if (!this.value) {
+          $cant.innerHTML = '<option value="">Selecciona cantón</option>';
+          $dist.innerHTML = '<option value="">Selecciona distrito</option>';
+          $cant.disabled = true;
+          $dist.disabled = true;
+          updateZone();
+          return;
+        }
+
+        fetch(`${API}/provincia/${this.value}/cantones.json`)
+          .then(r => r.json())
+          .then(data => {
+            $cant.innerHTML = '<option value="">Selecciona cantón</option>';
+            data.forEach(c => {
+              $cant.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
+            });
+            $cant.disabled = false;
+            $dist.innerHTML = '<option value="">Selecciona distrito</option>';
+            $dist.disabled = true;
+            updateZone();
+          });
+      });
+
+      $cant.addEventListener('change', function() {
+        if (!this.value) {
+          $dist.innerHTML = '<option value="">Selecciona distrito</option>';
+          $dist.disabled = true;
+          updateZone();
+          return;
+        }
+
+        fetch(`${API}/canton/${this.value}/distritos.json`)
+          .then(r => r.json())
+          .then(data => {
+            $dist.innerHTML = '<option value="">Selecciona distrito</option>';
+            data.forEach(d => {
+              $dist.innerHTML += `<option value="${d.id}">${d.nombre}</option>`;
+            });
+            $dist.disabled = false;
+            updateZone();
+          });
+      });
+
+      $dist.addEventListener('change', updateZone);
+
+      function updateZone() {
+        const provText = $prov.selectedOptions[0]?.text || '';
+        const cantText = $cant.selectedOptions[0]?.text || '';
+        const distText = $dist.selectedOptions[0]?.text || '';
+
+        const parts = [provText, cantText, distText].filter(p => p && !p.startsWith('Selecciona'));
+        const fullZone = parts.join(', ') || 'No seleccionada';
+
+        $zone.value = fullZone;
+        $preview.textContent = fullZone;
       }
     }
 
