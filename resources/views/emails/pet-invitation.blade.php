@@ -237,18 +237,6 @@
           <div style="background: white; border: 2px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
             <h3 style="color: #1e40af; font-size: 18px; margin-bottom: 10px;">{{ $index + 1 }}. {{ $petItem->name }}</h3>
 
-            @if($petItem->species)
-            <div class="pet-detail">
-              <span class="pet-detail-label">Especie:</span>
-              <span class="pet-detail-value">
-                @if($petItem->species === 'dog') Perro
-                @elseif($petItem->species === 'cat') Gato
-                @else Otro
-                @endif
-              </span>
-            </div>
-            @endif
-
             @if($petItem->breed)
             <div class="pet-detail">
               <span class="pet-detail-label">Raza:</span>

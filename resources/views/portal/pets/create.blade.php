@@ -503,9 +503,12 @@
               <div class="col-12" id="multiplePetsContainer" style="display: none;">
                 <div class="multiple-pets-header">
                   <i class="fa-solid fa-paw"></i>
-                  <h4>Datos de las Mascotas</h4>
+                  <h4>Mascotas Adicionales</h4>
                   <span class="pets-count-badge" id="petsCountBadge"></span>
                 </div>
+                <p style="padding: 12px 20px; margin: 0; background: #f0fdf4; color: #15803d; font-size: 14px; border-bottom: 2px solid #86efac;">
+                  <i class="fa-solid fa-info-circle"></i> El formulario principal arriba es la mascota #1. Aquí completa los datos de las mascotas adicionales.
+                </p>
                 <div id="petsFormsContainer"></div>
               </div>
 
@@ -2049,9 +2052,15 @@
         petsIncluded = parseInt(selectedOption.getAttribute('data-pets-included')) || 1;
 
         if (this.value && sendInvitation.checked) {
+          const additionalPets = petsIncluded - 1;
           generatePetForms(petsIncluded);
-          multiplePetsContainer.style.display = 'block';
-          petsCountBadge.textContent = `${petsIncluded} mascota${petsIncluded > 1 ? 's' : ''}`;
+
+          if (additionalPets > 0) {
+            multiplePetsContainer.style.display = 'block';
+            petsCountBadge.textContent = `${additionalPets} adicional${additionalPets > 1 ? 'es' : ''}`;
+          } else {
+            multiplePetsContainer.style.display = 'none';
+          }
         } else {
           multiplePetsContainer.style.display = 'none';
           petsFormsContainer.innerHTML = '';
@@ -2059,11 +2068,15 @@
       });
     }
 
-    // Función para generar formularios dinámicos de mascotas
-    function generatePetForms(count) {
+    // Función para generar formularios dinámicos de mascotas ADICIONALES
+    // El formulario original ya es la mascota #1, aquí generamos #2, #3, etc.
+    function generatePetForms(totalPets) {
       petsFormsContainer.innerHTML = '';
 
-      for (let i = 0; i < count; i++) {
+      // Generar totalPets - 1 formularios (porque el original ya es uno)
+      const additionalPets = totalPets - 1;
+
+      for (let i = 1; i <= additionalPets; i++) {
         const petCard = document.createElement('div');
         petCard.className = 'pet-form-card';
         petCard.innerHTML = `
@@ -2073,94 +2086,120 @@
           </div>
 
           <div class="row g-3">
+            <!-- Nombre y Raza -->
             <div class="col-md-6">
               <div class="dynamic-pet-field">
-                <label>Nombre <span class="text-danger">*</span></label>
-                <input type="text" name="pets[${i}][name]" class="form-control" placeholder="Ej: Max" required>
+                <label><i class="fa-solid fa-tag"></i> Nombre <span class="text-danger">*</span></label>
+                <input type="text" name="pets[${i}][name]" class="form-control" placeholder="Ej: Max, Luna..." required>
               </div>
             </div>
 
             <div class="col-md-6">
               <div class="dynamic-pet-field">
-                <label>Especie <span class="text-danger">*</span></label>
-                <select name="pets[${i}][species]" class="form-control" required>
-                  <option value="">Selecciona...</option>
-                  <option value="dog">Perro</option>
-                  <option value="cat">Gato</option>
-                  <option value="other">Otro</option>
-                </select>
+                <label><i class="fa-solid fa-dna"></i> Raza <span class="text-danger">*</span></label>
+                <input type="text" name="pets[${i}][breed]" class="form-control" placeholder="Ej: Labrador, Poodle..." required>
               </div>
             </div>
 
-            <div class="col-md-6">
+            <!-- Sexo -->
+            <div class="col-12">
               <div class="dynamic-pet-field">
-                <label>Raza</label>
-                <input type="text" name="pets[${i}][breed]" class="form-control" placeholder="Ej: Labrador">
-                <small>Opcional</small>
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label>Sexo</label>
+                <label><i class="fa-solid fa-venus-mars"></i> Sexo</label>
                 <select name="pets[${i}][sex]" class="form-control">
-                  <option value="">No especificado</option>
                   <option value="male">Macho</option>
                   <option value="female">Hembra</option>
+                  <option value="unknown">Desconocido</option>
                 </select>
               </div>
             </div>
 
-            <div class="col-md-4">
+            <!-- Esterilizado y Vacuna -->
+            <div class="col-md-6">
               <div class="dynamic-pet-field">
-                <label>Edad (años)</label>
+                <label>
+                  <input type="checkbox" name="pets[${i}][is_neutered]" value="1" style="width: auto; margin-right: 8px;">
+                  <i class="fa-solid fa-scissors"></i> Esterilizado
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="dynamic-pet-field">
+                <label>
+                  <input type="checkbox" name="pets[${i}][rabies_vaccine]" value="1" style="width: auto; margin-right: 8px;">
+                  <i class="fa-solid fa-syringe"></i> Vacuna antirrábica
+                </label>
+              </div>
+            </div>
+
+            <!-- Edad -->
+            <div class="col-md-6">
+              <div class="dynamic-pet-field">
+                <label><i class="fa-solid fa-cake-candles"></i> Edad (años)</label>
                 <input type="number" name="pets[${i}][age_years]" class="form-control" min="0" max="50" placeholder="0">
               </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-6">
               <div class="dynamic-pet-field">
-                <label>Meses</label>
+                <label><i class="fa-solid fa-calendar-alt"></i> Edad (meses)</label>
                 <input type="number" name="pets[${i}][age_months]" class="form-control" min="0" max="11" placeholder="0">
               </div>
             </div>
 
-            <div class="col-md-4">
-              <div class="dynamic-pet-field">
-                <label>Tamaño</label>
-                <select name="pets[${i}][size]" class="form-control">
-                  <option value="">No especificado</option>
-                  <option value="small">Pequeño</option>
-                  <option value="medium">Mediano</option>
-                  <option value="large">Grande</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label>Color</label>
-                <input type="text" name="pets[${i}][color]" class="form-control" placeholder="Ej: Café, Blanco">
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="dynamic-pet-field">
-                <label>Zona/Barrio</label>
-                <input type="text" name="pets[${i}][zone]" class="form-control" placeholder="Ej: Escazú Centro">
-              </div>
-            </div>
-
+            <!-- Zona (simplificado) -->
             <div class="col-12">
               <div class="dynamic-pet-field">
-                <label>Condiciones Médicas</label>
-                <textarea name="pets[${i}][medical_conditions]" class="form-control" rows="2" placeholder="Alergias, medicamentos, condiciones especiales..."></textarea>
-                <small>Información importante para quien encuentre la mascota</small>
+                <label><i class="fa-solid fa-map-location-dot"></i> Zona/Ubicación <span class="text-danger">*</span></label>
+                <input type="text" name="pets[${i}][zone]" class="form-control" placeholder="Ej: San José, Escazú, Centro" required>
+                <small>Provincia, cantón o distrito donde vive la mascota</small>
+              </div>
+            </div>
+
+            <!-- Condiciones Médicas -->
+            <div class="col-12">
+              <div class="dynamic-pet-field">
+                <label><i class="fa-solid fa-notes-medical"></i> Observaciones médicas</label>
+                <textarea name="pets[${i}][medical_conditions]" class="form-control" rows="3" placeholder="Ej: Alérgica a pollo. Toma medicamento para el corazón..."></textarea>
+                <small>Alergias, medicación, comportamiento especial</small>
+              </div>
+            </div>
+
+            <!-- Contacto de Emergencia -->
+            <div class="col-12">
+              <div class="dynamic-pet-field">
+                <label>
+                  <input type="checkbox" name="pets[${i}][has_emergency_contact]" value="1" class="emergency-toggle-${i}" style="width: auto; margin-right: 8px;">
+                  <i class="fa-solid fa-phone-volume"></i> Habilitar Contacto de Emergencia
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-6 emergency-fields-${i}" style="display: none;">
+              <div class="dynamic-pet-field">
+                <label><i class="fa-solid fa-user"></i> Nombre del contacto</label>
+                <input type="text" name="pets[${i}][emergency_contact_name]" class="form-control" placeholder="Ej: María González">
+              </div>
+            </div>
+
+            <div class="col-md-6 emergency-fields-${i}" style="display: none;">
+              <div class="dynamic-pet-field">
+                <label><i class="fa-solid fa-mobile-screen"></i> Teléfono del contacto</label>
+                <input type="text" name="pets[${i}][emergency_contact_phone]" class="form-control" placeholder="Ej: +506 8765-4321">
               </div>
             </div>
           </div>
         `;
         petsFormsContainer.appendChild(petCard);
+
+        // Agregar evento para toggle de contacto de emergencia
+        const emergencyToggle = petCard.querySelector(`.emergency-toggle-${i}`);
+        const emergencyFields = petCard.querySelectorAll(`.emergency-fields-${i}`);
+        emergencyToggle.addEventListener('change', function() {
+          emergencyFields.forEach(field => {
+            field.style.display = this.checked ? 'block' : 'none';
+          });
+        });
       }
     }
 
@@ -2175,12 +2214,14 @@
             return false;
           }
 
-          // Validar que se hayan llenado los datos mínimos de todas las mascotas
+          // Validar que se hayan llenado los datos mínimos de todas las mascotas ADICIONALES
           const petNameInputs = document.querySelectorAll('input[name^="pets"][name$="[name]"]');
-          const petSpeciesSelects = document.querySelectorAll('select[name^="pets"][name$="[species]"]');
+          const petBreedInputs = document.querySelectorAll('input[name^="pets"][name$="[breed]"]');
+          const petZoneInputs = document.querySelectorAll('input[name^="pets"][name$="[zone]"]');
 
           let allPetsValid = true;
-          petNameInputs.forEach((input, index) => {
+
+          petNameInputs.forEach((input) => {
             if (!input.value.trim()) {
               allPetsValid = false;
               input.style.borderColor = '#ef4444';
@@ -2189,18 +2230,27 @@
             }
           });
 
-          petSpeciesSelects.forEach((select, index) => {
-            if (!select.value) {
+          petBreedInputs.forEach((input) => {
+            if (!input.value.trim()) {
               allPetsValid = false;
-              select.style.borderColor = '#ef4444';
+              input.style.borderColor = '#ef4444';
             } else {
-              select.style.borderColor = '#d1d5db';
+              input.style.borderColor = '#d1d5db';
+            }
+          });
+
+          petZoneInputs.forEach((input) => {
+            if (!input.value.trim()) {
+              allPetsValid = false;
+              input.style.borderColor = '#ef4444';
+            } else {
+              input.style.borderColor = '#d1d5db';
             }
           });
 
           if (!allPetsValid) {
             e.preventDefault();
-            alert('Por favor completa el nombre y especie de todas las mascotas antes de continuar.');
+            alert('Por favor completa el nombre, raza y zona de todas las mascotas adicionales antes de continuar.');
             return false;
           }
         }
