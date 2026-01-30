@@ -2104,13 +2104,15 @@
       // Generar totalPets - 1 formularios (porque el original ya es uno)
       const additionalPets = totalPets - 1;
 
-      for (let i = 1; i <= additionalPets; i++) {
+      // Usar índice base-0 para Laravel (pets[0], pets[1], pets[2]...)
+      for (let arrayIndex = 0; arrayIndex < additionalPets; arrayIndex++) {
+        const displayNumber = arrayIndex + 2; // Para mostrar "Mascota 2", "Mascota 3", etc.
         const petCard = document.createElement('div');
         petCard.className = 'pet-form-card';
         petCard.innerHTML = `
           <div class="pet-form-header">
-            <div class="pet-number-badge">${i + 1}</div>
-            <h5>Mascota ${i + 1}</h5>
+            <div class="pet-number-badge">${displayNumber}</div>
+            <h5>Mascota ${displayNumber}</h5>
           </div>
 
           <!-- Replicación EXACTA del formulario original -->
@@ -2137,7 +2139,7 @@
                       <i class="fa-solid fa-tag label-icon"></i>
                       Nombre *
                     </label>
-                    <input type="text" name="pets[${i}][name]" class="form-input" placeholder="Ej: Max, Luna..." required>
+                    <input type="text" name="pets[${arrayIndex}][name]" class="form-input" placeholder="Ej: Max, Luna..." required>
                   </div>
                 </div>
 
@@ -2147,7 +2149,7 @@
                       <i class="fa-solid fa-dna label-icon"></i>
                       Raza <span class="text-danger">*</span>
                     </label>
-                    <input type="text" name="pets[${i}][breed]" class="form-input" placeholder="Ej: Labrador, Poodle..." required>
+                    <input type="text" name="pets[${arrayIndex}][breed]" class="form-input" placeholder="Ej: Labrador, Poodle..." required>
                   </div>
                 </div>
 
@@ -2157,20 +2159,20 @@
                     Sexo
                   </label>
                   <div class="gender-selector">
-                    <input type="radio" id="sex_m_${i}" name="pets[${i}][sex]" value="male" class="gender-input" checked>
-                    <label for="sex_m_${i}" class="gender-option">
+                    <input type="radio" id="sex_m_${arrayIndex}" name="pets[${arrayIndex}][sex]" value="male" class="gender-input" checked>
+                    <label for="sex_m_${arrayIndex}" class="gender-option">
                       <i class="fa-solid fa-mars"></i>
                       <span>Macho</span>
                     </label>
 
-                    <input type="radio" id="sex_f_${i}" name="pets[${i}][sex]" value="female" class="gender-input">
-                    <label for="sex_f_${i}" class="gender-option">
+                    <input type="radio" id="sex_f_${arrayIndex}" name="pets[${arrayIndex}][sex]" value="female" class="gender-input">
+                    <label for="sex_f_${arrayIndex}" class="gender-option">
                       <i class="fa-solid fa-venus"></i>
                       <span>Hembra</span>
                     </label>
 
-                    <input type="radio" id="sex_u_${i}" name="pets[${i}][sex]" value="unknown" class="gender-input">
-                    <label for="sex_u_${i}" class="gender-option">
+                    <input type="radio" id="sex_u_${arrayIndex}" name="pets[${arrayIndex}][sex]" value="unknown" class="gender-input">
+                    <label for="sex_u_${arrayIndex}" class="gender-option">
                       <i class="fa-solid fa-circle-question"></i>
                       <span>Desconocido</span>
                     </label>
@@ -2203,13 +2205,13 @@
                         <i class="fa-solid fa-scissors"></i>
                       </div>
                       <div>
-                        <label class="toggle-label" for="is_neutered_${i}">Esterilizado</label>
+                        <label class="toggle-label" for="is_neutered_${arrayIndex}">Esterilizado</label>
                         <p class="toggle-description">¿Está esterilizada tu mascota?</p>
                       </div>
                     </div>
-                    <input type="hidden" name="pets[${i}][is_neutered]" value="0">
+                    <input type="hidden" name="pets[${arrayIndex}][is_neutered]" value="0">
                     <label class="modern-switch">
-                      <input id="is_neutered_${i}" type="checkbox" name="pets[${i}][is_neutered]" value="1">
+                      <input id="is_neutered_${arrayIndex}" type="checkbox" name="pets[${arrayIndex}][is_neutered]" value="1">
                       <span class="switch-slider"></span>
                     </label>
                   </div>
@@ -2222,13 +2224,13 @@
                         <i class="fa-solid fa-syringe"></i>
                       </div>
                       <div>
-                        <label class="toggle-label" for="rabies_vaccine_${i}">Vacuna antirrábica</label>
+                        <label class="toggle-label" for="rabies_vaccine_${arrayIndex}">Vacuna antirrábica</label>
                         <p class="toggle-description">¿Tiene la vacuna al día?</p>
                       </div>
                     </div>
-                    <input type="hidden" name="pets[${i}][rabies_vaccine]" value="0">
+                    <input type="hidden" name="pets[${arrayIndex}][rabies_vaccine]" value="0">
                     <label class="modern-switch">
-                      <input id="rabies_vaccine_${i}" type="checkbox" name="pets[${i}][rabies_vaccine]" value="1">
+                      <input id="rabies_vaccine_${arrayIndex}" type="checkbox" name="pets[${arrayIndex}][rabies_vaccine]" value="1">
                       <span class="switch-slider"></span>
                     </label>
                   </div>
@@ -2245,14 +2247,14 @@
                         <label class="age-sublabel">Años</label>
                         <div class="input-with-icon">
                           <i class="fa-solid fa-calendar-days input-icon"></i>
-                          <input type="number" name="pets[${i}][age_years]" min="0" max="50" class="form-input" placeholder="0">
+                          <input type="number" name="pets[${arrayIndex}][age_years]" min="0" max="50" class="form-input" placeholder="0">
                         </div>
                       </div>
                       <div class="age-field">
                         <label class="age-sublabel">Meses</label>
                         <div class="input-with-icon">
                           <i class="fa-solid fa-calendar-alt input-icon"></i>
-                          <input type="number" name="pets[${i}][age_months]" min="0" max="11" class="form-input" placeholder="0">
+                          <input type="number" name="pets[${arrayIndex}][age_months]" min="0" max="11" class="form-input" placeholder="0">
                         </div>
                       </div>
                     </div>
@@ -2281,7 +2283,7 @@
             </div>
 
             <div class="section-content">
-              <div class="row g-4" id="cr-geo-${i}">
+              <div class="row g-4" id="cr-geo-${arrayIndex}">
                 <div class="col-12 col-md-4">
                   <div class="form-group">
                     <label class="form-label">
@@ -2290,7 +2292,7 @@
                     </label>
                     <div class="input-with-icon">
                       <i class="fa-solid fa-location-dot input-icon"></i>
-                      <select id="cr-province-${i}" class="form-input" disabled>
+                      <select id="cr-province-${arrayIndex}" class="form-input" disabled>
                         <option value="">Selecciona provincia</option>
                       </select>
                     </div>
@@ -2305,7 +2307,7 @@
                     </label>
                     <div class="input-with-icon">
                       <i class="fa-solid fa-building input-icon"></i>
-                      <select id="cr-canton-${i}" class="form-input" disabled>
+                      <select id="cr-canton-${arrayIndex}" class="form-input" disabled>
                         <option value="">Selecciona cantón</option>
                       </select>
                     </div>
@@ -2320,20 +2322,20 @@
                     </label>
                     <div class="input-with-icon">
                       <i class="fa-solid fa-map-pin input-icon"></i>
-                      <select id="cr-district-${i}" class="form-input" disabled>
+                      <select id="cr-district-${arrayIndex}" class="form-input" disabled>
                         <option value="">Selecciona distrito</option>
                       </select>
                     </div>
                   </div>
                 </div>
 
-                <input type="hidden" name="pets[${i}][zone]" id="zone-${i}" value="">
+                <input type="hidden" name="pets[${arrayIndex}][zone]" id="zone-${arrayIndex}" value="">
 
                 <div class="col-12">
                   <div class="zone-preview">
                     <i class="fa-solid fa-location-crosshairs"></i>
                     <span>Ubicación seleccionada:</span>
-                    <code id="zone-preview-${i}">No seleccionada</code>
+                    <code id="zone-preview-${arrayIndex}">No seleccionada</code>
                   </div>
                 </div>
               </div>
@@ -2361,18 +2363,18 @@
                     <i class="fa-solid fa-circle-check"></i>
                   </div>
                   <div>
-                    <label class="toggle-label" for="no-medical-${i}">Sin observaciones</label>
+                    <label class="toggle-label" for="no-medical-${arrayIndex}">Sin observaciones</label>
                     <p class="toggle-description">Mi mascota no tiene condiciones especiales</p>
                   </div>
                 </div>
                 <label class="modern-switch">
-                  <input id="no-medical-${i}" type="checkbox" class="no-medical-toggle">
+                  <input id="no-medical-${arrayIndex}" type="checkbox" class="no-medical-toggle">
                   <span class="switch-slider"></span>
                 </label>
               </div>
 
               <div class="form-group">
-                <textarea name="pets[${i}][medical_conditions]" id="medical_conditions_${i}" rows="5" class="form-textarea"
+                <textarea name="pets[${arrayIndex}][medical_conditions]" id="medical_conditions_${arrayIndex}" rows="5" class="form-textarea"
                   placeholder="Ej: Alérgica a pollo. Toma medicamento para el corazón 2 veces al día. Puede ser nerviosa con extraños."></textarea>
               </div>
             </div>
@@ -2399,26 +2401,26 @@
                     <i class="fa-solid fa-user-nurse"></i>
                   </div>
                   <div>
-                    <label class="toggle-label" for="has_emergency_contact_${i}">Habilitar Contacto de Emergencia</label>
+                    <label class="toggle-label" for="has_emergency_contact_${arrayIndex}">Habilitar Contacto de Emergencia</label>
                     <p class="toggle-description">Se mostrará como contacto secundario en caso de emergencia</p>
                   </div>
                 </div>
-                <input type="hidden" name="pets[${i}][has_emergency_contact]" value="0">
+                <input type="hidden" name="pets[${arrayIndex}][has_emergency_contact]" value="0">
                 <label class="modern-switch">
-                  <input id="has_emergency_contact_${i}" type="checkbox" name="pets[${i}][has_emergency_contact]" value="1"
+                  <input id="has_emergency_contact_${arrayIndex}" type="checkbox" name="pets[${arrayIndex}][has_emergency_contact]" value="1"
                          class="emergency-contact-toggle">
                   <span class="switch-slider"></span>
                 </label>
               </div>
 
-              <div id="emergency-fields-${i}" class="row g-4" style="display: none;">
+              <div id="emergency-fields-${arrayIndex}" class="row g-4" style="display: none;">
                 <div class="col-12 col-md-6">
                   <div class="form-group">
                     <label class="form-label">
                       <i class="fa-solid fa-user label-icon"></i>
                       Nombre del contacto
                     </label>
-                    <input type="text" name="pets[${i}][emergency_contact_name]" class="form-input"
+                    <input type="text" name="pets[${arrayIndex}][emergency_contact_name]" class="form-input"
                            placeholder="Ej: María González">
                   </div>
                 </div>
@@ -2429,7 +2431,7 @@
                       <i class="fa-solid fa-mobile-screen label-icon"></i>
                       Teléfono del contacto
                     </label>
-                    <input type="text" name="pets[${i}][emergency_contact_phone]" class="form-input"
+                    <input type="text" name="pets[${arrayIndex}][emergency_contact_phone]" class="form-input"
                            placeholder="Ej: +506 8765-4321">
                   </div>
                 </div>
@@ -2461,8 +2463,8 @@
 
             <div class="section-content">
               <div class="upload-area">
-                <input type="file" id="photos-${i}" name="pets[${i}][photos][]" class="d-none" multiple accept="image/*">
-                <label for="photos-${i}" class="upload-label">
+                <input type="file" id="photos-${arrayIndex}" name="pets[${arrayIndex}][photos][]" class="d-none" multiple accept="image/*">
+                <label for="photos-${arrayIndex}" class="upload-label">
                   <div class="upload-icon">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                   </div>
@@ -2473,9 +2475,9 @@
                 </label>
               </div>
 
-              <div id="photosPreviewGrid-${i}" class="photos-grid d-none"></div>
+              <div id="photosPreviewGrid-${arrayIndex}" class="photos-grid d-none"></div>
 
-              <button type="button" id="btnClearPhotos-${i}" class="btn-clear-photos d-none">
+              <button type="button" id="btnClearPhotos-${arrayIndex}" class="btn-clear-photos d-none">
                 <i class="fa-solid fa-trash"></i>
                 Eliminar todas las fotos
               </button>
@@ -2498,8 +2500,8 @@
 
             <div class="section-content">
               <div class="main-photo-uploader">
-                <div class="photo-preview-area" id="photoDrop-${i}">
-                  <img id="photoPreview-${i}" src="" alt="Vista previa" class="d-none">
+                <div class="photo-preview-area" id="photoDrop-${arrayIndex}">
+                  <img id="photoPreview-${arrayIndex}" src="" alt="Vista previa" class="d-none">
                   <div class="photo-placeholder">
                     <i class="fa-solid fa-image"></i>
                     <p>Arrastra una imagen aquí o haz clic en "Seleccionar imagen"</p>
@@ -2508,12 +2510,12 @@
                 </div>
 
                 <div class="photo-actions">
-                  <input id="photo-${i}" name="pets[${i}][photo]" type="file" accept="image/*" class="d-none" required>
-                  <label for="photo-${i}" class="btn-photo-action primary">
+                  <input id="photo-${arrayIndex}" name="pets[${arrayIndex}][photo]" type="file" accept="image/*" class="d-none" required>
+                  <label for="photo-${arrayIndex}" class="btn-photo-action primary">
                     <i class="fa-solid fa-image"></i>
                     Seleccionar imagen
                   </label>
-                  <button type="button" id="btnClearPhoto-${i}" class="btn-photo-action secondary">
+                  <button type="button" id="btnClearPhoto-${arrayIndex}" class="btn-photo-action secondary">
                     <i class="fa-solid fa-xmark"></i>
                     Quitar
                   </button>
@@ -2525,7 +2527,7 @@
         petsFormsContainer.appendChild(petCard);
 
         // Agregar funcionalidad JavaScript para esta mascota
-        initializePetForm(i);
+        initializePetForm(arrayIndex);
       }
     }
 
@@ -2683,6 +2685,7 @@
 
     // Inicializar selectores de ubicación de Costa Rica
     function initializeLocationSelectors(petIndex) {
+      console.log(`[DEBUG] Inicializando selectores de ubicación para pet ${petIndex}`);
       const API = 'https://ubicaciones.paginasweb.cr';
       const $prov = document.getElementById(`cr-province-${petIndex}`);
       const $cant = document.getElementById(`cr-canton-${petIndex}`);
@@ -2690,21 +2693,34 @@
       const $zone = document.getElementById(`zone-${petIndex}`);
       const $preview = document.getElementById(`zone-preview-${petIndex}`);
 
-      if (!$prov || !$cant || !$dist) return;
+      console.log(`[DEBUG] Elementos encontrados:`, { $prov, $cant, $dist, $zone, $preview });
 
+      if (!$prov || !$cant || !$dist) {
+        console.error(`[ERROR] No se encontraron todos los selectores para pet ${petIndex}`);
+        return;
+      }
+
+      console.log(`[DEBUG] Cargando provincias desde API...`);
       // Cargar provincias
       fetch(`${API}/provincias.json`)
         .then(r => r.json())
         .then(data => {
+          console.log(`[DEBUG] Provincias cargadas:`, data.length);
           $prov.innerHTML = '<option value="">Selecciona provincia</option>';
           data.forEach(p => {
             $prov.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
           });
           $prov.disabled = false;
+          console.log(`[DEBUG] Select de provincia habilitado para pet ${petIndex}`);
+        })
+        .catch(error => {
+          console.error(`[ERROR] Error al cargar provincias:`, error);
+          $prov.innerHTML = '<option value="">Error al cargar provincias</option>';
         });
 
       // Eventos de cascada
       $prov.addEventListener('change', function() {
+        console.log(`[DEBUG] Provincia seleccionada para pet ${petIndex}:`, this.value);
         if (!this.value) {
           $cant.innerHTML = '<option value="">Selecciona cantón</option>';
           $dist.innerHTML = '<option value="">Selecciona distrito</option>';
@@ -2714,9 +2730,11 @@
           return;
         }
 
+        console.log(`[DEBUG] Cargando cantones para provincia ${this.value}...`);
         fetch(`${API}/provincia/${this.value}/cantones.json`)
           .then(r => r.json())
           .then(data => {
+            console.log(`[DEBUG] Cantones cargados:`, data.length);
             $cant.innerHTML = '<option value="">Selecciona cantón</option>';
             data.forEach(c => {
               $cant.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
@@ -2725,10 +2743,14 @@
             $dist.innerHTML = '<option value="">Selecciona distrito</option>';
             $dist.disabled = true;
             updateZone();
+          })
+          .catch(error => {
+            console.error(`[ERROR] Error al cargar cantones:`, error);
           });
       });
 
       $cant.addEventListener('change', function() {
+        console.log(`[DEBUG] Cantón seleccionado para pet ${petIndex}:`, this.value);
         if (!this.value) {
           $dist.innerHTML = '<option value="">Selecciona distrito</option>';
           $dist.disabled = true;
@@ -2736,19 +2758,27 @@
           return;
         }
 
+        console.log(`[DEBUG] Cargando distritos para cantón ${this.value}...`);
         fetch(`${API}/canton/${this.value}/distritos.json`)
           .then(r => r.json())
           .then(data => {
+            console.log(`[DEBUG] Distritos cargados:`, data.length);
             $dist.innerHTML = '<option value="">Selecciona distrito</option>';
             data.forEach(d => {
               $dist.innerHTML += `<option value="${d.id}">${d.nombre}</option>`;
             });
             $dist.disabled = false;
             updateZone();
+          })
+          .catch(error => {
+            console.error(`[ERROR] Error al cargar distritos:`, error);
           });
       });
 
-      $dist.addEventListener('change', updateZone);
+      $dist.addEventListener('change', function() {
+        console.log(`[DEBUG] Distrito seleccionado para pet ${petIndex}:`, this.value);
+        updateZone();
+      });
 
       function updateZone() {
         const provText = $prov.selectedOptions[0]?.text || '';
@@ -2758,8 +2788,9 @@
         const parts = [provText, cantText, distText].filter(p => p && !p.startsWith('Selecciona'));
         const fullZone = parts.join(', ') || 'No seleccionada';
 
+        console.log(`[DEBUG] Actualizando zona para pet ${petIndex}:`, fullZone);
         $zone.value = fullZone;
-        $preview.textContent = fullZone;
+        if ($preview) $preview.textContent = fullZone;
       }
     }
 
@@ -2898,7 +2929,7 @@
             // Restaurar valores en cada formulario dinámico
             Object.keys(oldPets).forEach(function(index) {
               const petData = oldPets[index];
-              const i = parseInt(index) + 1; // El índice en old() es 0-based, pero los IDs son 1-based
+              // Ahora los IDs también son 0-based, así que index coincide directamente
 
               // Restaurar campos básicos
               if (petData.name) {
@@ -2930,24 +2961,24 @@
 
               // Restaurar checkboxes
               if (petData.is_neutered == '1') {
-                const neuteredInput = document.getElementById(`is_neutered_${i}`);
+                const neuteredInput = document.getElementById(`is_neutered_${index}`);
                 if (neuteredInput) neuteredInput.checked = true;
               }
 
               if (petData.rabies_vaccine == '1') {
-                const rabiesInput = document.getElementById(`rabies_vaccine_${i}`);
+                const rabiesInput = document.getElementById(`rabies_vaccine_${index}`);
                 if (rabiesInput) rabiesInput.checked = true;
               }
 
               // Restaurar observaciones médicas
               if (petData.medical_conditions) {
-                const medicalInput = document.getElementById(`medical_conditions_${i}`);
+                const medicalInput = document.getElementById(`medical_conditions_${index}`);
                 if (medicalInput) medicalInput.value = petData.medical_conditions;
               }
 
               // Restaurar contacto de emergencia
               if (petData.has_emergency_contact == '1') {
-                const emergencyToggle = document.getElementById(`has_emergency_contact_${i}`);
+                const emergencyToggle = document.getElementById(`has_emergency_contact_${index}`);
                 if (emergencyToggle) {
                   emergencyToggle.checked = true;
                   emergencyToggle.dispatchEvent(new Event('change'));
@@ -2966,10 +2997,10 @@
 
               // Restaurar zona (solo el valor, no los selectores porque requieren llamadas API)
               if (petData.zone) {
-                const zoneInput = document.getElementById(`zone-${i}`);
+                const zoneInput = document.getElementById(`zone-${index}`);
                 if (zoneInput) {
                   zoneInput.value = petData.zone;
-                  const zonePreview = document.getElementById(`zone-preview-${i}`);
+                  const zonePreview = document.getElementById(`zone-preview-${index}`);
                   if (zonePreview) zonePreview.textContent = petData.zone;
                 }
               }
