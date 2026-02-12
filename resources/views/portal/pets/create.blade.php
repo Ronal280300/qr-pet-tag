@@ -2779,15 +2779,15 @@
       $cant.addEventListener('change', function() {
         console.log(`[DEBUG] Cantón seleccionado para pet ${petIndex}:`, this.value);
         $dist.disabled = true;
+        $dist.innerHTML = '<option value="">Selecciona distrito</option>';
         updateZone();
 
-        if (!this.value) {
-          $dist.innerHTML = '<option value="">Selecciona distrito</option>';
+        if (!this.value || !$prov.value) {
           return;
         }
 
-        console.log(`[DEBUG] Cargando distritos para cantón ${this.value}...`);
-        fetch(`${API}/canton/${this.value}/distritos.json`)
+        console.log(`[DEBUG] Cargando distritos para provincia ${$prov.value} y cantón ${this.value}...`);
+        fetch(`${API}/provincia/${$prov.value}/canton/${this.value}/distritos.json`)
           .then(r => {
             if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
             return r.json();
