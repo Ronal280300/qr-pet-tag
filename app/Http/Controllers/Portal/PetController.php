@@ -317,7 +317,33 @@ class PetController extends Controller
                 $createdPets[] = $additionalPet;
             }
 
-            // 3. Enviar email de invitación (solo una vez) con TODAS las mascotas
+            // 3. Crear orden automáticamente
+            $plan = \App\Models\Plan::find($pendingPlanId);
+            $petsCount = count($createdPets);
+
+            // Calcular costos
+            $subtotal = $plan->price;
+            $additionalPetsCost = 0;
+            if ($petsCount > $plan->max_pets) {
+                $extraPets = $petsCount - $plan->max_pets;
+                $additionalPetsCost = $extraPets * ($plan->additional_pet_price ?? 0);
+            }
+            $total = $subtotal + $additionalPetsCost;
+
+            $order = \App\Models\Order::create([
+                'user_id' => null, // Se llenará cuando el cliente se registre
+                'plan_id' => $pendingPlanId,
+                'pets_quantity' => $petsCount,
+                'subtotal' => $subtotal,
+                'additional_pets_cost' => $additionalPetsCost,
+                'total' => $total,
+                'status' => 'pending',
+                'pending_group_token' => $pendingGroupToken,
+                'pending_email' => $pendingEmail,
+                'admin_notes' => 'Orden creada automáticamente al enviar invitación. Mascotas: ' . collect($createdPets)->pluck('name')->join(', '),
+            ]);
+
+            // 4. Enviar email de invitación (solo una vez) con TODAS las mascotas
             try {
                 \Illuminate\Support\Facades\Mail::to($pendingEmail)
                     ->send(new \App\Mail\PetInvitationMail($createdPets[0], $createdPets));

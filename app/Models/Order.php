@@ -33,6 +33,9 @@ class Order extends Model
         'shipping_zone',         // 'gam' o 'fuera_gam'
         'shipping_cost',         // Costo del envío
         'shipping_address',      // Dirección de envío
+        // Campos para órdenes pendientes de invitación
+        'pending_group_token',   // Token del grupo de mascotas pendientes
+        'pending_email',         // Email del cliente pendiente
     ];
 
     protected function casts(): array
