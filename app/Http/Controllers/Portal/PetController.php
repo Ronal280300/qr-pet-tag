@@ -260,11 +260,6 @@ class PetController extends Controller
 
             $mainPet = \App\Models\Pet::create($mainPetData);
 
-            // Generar thumbnail para foto principal
-            if (!empty($mainPetData['photo'])) {
-                $photoService->generateThumb($mainPetData['photo']);
-            }
-
             // Generar QR code
             $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $mainPet->id]);
             $qrService->ensureSlugAndImage($qr, $mainPet);
@@ -304,11 +299,6 @@ class PetController extends Controller
                 }
 
                 $additionalPet = \App\Models\Pet::create($additionalPetData);
-
-                // Generar thumbnail para foto principal
-                if (!empty($additionalPetData['photo'])) {
-                    $photoService->generateThumb($additionalPetData['photo']);
-                }
 
                 // Generar QR code
                 $qr = \App\Models\QrCode::firstOrNew(['pet_id' => $additionalPet->id]);

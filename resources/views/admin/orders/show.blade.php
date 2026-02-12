@@ -125,6 +125,43 @@
                     </div>
                 </div>
 
+                <!-- Mascotas Ligadas a Esta Orden -->
+                @if($order->pets && $order->pets->count() > 0)
+                <div class="info-card-modern">
+                    <div class="card-header-modern">
+                        <div class="header-icon">
+                            <i class="fa-solid fa-paw"></i>
+                        </div>
+                        <h5>Mascotas Ligadas a Esta Orden</h5>
+                    </div>
+                    <div class="card-body-modern">
+                        <div class="pets-list-compact">
+                            @foreach($order->pets as $pet)
+                            <div class="pet-item-compact">
+                                <div class="pet-info-compact">
+                                    @if($pet->photo)
+                                    <img src="{{ asset('storage/' . $pet->photo) }}" alt="{{ $pet->name }}" class="pet-avatar">
+                                    @else
+                                    <div class="pet-avatar-placeholder">
+                                        <i class="fa-solid fa-paw"></i>
+                                    </div>
+                                    @endif
+                                    <div class="pet-details">
+                                        <strong>{{ $pet->name }}</strong>
+                                        <span class="pet-breed">{{ $pet->breed }}</span>
+                                    </div>
+                                </div>
+                                <a href="{{ route('portal.pets.show', $pet) }}" class="btn-view-pet">
+                                    <i class="fa-solid fa-eye"></i>
+                                    Ver mascota
+                                </a>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Payment & Shipping Information -->
                 @if($order->payment_method || $order->shipping_zone)
                 <div class="info-card-modern">
@@ -1868,6 +1905,116 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .swal2-icon {
     border-width: 3px !important;
+}
+
+/* ============================================
+   MASCOTAS LIGADAS A LA ORDEN
+   ============================================ */
+
+.pets-list-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pet-item-compact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.pet-item-compact:hover {
+    background: #F3F4F6;
+    border-color: #4F89E8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 137, 232, 0.15);
+}
+
+.pet-info-compact {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pet-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid #E5E7EB;
+}
+
+.pet-avatar-placeholder {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.pet-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pet-details strong {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.pet-breed {
+    font-size: 14px;
+    color: #6B7280;
+}
+
+.btn-view-pet {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-view-pet:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-view-pet i {
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .pet-item-compact {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .btn-view-pet {
+        width: 100%;
+        justify-content: center;
+    }
 }
 </style>
 
