@@ -136,26 +136,58 @@ class PetActivationController extends Controller
                 ]);
             }
 
-            // 2. Crear UNA orden para TODAS las mascotas
+            // 2. Buscar orden existente o crear una nueva
             if ($pet->pending_plan_id) {
                 $plan = Plan::find($pet->pending_plan_id);
 
                 if ($plan) {
                     $petsCount = $petsToActivate->count();
 
-                    $order = Order::create([
-                        'user_id' => $user->id,
-                        'plan_id' => $plan->id,
-                        'pets_quantity' => $petsCount, // Cantidad real de mascotas
-                        'subtotal' => $plan->price, // Precio base del plan
-                        'additional_pets_cost' => 0, // Sin mascotas adicionales
-                        'total' => $plan->price, // Total = subtotal + additional_pets_cost + shipping_cost
-                        'status' => 'verified', // Directamente verificada
-                        'payment_method' => 'admin_assignment', // Método especial para identificar origen
-                        'verified_at' => now(),
-                        'verified_by' => null, // Null porque es asignación automática del sistema
-                        'admin_notes' => 'Orden creada automáticamente por invitación de administrador. Mascotas: ' . $petsToActivate->pluck('name')->join(', '),
-                    ]);
+                    // Buscar orden existente por pending_group_token
+                    $order = null;
+                    if ($pet->pending_group_token) {
+                        $order = Order::where('pending_group_token', $pet->pending_group_token)
+                            ->whereNull('user_id')
+                            ->first();
+                    }
+
+                    if ($order) {
+                        // Actualizar orden existente con el user_id
+                        $order->update([
+                            'user_id' => $user->id,
+                            'status' => 'verified', // Cambiar a verificada
+                            'verified_at' => now(),
+                            'admin_notes' => ($order->admin_notes ?? '') . ' | Usuario registrado: ' . $user->name . ' (' . $user->email . ')',
+                        ]);
+
+                        Log::info('Orden existente actualizada con user_id', [
+                            'order_id' => $order->id,
+                            'order_number' => $order->order_number,
+                            'user_id' => $user->id,
+                            'pets_count' => $petsCount
+                        ]);
+                    } else {
+                        // Crear nueva orden (para órdenes antiguas sin pending_group_token)
+                        $order = Order::create([
+                            'user_id' => $user->id,
+                            'plan_id' => $plan->id,
+                            'pets_quantity' => $petsCount,
+                            'subtotal' => $plan->price,
+                            'additional_pets_cost' => 0,
+                            'total' => $plan->price,
+                            'status' => 'verified',
+                            'payment_method' => 'admin_assignment',
+                            'verified_at' => now(),
+                            'verified_by' => null,
+                            'admin_notes' => 'Orden creada automáticamente por invitación de administrador. Mascotas: ' . $petsToActivate->pluck('name')->join(', '),
+                        ]);
+
+                        Log::info('Nueva orden creada (sin pending_group_token encontrado)', [
+                            'order_id' => $order->id,
+                            'user_id' => $user->id,
+                            'pets_count' => $petsCount
+                        ]);
+                    }
 
                     // Ligar TODAS las mascotas a la misma orden
                     foreach ($petsToActivate as $petToActivate) {
@@ -163,10 +195,10 @@ class PetActivationController extends Controller
                         $petToActivate->save();
                     }
 
-                    Log::info('Orden creada y ligada a mascotas', [
+                    Log::info('Mascotas ligadas a orden', [
                         'order_id' => $order->id,
+                        'order_number' => $order->order_number,
                         'pets_count' => $petsCount,
-                        'plan_id' => $plan->id,
                         'pets_names' => $petsToActivate->pluck('name')->toArray()
                     ]);
                 } else {

@@ -1706,7 +1706,128 @@
   }
 
   .pet-form-card {
-    padding: 16px;
+    padding: 12px;
+  }
+
+  .pet-form-card .form-section {
+    padding: 20px 16px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .pet-form-card .section-header {
+    margin-bottom: 20px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .pet-form-card .section-icon {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 20px !important;
+  }
+
+  .pet-form-card .section-title {
+    font-size: 16px !important;
+  }
+
+  .pet-form-card .section-description {
+    font-size: 12px !important;
+  }
+
+  .pet-form-card .row.g-4 {
+    gap: 1rem !important;
+  }
+
+  .pet-form-card .col-12.col-lg-6,
+  .pet-form-card .col-12.col-md-6,
+  .pet-form-card .col-12.col-md-4 {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .pet-form-card .form-input,
+  .pet-form-card .form-textarea {
+    font-size: 16px !important; /* Evita zoom en iOS */
+  }
+
+  .pet-form-card .gender-selector {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .pet-form-card .gender-option {
+    width: 100% !important;
+    padding: 12px !important;
+  }
+
+  .pet-form-card .toggle-card {
+    padding: 14px !important;
+  }
+
+  .pet-form-card .toggle-label {
+    font-size: 14px !important;
+  }
+
+  .pet-form-card .toggle-description {
+    font-size: 12px !important;
+  }
+
+  .pet-form-card .age-inputs-dual {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .pet-form-card .age-field {
+    width: 100% !important;
+  }
+
+  .pet-form-card .main-photo-uploader {
+    padding: 16px !important;
+  }
+
+  .pet-form-card .photo-preview-area {
+    height: 200px !important;
+  }
+
+  .pet-form-card .btn-photo-action {
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+  }
+
+  .pet-form-card .upload-label {
+    padding: 16px !important;
+  }
+
+  .pet-form-card .upload-title {
+    font-size: 14px !important;
+  }
+
+  .pet-form-card .upload-subtitle {
+    font-size: 12px !important;
+  }
+
+  .pet-form-card .photos-grid {
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 columnas en móvil */
+  }
+
+  .pet-form-card .zone-preview {
+    padding: 10px !important;
+    font-size: 13px !important;
+  }
+
+  .pet-form-header {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  .pet-number-badge {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .pet-form-header h5 {
+    font-size: 15px !important;
   }
 }
 </style>
