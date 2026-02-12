@@ -220,11 +220,23 @@
                             <td>
                                 <div class="customer-info">
                                     <div class="customer-avatar">
-                                        {{ strtoupper(substr($order->user->name ?? 'U', 0, 1)) }}
+                                        @if($order->user)
+                                            {{ strtoupper(substr($order->user->name, 0, 1)) }}
+                                        @else
+                                            {{ strtoupper(substr($order->pending_email ?? 'P', 0, 1)) }}
+                                        @endif
                                     </div>
                                     <div>
-                                        <div class="customer-name">{{ $order->user->name ?? 'N/A' }}</div>
-                                        <div class="customer-email">{{ $order->user->email ?? 'N/A' }}</div>
+                                        <div class="customer-name">
+                                            @if($order->user)
+                                                {{ $order->user->name }}
+                                            @else
+                                                <span style="color: #F59E0B; font-style: italic;">Pendiente de registro</span>
+                                            @endif
+                                        </div>
+                                        <div class="customer-email">
+                                            {{ $order->user->email ?? $order->pending_email ?? 'N/A' }}
+                                        </div>
                                     </div>
                                 </div>
                             </td>
