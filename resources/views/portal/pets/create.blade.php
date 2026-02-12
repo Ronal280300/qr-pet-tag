@@ -1781,20 +1781,52 @@
   }
 
   .pet-form-card .main-photo-uploader {
-    padding: 16px !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
   }
 
   .pet-form-card .photo-preview-area {
     height: 200px !important;
+    min-height: 200px !important;
+    max-height: 200px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .pet-form-card .photo-preview-area img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .pet-form-card .photo-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    max-width: 100% !important;
   }
 
   .pet-form-card .btn-photo-action {
     padding: 10px 16px !important;
     font-size: 14px !important;
+    flex: 1 !important;
+    min-width: 120px !important;
+    max-width: 100% !important;
+  }
+
+  .pet-form-card .upload-area {
+    max-width: 100% !important;
+    overflow: hidden !important;
   }
 
   .pet-form-card .upload-label {
     padding: 16px !important;
+    max-width: 100% !important;
+    word-wrap: break-word !important;
   }
 
   .pet-form-card .upload-title {
@@ -1807,6 +1839,20 @@
 
   .pet-form-card .photos-grid {
     grid-template-columns: repeat(2, 1fr) !important; /* 2 columnas en móvil */
+    max-width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .pet-form-card .photos-grid .ph {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .pet-form-card .photos-grid .ph img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    object-fit: cover !important;
   }
 
   .pet-form-card .zone-preview {
