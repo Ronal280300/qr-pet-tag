@@ -61,14 +61,21 @@
                                     <i class="fa-solid fa-user-circle"></i>
                                     Nombre
                                 </label>
-                                <p>{{ $order->user->name }}</p>
+                                @if($order->user)
+                                    <p>{{ $order->user->name }}</p>
+                                @else
+                                    <p style="color: #F59E0B; font-style: italic;">
+                                        <i class="fa-solid fa-clock"></i>
+                                        Pendiente de registro
+                                    </p>
+                                @endif
                             </div>
                             <div class="info-item">
                                 <label>
                                     <i class="fa-solid fa-envelope"></i>
                                     Email
                                 </label>
-                                <p>{{ $order->user->email }}</p>
+                                <p>{{ $order->user->email ?? $order->pending_email ?? 'N/A' }}</p>
                             </div>
                             <div class="info-item">
                                 <label>
