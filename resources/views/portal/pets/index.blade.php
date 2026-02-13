@@ -793,8 +793,36 @@
   /* ===== Pagination mejorada ===== */
   .pagination-wrapper {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .pagination-info {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pagination-info strong {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .pagination-separator {
+    color: var(--text-muted);
+    margin: 0 0.5rem;
+  }
+
+  .pagination-controls {
+    display: flex;
     justify-content: center;
-    margin-top: 2rem;
   }
 
   .pagination {
@@ -806,31 +834,53 @@
   }
 
   .page-item .page-link {
-    padding: 0.625rem 1rem;
+    padding: 0.75rem 1.125rem;
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text-secondary);
     background: white;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.2s ease;
+    text-decoration: none;
+    min-width: 44px;
+    text-align: center;
   }
 
   .page-item.active .page-link {
     background: var(--primary);
     color: white;
     border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    transform: translateY(-2px);
   }
 
   .page-item:not(.disabled) .page-link:hover {
     background: var(--primary-ultra-light);
     border-color: var(--primary);
     color: var(--primary);
+    transform: translateY(-2px);
   }
 
   .page-item.disabled .page-link {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  /* Responsive pagination */
+  @media (max-width: 768px) {
+    .pagination-info {
+      font-size: 0.875rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .page-item .page-link {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.875rem;
+      min-width: 40px;
+    }
   }
 </style>
 @endpush
@@ -1060,9 +1110,18 @@
       </div>
 
       {{-- Pagination --}}
-      <div class="pagination-wrapper">
-        {{ $pets->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
-      </div>
+      @if($pets->hasPages())
+        <div class="pagination-wrapper">
+          <div class="pagination-info">
+            Página <strong>{{ $pets->currentPage() }}</strong> de <strong>{{ $pets->lastPage() }}</strong>
+            <span class="pagination-separator">•</span>
+            Mostrando <strong>{{ $pets->count() }}</strong> de <strong>{{ $pets->total() }}</strong> mascotas
+          </div>
+          <div class="pagination-controls">
+            {{ $pets->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
+          </div>
+        </div>
+      @endif
     @endif
 
   </div>
