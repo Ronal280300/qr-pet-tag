@@ -634,7 +634,9 @@ body {
   .info-item{padding:1rem}
   .info-item i{font-size:1.5rem}
   .btn-contact{padding:1.1rem 1.5rem;font-size:1rem}
-  .lightbox-nav{display:none}
+  .lightbox-nav{width:50px;height:50px;font-size:20px}
+  .lightbox-prev{left:10px}
+  .lightbox-next{right:10px}
   .lightbox-close{top:10px;right:10px;width:44px;height:44px;font-size:20px}
   .alert-banner{padding:1.2rem}
   .alert-title{font-size:1.1rem}
@@ -946,38 +948,45 @@ body {
     setTimeout(startAutoplay, 8000);
   });
 
-  // Click para abrir lightbox (solo en el área de la imagen)
-  slides.forEach((slide) => {
-    const img = slide.querySelector('img');
-    if (img) {
-      img.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const lightbox = document.getElementById('lightbox');
-        const lightboxImg = document.getElementById('lightboxImg');
-        lightboxImg.src = img.src;
-        lightbox.classList.add('active');
-        stopAutoplay();
-      });
-    }
-  });
-
   startAutoplay();
 })();
 
-// Lightbox
+// Lightbox con navegación entre fotos
 (function(){
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
   const closeBtn = document.getElementById('lightboxClose');
   const prevBtn = document.getElementById('lightboxPrev');
   const nextBtn = document.getElementById('lightboxNext');
-  const slides = Array.from(document.querySelectorAll('.carousel-slide img')).map(img => img.src);
-  
+
+  // Obtener todas las imágenes del carousel
+  const carouselSlides = document.querySelectorAll('.carousel-slide img');
+  const allPhotos = Array.from(carouselSlides).map(img => img.src);
+
   let currentIndex = 0;
 
+  // Abrir lightbox al hacer click en imagen del carousel
+  carouselSlides.forEach((img, index) => {
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      currentIndex = index; // Establecer índice correcto
+      lightboxImg.src = allPhotos[currentIndex];
+      lightbox.classList.add('active');
+
+      // Mostrar/ocultar botones según cantidad de fotos
+      if(allPhotos.length <= 1) {
+        if(prevBtn) prevBtn.style.display = 'none';
+        if(nextBtn) nextBtn.style.display = 'none';
+      } else {
+        if(prevBtn) prevBtn.style.display = '';
+        if(nextBtn) nextBtn.style.display = '';
+      }
+    });
+  });
+
   function show(index){
-    currentIndex = (index + slides.length) % slides.length;
-    lightboxImg.src = slides[currentIndex];
+    currentIndex = (index + allPhotos.length) % allPhotos.length;
+    lightboxImg.src = allPhotos[currentIndex];
   }
 
   if(closeBtn) {
@@ -987,17 +996,19 @@ body {
   }
 
   if(prevBtn) {
-    prevBtn.addEventListener('click', () => {
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Evitar que cierre el lightbox
       show(currentIndex - 1);
     });
   }
 
   if(nextBtn) {
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Evitar que cierre el lightbox
       show(currentIndex + 1);
     });
   }
-  
+
   // Cerrar al hacer click en el fondo (fuera de la imagen)
   lightbox.addEventListener('click', e => {
     // Solo cerrar si se hace click directamente en el lightbox (fondo negro)
@@ -1006,6 +1017,7 @@ body {
     }
   });
 
+  // Navegación con teclado
   document.addEventListener('keydown', e => {
     if(!lightbox.classList.contains('active')) return;
     if(e.key === 'Escape') lightbox.classList.remove('active');
