@@ -88,13 +88,14 @@
             {{-- Código de país --}}
             <select class="phone-code-select" name="phone_code" id="phone_code">
               <option value="506" {{ $phoneCode=='506' ? 'selected':'' }}>🇨🇷 +506</option>
-              <option value="502" {{ $phoneCode=='502' ? 'selected':'' }}>🇬🇹 +502</option>
-              <option value="503" {{ $phoneCode=='503' ? 'selected':'' }}>🇸🇻 +503</option>
-              <option value="504" {{ $phoneCode=='504' ? 'selected':'' }}>🇭🇳 +504</option>
-              <option value="505" {{ $phoneCode=='505' ? 'selected':'' }}>🇳🇮 +505</option>
-              <option value="507" {{ $phoneCode=='507' ? 'selected':'' }}>🇵🇦 +507</option>
-              <option value="52"  {{ $phoneCode=='52'  ? 'selected':'' }}>🇲🇽 +52</option>
-              <option value="1"   {{ $phoneCode=='1'   ? 'selected':'' }}>🇺🇸 +1</option>
+              {{-- Otros países comentados - Solo Costa Rica por ahora --}}
+              {{-- <option value="502" {{ $phoneCode=='502' ? 'selected':'' }}>🇬🇹 +502</option> --}}
+              {{-- <option value="503" {{ $phoneCode=='503' ? 'selected':'' }}>🇸🇻 +503</option> --}}
+              {{-- <option value="504" {{ $phoneCode=='504' ? 'selected':'' }}>🇭🇳 +504</option> --}}
+              {{-- <option value="505" {{ $phoneCode=='505' ? 'selected':'' }}>🇳🇮 +505</option> --}}
+              {{-- <option value="507" {{ $phoneCode=='507' ? 'selected':'' }}>🇵🇦 +507</option> --}}
+              {{-- <option value="52"  {{ $phoneCode=='52'  ? 'selected':'' }}>🇲🇽 +52</option> --}}
+              {{-- <option value="1"   {{ $phoneCode=='1'   ? 'selected':'' }}>🇺🇸 +1</option> --}}
             </select>
 
             {{-- Número local --}}

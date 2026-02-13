@@ -563,24 +563,30 @@ body {
 }
 
 .lightbox-close {
-  position: absolute;
-  top: -50px;
-  right: 0;
+  position: fixed;
+  top: 20px;
+  right: 20px;
   width: 50px;
   height: 50px;
   border: none;
-  background: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.15);
   backdrop-filter: blur(10px);
   border-radius: 50%;
   color: #fff;
   font-size: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
+  z-index: 10001;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
 .lightbox-close:hover {
   background: var(--danger);
   transform: rotate(90deg) scale(1.1);
+}
+
+.lightbox-close:active {
+  transform: rotate(90deg) scale(0.95);
 }
 
 .lightbox-nav {
@@ -629,6 +635,7 @@ body {
   .info-item i{font-size:1.5rem}
   .btn-contact{padding:1.1rem 1.5rem;font-size:1rem}
   .lightbox-nav{display:none}
+  .lightbox-close{top:10px;right:10px;width:44px;height:44px;font-size:20px}
   .alert-banner{padding:1.2rem}
   .alert-title{font-size:1.1rem}
   .alert-text{font-size:.95rem}
@@ -991,11 +998,23 @@ body {
     });
   }
   
+  // Cerrar al hacer click fuera de la imagen o en el fondo
   lightbox.addEventListener('click', e => {
-    if(e.target === lightbox) {
+    // Cerrar si se hace click en el lightbox mismo o en el lightbox-content
+    if(e.target === lightbox || e.target.classList.contains('lightbox-content')) {
       lightbox.classList.remove('active');
     }
   });
+
+  // También permitir cerrar tocando la imagen misma (útil en móvil)
+  const lightboxImg = document.getElementById('lightboxImg');
+  if(lightboxImg) {
+    lightboxImg.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Un toque simple cierra el lightbox (mejor UX en móvil)
+      lightbox.classList.remove('active');
+    });
+  }
 
   document.addEventListener('keydown', e => {
     if(!lightbox.classList.contains('active')) return;
