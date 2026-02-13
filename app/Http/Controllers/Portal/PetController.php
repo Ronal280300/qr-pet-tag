@@ -34,7 +34,8 @@ class PetController extends Controller
             $query->where('user_id', Auth::id());
         }
 
-        // Búsqueda global (nombre, raza, zona, dueño)
+        // Búsqueda global por texto (nombre, raza, zona, dueño)
+        // Nota: Filtros (perdidas, recompensa, sexo) se manejan del lado del cliente
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
@@ -46,23 +47,6 @@ class PetController extends Controller
                                 ->orWhere('email', 'LIKE', "%{$search}%");
                   });
             });
-        }
-
-        // Filtro: Perdidas
-        if ($request->filled('lost') && $request->boolean('lost')) {
-            $query->where('is_lost', true);
-        }
-
-        // Filtro: Con recompensa
-        if ($request->filled('reward') && $request->boolean('reward')) {
-            $query->whereHas('reward', function($q) {
-                $q->where('active', true);
-            });
-        }
-
-        // Filtro: Sexo
-        if ($request->filled('sex') && in_array($request->input('sex'), ['male', 'female', 'unknown'])) {
-            $query->where('sex', $request->input('sex'));
         }
 
         $pets = $query->paginate(12)->withQueryString();

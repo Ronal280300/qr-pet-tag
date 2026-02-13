@@ -998,23 +998,13 @@ body {
     });
   }
   
-  // Cerrar al hacer click fuera de la imagen o en el fondo
+  // Cerrar al hacer click en el fondo (fuera de la imagen)
   lightbox.addEventListener('click', e => {
-    // Cerrar si se hace click en el lightbox mismo o en el lightbox-content
-    if(e.target === lightbox || e.target.classList.contains('lightbox-content')) {
+    // Solo cerrar si se hace click directamente en el lightbox (fondo negro)
+    if(e.target === lightbox) {
       lightbox.classList.remove('active');
     }
   });
-
-  // También permitir cerrar tocando la imagen misma (útil en móvil)
-  const lightboxImg = document.getElementById('lightboxImg');
-  if(lightboxImg) {
-    lightboxImg.addEventListener('click', (e) => {
-      e.stopPropagation();
-      // Un toque simple cierra el lightbox (mejor UX en móvil)
-      lightbox.classList.remove('active');
-    });
-  }
 
   document.addEventListener('keydown', e => {
     if(!lightbox.classList.contains('active')) return;
