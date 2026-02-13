@@ -276,12 +276,25 @@
   }
 
   .filter-chip:hover .filter-dot,
-  .filter-chip[aria-pressed="true"] .filter-dot {
+  .filter-chip[aria-pressed="true"] .filter-dot,
+  .filter-chip.active .filter-dot {
     opacity: 1;
+  }
+
+  .filter-chip.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  }
+
+  .filter-chip {
+    text-decoration: none;
   }
 
   /* ===== Search box ===== */
   .search-box {
+    position: relative;
     background: white;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -318,6 +331,26 @@
 
   .search-input::placeholder {
     color: var(--text-muted);
+  }
+
+  .search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    color: white;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .search-clear:hover {
+    background: var(--danger);
+    transform: scale(1.1);
   }
 
   /* ===== Grid de mascotas ===== */
@@ -863,41 +896,61 @@
 
     {{-- Filters --}}
     <div class="filters-section">
-      <div class="filters-bar" id="filterBar">
-        <button class="filter-chip" data-filter="all" aria-pressed="true">
-          <span class="filter-dot"></span>
-          Todos
-        </button>
-        <button class="filter-chip" data-filter="lost">
-          <span class="filter-dot"></span>
-          Perdidas
-        </button>
-        <button class="filter-chip" data-filter="reward">
-          <span class="filter-dot"></span>
-          Con recompensa
-        </button>
-        <button class="filter-chip" data-filter="sex:male">
-          <span class="filter-dot"></span>
-          Macho
-        </button>
-        <button class="filter-chip" data-filter="sex:female">
-          <span class="filter-dot"></span>
-          Hembra
-        </button>
-      </div>
-
-      {{-- Search (solo admin) --}}
-      @if(auth()->user()->is_admin)
-        <div class="search-box">
-          <i class="fa-solid fa-magnifying-glass search-icon"></i>
-          <input 
-            type="text" 
-            id="petSearch" 
-            class="search-input" 
-            placeholder="Buscar por nombre, raza, zona o dueño..."
-          >
+      <form method="GET" action="{{ route('portal.pets.index') }}" id="filterForm">
+        <div class="filters-bar">
+          <a href="{{ route('portal.pets.index') }}" class="filter-chip {{ !request()->hasAny(['lost', 'reward', 'sex']) ? 'active' : '' }}">
+            <span class="filter-dot"></span>
+            Todos
+          </a>
+          <button type="submit" name="lost" value="1" class="filter-chip {{ request()->boolean('lost') ? 'active' : '' }}">
+            <span class="filter-dot"></span>
+            Perdidas
+          </button>
+          <button type="submit" name="reward" value="1" class="filter-chip {{ request()->boolean('reward') ? 'active' : '' }}">
+            <span class="filter-dot"></span>
+            Con recompensa
+          </button>
+          <button type="submit" name="sex" value="male" class="filter-chip {{ request('sex') === 'male' ? 'active' : '' }}">
+            <span class="filter-dot"></span>
+            Macho
+          </button>
+          <button type="submit" name="sex" value="female" class="filter-chip {{ request('sex') === 'female' ? 'active' : '' }}">
+            <span class="filter-dot"></span>
+            Hembra
+          </button>
         </div>
-      @endif
+
+        {{-- Search (solo admin) --}}
+        @if(auth()->user()->is_admin)
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input
+              type="text"
+              name="search"
+              id="petSearch"
+              class="search-input"
+              placeholder="Buscar por nombre, raza, zona o dueño..."
+              value="{{ request('search') }}"
+            >
+            @if(request('search'))
+              <a href="{{ route('portal.pets.index') }}" class="search-clear" title="Limpiar búsqueda">
+                <i class="fa-solid fa-xmark"></i>
+              </a>
+            @endif
+          </div>
+        @endif
+
+        {{-- Hidden inputs para mantener filtros activos --}}
+        @if(request('lost'))
+          <input type="hidden" name="lost" value="1">
+        @endif
+        @if(request('reward'))
+          <input type="hidden" name="reward" value="1">
+        @endif
+        @if(request('sex'))
+          <input type="hidden" name="sex" value="{{ request('sex') }}">
+        @endif
+      </form>
     </div>
 
     {{-- Grid de mascotas --}}
@@ -917,19 +970,9 @@
       <div id="petGrid" class="pets-grid">
         @foreach($pets as $pet)
           @php
-            $hasReward = optional($pet->reward)->active ? '1' : '0';
             $sex = $pet->sex ?? 'unknown';
           @endphp
-          <div
-            class="pet-card"
-            data-name="{{ Str::lower($pet->name) }}"
-            data-breed="{{ Str::lower($pet->breed ?? '') }}"
-            data-zone="{{ Str::lower($pet->zone ?? '') }}"
-            data-owner="{{ Str::lower(optional($pet->user)->name.' '.optional($pet->user)->email) }}"
-            data-lost="{{ $pet->is_lost ? '1' : '0' }}"
-            data-reward="{{ $hasReward }}"
-            data-sex="{{ $sex }}"
-          >
+          <div class="pet-card">
             {{-- Thumbnail --}}
             <div class="pet-thumbnail">
               <img src="{{ $pet->main_photo_url }}" alt="{{ $pet->name }}" class="pet-image">
@@ -1008,15 +1051,6 @@
         @endforeach
       </div>
 
-      {{-- Empty filtered state --}}
-      <div id="emptyFiltered" class="empty-state empty-filtered">
-        <div class="empty-icon">
-          <i class="fa-solid fa-search"></i>
-        </div>
-        <div class="empty-title">No se encontraron resultados</div>
-        <div class="empty-text">Intenta ajustar los filtros o términos de búsqueda</div>
-      </div>
-
       {{-- Pagination --}}
       <div class="pagination-wrapper">
         {{ $pets->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
@@ -1030,121 +1064,19 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const grid = document.getElementById('petGrid');
-  if (!grid) return;
-
-  const items = Array.from(grid.querySelectorAll('.pet-card'));
-  const emptyFiltered = document.getElementById('emptyFiltered');
-
-  // Estado de filtros
-  const state = {
-    text: '',
-    lost: false,
-    reward: false,
-    sex: null,
-  };
-
-  // Normalizar texto
-  const normalize = (str) => {
-    return (str || '').toString().toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-  };
-
-  // Search input (solo admin)
+  // Auto-submit búsqueda cuando el usuario escribe
   const searchInput = document.getElementById('petSearch');
-  if (searchInput) {
+  const filterForm = document.getElementById('filterForm');
+
+  if (searchInput && filterForm) {
     let searchTimeout;
     searchInput.addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
-        state.text = normalize(e.target.value);
-        applyFilters();
-      }, 150);
+        filterForm.submit();
+      }, 500); // Esperar 500ms después de que el usuario deje de escribir
     });
   }
-
-  // Filter chips
-  const filterBar = document.getElementById('filterBar');
-  filterBar.addEventListener('click', (e) => {
-    const chip = e.target.closest('.filter-chip');
-    if (!chip) return;
-
-    const filter = chip.dataset.filter;
-    const isPressed = chip.getAttribute('aria-pressed') === 'true';
-
-    // Reset con "Todos"
-    if (filter === 'all') {
-      state.lost = false;
-      state.reward = false;
-      state.sex = null;
-      
-      filterBar.querySelectorAll('.filter-chip').forEach(c => {
-        c.setAttribute('aria-pressed', 'false');
-      });
-      chip.setAttribute('aria-pressed', 'true');
-      applyFilters();
-      return;
-    }
-
-    // Desactivar "Todos"
-    filterBar.querySelector('[data-filter="all"]').setAttribute('aria-pressed', 'false');
-
-    // Toggle filtros
-    if (filter === 'lost') {
-      chip.setAttribute('aria-pressed', (!isPressed).toString());
-      state.lost = !isPressed;
-    } else if (filter === 'reward') {
-      chip.setAttribute('aria-pressed', (!isPressed).toString());
-      state.reward = !isPressed;
-    } else if (filter.startsWith('sex:')) {
-      const sexValue = filter.split(':')[1];
-      const sexChips = filterBar.querySelectorAll('[data-filter^="sex:"]');
-      
-      if (state.sex === sexValue) {
-        state.sex = null;
-        chip.setAttribute('aria-pressed', 'false');
-      } else {
-        state.sex = sexValue;
-        sexChips.forEach(c => c.setAttribute('aria-pressed', 'false'));
-        chip.setAttribute('aria-pressed', 'true');
-      }
-    }
-
-    applyFilters();
-  });
-
-  // Aplicar filtros
-  function applyFilters() {
-    let visibleCount = 0;
-
-    items.forEach(card => {
-      const name = card.dataset.name || '';
-      const breed = card.dataset.breed || '';
-      const zone = card.dataset.zone || '';
-      const owner = card.dataset.owner || '';
-      
-      const matchesText = !state.text || 
-        [name, breed, zone, owner].some(v => normalize(v).includes(state.text));
-
-      const matchesLost = !state.lost || card.dataset.lost === '1';
-      const matchesReward = !state.reward || card.dataset.reward === '1';
-      const matchesSex = !state.sex || card.dataset.sex === state.sex;
-
-      const show = matchesText && matchesLost && matchesReward && matchesSex;
-      
-      card.style.display = show ? '' : 'none';
-      if (show) visibleCount++;
-    });
-
-    // Mostrar/ocultar mensaje de vacío
-    if (emptyFiltered) {
-      emptyFiltered.style.display = visibleCount === 0 ? 'block' : 'none';
-    }
-  }
-
-  // Aplicar filtros iniciales
-  applyFilters();
 
   // Lazy loading de imágenes
   const imageObserver = new IntersectionObserver((entries) => {

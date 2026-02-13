@@ -26,7 +26,7 @@ class PetController extends Controller
             ->only(['create', 'store', 'destroy', 'generateQR', 'regenCode']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $query = Pet::with(['qrCode', 'reward', 'user'])->latest('id');
 
@@ -34,7 +34,38 @@ class PetController extends Controller
             $query->where('user_id', Auth::id());
         }
 
-        $pets = $query->paginate(12);
+        // Búsqueda global (nombre, raza, zona, dueño)
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('breed', 'LIKE', "%{$search}%")
+                  ->orWhere('zone', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'LIKE', "%{$search}%")
+                                ->orWhere('email', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filtro: Perdidas
+        if ($request->filled('lost') && $request->boolean('lost')) {
+            $query->where('is_lost', true);
+        }
+
+        // Filtro: Con recompensa
+        if ($request->filled('reward') && $request->boolean('reward')) {
+            $query->whereHas('reward', function($q) {
+                $q->where('active', true);
+            });
+        }
+
+        // Filtro: Sexo
+        if ($request->filled('sex') && in_array($request->input('sex'), ['male', 'female', 'unknown'])) {
+            $query->where('sex', $request->input('sex'));
+        }
+
+        $pets = $query->paginate(12)->withQueryString();
 
         return view('portal.pets.index', compact('pets'));
     }

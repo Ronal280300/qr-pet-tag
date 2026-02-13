@@ -964,13 +964,14 @@
             <div class="phone-grid">
               <select id="phone_code" name="phone_code" class="form-input @error('phone_code') is-invalid @enderror">
                 <option value="506" @selected(old('phone_code','506')=='506')>🇨🇷 +506</option>
-                <option value="507" @selected(old('phone_code')=='507')>🇵🇦 +507</option>
-                <option value="505" @selected(old('phone_code')=='505')>🇳🇮 +505</option>
-                <option value="502" @selected(old('phone_code')=='502')>🇬🇹 +502</option>
-                <option value="503" @selected(old('phone_code')=='503')>🇸🇻 +503</option>
-                <option value="504" @selected(old('phone_code')=='504')>🇭🇳 +504</option>
-                <option value="52" @selected(old('phone_code')=='52')>🇲🇽 +52</option>
-                <option value="1" @selected(old('phone_code')=='1')>🇺🇸 +1</option>
+                {{-- Otros países comentados - Solo Costa Rica por ahora --}}
+                {{-- <option value="507" @selected(old('phone_code')=='507')>🇵🇦 +507</option> --}}
+                {{-- <option value="505" @selected(old('phone_code')=='505')>🇳🇮 +505</option> --}}
+                {{-- <option value="502" @selected(old('phone_code')=='502')>🇬🇹 +502</option> --}}
+                {{-- <option value="503" @selected(old('phone_code')=='503')>🇸🇻 +503</option> --}}
+                {{-- <option value="504" @selected(old('phone_code')=='504')>🇭🇳 +504</option> --}}
+                {{-- <option value="52" @selected(old('phone_code')=='52')>🇲🇽 +52</option> --}}
+                {{-- <option value="1" @selected(old('phone_code')=='1')>🇺🇸 +1</option> --}}
               </select>
 
               <div class="input-wrapper">
