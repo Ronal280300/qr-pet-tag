@@ -420,6 +420,13 @@
         <span>Exportar TAGs</span>
       </a>
 
+      {{-- Validación de Mercado --}}
+      <div class="nav-section-title">Validación</div>
+      <a href="{{ route('portal.admin.survey.index') }}" class="nav-link-sidebar {{ request()->routeIs('portal.admin.survey.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Estadísticas</span>
+      </a>
+
       <div class="sidebar-divider"></div>
 
       {{-- Sistema --}}
