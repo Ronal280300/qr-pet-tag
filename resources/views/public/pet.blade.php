@@ -603,6 +603,7 @@ body {
   font-size: 28px;
   cursor: pointer;
   transition: all 0.3s ease;
+  z-index: 10;
 }
 
 .lightbox-nav:hover {
