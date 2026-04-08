@@ -20,6 +20,8 @@ use App\Http\Controllers\Admin\ClientController; // <-- NUEVO
 use App\Http\Controllers\Admin\PlanManagementController;
 use App\Http\Controllers\Admin\OrderManagementController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\PublicSurveyController;
+use App\Http\Controllers\Admin\SurveyController;
 
 // Middleware
 use App\Http\Middleware\AdminOnly;
@@ -77,6 +79,10 @@ Route::post('password/reset', [\App\Http\Controllers\Auth\ResetPasswordControlle
 //Ubicación
 Route::post('/p/{slug}/ping', [PublicPetPingController::class, 'store'])
     ->name('public.pet.ping');
+
+// Encuesta de validación de mercado (pública)
+Route::get('/encuesta', [PublicSurveyController::class, 'show'])->name('survey.public');
+Route::post('/encuesta', [PublicSurveyController::class, 'store'])->name('survey.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -290,6 +296,9 @@ Route::middleware('auth')->prefix('portal')->name('portal.')->group(function () 
             Route::post('email-campaigns/{emailCampaign}/stop', [\App\Http\Controllers\Admin\EmailCampaignController::class, 'stop'])->name('email-campaigns.stop');
 
             Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+
+            // 📊 Estadísticas / Validación de Mercado
+            Route::get('estadisticas', [SurveyController::class, 'index'])->name('survey.index');
 
             // 👉 Configuración del Sistema
             Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
