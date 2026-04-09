@@ -1,1122 +1,753 @@
 @php
     use App\Models\Plan;
+    // Precargamos los planes en arrays
     $oneTimePlans = Plan::active()->oneTime()->orderBy('pets_included')->get();
-    $subscriptionPlans = Plan::active()->subscription()->orderBy('duration_months')->orderBy('pets_included')->get()->groupBy('duration_months');
+    
+    // Simplificaremos la lógica tomando el primer grupo de suscripción para la UI limpia
+    // (generalmente es suscripción anual o mensual, tomamos la primera disponible)
+    $subGroups = Plan::active()->subscription()->orderBy('duration_months')->orderBy('pets_included')->get()->groupBy('duration_months');
+    $subscriptionPlans = $subGroups->first() ?? collect(); 
+    $subDuration = $subGroups->keys()->first() ?? 1;
 @endphp
 
-<section class="py-5 plans-section-modern" id="planes">
-    <div class="container-fluid px-4">
-        <!-- Header -->
-        <div class="text-center mb-5 reveal">
-            <div class="plan-badge-modern">
-                <span class="plan-badge-icon">ðŸ’Ž</span>
-                <span>PLANES</span>
-            </div>
-            <h2 class="section-title-modern mb-3">
-                Elige el <span class="plan-highlight-modern">plan perfecto</span> para ti
-            </h2>
-            <p class="text-muted-modern">Protege a tus mascotas con el plan que mejor se adapte a tus necesidades</p>
+<section class="guided-pricing-section" id="planes">
+    <div class="guided-container">
+        
+        <!-- Encabezado Fuerte -->
+        <div class="guided-header">
+            <span class="guided-eyebrow">PROTECCIÓN PETSCAN</span>
+            <h2 class="guided-title">Construye la armadura perfecta para tu familia.</h2>
+            <p class="guided-subtitle">Selecciona cuántos miembros de tu manada deseas proteger. Cobertura inmediata, tecnología permanente.</p>
         </div>
 
-        <!-- Toggle Minimalista -->
-        <div class="plan-type-selector reveal">
-            <div class="selector-track">
-                <div class="selector-background onetime-active" id="selectorBackground"></div>
-                <button class="selector-option active" data-type="oneTime">
-                    <span class="selector-icon">ðŸ’³</span>
-                    <span class="selector-text">
-                        <strong>Pago Ãšnico</strong>
-                        <small>Una sola vez</small>
-                    </span>
-                </button>
-                <button class="selector-option" data-type="subscription">
-                    <span class="selector-icon">ðŸ”„</span>
-                    <span class="selector-text">
-                        <strong>SuscripciÃ³n</strong>
-                        <small>RenovaciÃ³n automÃ¡tica</small>
-                    </span>
-                </button>
-            </div>
-        </div>
-
-        <!-- PAGO ÃšNICO -->
-        <div class="plans-container active" id="oneTimePlans">
-            <div class="plans-scroll-wrapper">
-                <button class="scroll-nav scroll-nav-left" data-direction="left">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
+        <div class="guided-layout">
+            <!-- Columna Izquierda: Configurador Guiado -->
+            <div class="guided-configurator">
                 
-                <div class="plans-scroll">
-                    @foreach($oneTimePlans as $index => $plan)
-                    <div class="plan-card-modern onetime-plan">
-                        @if($plan->pets_included == 3)
-                        <div class="popular-badge-modern">
-                            <i class="fa-solid fa-crown"></i>
-                            <span>Popular</span>
+                <div class="config-step">
+                    <h3 class="step-title">1. ¿Qué tipo de cobertura prefieres?</h3>
+                    <div class="premium-segmented-control" id="billingSelector">
+                        <div class="segmented-indicator"></div>
+                        <button class="segment-btn active" data-type="onetime">
+                            Pago Único
+                        </button>
+                        <button class="segment-btn" data-type="subscription">
+                            Renovación Continua
+                        </button>
+                    </div>
+                </div>
+
+                <div class="config-step">
+                    <h3 class="step-title">2. ¿Cuántas mascotas tienes?</h3>
+                    <div class="pet-selector-grid" id="petSelector">
+                        <!-- Generado por JS o con los botones base acá -->
+                    </div>
+                    <div class="pet-limit-note">
+                        <i class="fa-solid fa-circle-info"></i> Puedes agregar más mascotas en el siguiente paso si tienes una familia numerosa.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Tarjeta de Resumen Dinámica -->
+            <div class="guided-summary">
+                <div class="summary-card" id="summaryCard">
+                    <!-- Badge Dinámico -->
+                    <div class="summary-badge-wrapper" id="summaryBadgeWrapper">
+                        <span class="summary-badge" id="summaryBadge">MEJOR OPCIÓN</span>
+                    </div>
+
+                    <!-- Cabecera -->
+                    <div class="summary-header">
+                        <div class="summary-icon">
+                            <i class="fa-solid fa-shield-dog"></i>
                         </div>
-                        @endif
-
-                        <div class="plan-header-modern">
-                            <div class="plan-icon-modern onetime-icon">
-                                <i class="fa-solid fa-dog"></i>
-                            </div>
-                            <h3 class="plan-title-modern">{{ $plan->pets_included }} {{ Str::plural('Mascota', $plan->pets_included) }}</h3>
+                        <div class="summary-title-group">
+                            <h3 id="summaryTitle">Cargando...</h3>
+                            <p id="summaryDesc">Preparando tu protección</p>
                         </div>
+                    </div>
 
-                        <div class="plan-price-modern">
-                            <span class="price-currency">â‚¡</span>
-                            <span class="price-amount">{{ number_format($plan->price, 0, ',', '.') }}</span>
-                        </div>
-                        <p class="plan-billing-modern">Pago Ãºnico</p>
+                    <!-- Precio Animado -->
+                    <div class="summary-price-wrapper">
+                        <span class="summary-currency">₡</span>
+                        <div class="summary-price" id="summaryPrice">0</div>
+                    </div>
+                    <p class="summary-billing" id="summaryBillingMode">Pago único</p>
 
-                        <div class="plan-divider-modern"></div>
-
-                        <ul class="plan-features-modern">
-                            <li>
-                                <i class="fa-solid fa-check-circle"></i>
-                                <span>{{ $plan->pets_included }} {{ Str::plural('placa', $plan->pets_included) }} con QR</span>
-                            </li>
-                            <li>
-                                <i class="fa-solid fa-check-circle"></i>
-                                <span>Perfil digital completo</span>
-                            </li>
-                            <li>
-                                <i class="fa-solid fa-check-circle"></i>
-                                <span>Actualizaciones ilimitadas</span>
-                            </li>
-                            <li>
-                                <i class="fa-solid fa-check-circle"></i>
-                                <span>Sistema de recompensas</span>
-                            </li>
-                            <li>
-                                <i class="fa-solid fa-check-circle"></i>
-                                <span>Soporte por WhatsApp</span>
-                            </li>
+                    <!-- Beneficios -->
+                    <div class="summary-features-container">
+                        <p class="features-title">Tu cobertura incluye:</p>
+                        <ul class="summary-features" id="summaryFeatures">
+                            <!-- Inyectado por JS -->
                         </ul>
-
-                        <div class="plan-footer-modern">
-                            <a href="{{ route('checkout.show', $plan->id) }}" class="btn-plan-modern onetime-btn">
-                                <i class="fa-solid fa-shopping-cart"></i>
-                                <span>Elegir plan</span>
-                            </a>
-                            @if($plan->pets_included >= 3)
-                            <p class="plan-extra-info">
-                                <i class="fa-solid fa-plus-circle"></i>
-                                Mascota adicional: â‚¡{{ number_format($plan->additional_pet_price, 0, ',', '.') }}
-                            </p>
-                            @endif
-                        </div>
                     </div>
-                    @endforeach
-                </div>
 
-                <button class="scroll-nav scroll-nav-right" data-direction="right">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-            </div>
-
-            <div class="scroll-indicators" id="oneTimeIndicators"></div>
-
-            <div class="plan-info-box">
-                <i class="fa-solid fa-info-circle"></i>
-                <span>DespuÃ©s de 3 mascotas, cada mascota adicional tiene un costo de â‚¡10,000</span>
-            </div>
-        </div>
-
-        <!-- SUSCRIPCIONES -->
-        <div class="plans-container" id="subscriptionPlans">
-            <!-- Duration selector -->
-            <div class="duration-selector">
-                @foreach($subscriptionPlans as $months => $plans)
-                <button class="duration-btn {{ $loop->first ? 'active' : '' }}" data-duration="{{ $months }}">
-                    {{ $months }} {{ Str::plural('mes', $months) }}
-                </button>
-                @endforeach
-            </div>
-
-            @foreach($subscriptionPlans as $months => $plans)
-            <div class="duration-content {{ $loop->first ? 'active' : '' }}" data-duration="{{ $months }}">
-                <div class="plans-scroll-wrapper">
-                    <button class="scroll-nav scroll-nav-left" data-direction="left">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
+                    <!-- Botón CTA de alto impacto -->
+                    <a href="javascript:void(0);" class="summary-cta" id="summaryCtaBtn">
+                        <span id="ctaText">Proteger a mi mascota</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
                     
-                    <div class="plans-scroll">
-                        @foreach($plans as $plan)
-                        <div class="plan-card-modern subscription-plan">
-                            @if($plan->pets_included == 3)
-                            <div class="popular-badge-modern">
-                                <i class="fa-solid fa-crown"></i>
-                                <span>Popular</span>
-                            </div>
-                            @endif
-
-                            <div class="plan-header-modern">
-                                <div class="plan-icon-modern subscription-icon">
-                                    <i class="fa-solid fa-paw"></i>
-                                </div>
-                                <h3 class="plan-title-modern">{{ $plan->pets_included }} {{ Str::plural('Mascota', $plan->pets_included) }}</h3>
-                            </div>
-
-                            <div class="plan-price-modern">
-                                <span class="price-currency">â‚¡</span>
-                                <span class="price-amount">{{ number_format($plan->price, 0, ',', '.') }}</span>
-                            </div>
-                            <p class="plan-billing-modern">Cada {{ $months }} {{ Str::plural('mes', $months) }}</p>
-
-                            <div class="plan-divider-modern"></div>
-
-                            <ul class="plan-features-modern">
-                                <li>
-                                    <i class="fa-solid fa-check-circle"></i>
-                                    <span>{{ $plan->pets_included }} {{ Str::plural('placa', $plan->pets_included) }} con QR</span>
-                                </li>
-                                <li>
-                                    <i class="fa-solid fa-check-circle"></i>
-                                    <span>Perfil digital completo</span>
-                                </li>
-                                <li>
-                                    <i class="fa-solid fa-check-circle"></i>
-                                    <span>Actualizaciones ilimitadas</span>
-                                </li>
-                                <li>
-                                    <i class="fa-solid fa-check-circle"></i>
-                                    <span>Sistema de recompensas</span>
-                                </li>
-                                <li>
-                                    <i class="fa-solid fa-check-circle"></i>
-                                    <span>Soporte prioritario</span>
-                                </li>
-                                <li>
-                                    <i class="fa-solid fa-check-circle"></i>
-                                    <span>RenovaciÃ³n automÃ¡tica</span>
-                                </li>
-                            </ul>
-
-                            <div class="plan-footer-modern">
-                                <a href="{{ route('checkout.show', $plan->id) }}" class="btn-plan-modern subscription-btn">
-                                    <i class="fa-solid fa-shopping-cart"></i>
-                                    <span>Elegir plan</span>
-                                </a>
-                                @if($plan->pets_included >= 3)
-                                <p class="plan-extra-info">
-                                    <i class="fa-solid fa-plus-circle"></i>
-                                    Mascota adicional: â‚¡{{ number_format($plan->additional_pet_price, 0, ',', '.') }}
-                                </p>
-                                @endif
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-
-                    <button class="scroll-nav scroll-nav-right" data-direction="right">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </button>
+                    <p class="summary-guarantee">
+                        <i class="fa-solid fa-lock"></i> Compra segura y encriptada
+                    </p>
                 </div>
-
-                <div class="scroll-indicators" data-duration="{{ $months }}"></div>
-
-                <div class="plan-info-box">
-                    <i class="fa-solid fa-info-circle"></i>
-                    <span>DespuÃ©s de 3 mascotas, cada mascota adicional cuesta â‚¡{{ number_format($plans->first()->additional_pet_price, 0, ',', '.') }} por {{ $months }} {{ Str::plural('mes', $months) }}</span>
-                </div>
-            </div>
-            @endforeach
-        </div>
-
-        <!-- Benefits -->
-        <div class="benefits-grid reveal">
-            <div class="benefit-item">
-                <div class="benefit-icon">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <span>GarantÃ­a 30 dÃ­as</span>
-            </div>
-            <div class="benefit-item">
-                <div class="benefit-icon">
-                    <i class="fa-solid fa-truck-fast"></i>
-                </div>
-                <span>EnvÃ­o incluido</span>
-            </div>
-            <div class="benefit-item">
-                <div class="benefit-icon">
-                    <i class="fa-solid fa-headset"></i>
-                </div>
-                <span>Soporte 24/7</span>
             </div>
         </div>
     </div>
 </section>
 
+<!-- Pasando la data de PHP a JS para hacer la UI inmediata sin recargas -->
+<script>
+    window.PetScanPlansData = {
+        onetime: @json($oneTimePlans),
+        subscription: @json($subscriptionPlans),
+        subDuration: {{ $subDuration }},
+        routes: {
+            checkout: "{{ route('checkout.show', ':id') }}"
+        }
+    };
+</script>
+
 <style>
-/* ============================================
-   MODERN MINIMALIST PLANS SECTION
-   ============================================ */
+/* ==========================================================================
+   ENFOQUE GUIADO - ESTILO APPLE/AIRBNB (SaaS Storytelling)
+   ========================================================================== */
 
 :root {
-    --plan-primary: #4F89E8;
-    --plan-primary-dark: #1E7CF2;
-    --plan-subscription: #10B981;
-    --plan-subscription-dark: #059669;
-    --plan-popular: #F59E0B;
-    --plan-text: #1F2937;
-    --plan-text-light: #6B7280;
-    --plan-border: #E5E7EB;
-    --plan-bg: #FFFFFF;
-    --plan-bg-light: #F9FAFB;
+    --vp-bg: #FAFAFA;
+    --vp-surface: #FFFFFF;
+    --vp-text-primary: #1D1D1F;
+    --vp-text-secondary: #86868B;
+    --vp-accent: #0066CC;
+    --vp-accent-hover: #0055AA;
+    --vp-border: #D2D2D7;
+    --vp-border-light: #E5E5EA;
+    --vp-success: #34C759;
+    --vp-popular: #FF9500;
 }
 
-.plans-section-modern {
-    background: white;
-    position: relative;
-    overflow: hidden;
+.guided-pricing-section {
+    background-color: var(--vp-bg);
+    padding: 100px 0 120px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif;
+    color: var(--vp-text-primary);
 }
 
-/* Header Styles */
-.plan-badge-modern {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 20px;
-    background: var(--plan-bg-light);
-    border: 1px solid var(--plan-border);
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--plan-text);
-    letter-spacing: 0.5px;
-}
-
-.plan-badge-icon {
-    font-size: 16px;
-}
-
-.section-title-modern {
-    font-size: 42px;
-    font-weight: 800;
-    color: var(--plan-text);
-    line-height: 1.2;
-}
-
-.plan-highlight-modern {
-    background: linear-gradient(135deg, var(--plan-primary), var(--plan-primary-dark));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.text-muted-modern {
-    font-size: 16px;
-    color: var(--plan-text-light);
-    max-width: 600px;
+.guided-container {
+    max-width: 1080px;
     margin: 0 auto;
+    padding: 0 24px;
 }
 
-/* Plan Type Selector (Minimalist Toggle) */
-.plan-type-selector {
-    max-width: 500px;
+/* --- Header Fuerte --- */
+.guided-header {
+    text-align: center;
+    max-width: 680px;
     margin: 0 auto 60px;
 }
 
-.selector-track {
-    position: relative;
-    display: flex;
-    gap: 8px;
-    padding: 6px;
-    background: var(--plan-bg-light);
-    border-radius: 16px;
-    border: 1px solid var(--plan-border);
+.guided-eyebrow {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--vp-accent);
+    margin-bottom: 20px;
+    display: inline-block;
 }
 
-.selector-background {
+.guided-title {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+}
+
+.guided-subtitle {
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--vp-text-secondary);
+    font-weight: 400;
+}
+
+/* --- Layout Principal --- */
+.guided-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 60px;
+    align-items: start;
+}
+
+/* --- Opciones Izquierda (Configurador) --- */
+.config-step {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s ease forwards;
+}
+
+.config-step:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.step-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--vp-text-primary);
+}
+
+/* Selector Segmentado (Billing) */
+.premium-segmented-control {
+    display: flex;
+    position: relative;
+    background-color: #E3E3E8;
+    padding: 4px;
+    border-radius: 14px;
+}
+
+.segmented-indicator {
     position: absolute;
-    top: 6px;
-    left: 6px;
-    width: calc(50% - 10px);
-    height: calc(100% - 12px);
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 0;
-}
-
-.selector-background.subscription-active {
-    transform: translateX(calc(100% + 8px));
-    background: linear-gradient(135deg, var(--plan-subscription), var(--plan-subscription-dark));
-}
-
-.selector-background.onetime-active {
-    background: linear-gradient(135deg, var(--plan-primary), var(--plan-primary-dark));
-}
-
-.selector-option {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 16px 20px;
-    background: transparent;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background-color: var(--vp-surface);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.04);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 1;
 }
 
-.selector-icon {
-    font-size: 24px;
-    transition: all 0.3s ease;
-}
-
-.selector-text {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-}
-
-.selector-text strong {
+.segment-btn {
+    flex: 1;
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    border: none;
+    padding: 14px 20px;
     font-size: 15px;
-    font-weight: 700;
-    color: var(--plan-text);
-    transition: color 0.3s ease;
-}
-
-.selector-text small {
-    font-size: 12px;
-    color: var(--plan-text-light);
-    transition: color 0.3s ease;
-}
-
-.selector-option.active .selector-text strong,
-.selector-option.active .selector-text small {
-    color: white;
-}
-
-/* Plans Container */
-.plans-container {
-    display: none;
-    margin-bottom: 40px;
-}
-
-.plans-container.active {
-    display: block;
-    animation: fadeInUp 0.5s ease;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Scroll Wrapper */
-.plans-scroll-wrapper {
-    position: relative;
-    margin: 0 -20px;
-    padding: 20px 60px;
-}
-
-.plans-scroll {
-    display: flex;
-    gap: 24px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-    padding: 10px 20px 30px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-
-.plans-scroll::-webkit-scrollbar {
-    display: none;
-}
-
-/* Scroll Navigation Buttons */
-.scroll-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: white;
-    border: 1px solid var(--plan-border);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-weight: 600;
+    color: var(--vp-text-secondary);
     cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s ease;
-    color: var(--plan-text);
+    border-radius: 10px;
+    transition: color 0.3s;
 }
 
-.scroll-nav:hover {
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-    border-color: var(--plan-primary);
-    color: var(--plan-primary);
+.segment-btn.active {
+    color: var(--vp-text-primary);
 }
 
-.scroll-nav-left {
-    left: 10px;
+/* Selector Cajas (Pets) */
+.pet-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 16px;
 }
 
-.scroll-nav-right {
-    right: 10px;
-}
-
-.scroll-nav:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    transform: translateY(-50%) scale(0.9);
-}
-
-/* Plan Card Modern */
-.plan-card-modern {
-    min-width: 320px;
-    max-width: 320px;
-    background: white;
-    border-radius: 24px;
-    border: 2px solid var(--plan-border);
-    padding: 32px 28px;
-    scroll-snap-align: center;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
+.pet-btn {
+    background: var(--vp-surface);
+    border: 2px solid var(--vp-border-light);
+    border-radius: 16px;
+    padding: 24px 16px;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
 }
 
-.plan-card-modern:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+.pet-btn:hover {
+    border-color: var(--vp-border);
+    transform: translateY(-2px);
 }
 
-.onetime-plan {
-    border-color: rgba(79, 137, 232, 0.3);
+.pet-btn.active {
+    border-color: var(--vp-accent);
+    background-color: #F5FAFF;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
 }
 
-.onetime-plan:hover {
-    border-color: var(--plan-primary);
-    box-shadow: 0 20px 40px rgba(79, 137, 232, 0.15);
+.pet-btn i {
+    font-size: 28px;
+    color: var(--vp-text-secondary);
+    transition: color 0.3s;
 }
 
-.subscription-plan {
-    border-color: rgba(16, 185, 129, 0.3);
+.pet-btn.active i {
+    color: var(--vp-accent);
 }
 
-.subscription-plan:hover {
-    border-color: var(--plan-subscription);
-    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+.pet-btn span {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--vp-text-primary);
 }
 
-/* Popular Badge */
-.popular-badge-modern {
+.pet-limit-note {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--vp-text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.pet-limit-note i {
+    margin-top: 3px;
+}
+
+/* --- Resumen Derecha (Tarjeta Final) --- */
+.guided-summary {
+    position: sticky;
+    top: 40px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s ease forwards;
+    animation-delay: 0.3s;
+}
+
+.summary-card {
+    background-color: var(--vp-surface);
+    border-radius: 28px;
+    padding: 48px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.06), 0 10px 20px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.04);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.summary-badge-wrapper {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, #FF9500, #FF5E3A);
+    color: #FFF;
+    text-align: center;
+    padding: 8px 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: all 0.3s ease;
+}
+
+.summary-badge-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.summary-card.has-badge {
+    padding-top: 56px; /* Compensar la aparición de la bandera */
+}
+
+/* Header Resumen */
+.summary-header {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    background: linear-gradient(135deg, var(--plan-popular), #F97316);
-    color: white;
-    border-radius: 100px;
-    font-size: 12px;
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    gap: 20px;
+    margin-bottom: 32px;
 }
 
-/* Plan Header */
-.plan-header-modern {
-    text-align: center;
-    margin-bottom: 24px;
-}
-
-.plan-icon-modern {
-    width: 72px;
-    height: 72px;
-    border-radius: 20px;
+.summary-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #F2F8FF;
+    color: var(--vp-accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    margin: 0 auto 16px;
-    color: white;
+    font-size: 28px;
 }
 
-.onetime-icon {
-    background: linear-gradient(135deg, var(--plan-primary), var(--plan-primary-dark));
-    box-shadow: 0 8px 24px rgba(79, 137, 232, 0.3);
+.summary-title-group h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px;
 }
 
-.subscription-icon {
-    background: linear-gradient(135deg, var(--plan-subscription), var(--plan-subscription-dark));
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-}
-
-.plan-title-modern {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--plan-text);
+.summary-title-group p {
+    font-size: 15px;
+    color: var(--vp-text-secondary);
     margin: 0;
 }
 
-/* Plan Price */
-.plan-price-modern {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 4px;
-    margin: 16px 0 8px;
-}
-
-.price-currency {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--plan-text-light);
-}
-
-.price-amount {
-    font-size: 48px;
-    font-weight: 900;
-    color: var(--plan-text);
-    line-height: 1;
-    letter-spacing: -1px;
-}
-
-.plan-billing-modern {
-    text-align: center;
-    font-size: 14px;
-    color: var(--plan-text-light);
-    margin: 0 0 24px;
-}
-
-/* Plan Divider */
-.plan-divider-modern {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--plan-border), transparent);
-    margin: 24px 0;
-}
-
-/* Plan Features */
-.plan-features-modern {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 32px;
-    flex: 1;
-}
-
-.plan-features-modern li {
+/* Precio Animable */
+.summary-price-wrapper {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 10px 0;
-    font-size: 14px;
-    color: var(--plan-text);
+    gap: 4px;
 }
 
-.plan-features-modern i {
-    color: var(--plan-subscription);
+.summary-currency {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--vp-text-secondary);
+    margin-top: 8px;
+}
+
+.summary-price {
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1;
+    color: var(--vp-text-primary);
+    transition: opacity 0.2s;
+}
+
+.summary-price.updating {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.summary-billing {
+    font-size: 15px;
+    color: var(--vp-text-secondary);
+    margin: 12px 0 40px;
+    font-weight: 500;
+}
+
+/* Lista de Beneficios */
+.features-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--vp-text-secondary);
+    margin-bottom: 20px;
+}
+
+.summary-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 40px;
+}
+
+.summary-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
     font-size: 16px;
-    margin-top: 2px;
-    flex-shrink: 0;
+    line-height: 1.5;
+    color: var(--vp-text-primary);
+    animation: slideInRight 0.3s ease forwards;
+    opacity: 0;
 }
 
-/* Plan Footer */
-.plan-footer-modern {
-    margin-top: auto;
+/* Escalado para retraso en listas animadas */
+.summary-features li:nth-child(1) { animation-delay: 0.1s; }
+.summary-features li:nth-child(2) { animation-delay: 0.15s; }
+.summary-features li:nth-child(3) { animation-delay: 0.2s; }
+.summary-features li:nth-child(4) { animation-delay: 0.25s; }
+.summary-features li:nth-child(5) { animation-delay: 0.3s; }
+
+.summary-features li i {
+    color: var(--vp-accent);
+    font-size: 18px;
+    margin-top: 3px;
 }
 
-.btn-plan-modern {
+/* CTA */
+.summary-cta {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
-    padding: 16px 24px;
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 700;
-    color: white;
+    background-color: var(--vp-accent);
+    color: #FFFFFF;
     text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    padding: 20px;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 8px 16px rgba(0, 102, 204, 0.25);
 }
 
-.onetime-btn {
-    background: linear-gradient(135deg, var(--plan-primary), var(--plan-primary-dark));
-    box-shadow: 0 8px 20px rgba(79, 137, 232, 0.3);
-}
-
-.onetime-btn:hover {
+.summary-cta:hover {
+    background-color: var(--vp-accent-hover);
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(79, 137, 232, 0.4);
-    color: white;
+    box-shadow: 0 12px 24px rgba(0, 102, 204, 0.35);
+    color: #FFFFFF;
 }
 
-.subscription-btn {
-    background: linear-gradient(135deg, var(--plan-subscription), var(--plan-subscription-dark));
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+.summary-cta i {
+    transition: transform 0.3s;
 }
 
-.subscription-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
-    color: white;
+.summary-cta:hover i {
+    transform: translateX(4px);
 }
 
-.plan-extra-info {
+.summary-guarantee {
     text-align: center;
-    font-size: 12px;
-    color: var(--plan-text-light);
-    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--vp-text-secondary);
+    margin: 20px 0 0;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
 }
 
-.plan-extra-info i {
-    color: var(--plan-primary);
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Scroll Indicators */
-.scroll-indicators {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin: 20px 0;
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
-.scroll-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--plan-border);
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.scroll-indicator.active {
-    width: 32px;
-    border-radius: 4px;
-    background: var(--plan-primary);
-}
-
-/* Duration Selector */
-.duration-selector {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-}
-
-.duration-btn {
-    padding: 12px 28px;
-    background: var(--plan-bg-light);
-    border: 1px solid var(--plan-border);
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--plan-text);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.duration-btn:hover {
-    border-color: var(--plan-subscription);
-    color: var(--plan-subscription);
-}
-
-.duration-btn.active {
-    background: linear-gradient(135deg, var(--plan-subscription), var(--plan-subscription-dark));
-    color: white;
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.duration-content {
-    display: none;
-}
-
-.duration-content.active {
-    display: block;
-    animation: fadeInUp 0.5s ease;
-}
-
-/* Info Box */
-.plan-info-box {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 16px 24px;
-    background: var(--plan-bg-light);
-    border: 1px solid var(--plan-border);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-size: 14px;
-    color: var(--plan-text);
-}
-
-.plan-info-box i {
-    color: var(--plan-primary);
-    font-size: 18px;
-}
-
-/* Benefits Grid */
-.benefits-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    max-width: 900px;
-    margin: 60px auto 0;
-}
-
-.benefit-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 20px;
-    background: var(--plan-bg-light);
-    border: 1px solid var(--plan-border);
-    border-radius: 16px;
-    transition: all 0.3s ease;
-}
-
-.benefit-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.benefit-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    color: var(--plan-primary);
-}
-
-.benefit-item span {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--plan-text);
-}
-
-/* Reveal Animation */
-.reveal {
-    opacity: 0;
-    transform: translateY(30px);
-    animation: revealAnimation 0.8s ease forwards;
-}
-
-@keyframes revealAnimation {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .section-title-modern {
-        font-size: 32px;
-    }
-
-    .selector-track {
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .selector-background {
-        width: calc(100% - 12px);
-        height: calc(50% - 9px);
-    }
-
-    .selector-background.subscription-active {
-        transform: translateY(calc(100% + 6px));
-    }
-
-    .selector-background.onetime-active {
-        transform: translateY(0);
-    }
-
-    .selector-option {
-        padding: 14px 16px;
-    }
-
-    .plan-card-modern {
-        min-width: 280px;
-        max-width: 280px;
-        padding: 28px 24px;
-    }
-
-    .plans-scroll-wrapper {
-        padding: 20px 20px;
-    }
-
-    .scroll-nav {
-        display: none;
-    }
-
-    .plans-scroll {
-        scroll-snap-type: x proximity;
-        gap: 16px;
-        padding: 10px 10px 30px;
-    }
-
-    .benefits-grid {
+/* Responsividad */
+@media (max-width: 1024px) {
+    .guided-layout {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 40px;
     }
-
-    .price-amount {
-        font-size: 40px;
+    .guided-summary {
+        position: relative;
+        top: 0;
+    }
+    .summary-card {
+        padding: 32px;
     }
 }
 
-@media (max-width: 480px) {
-    .plan-card-modern {
-        min-width: 260px;
-        max-width: 260px;
+@media (max-width: 768px) {
+    .guided-pricing-section {
+        padding: 60px 0 80px;
+    }
+    .guided-title {
+        font-size: 38px;
+        letter-spacing: -1px;
+    }
+    .premium-segmented-control {
+        flex-direction: column;
+    }
+    .segmented-indicator {
+        width: calc(100% - 8px);
+        height: calc(50% - 4px);
+    }
+    .pet-selector-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .summary-price {
+        font-size: 56px;
+    }
+    .summary-card {
+        padding: 24px;
     }
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Plan Type Toggle
-    const selectorOptions = document.querySelectorAll('.selector-option');
-    const selectorBackground = document.getElementById('selectorBackground');
-    const oneTimePlans = document.getElementById('oneTimePlans');
-    const subscriptionPlans = document.getElementById('subscriptionPlans');
+    
+    // Configuración base de la lógica dinámica
+    const data = window.PetScanPlansData;
+    let currentType = 'onetime'; // 'onetime' o 'subscription'
+    let currentPets = 1;         // default initial
+    let activePlan = null;
+    
+    // Referencias a los elementos del DOM
+    const billingBtns = document.querySelectorAll('.segment-btn');
+    const segIndicator = document.querySelector('.segmented-indicator');
+    const petSelectorContainer = document.getElementById('petSelector');
+    
+    // Panel Resumen DOM
+    const sumCard = document.getElementById('summaryCard');
+    const sumBadgeWrap = document.getElementById('summaryBadgeWrapper');
+    const sumTitle = document.getElementById('summaryTitle');
+    const sumDesc = document.getElementById('summaryDesc');
+    const sumPrice = document.getElementById('summaryPrice');
+    const sumBilling = document.getElementById('summaryBillingMode');
+    const sumFeatures = document.getElementById('summaryFeatures');
+    const ctaBtn = document.getElementById('summaryCtaBtn');
+    const ctaText = document.getElementById('ctaText');
 
-    // Initialize state on load
-    function initializeSelector() {
-        const activeOption = document.querySelector('.selector-option.active');
-        if (activeOption) {
-            const type = activeOption.dataset.type;
-            if (type === 'oneTime') {
-                selectorBackground.classList.add('onetime-active');
-                selectorBackground.classList.remove('subscription-active');
+    // 1. Inicializar Interface
+    function init() {
+        // Encontrar la cantidad de mascotas base (normalmente 1)
+        if (data.onetime && data.onetime.length > 0) {
+            currentPets = data.onetime[0].pets_included;
+        }
+        buildPetButtons();
+        updateUI();
+    }
+
+    // 2. Control de Selector Segmentado (Pago único / Suscripción)
+    billingBtns.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            if(btn.classList.contains('active')) return;
+            
+            // Animación Segment Indicator
+            if (index === 0) {
+                // Desktop: horizontal, Mobile: vertical
+                if(window.innerWidth > 768) {
+                    segIndicator.style.transform = 'translateX(0)';
+                } else {
+                    segIndicator.style.transform = 'translateY(0)';
+                }
             } else {
-                selectorBackground.classList.add('subscription-active');
-                selectorBackground.classList.remove('onetime-active');
+                if(window.innerWidth > 768) {
+                    segIndicator.style.transform = 'translateX(100%)';
+                } else {
+                    segIndicator.style.transform = 'translateY(100%)';
+                }
             }
+
+            billingBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            currentType = btn.getAttribute('data-type');
+            
+            // Reconstruir botones de mascota por si difieren y actualizar UI central
+            buildPetButtons();
+            updateUI();
+        });
+    });
+
+    // Handle resize para el indicator position
+    window.addEventListener('resize', () => {
+        const activeIdx = Array.from(billingBtns).findIndex(b => b.classList.contains('active'));
+        if(window.innerWidth > 768) {
+            segIndicator.style.transform = activeIdx === 1 ? 'translateX(100%)' : 'translateX(0)';
+        } else {
+            segIndicator.style.transform = activeIdx === 1 ? 'translateY(100%)' : 'translateY(0)';
+        }
+    });
+
+    // 3. Reconstruir botones de selección de mascotas
+    function buildPetButtons() {
+        const plansList = currentType === 'onetime' ? data.onetime : data.subscription;
+        petSelectorContainer.innerHTML = '';
+        
+        let foundCurrentPets = false;
+
+        plansList.forEach(plan => {
+            if(plan.pets_included == currentPets) foundCurrentPets = true;
+
+            const btn = document.createElement('button');
+            btn.className = `pet-btn ${plan.pets_included == currentPets ? 'active' : ''}`;
+            btn.innerHTML = `
+                <i class="fa-solid fa-dog"></i>
+                <span>${plan.pets_included} ${plan.pets_included == 1 ? 'Mascota' : 'Mascotas'}</span>
+            `;
+            
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.pet-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentPets = plan.pets_included;
+                updateUI();
+            });
+
+            petSelectorContainer.appendChild(btn);
+        });
+
+        // Fallback if current pets choice isn't in new array
+        if(!foundCurrentPets && plansList.length > 0) {
+            currentPets = plansList[0].pets_included;
+            document.querySelector('.pet-btn').classList.add('active'); // select first
         }
     }
-    
-    // Call on load
-    initializeSelector();
 
-    selectorOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            const type = option.dataset.type;
+    // 4. Lógica de UI - Animar y mostrar los datos del plan actual
+    function updateUI() {
+        const plansList = currentType === 'onetime' ? data.onetime : data.subscription;
+        activePlan = plansList.find(p => p.pets_included == currentPets);
+        
+        if(!activePlan) return;
+
+        // Animar salida del precio
+        sumPrice.classList.add('updating');
+
+        setTimeout(() => {
+            // Asignar nuevas variables
+            const isPopular = activePlan.pets_included == 3; // Lógica del negocio
             
-            // Update active states
-            selectorOptions.forEach(opt => opt.classList.remove('active'));
-            option.classList.add('active');
-            
-            // Update background
-            if (type === 'subscription') {
-                selectorBackground.classList.add('subscription-active');
-                selectorBackground.classList.remove('onetime-active');
-                oneTimePlans.classList.remove('active');
-                subscriptionPlans.classList.add('active');
+            // Badge popular
+            if(isPopular) {
+                sumBadgeWrap.classList.add('visible');
+                sumCard.classList.add('has-badge');
             } else {
-                selectorBackground.classList.add('onetime-active');
-                selectorBackground.classList.remove('subscription-active');
-                oneTimePlans.classList.add('active');
-                subscriptionPlans.classList.remove('active');
-            }
-        });
-    });
-
-    // Duration Toggle for Subscriptions
-    const durationBtns = document.querySelectorAll('.duration-btn');
-    const durationContents = document.querySelectorAll('.duration-content');
-
-    durationBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const duration = btn.dataset.duration;
-            
-            // Update buttons
-            durationBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // Update content
-            durationContents.forEach(content => {
-                if (content.dataset.duration === duration) {
-                    content.classList.add('active');
-                } else {
-                    content.classList.remove('active');
-                }
-            });
-
-            // Update scroll indicators
-            setTimeout(() => {
-                setupScrollIndicators(document.querySelector(`.duration-content[data-duration="${duration}"] .plans-scroll`));
-            }, 100);
-        });
-    });
-
-    // Horizontal Scroll Navigation
-    function setupScrollNavigation() {
-        const scrollWrappers = document.querySelectorAll('.plans-scroll-wrapper');
-        
-        scrollWrappers.forEach(wrapper => {
-            const scrollContainer = wrapper.querySelector('.plans-scroll');
-            const leftBtn = wrapper.querySelector('.scroll-nav-left');
-            const rightBtn = wrapper.querySelector('.scroll-nav-right');
-            
-            if (!scrollContainer || !leftBtn || !rightBtn) return;
-
-            const scrollAmount = 344; // card width + gap
-
-            leftBtn.addEventListener('click', () => {
-                scrollContainer.scrollBy({
-                    left: -scrollAmount,
-                    behavior: 'smooth'
-                });
-            });
-
-            rightBtn.addEventListener('click', () => {
-                scrollContainer.scrollBy({
-                    left: scrollAmount,
-                    behavior: 'smooth'
-                });
-            });
-
-            // Update button states
-            function updateButtonStates() {
-                const isAtStart = scrollContainer.scrollLeft <= 10;
-                const isAtEnd = scrollContainer.scrollLeft >= scrollContainer.scrollWidth - scrollContainer.clientWidth - 10;
-                
-                leftBtn.disabled = isAtStart;
-                rightBtn.disabled = isAtEnd;
+                sumBadgeWrap.classList.remove('visible');
+                sumCard.classList.remove('has-badge');
             }
 
-            scrollContainer.addEventListener('scroll', updateButtonStates);
-            updateButtonStates();
-        });
-    }
-
-    // Scroll Indicators
-    function setupScrollIndicators(scrollContainer) {
-        if (!scrollContainer) return;
-        
-        const wrapper = scrollContainer.closest('.plans-scroll-wrapper').parentElement;
-        const indicatorsContainer = wrapper.querySelector('.scroll-indicators');
-        
-        if (!indicatorsContainer) return;
-
-        const cards = scrollContainer.querySelectorAll('.plan-card-modern');
-        indicatorsContainer.innerHTML = '';
-
-        cards.forEach((card, index) => {
-            const indicator = document.createElement('div');
-            indicator.classList.add('scroll-indicator');
-            if (index === 0) indicator.classList.add('active');
+            // Textos Principales
+            sumTitle.textContent = `Cobertura para ${activePlan.pets_included} ${activePlan.pets_included == 1 ? 'Mascota' : 'Mascotas'}`;
             
-            indicator.addEventListener('click', () => {
-                card.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest',
-                    inline: 'center'
-                });
-            });
+            // Precio
+            const formattedPrice = Number(activePlan.price).toLocaleString('es-CR');
+            sumPrice.textContent = formattedPrice;
+
+            // Billing Period
+            if(currentType === 'onetime') {
+                sumDesc.textContent = "La armadura digital completa para siempre.";
+                sumBilling.textContent = "Pago único. Sin cargos ocultos.";
+                ctaText.textContent = "Elegir Plan";
+            } else {
+                sumDesc.textContent = "Protección con esteroides y soporte premium.";
+                sumBilling.textContent = `Renovación cada ${data.subDuration} meses. Cancela cuando quieras.`;
+                ctaText.textContent = "Iniciar suscripción";
+            }
+
+            // Recrear Lista de Beneficios (Para disparar la animación de cascada)
+            sumFeatures.innerHTML = '';
             
-            indicatorsContainer.appendChild(indicator);
-        });
+            let features = [];
+            if(currentType === 'onetime') {
+                features = [
+                    `<strong>${activePlan.pets_included} ${activePlan.pets_included == 1 ? 'Placa inteligente' : 'Placas inteligentes'} QR</strong>`,
+                    "Perfil digital siempre disponible",
+                    "Alertas de escaneo al WhatsApp",
+                    "Acceso ilimitado a actualizaciones médicas",
+                    "Sistema de reporte automático en portal"
+                ];
+            } else {
+                features = [
+                    `<strong>${activePlan.pets_included} ${activePlan.pets_included == 1 ? 'Placa Premium' : 'Placas Premium'} QR</strong>`,
+                    "Reemplazo físico de placa gratis (1 anual)",
+                    "Mantenimiento VIP de perfil",
+                    "Notificaciones SMS de escaneo",
+                    "Soporte 24/7 sin filas de espera"
+                ];
+            }
 
-        // Update active indicator on scroll
-        scrollContainer.addEventListener('scroll', () => {
-            const containerCenter = scrollContainer.scrollLeft + scrollContainer.clientWidth / 2;
-            let activeIndex = 0;
-            let minDistance = Infinity;
+            // Extras
+            if(activePlan.pets_included >= 3 && activePlan.additional_pet_price > 0) {
+                const addPrice = Number(activePlan.additional_pet_price).toLocaleString('es-CR');
+                features.push(`Mascota extra por solo ₡${addPrice}`);
+            }
 
-            cards.forEach((card, index) => {
-                const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-                const distance = Math.abs(containerCenter - cardCenter);
-                
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    activeIndex = index;
-                }
+            features.forEach(feat => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fa-solid fa-check-circle"></i> <span>${feat}</span>`;
+                sumFeatures.appendChild(li);
             });
 
-            const indicators = indicatorsContainer.querySelectorAll('.scroll-indicator');
-            indicators.forEach((indicator, index) => {
-                if (index === activeIndex) {
-                    indicator.classList.add('active');
-                } else {
-                    indicator.classList.remove('active');
-                }
-            });
-        });
+            // Actualizar Enlace CTA
+            const checkoutUrl = data.routes.checkout.replace(':id', activePlan.id);
+            ctaBtn.href = checkoutUrl;
+
+            // Retornar animación precio
+            sumPrice.classList.remove('updating');
+            
+        }, 200); // 200ms duration for fade down
     }
 
-    // Initialize
-    setupScrollNavigation();
-    setupScrollIndicators(document.querySelector('#oneTimePlans .plans-scroll'));
-    
-    // Setup indicators for first subscription duration
-    const firstDuration = document.querySelector('.duration-content.active .plans-scroll');
-    if (firstDuration) {
-        setupScrollIndicators(firstDuration);
-    }
-
-    // Touch swipe enhancement
-    const scrollContainers = document.querySelectorAll('.plans-scroll');
-    scrollContainers.forEach(container => {
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        container.addEventListener('mousedown', (e) => {
-            isDown = true;
-            container.style.cursor = 'grabbing';
-            startX = e.pageX - container.offsetLeft;
-            scrollLeft = container.scrollLeft;
-        });
-
-        container.addEventListener('mouseleave', () => {
-            isDown = false;
-            container.style.cursor = 'grab';
-        });
-
-        container.addEventListener('mouseup', () => {
-            isDown = false;
-            container.style.cursor = 'grab';
-        });
-
-        container.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - container.offsetLeft;
-            const walk = (x - startX) * 2;
-            container.scrollLeft = scrollLeft - walk;
-        });
-    });
+    // Levantar todo
+    init();
 });
 </script>
-</document_content>
