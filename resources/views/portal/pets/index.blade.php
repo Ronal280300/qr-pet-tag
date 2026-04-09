@@ -1,1130 +1,766 @@
 @extends('layouts.app')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/portal.css') }}">
 <style>
+/* SAAS ESTÉTICA PREMIUM - REDISEÑO V2 */
+
+:root {
+  /* Paleta original respetada (Azul vibrante) */
+  --saas-primary: #2563eb;
+  --saas-primary-hover: #1d4ed8;
+  --saas-primary-soft: #eff6ff;
+  
+  --saas-bg: #F8FAFC;
+  --saas-surface: #FFFFFF;
+  --saas-text: #0F172A;
+  --saas-text-muted: #64748B;
+  --saas-border: #E2E8F0;
+  
+  --saas-radius-lg: 24px;
+  --saas-radius: 16px;
+  
+  --saas-shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.08); /* Sombra base más pronunciada */
+  --saas-shadow-md: 0 12px 24px -4px rgba(15, 23, 42, 0.1);
+  --saas-shadow-hover: 0 25px 40px -10px rgba(37, 99, 235, 0.18); /* Sombra azulada al hover */
+}
+
+/* Layout Page */
+.pets-dashboard {
+  padding: 2.5rem 0 5rem;
+  background: transparent;
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header Premium */
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+}
+
+.dash-title-group h1 {
+  font-size: 2.75rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: var(--saas-text);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.dash-title-group p {
+  color: var(--saas-text-muted);
+  font-size: 1.1rem;
+  margin: 0.5rem 0 0;
+  font-weight: 500;
+}
+
+.dash-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.saas-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.saas-btn-primary {
+  background: var(--saas-primary);
+  color: #FFF;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+}
+.saas-btn-primary:hover {
+  background: var(--saas-primary-hover);
+  color: #FFF;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+}
+
+.saas-btn-outline {
+  background: var(--saas-surface);
+  color: var(--saas-primary);
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.saas-btn-outline:hover {
+  background: var(--saas-primary-soft);
+  color: var(--saas-primary-hover);
+}
+
+/* Top Stats */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-pill {
+  background: var(--saas-surface);
+  border: none;
+  padding: 1.25rem 1.75rem;
+  border-radius: var(--saas-radius);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--saas-shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-pill::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: var(--saas-primary);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.stat-pill:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--saas-shadow-md);
+}
+.stat-pill:hover::before { opacity: 1; }
+
+.stat-pill-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--saas-primary-soft);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--saas-primary);
+  font-size: 1.25rem;
+}
+
+.stat-pill-data {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-pill-data strong {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--saas-text);
+  line-height: 1;
+}
+
+.stat-pill-data span {
+  font-size: 0.85rem;
+  color: var(--saas-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+/* Barra de Herramientas */
+.dash-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  background: var(--saas-surface);
+  padding: 0.75rem;
+  border-radius: var(--saas-radius-lg);
+  box-shadow: var(--saas-shadow-md);
+}
+
+.saas-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.saas-filter-btn {
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--saas-text-muted);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.saas-filter-btn:hover {
+  background: var(--saas-bg);
+  color: var(--saas-text);
+}
+.saas-filter-btn.active {
+  background: var(--saas-primary-soft);
+  color: var(--saas-primary);
+}
+
+.saas-search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.25rem;
+  width: 340px;
+  position: relative;
+  border-left: 1px solid var(--saas-border);
+}
+.saas-search i { color: var(--saas-primary); font-size: 1.1rem; }
+.saas-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--saas-text);
+}
+.saas-search input::placeholder { color: #94A3B8; font-weight: 500; }
+.search-clear { color: #94A3B8; cursor: pointer; transition: color 0.2s; }
+.search-clear:hover { color: #EF4444; }
+
+/* Grid Moderno V2 */
+.saas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  margin-bottom: 4rem;
+}
+
+/* Card Super Premium */
+.saas-card {
+  background: var(--saas-surface);
+  border-radius: var(--saas-radius-lg);
+  border: none;
+  overflow: hidden;
+  box-shadow: var(--saas-shadow-sm);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.saas-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--saas-shadow-hover);
+}
+
+.card-hero {
+  position: relative;
+  aspect-ratio: 4/3; 
+  background: #F1F5F9;
+  overflow: hidden;
+}
+
+.card-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.saas-card:hover .card-hero img {
+  transform: scale(1.08);
+}
+
+.card-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.8) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.saas-card:hover .card-hero::after {
+  opacity: 1;
+}
+
+.card-badges {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.saas-badge {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 0.5rem 1rem;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.badge-alert { background: rgba(239, 68, 68, 0.95); color: white; border: 1px solid rgba(255,255,255,0.2); }
+.badge-reward { background: rgba(16, 185, 129, 0.95); color: white; border: 1px solid rgba(255,255,255,0.2); }
+
+/* Botones de acción inferiores fijos en móvil y PC para mejor UX */
+.card-bottom-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-action-solid {
+  background: var(--saas-primary);
+  color: white;
+  border-radius: 12px;
+  padding: 0.8rem;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.btn-action-solid:hover {
+  background: var(--saas-primary-hover);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-action-light {
+  background: var(--saas-primary-soft);
+  color: var(--saas-primary);
+  border-radius: 12px;
+  padding: 0.8rem;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.btn-action-light:hover {
+  background: white;
+  border-color: var(--saas-primary);
+  color: var(--saas-primary-hover);
+  transform: translateY(-2px);
+}
+
+.card-body {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: var(--saas-surface);
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.pet-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--saas-text);
+  margin: 0;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pet-gender {
+  color: var(--saas-text-muted);
+  font-size: 1.2rem;
+}
+.pet-gender.male { color: var(--saas-primary); }
+.pet-gender.female { color: #EC4899; }
+
+.pet-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--saas-text-muted);
+}
+.detail-row i {
+  color: var(--saas-text-muted);
+  width: 16px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* Paginación minimalista (Full Números) */
+.saas-pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+  width: 100%;
+}
+
+.saas-numbers-wrapper {
+  background: var(--saas-surface);
+  padding: 0.5rem;
+  border-radius: 100px;
+  box-shadow: var(--saas-shadow-md);
+  display: inline-flex;
+  gap: 0.25rem;
+  border: 1px solid var(--saas-border);
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none; /* Firefox */
+}
+
+.saas-numbers-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome, Webkit */
+}
+
+.page-num {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--saas-text-muted);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* Nav arrows style */
+.page-nav-arrow {
+  width: auto;
+  padding: 0 1rem;
+  border-radius: 100px;
+}
+
+.page-num:hover:not(.disabled) {
+  background: var(--saas-primary-soft);
+  color: var(--saas-primary);
+}
+
+.page-num.active {
+  background: var(--saas-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.page-num.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  color: var(--saas-text-muted);
+  font-weight: 800;
+}
+
+/* Empty State */
+.saas-empty {
+  grid-column: span 3;
+  text-align: center;
+  padding: 8rem 2rem;
+  background: transparent;
+  border: 2px dashed #CBD5E1;
+  border-radius: var(--saas-radius-lg);
+}
+.saas-empty-icon {
+  width: 96px;
+  height: 96px;
+  background: var(--saas-surface);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem;
+  font-size: 3rem;
+  color: var(--saas-primary);
+  box-shadow: var(--saas-shadow-sm);
+}
+.saas-empty h3 { font-size: 1.75rem; font-weight: 800; color: var(--saas-text); margin-bottom: 0.5rem; }
+.saas-empty p { color: var(--saas-text-muted); margin-bottom: 2.5rem; font-size: 1.1rem; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .saas-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .saas-empty { grid-column: span 2; }
+}
+
+@media (max-width: 768px) {
+  .dash-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+  .dash-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+  .saas-btn { justify-content: center; padding: 1rem; }
+  
+  .dash-stats { grid-template-columns: 1fr; gap: 1rem; }
+  
+  .dash-tools { flex-direction: column; padding: 1rem; gap: 1.25rem; border-radius: 20px; }
+  .saas-filters { width: 100%; overflow-x: auto; padding-bottom: 0.5rem; flex-wrap: nowrap; scrollbar-width: none; }
+  .saas-filters::-webkit-scrollbar { display: none; }
+  .saas-filter-btn { flex-shrink: 0; }
+  .saas-search { width: 100%; border-left: none; border-top: 1px solid var(--saas-border); padding: 1rem 0 0 0; }
+  
+  .saas-grid { grid-template-columns: 1fr; margin-bottom: 2rem; }
+  .saas-empty { grid-column: span 1; }
+  
+  .saas-numbers-wrapper { padding: 0.5rem 0.25rem; justify-content: flex-start; }
+}
 
-  /* ===== Animaciones globales ===== */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideInLeft {
-    from {
-      opacity: 0;
-      transform: translateX(-30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  /* ===== Variables y reset ===== */
-  :root {
-    --primary: #2563eb;
-    --primary-dark: #1e40af;
-    --primary-light: #3b82f6;
-    --primary-ultra-light: #eff6ff;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --text-muted: #9ca3af;
-    --border: #e5e7eb;
-    --bg-page: #f8fafc;
-    --bg-card: #ffffff;
-    --radius: 12px;
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  /* ===== Page background ===== */
-  .pets-page {
-    background: var(--bg-page);
-    min-height: 100vh;
-    padding: 2rem 0;
-  }
-
-  .pets-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-  }
-
-  /* ===== Header ===== */
-  .pets-header {
-    margin-bottom: 2.5rem;
-  }
-
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-
-  .header-title h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 0.375rem 0;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-  }
-
-  .header-subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin: 0;
-    font-weight: 500;
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 0.75rem;
-    flex-shrink: 0;
-  }
-
-  .btn-header {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    border-radius: var(--radius);
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    text-decoration: none;
-  }
-
-  .btn-header:hover {
-    text-decoration: none;
-  }
-
-  .btn-primary-header {
-    background: var(--primary);
-    color: white;
-  }
-
-  .btn-primary-header:hover {
-    background: var(--primary-dark);
-    transform: translateY(-1px);
-    color: white;
-  }
-
-  .btn-secondary-header {
-    background: white;
-    color: var(--primary);
-    border: 1px solid var(--border);
-  }
-
-  .btn-secondary-header:hover {
-    background: var(--primary-ultra-light);
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  /* ===== Stats minimalistas ===== */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .stat-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 3px;
-    height: 100%;
-    background: var(--primary);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .stat-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
-    transform: translateY(-2px);
-  }
-
-  .stat-card:hover::before {
-    opacity: 1;
-  }
-
-  .stat-icon {
-    width: 52px;
-    height: 52px;
-    background: var(--primary-ultra-light);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary);
-    font-size: 1.375rem;
-    flex-shrink: 0;
-  }
-
-  .stat-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    line-height: 1;
-    margin-bottom: 0.375rem;
-    letter-spacing: -0.025em;
-  }
-
-  .stat-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* ===== Filters bar ===== */
-  .filters-section {
-    margin-bottom: 2.5rem;
-  }
-
-  .filters-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.875rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .filter-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.125rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    user-select: none;
-  }
-
-  .filter-chip:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--primary-ultra-light);
-    transform: translateY(-1px);
-  }
-
-  .filter-chip[aria-pressed="true"] {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-  }
-
-  .filter-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.4;
-    transition: opacity 0.2s ease;
-  }
-
-  .filter-chip:hover .filter-dot,
-  .filter-chip[aria-pressed="true"] .filter-dot,
-  .filter-chip.active .filter-dot {
-    opacity: 1;
-  }
-
-  .filter-chip.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-  }
-
-  .filter-chip {
-    text-decoration: none;
-  }
-
-  /* ===== Search box ===== */
-  .search-box {
-    position: relative;
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  }
-
-  .search-box:focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  }
-
-  .search-icon {
-    color: var(--text-muted);
-    font-size: 1.125rem;
-  }
-
-  .search-box:focus-within .search-icon {
-    color: var(--primary);
-  }
-
-  .search-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 0.9375rem;
-    color: var(--text-primary);
-    font-weight: 500;
-  }
-
-  .search-input::placeholder {
-    color: var(--text-muted);
-  }
-
-  .search-clear {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--text-muted);
-    color: white;
-    font-size: 14px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-
-  .search-clear:hover {
-    background: var(--danger);
-    transform: scale(1.1);
-  }
-
-  /* ===== Grid de mascotas ===== */
-  .pets-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-    gap: 1.75rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .pet-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-
-  .pet-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
-    opacity: 0;
-    transition: opacity 0.25s ease;
-    pointer-events: none;
-  }
-
-  .pet-card:hover {
-    border-color: var(--primary);
-    transform: translateY(-4px);
-  }
-
-  .pet-card:hover::after {
-    opacity: 1;
-  }
-
-  /* ===== Pet thumbnail ===== */
-  .pet-thumbnail {
-    position: relative;
-    background: linear-gradient(135deg, #f8fafc 0%, var(--primary-ultra-light) 100%);
-    aspect-ratio: 4/3;
-    overflow: hidden;
-  }
-
-  .pet-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .pet-card:hover .pet-image {
-    transform: scale(1.06);
-  }
-
-  /* ===== Badges ===== */
-  .pet-badges {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    pointer-events: none;
-    z-index: 10;
-  }
-
-  .badge-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 0.875rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 999px;
-    backdrop-filter: blur(12px);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  }
-
-  .badge-lost {
-    background: rgba(239, 68, 68, 0.96);
-    color: white;
-  }
-
-  .badge-reward {
-    background: rgba(34, 197, 94, 0.96);
-    color: white;
-  }
-
-  /* ===== Pet content ===== */
-  .pet-content {
-    padding: 1.5rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .pet-name-row {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-  }
-
-  .pet-gender-icon {
-    font-size: 1.125rem;
-    color: var(--primary);
-  }
-
-  .pet-name {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    letter-spacing: -0.015em;
-  }
-
-  .pet-info {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.625rem;
-  }
-
-  .info-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--bg-page);
-    border-radius: 8px;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
-  }
-
-  .info-tag:hover {
-    background: var(--primary-ultra-light);
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  .info-tag i {
-    font-size: 0.75rem;
-    color: var(--primary);
-  }
-
-  /* ===== Pet actions ===== */
-  .pet-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    margin-top: auto;
-  }
-
-  .btn-pet {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-  }
-
-  .btn-pet:hover {
-    text-decoration: none;
-  }
-
-  .btn-pet-view {
-    background: white;
-    color: var(--text-secondary);
-  }
-
-  .btn-pet-view:hover {
-    background: var(--bg-page);
-    color: var(--text-primary);
-    border-color: var(--text-secondary);
-  }
-
-  .btn-pet-edit {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-  }
-
-  .btn-pet-edit:hover {
-    background: var(--primary-dark);
-    border-color: var(--primary-dark);
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-  }
-
-  /* ===== Empty states ===== */
-  .empty-state {
-    background: white;
-    border: 2px dashed var(--border);
-    border-radius: 16px;
-    padding: 4rem 2rem;
-    text-align: center;
-  }
-
-  .empty-icon {
-    width: 72px;
-    height: 72px;
-    margin: 0 auto 1.5rem;
-    background: var(--primary-ultra-light);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary);
-    font-size: 2rem;
-  }
-
-  .empty-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.625rem;
-  }
-
-  .empty-text {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-bottom: 2rem;
-  }
-
-  .empty-filtered {
-    display: none;
-  }
-
-  /* ===== Animaciones sutiles ===== */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(24px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .pet-card {
-    animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    animation-fill-mode: both;
-  }
-
-  .pet-card:nth-child(1) { animation-delay: 0s; }
-  .pet-card:nth-child(2) { animation-delay: 0.05s; }
-  .pet-card:nth-child(3) { animation-delay: 0.1s; }
-  .pet-card:nth-child(4) { animation-delay: 0.15s; }
-  .pet-card:nth-child(5) { animation-delay: 0.2s; }
-  .pet-card:nth-child(6) { animation-delay: 0.25s; }
-
-  /* ===== Responsive ===== */
-  @media (max-width: 768px) {
-    .pets-page {
-      padding: 1.5rem 0;
-    }
-
-    .pets-container {
-      padding: 0 1rem;
-    }
-
-    .header-top {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-
-    .header-title h1 {
-      font-size: 1.5rem;
-    }
-
-    .header-actions {
-      width: 100%;
-    }
-
-    .btn-header {
-      flex: 1;
-      justify-content: center;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-    }
-
-    .stats-grid {
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-    }
-
-    .stat-card {
-      padding: 1rem;
-    }
-
-    .stat-icon {
-      width: 42px;
-      height: 42px;
-      font-size: 1.125rem;
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-    }
-
-    .stat-label {
-      font-size: 0.8125rem;
-    }
-
-    .filters-bar {
-      gap: 0.5rem;
-    }
-
-    .filter-chip {
-      padding: 0.5rem 0.875rem;
-      font-size: 0.875rem;
-    }
-
-    .pets-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-
-    .pet-content {
-      padding: 1rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .pets-page {
-      padding: 1rem 0;
-    }
-
-    .pets-container {
-      padding: 0 0.75rem;
-    }
-
-    .pets-header {
-      margin-bottom: 1.5rem;
-    }
-
-    .header-title h1 {
-      font-size: 1.375rem;
-    }
-
-    .header-subtitle {
-      font-size: 0.875rem;
-    }
-
-    .btn-header {
-      padding: 0.625rem 0.875rem;
-      font-size: 0.8125rem;
-    }
-
-    .stats-grid {
-      gap: 0.625rem;
-    }
-
-    .stat-card {
-      padding: 0.875rem;
-    }
-
-    .filters-section {
-      margin-bottom: 1.5rem;
-    }
-
-    .search-box {
-      padding: 0.625rem 0.875rem;
-    }
-
-    .search-input {
-      font-size: 0.875rem;
-    }
-
-    .pet-name {
-      font-size: 1rem;
-    }
-
-    .info-tag {
-      font-size: 0.75rem;
-    }
-
-    .btn-pet {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.8125rem;
-    }
-
-    .empty-state {
-      padding: 2rem 1rem;
-    }
-
-    .empty-icon {
-      width: 56px;
-      height: 56px;
-      font-size: 1.5rem;
-    }
-  }
-
-  /* ===== Loading state ===== */
-  .pet-thumbnail.loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    animation: shimmer 1.5s infinite;
-  }
-
-  @keyframes shimmer {
-    to {
-      left: 100%;
-    }
-  }
-
-  /* ===== Pagination mejorada ===== */
-  .pagination-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .pagination-info {
-    font-size: 0.9375rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .pagination-info strong {
-    color: var(--primary);
-    font-weight: 700;
-  }
-
-  .pagination-separator {
-    color: var(--text-muted);
-    margin: 0 0.5rem;
-  }
-
-  .pagination-controls {
-    display: flex;
-    justify-content: center;
-  }
-
-  .pagination {
-    display: flex;
-    gap: 0.5rem;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .page-item .page-link {
-    padding: 0.75rem 1.125rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    min-width: 44px;
-    text-align: center;
-  }
-
-  .page-item.active .page-link {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-    transform: translateY(-2px);
-  }
-
-  .page-item:not(.disabled) .page-link:hover {
-    background: var(--primary-ultra-light);
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: translateY(-2px);
-  }
-
-  .page-item.disabled .page-link {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  /* Responsive pagination */
-  @media (max-width: 768px) {
-    .pagination-info {
-      font-size: 0.875rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .page-item .page-link {
-      padding: 0.625rem 0.875rem;
-      font-size: 0.875rem;
-      min-width: 40px;
-    }
-  }
 </style>
 @endpush
 
 @section('content')
-<div class="pets-page">
-  <div class="pets-container">
-
-    {{-- Header --}}
-    <div class="pets-header">
-      <div class="header-top">
-        <div class="header-title">
-          <h1>{{ auth()->user()->is_admin ? 'Gestión de Mascotas' : 'Mis Mascotas' }}</h1>
-          <p class="header-subtitle">Administra la información de tus mascotas registradas</p>
-        </div>
-        <div class="header-actions">
-          @if(auth()->user()->is_admin)
-            <a href="{{ route('portal.pets.create') }}" class="btn-header btn-secondary-header">
-              <i class="fa-solid fa-plus"></i>
-              <span>Registrar</span>
-            </a>
-          @endif
-          <a href="{{ route('portal.activate-tag') }}" class="btn-header btn-primary-header">
-            <i class="fa-solid fa-tag"></i>
-            <span>Activar TAG</span>
-          </a>
-        </div>
-      </div>
-
-      {{-- Stats --}}
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fa-solid fa-paw"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ $pets->total() }}</div>
-            <div class="stat-label">Total</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ $pets->getCollection()->where('is_lost', true)->count() }}</div>
-            <div class="stat-label">Perdidas</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fa-solid fa-medal"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ $pets->getCollection()->filter(fn($p)=>optional($p->reward)->active)->count() }}</div>
-            <div class="stat-label">Con recompensa</div>
-          </div>
-        </div>
-      </div>
+<div class="pets-dashboard">
+  
+  {{-- Header --}}
+  <div class="dash-header">
+    <div class="dash-title-group">
+      <h1>{{ auth()->user()->is_admin ? 'Directorio Mascotas' : 'Mis Mascotas' }}</h1>
+      <p>Vista general y administración total de registros</p>
     </div>
-
-    {{-- Filters --}}
-    <div class="filters-section">
-      <div class="filters-bar" id="filterBar">
-        <button class="filter-chip active" data-filter="all" aria-pressed="true">
-          <span class="filter-dot"></span>
-          Todos
-        </button>
-        <button class="filter-chip" data-filter="lost">
-          <span class="filter-dot"></span>
-          Perdidas
-        </button>
-        <button class="filter-chip" data-filter="reward">
-          <span class="filter-dot"></span>
-          Con recompensa
-        </button>
-        <button class="filter-chip" data-filter="sex:male">
-          <span class="filter-dot"></span>
-          Macho
-        </button>
-        <button class="filter-chip" data-filter="sex:female">
-          <span class="filter-dot"></span>
-          Hembra
-        </button>
-      </div>
-
-      {{-- Search (solo admin) --}}
+    <div class="dash-actions">
       @if(auth()->user()->is_admin)
-        <form method="GET" action="{{ route('portal.pets.index') }}" id="searchForm">
-          <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input
-              type="text"
-              name="search"
-              id="petSearch"
-              class="search-input"
-              placeholder="Buscar por nombre, raza, zona o dueño..."
-              value="{{ request('search') }}"
-            >
-            @if(request('search'))
-              <a href="{{ route('portal.pets.index') }}" class="search-clear" title="Limpiar búsqueda">
-                <i class="fa-solid fa-xmark"></i>
-              </a>
-            @endif
-          </div>
-        </form>
+        <a href="{{ route('portal.pets.create') }}" class="saas-btn saas-btn-outline">
+          <i class="fa-solid fa-plus"></i>
+          <span>Nuevo Registro</span>
+        </a>
       @endif
+      <a href="{{ route('portal.activate-tag') }}" class="saas-btn saas-btn-primary">
+        <i class="fa-solid fa-qrcode"></i>
+        <span>Activar TAG</span>
+      </a>
+    </div>
+  </div>
+
+  {{-- Stats --}}
+  <div class="dash-stats">
+    <div class="stat-pill">
+      <div class="stat-pill-icon"><i class="fa-solid fa-folder-open"></i></div>
+      <div class="stat-pill-data">
+        <strong>{{ $pets->total() }}</strong>
+        <span>Registros</span>
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-icon" style="background:#FEF2F2; color:#EF4444;"><i class="fa-solid fa-bell"></i></div>
+      <div class="stat-pill-data">
+        <strong>{{ $pets->getCollection()->where('is_lost', true)->count() }}</strong>
+        <span>Extraviadas</span>
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-icon" style="background:#ECFDF5; color:#10B981;"><i class="fa-solid fa-award"></i></div>
+      <div class="stat-pill-data">
+        <strong>{{ $pets->getCollection()->filter(fn($p)=>optional($p->reward)->active)->count() }}</strong>
+        <span>Recompensadas</span>
+      </div>
+    </div>
+  </div>
+
+  {{-- Herramientas Modernas --}}
+  <div class="dash-tools">
+    <div class="saas-filters" id="filterBar">
+      <button class="saas-filter-btn active" data-filter="all"><i class="fa-solid fa-layer-group"></i> Todos</button>
+      <button class="saas-filter-btn" data-filter="lost"><i class="fa-solid fa-location-crosshairs"></i> Perdidas</button>
+      <button class="saas-filter-btn" data-filter="reward"><i class="fa-solid fa-sack-dollar"></i> Con Premio</button>
+      <button class="saas-filter-btn" data-filter="sex:male"><i class="fa-solid fa-mars"></i> Machos</button>
+      <button class="saas-filter-btn" data-filter="sex:female"><i class="fa-solid fa-venus"></i> Hembras</button>
     </div>
 
-    {{-- Grid de mascotas --}}
-    @if($pets->isEmpty())
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="fa-solid fa-paw"></i>
-        </div>
-        <div class="empty-title">No hay mascotas registradas</div>
-        <div class="empty-text">Comienza registrando tu primera mascota</div>
-        <a href="{{ route('portal.activate-tag') }}" class="btn-header btn-primary-header">
-          <i class="fa-solid fa-tag"></i>
-          <span>Activar mi primer TAG</span>
-        </a>
-      </div>
-    @else
-      <div id="petGrid" class="pets-grid">
-        @foreach($pets as $pet)
-          @php
-            $hasReward = optional($pet->reward)->active ? '1' : '0';
-            $sex = $pet->sex ?? 'unknown';
-          @endphp
-          <div
-            class="pet-card"
-            data-name="{{ Str::lower($pet->name) }}"
-            data-breed="{{ Str::lower($pet->breed ?? '') }}"
-            data-zone="{{ Str::lower($pet->zone ?? '') }}"
-            data-owner="{{ Str::lower(optional($pet->user)->name.' '.optional($pet->user)->email) }}"
-            data-lost="{{ $pet->is_lost ? '1' : '0' }}"
-            data-reward="{{ $hasReward }}"
-            data-sex="{{ $sex }}"
-          >
-            {{-- Thumbnail --}}
-            <div class="pet-thumbnail">
-              <img src="{{ $pet->main_photo_url }}" alt="{{ $pet->name }}" class="pet-image">
-              
-              <div class="pet-badges">
-                @if($pet->is_lost)
-                  <span class="badge-item badge-lost">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    Perdida
-                  </span>
-                @else
-                  <span></span>
-                @endif
-                
-                @if(optional($pet->reward)->active)
-                  <span class="badge-item badge-reward">
-                    <i class="fa-solid fa-medal"></i>
-                    @if(optional($pet->reward)->amount)
-                      ₡{{ number_format((float)$pet->reward->amount, 0) }}
-                    @else
-                      Recompensa
-                    @endif
-                  </span>
-                @endif
-              </div>
-            </div>
-
-            {{-- Content --}}
-            <div class="pet-content">
-              <div class="pet-name-row">
-                @if($sex === 'male')
-                  <i class="fa-solid fa-mars pet-gender-icon"></i>
-                @elseif($sex === 'female')
-                  <i class="fa-solid fa-venus pet-gender-icon"></i>
-                @else
-                  <i class="fa-solid fa-circle-question pet-gender-icon" style="color: var(--text-muted);"></i>
-                @endif
-                <h3 class="pet-name">{{ $pet->name }}</h3>
-              </div>
-
-              <div class="pet-info">
-                @if($pet->breed)
-                  <span class="info-tag">
-                    <i class="fa-solid fa-dog"></i>
-                    {{ $pet->breed }}
-                  </span>
-                @endif
-                
-                @if($pet->zone)
-                  <span class="info-tag">
-                    <i class="fa-solid fa-location-dot"></i>
-                    {{ $pet->zone }}
-                  </span>
-                @endif
-                
-                @if(auth()->user()->is_admin && $pet->user)
-                  <span class="info-tag">
-                    <i class="fa-solid fa-user"></i>
-                    {{ $pet->user->name }}
-                  </span>
-                @endif
-              </div>
-
-              <div class="pet-actions">
-                <a href="{{ route('portal.pets.show', $pet) }}" class="btn-pet btn-pet-view">
-                  <i class="fa-solid fa-eye"></i>
-                  Ver
-                </a>
-                <a href="{{ route('portal.pets.edit', $pet) }}" class="btn-pet btn-pet-edit">
-                  <i class="fa-solid fa-pen"></i>
-                  Editar
-                </a>
-              </div>
-            </div>
-          </div>
-        @endforeach
-      </div>
-
-      {{-- Empty filtered state --}}
-      <div id="emptyFiltered" class="empty-state empty-filtered" style="display: none;">
-        <div class="empty-icon">
+    @if(auth()->user()->is_admin)
+      <form method="GET" action="{{ route('portal.pets.index') }}" id="searchForm">
+        <div class="saas-search">
           <i class="fa-solid fa-search"></i>
+          <input type="text" name="search" id="petSearch" placeholder="Buscar por nombre o raza..." value="{{ request('search') }}">
+          @if(request('search'))
+            <a href="{{ route('portal.pets.index') }}" class="search-clear" title="Limpiar"><i class="fa-solid fa-xmark"></i></a>
+          @endif
         </div>
-        <div class="empty-title">No se encontraron resultados</div>
-        <div class="empty-text">Intenta ajustar los filtros</div>
-      </div>
-
-      {{-- Pagination --}}
-      @if($pets->hasPages())
-        <div class="pagination-wrapper">
-          <div class="pagination-info">
-            Página <strong>{{ $pets->currentPage() }}</strong> de <strong>{{ $pets->lastPage() }}</strong>
-            <span class="pagination-separator">•</span>
-            Mostrando <strong>{{ $pets->count() }}</strong> de <strong>{{ $pets->total() }}</strong> mascotas
-          </div>
-          <div class="pagination-controls">
-            {{ $pets->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
-          </div>
-        </div>
-      @endif
+      </form>
     @endif
-
   </div>
+
+  {{-- Grid UI --}}
+  @if($pets->isEmpty())
+    <div class="saas-grid">
+      <div class="saas-empty">
+        <div class="saas-empty-icon"><i class="fa-brands fa-space-awesome"></i></div>
+        <h3>El directorio está vacío</h3>
+        <p>No se encontraron registros de mascotas en esta base de datos en este momento.</p>
+        <a href="{{ route('portal.activate-tag') }}" class="saas-btn saas-btn-primary">Vincular TAG ahora</a>
+      </div>
+    </div>
+  @else
+    <div class="saas-grid" id="petGrid">
+      @foreach($pets as $pet)
+        @php
+          $hasReward = optional($pet->reward)->active ? '1' : '0';
+          $sex = $pet->sex ?? 'unknown';
+        @endphp
+        <div class="saas-card pet-card"
+             data-lost="{{ $pet->is_lost ? '1' : '0' }}"
+             data-reward="{{ $hasReward }}"
+             data-sex="{{ $sex }}">
+          
+          {{-- Hero Image & Flotantes --}}
+          <div class="card-hero">
+            <img src="{{ $pet->main_photo_url }}" alt="{{ $pet->name }}" loading="lazy">
+            <div class="card-badges">
+              @if($pet->is_lost)
+                <span class="saas-badge badge-alert"><i class="fa-solid fa-bolt"></i> Buscada</span>
+              @else
+                <span></span>
+              @endif
+              
+              @if(optional($pet->reward)->active)
+                <span class="saas-badge badge-reward">
+                  <i class="fa-solid fa-star"></i> 
+                  @if(optional($pet->reward)->amount) ₡{{ number_format((float)$pet->reward->amount, 0) }} @else Premio @endif
+                </span>
+              @endif
+            </div>
+
+            {{-- Removido quick-actions flotantes para mejor UX en móviles --}}
+          </div>
+
+          {{-- Content --}}
+          <div class="card-body">
+            <div class="card-meta">
+              <h3 class="pet-title">{{ $pet->name }}</h3>
+              @if($sex === 'male')
+                <i class="fa-solid fa-mars pet-gender male"></i>
+              @elseif($sex === 'female')
+                <i class="fa-solid fa-venus pet-gender female"></i>
+              @else
+                <i class="fa-solid fa-minus pet-gender"></i>
+              @endif
+            </div>
+
+            <div class="pet-details">
+              @if($pet->breed)
+                <div class="detail-row"><i class="fa-solid fa-paw"></i> {{ Str::limit($pet->breed, 20) }}</div>
+              @endif
+              @if($pet->zone)
+                <div class="detail-row"><i class="fa-solid fa-map-pin"></i> {{ Str::limit($pet->zone, 20) }}</div>
+              @endif
+            </div>
+
+            {{-- Fijos al fondo para un tacto seguro en móviles y PC --}}
+            <div class="card-bottom-actions">
+              <a href="{{ route('portal.pets.show', $pet) }}" class="btn-action-light"><i class="fa-regular fa-eye"></i> Ver</a>
+              <a href="{{ route('portal.pets.edit', $pet) }}" class="btn-action-solid"><i class="fa-solid fa-pen-nib"></i> Editar</a>
+            </div>
+          </div>
+        </div>
+      @endforeach
+    </div>
+
+    {{-- Empty JS State --}}
+    <div class="saas-grid" id="emptyFiltered" style="display: none;">
+      <div class="saas-empty" style="grid-column: span 3; padding: 4rem 2rem;">
+        <div class="saas-empty-icon" style="width:72px; height:72px; font-size:2rem;"><i class="fa-solid fa-ghost"></i></div>
+        <h3 style="font-size:1.25rem;">Sin coincidencias</h3>
+        <p style="margin-bottom:0;">Intenta limpiar los filtros visuales seleccionados arriba.</p>
+      </div>
+    </div>
+
+    {{-- Paginación Minimalista (Pestañas en números responsive) --}}
+    @if($pets->hasPages())
+      <div class="saas-pagination-container">
+        <div class="saas-numbers-wrapper">
+          
+          {{-- Prev --}}
+          @if ($pets->onFirstPage())
+             <span class="page-num page-nav-arrow disabled"><i class="fa-solid fa-chevron-left"></i></span>
+          @else
+             <a href="{{ $pets->previousPageUrl() }}" class="page-num page-nav-arrow"><i class="fa-solid fa-chevron-left"></i></a>
+          @endif
+
+          @php
+             $currentPage = $pets->currentPage();
+             $lastPage = $pets->lastPage();
+             $start = max(1, $currentPage - 2);
+             $end = min($lastPage, $currentPage + 2);
+          @endphp
+
+          @if($start > 1)
+             <a href="{{ $pets->url(1) }}" class="page-num">1</a>
+             @if($start > 2)
+               <span class="page-dots"><i class="fa-solid fa-ellipsis"></i></span>
+             @endif
+          @endif
+
+          @for ($i = $start; $i <= $end; $i++)
+             <a href="{{ $pets->url($i) }}" class="page-num {{ $i == $currentPage ? 'active' : '' }}">{{ $i }}</a>
+          @endfor
+
+          @if($end < $lastPage)
+             @if($end < $lastPage - 1)
+               <span class="page-dots"><i class="fa-solid fa-ellipsis"></i></span>
+             @endif
+             <a href="{{ $pets->url($lastPage) }}" class="page-num">{{ $lastPage }}</a>
+          @endif
+
+          {{-- Next --}}
+          @if ($pets->hasMorePages())
+             <a href="{{ $pets->nextPageUrl() }}" class="page-num page-nav-arrow"><i class="fa-solid fa-chevron-right"></i></a>
+          @else
+             <span class="page-num page-nav-arrow disabled"><i class="fa-solid fa-chevron-right"></i></span>
+          @endif
+
+        </div>
+      </div>
+    @endif
+  @endif
 </div>
 @endsection
 
@@ -1136,145 +772,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const items = Array.from(grid.querySelectorAll('.pet-card'));
   const emptyFiltered = document.getElementById('emptyFiltered');
+  const filterBar = document.getElementById('filterBar');
 
-  // Estado de filtros (solo para filtros visuales del lado del cliente)
-  const state = {
-    lost: false,
-    reward: false,
-    sex: null,
-  };
+  const state = { lost: false, reward: false, sex: null };
 
-  // Normalizar texto
-  const normalize = (str) => {
-    return (str || '').toString().toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-  };
-
-  // Auto-submit búsqueda cuando el usuario escribe (búsqueda del servidor)
+  // JS Search Submit
   const searchInput = document.getElementById('petSearch');
   const searchForm = document.getElementById('searchForm');
-
   if (searchInput && searchForm) {
     let searchTimeout;
-    searchInput.addEventListener('input', (e) => {
+    searchInput.addEventListener('input', () => {
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        searchForm.submit();
-      }, 500); // Esperar 500ms después de que el usuario deje de escribir
+      searchTimeout = setTimeout(() => searchForm.submit(), 600);
     });
   }
 
-  // Filter chips (filtros del lado del cliente - rápidos, sin reload)
-  const filterBar = document.getElementById('filterBar');
+  // Filter Logic
   filterBar.addEventListener('click', (e) => {
-    const chip = e.target.closest('.filter-chip');
-    if (!chip) return;
+    let btn = e.target.closest('.saas-filter-btn');
+    if (!btn) return;
 
-    const filter = chip.dataset.filter;
-    const isPressed = chip.getAttribute('aria-pressed') === 'true';
+    const filter = btn.dataset.filter;
+    const isActive = btn.classList.contains('active');
 
-    // Reset con "Todos"
     if (filter === 'all') {
-      state.lost = false;
-      state.reward = false;
-      state.sex = null;
-
-      filterBar.querySelectorAll('.filter-chip').forEach(c => {
-        c.setAttribute('aria-pressed', 'false');
-        c.classList.remove('active');
-      });
-      chip.setAttribute('aria-pressed', 'true');
-      chip.classList.add('active');
-      applyFilters();
-      return;
-    }
-
-    // Desactivar "Todos"
-    const allChip = filterBar.querySelector('[data-filter="all"]');
-    allChip.setAttribute('aria-pressed', 'false');
-    allChip.classList.remove('active');
-
-    // Toggle filtros
-    if (filter === 'lost') {
-      chip.setAttribute('aria-pressed', (!isPressed).toString());
-      chip.classList.toggle('active');
-      state.lost = !isPressed;
-    } else if (filter === 'reward') {
-      chip.setAttribute('aria-pressed', (!isPressed).toString());
-      chip.classList.toggle('active');
-      state.reward = !isPressed;
-    } else if (filter.startsWith('sex:')) {
-      const sexValue = filter.split(':')[1];
-      const sexChips = filterBar.querySelectorAll('[data-filter^="sex:"]');
-
-      if (state.sex === sexValue) {
-        state.sex = null;
-        chip.setAttribute('aria-pressed', 'false');
-        chip.classList.remove('active');
-      } else {
-        state.sex = sexValue;
-        sexChips.forEach(c => {
-          c.setAttribute('aria-pressed', 'false');
-          c.classList.remove('active');
-        });
-        chip.setAttribute('aria-pressed', 'true');
-        chip.classList.add('active');
+      state.lost = false; state.reward = false; state.sex = null;
+      filterBar.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    } else {
+      filterBar.querySelector('[data-filter="all"]').classList.remove('active');
+      
+      if (filter === 'lost') {
+        state.lost = !isActive;
+        btn.classList.toggle('active');
+      } else if (filter === 'reward') {
+        state.reward = !isActive;
+        btn.classList.toggle('active');
+      } else if (filter.startsWith('sex:')) {
+        const val = filter.split(':')[1];
+        filterBar.querySelectorAll('[data-filter^="sex:"]').forEach(b => b.classList.remove('active'));
+        if (state.sex === val) {
+          state.sex = null;
+        } else {
+          state.sex = val;
+          btn.classList.add('active');
+        }
       }
     }
-
     applyFilters();
   });
 
-  // Aplicar filtros (lado del cliente)
   function applyFilters() {
     let visibleCount = 0;
-
     items.forEach(card => {
-      const matchesLost = !state.lost || card.dataset.lost === '1';
-      const matchesReward = !state.reward || card.dataset.reward === '1';
-      const matchesSex = !state.sex || card.dataset.sex === state.sex;
-
-      const show = matchesLost && matchesReward && matchesSex;
-
-      card.style.display = show ? '' : 'none';
-      if (show) visibleCount++;
-    });
-
-    // Mostrar/ocultar mensaje de vacío
-    if (emptyFiltered) {
-      emptyFiltered.style.display = visibleCount === 0 ? 'block' : 'none';
-    }
-  }
-
-  // Aplicar filtros iniciales
-  applyFilters();
-
-  // Lazy loading de imágenes
-  const imageObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        const thumbnail = img.closest('.pet-thumbnail');
-        
-        if (thumbnail) {
-          thumbnail.classList.add('loading');
-        }
-
-        img.addEventListener('load', () => {
-          if (thumbnail) {
-            thumbnail.classList.remove('loading');
-          }
-        });
-
-        imageObserver.unobserve(img);
+      const matchLost = !state.lost || card.dataset.lost === '1';
+      const matchReward = !state.reward || card.dataset.reward === '1';
+      const matchSex = !state.sex || card.dataset.sex === state.sex;
+      
+      const show = matchLost && matchReward && matchSex;
+      
+      if(show) {
+        card.style.display = '';
+        visibleCount++;
+        // Trigger reflow to restart animation on filter
+        card.style.animation = 'none';
+        card.offsetHeight; 
+        card.style.animation = 'fadeIn 0.4s ease forwards';
+      } else {
+        card.style.display = 'none';
       }
     });
-  }, { rootMargin: '50px' });
 
-  document.querySelectorAll('.pet-image').forEach(img => {
-    imageObserver.observe(img);
-  });
+    if (emptyFiltered) {
+      emptyFiltered.style.display = visibleCount === 0 ? '' : 'none';
+      grid.style.display = visibleCount === 0 ? 'none' : 'grid';
+    }
+  }
 });
 </script>
 @endpush
