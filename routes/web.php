@@ -54,8 +54,10 @@ Route::middleware('auth')->group(function () {
 // Perfil público por SLUG (URL impresa en el TAG/QR)
 Route::get('/p/{slug}', [PublicController::class, 'showPet'])->name('public.pet.show');
 
-// Página de Términos y Condiciones
+// Páginas Legales y Soporte
 Route::view('/terminos', 'legal.terms')->name('legal.terms');
+Route::view('/privacidad', 'legal.privacy')->name('legal.privacy');
+Route::view('/ayuda', 'legal.help')->name('legal.help');
 
 // ===== Login / Logout =====
 Route::get('login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
