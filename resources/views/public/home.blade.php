@@ -1,2092 +1,960 @@
 @extends('layouts.app')
-@section('title', 'QR-Pet Tag — Protege siempre a tu mascota')
+@section('title', 'PetScan — La identificación inteligente para tu mascota')
 
 @push('styles')
-{{-- Fuentes modernas --}}
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
   :root {
-    --primary: #4e89e8;
-    --primary-dark: #3a6bb8;
-    --secondary: #ff7e30;
-    --secondary-dark: #e66a1f;
-    --ink: #0f172a;
-    --ink-light: #1e293b;
-    --muted: #64748b;
-    --muted-light: #94a3b8;
-    --bg: #ffffff;
-    --bg-subtle: #f8fafc;
-    --success: #10b981;
-    --success-light: #d1fae5;
-    --border: #e2e8f0;
-    --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
-    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
-    --shadow-lg: 0 16px 48px rgba(15, 23, 42, 0.12);
-    --shadow-xl: 0 24px 64px rgba(15, 23, 42, 0.16);
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    --ps-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+    --ps-bg: #FFFFFF;
+    --ps-bg-alt: #F8FAFC;
+    --ps-bg-accent: #EFF6FF;
+    
+    --ps-text-900: #0F172A;
+    --ps-text-600: #475569;
+    --ps-text-500: #64748B;
+    
+    --ps-primary: #0F172A;
+    --ps-primary-hover: #1E293B;
+    
+    --ps-accent: #2563EB;
+    --ps-accent-hover: #1D4ED8;
+    
+    --ps-border: #E2E8F0;
   }
 
   body {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    overflow-x: hidden;
+    font-family: var(--ps-font);
+    background-color: var(--ps-bg);
+    color: var(--ps-text-900);
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .ps-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
   }
 
   /* ============================================
-     HERO SECTION - Diseño moderno sin background
+     SISTEMA DE ANIMACIÓN (SCROLL REVEAL SUTIL)
      ============================================ */
-  .hero-modern {
+  .ps-reveal {
+    opacity: 0;
+    transform: translateY(16px); /* Muy sutil, no 30px */
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ps-reveal.ps-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .ps-delay-1 { transition-delay: 0.1s; }
+  .ps-delay-2 { transition-delay: 0.2s; }
+  .ps-delay-3 { transition-delay: 0.3s; }
+
+  /* ============================================
+     HERO SECTION
+     ============================================ */
+  .ps-hero {
     position: relative;
-    min-height: 90vh;
-    display: flex;
-    align-items: center;
-    padding: 100px 0 80px;
-    background: var(--bg);
+    padding: 120px 0 80px;
+    background: radial-gradient(circle at top, #FFFFFF 0%, var(--ps-bg-alt) 100%);
+    border-bottom: 1px solid var(--ps-border);
     overflow: hidden;
   }
 
-  /* Decoración con círculos flotantes */
-  .hero-decoration {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 0;
-  }
-
-  .floating-circle {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.05;
-    animation: float 20s ease-in-out infinite;
-  }
-
-  .floating-circle:nth-child(1) {
-    width: 500px;
-    height: 500px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    top: -200px;
-    right: -150px;
-    animation-delay: 0s;
-  }
-
-  .floating-circle:nth-child(2) {
-    width: 300px;
-    height: 300px;
-    background: linear-gradient(135deg, var(--secondary), var(--primary));
-    bottom: -100px;
-    left: -100px;
-    animation-delay: 3s;
-  }
-
-  .floating-circle:nth-child(3) {
-    width: 200px;
-    height: 200px;
-    background: linear-gradient(135deg, var(--primary), var(--success));
-    top: 40%;
-    left: 10%;
-    animation-delay: 6s;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    25% { transform: translate(30px, -30px) scale(1.05); }
-    50% { transform: translate(-20px, 20px) scale(0.95); }
-    75% { transform: translate(20px, 30px) scale(1.02); }
-  }
-
-  .hero-content {
+  .ps-hero-content {
     position: relative;
-    z-index: 10;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    z-index: 2;
   }
 
-  .hero-badge {
+  .ps-hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, rgba(78, 137, 232, 0.1), rgba(255, 126, 48, 0.1));
-    border: 1px solid rgba(78, 137, 232, 0.2);
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--primary);
+    padding: 8px 16px;
+    background-color: var(--ps-bg-accent);
+    color: var(--ps-accent);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 9999px;
     margin-bottom: 24px;
-    backdrop-filter: blur(10px);
-    animation: slideDown 0.6s ease-out, pulse 3s ease-in-out infinite 1s;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.05);
+    border: 1px solid rgba(37, 99, 235, 0.1);
   }
 
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(78, 137, 232, 0.4); }
-    50% { box-shadow: 0 0 0 15px rgba(78, 137, 232, 0); }
-  }
-
-  .hero-title {
-    font-weight: 900;
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
+  .ps-hero-title {
+    font-size: 56px;
+    font-weight: 800;
     line-height: 1.1;
-    color: var(--ink);
+    letter-spacing: -2px;
+    color: var(--ps-text-900);
     margin-bottom: 24px;
-    letter-spacing: -0.02em;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    hyphens: none;
   }
 
-  .hero-title-animated {
-    opacity: 1;
-    min-height: 120px;
-  }
-
-  .hero-title-text {
-    display: inline-block;
-  }
-
-  @keyframes fadeInUp {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-  }
-
-  .gradient-text {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    position: relative;
-    display: inline-block;
-  }
-
-  .hero-subtitle {
-    font-size: clamp(1.1rem, 2vw, 1.4rem);
-    color: var(--muted);
+  .ps-hero-subtitle {
+    font-size: 20px;
+    color: var(--ps-text-600);
     margin-bottom: 40px;
     max-width: 600px;
-    line-height: 1.7;
-    opacity: 0;
-    animation: fadeInUp 0.8s ease-out 0.4s forwards;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .hero-cta {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    opacity: 0;
-    animation: fadeInUp 0.8s ease-out 0.6s forwards;
-  }
-
-  .btn-hero {
+  .ps-btn-primary {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 16px 32px;
+    justify-content: center;
+    padding: 16px 36px;
+    background-color: var(--ps-primary);
+    color: #FFFFFF !important;
     font-size: 16px;
     font-weight: 600;
     border-radius: 12px;
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .btn-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s;
+  .ps-btn-primary:hover {
+    background-color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
   }
 
-  .btn-hero:hover::before {
-    left: 100%;
+  .ps-hero-image-perspective {
+    margin-top: 60px;
+    perspective: 1500px; /* Profundidad extra sutil */
   }
 
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    box-shadow: 0 8px 24px rgba(78, 137, 232, 0.3);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(78, 137, 232, 0.4);
-    color: white;
-  }
-
-  .btn-secondary {
-    background: white;
-    color: var(--ink);
-    border: 2px solid var(--border);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .btn-secondary:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  .hero-image {
-    position: relative;
-    z-index: 1;
-    opacity: 0;
-    animation: fadeInScale 1s ease-out 0.4s forwards;
-  }
-
-  @keyframes fadeInScale {
-    from {
-      opacity: 0;
-      transform: scale(0.9) translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-
-  .hero-image-wrapper {
-    position: relative;
-    animation: floatImage 8s ease-in-out infinite;
-  }
-
-  @keyframes floatImage {
-    0%, 100% {
-      transform: translateY(0) translateX(0) rotate(0deg) scale(1);
-    }
-    25% {
-      transform: translateY(-15px) translateX(10px) rotate(2deg) scale(1.02);
-    }
-    50% {
-      transform: translateY(-25px) translateX(-5px) rotate(-1deg) scale(1.05);
-    }
-    75% {
-      transform: translateY(-15px) translateX(10px) rotate(2deg) scale(1.02);
-    }
-  }
-
-  .hero-image-inner {
+  .ps-hero-image-wrapper {
     position: relative;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: var(--shadow-xl);
-    transition: transform 0.4s ease;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0,0,0,0.05);
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #FFF;
+    transform-style: preserve-3d;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .hero-image-inner:hover {
-    transform: scale(1.02) rotate(1deg);
-  }
-
-  .hero-image-inner img {
+  .ps-hero-image-wrapper img {
     width: 100%;
     height: auto;
     display: block;
-  }
-
-  /* Efecto de brillo en la imagen */
-  .hero-image-glow {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(78, 137, 232, 0.15), transparent 70%);
-    animation: rotate 10s linear infinite;
+    object-fit: cover;
     pointer-events: none;
   }
 
-  @keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
   /* ============================================
-     TRUST BADGES - Rediseño moderno
+     TRUST BAR
      ============================================ */
-  .trust-section {
-    padding: 60px 0;
-    background: var(--bg-subtle);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+  .ps-trust-bar {
+    padding: 32px 0;
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--ps-border);
   }
 
-  .trust-badge-modern {
+  .ps-trust-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .ps-trust-item {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 16px 24px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-    border: 1px solid var(--border);
-  }
-
-  .trust-badge-modern:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary);
-  }
-
-  .trust-badge-icon {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    font-size: 24px;
-    background: linear-gradient(135deg, rgba(78, 137, 232, 0.1), rgba(78, 137, 232, 0.05));
-    color: var(--primary);
-  }
-
-  .trust-badge-content h4 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--ink);
-    margin: 0 0 2px 0;
-  }
-
-  .trust-badge-content p {
-    font-size: 14px;
-    color: var(--muted);
-    margin: 0;
-  }
-
-  /* ============================================
-     METRICS SECTION - Estadísticas animadas
-     ============================================ */
-  .metrics-section {
-    padding: 80px 0;
-    background: white;
-  }
-
-  .metric-card-modern {
-    text-align: center;
-    padding: 40px 24px;
-    background: white;
-    border: 2px solid var(--border);
-    border-radius: 20px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .metric-card-modern::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
-    transform: scaleX(0);
-    transition: transform 0.4s ease;
-  }
-
-  .metric-card-modern:hover {
-    transform: translateY(-8px);
-    border-color: var(--primary);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .metric-card-modern:hover::before {
-    transform: scaleX(1);
-  }
-
-  .metric-icon-modern {
-    width: 64px;
-    height: 64px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 16px;
-    font-size: 28px;
-    margin-bottom: 20px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    box-shadow: 0 8px 24px rgba(78, 137, 232, 0.25);
-    animation: bounceIn 0.6s ease-out;
-  }
-
-  @keyframes bounceIn {
-    0% { transform: scale(0); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
-
-  .metric-number {
-    font-size: clamp(2.5rem, 4vw, 3.5rem);
-    font-weight: 900;
-    color: var(--ink);
-    margin: 0 0 8px 0;
-    line-height: 1;
-  }
-
-  .metric-label {
-    font-size: 16px;
-    color: var(--muted);
-    font-weight: 500;
-    margin: 0;
-  }
-
-  /* ============================================
-     FEATURES SECTION - Características
-     ============================================ */
-  .features-section {
-    padding: 100px 0;
-    background: var(--bg-subtle);
-    position: relative;
-  }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: 64px;
-  }
-
-  .section-badge {
-    display: inline-block;
-    padding: 8px 20px;
-    background: linear-gradient(135deg, rgba(78, 137, 232, 0.1), rgba(255, 126, 48, 0.1));
-    border: 1px solid rgba(78, 137, 232, 0.2);
-    border-radius: 50px;
-    font-size: 14px;
+    color: var(--ps-text-600);
     font-weight: 600;
-    color: var(--primary);
+    font-size: 14px;
+  }
+
+  .ps-trust-item i {
+    color: var(--ps-accent);
+    font-size: 20px;
+    padding: 8px;
+    background: var(--ps-bg-accent);
+    border-radius: 8px;
+  }
+
+  /* ============================================
+     HOW IT WORKS
+     ============================================ */
+  .ps-section {
+    padding: 120px 0;
+    background: #FFFFFF;
+  }
+
+  .ps-section-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 64px;
+  }
+
+  .ps-section-title {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--ps-text-900);
     margin-bottom: 16px;
   }
 
-  .section-title {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 900;
-    color: var(--ink);
-    margin: 0 0 16px 0;
-    letter-spacing: -0.02em;
-  }
-
-  .section-subtitle {
+  .ps-section-subtitle {
     font-size: 18px;
-    color: var(--muted);
-    max-width: 600px;
-    margin: 0 auto;
+    color: var(--ps-text-600);
   }
 
-  .feature-card-modern {
-    background: white;
-    border: 2px solid var(--border);
-    border-radius: 24px;
+  .ps-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  .ps-step-card {
+    background: var(--ps-bg-alt);
     padding: 40px 32px;
-    height: 100%;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 24px;
+    border: 1px solid var(--ps-border);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
   }
 
-  .feature-card-modern::before {
+  .ps-step-card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(78, 137, 232, 0.02), rgba(255, 126, 48, 0.02));
-    opacity: 0;
-    transition: opacity 0.4s ease;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--ps-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .feature-card-modern:hover::before {
-    opacity: 1;
+  .ps-step-card:hover {
+    transform: translateY(-4px); /* Suave ascenso */
+    box-shadow: 0 15px 30px -10px rgba(0,0,0,0.04);
+    background: #FFFFFF;
+    border-color: rgba(37,99,235,0.1);
   }
 
-  .feature-card-modern:hover {
-    transform: translateY(-12px);
-    border-color: var(--primary);
-    box-shadow: var(--shadow-xl);
+  .ps-step-card:hover::before {
+    transform: scaleX(1);
   }
 
-  .feature-icon-modern {
-    width: 72px;
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 18px;
-    font-size: 32px;
-    margin-bottom: 24px;
-    background: linear-gradient(135deg, rgba(78, 137, 232, 0.1), rgba(78, 137, 232, 0.05));
-    color: var(--primary);
-    transition: all 0.4s ease;
-  }
-
-  .feature-card-modern:hover .feature-icon-modern {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 8px 24px rgba(78, 137, 232, 0.2);
-  }
-
-  .feature-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--ink);
-    margin: 0 0 12px 0;
-  }
-
-  .feature-description {
-    font-size: 15px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin: 0;
-  }
-
-  /* ============================================
-     BENEFITS SECTION - Beneficios
-     ============================================ */
-  .benefits-section {
-    padding: 100px 0;
-    background: white;
-  }
-
-  .benefit-card-modern {
-    display: flex;
-    gap: 24px;
-    padding: 32px;
-    background: white;
-    border: 2px solid var(--border);
-    border-radius: 20px;
-    transition: all 0.3s ease;
-    height: 100%;
-  }
-
-  .benefit-card-modern:hover {
-    transform: translateX(8px);
-    border-color: var(--success);
-    box-shadow: var(--shadow-md);
-  }
-
-  .benefit-icon-modern {
+  .ps-step-icon {
     width: 56px;
     height: 56px;
+    background: var(--ps-primary);
+    color: #FFF;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
+    border-radius: 16px;
     font-size: 24px;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
-    color: var(--success);
-    flex-shrink: 0;
-  }
-
-  .benefit-content h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--ink);
-    margin: 0 0 8px 0;
-  }
-
-  .benefit-content p {
-    font-size: 15px;
-    color: var(--muted);
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  /* ============================================
-     HOW IT WORKS - Paso a paso
-     ============================================ */
-  .how-it-works {
-    padding: 100px 0;
-    background: var(--bg-subtle);
-  }
-
-  .step-card {
-    position: relative;
-    text-align: center;
-    padding: 40px 24px;
-  }
-
-  .step-number {
-    width: 64px;
-    height: 64px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 24px;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
     margin-bottom: 24px;
-    box-shadow: 0 8px 24px rgba(78, 137, 232, 0.3);
-    position: relative;
-    z-index: 2;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .ps-step-card:hover .ps-step-icon {
+    transform: translateY(-2px);
+    background: var(--ps-accent);
   }
 
-  .step-connector {
-    position: absolute;
-    top: 72px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: calc(100% - 144px);
-    background: linear-gradient(180deg, var(--primary), transparent);
-    z-index: 1;
-  }
-
-  .step-card:last-child .step-connector {
-    display: none;
-  }
-
-  .step-title {
+  .ps-step-title {
     font-size: 20px;
     font-weight: 700;
-    color: var(--ink);
-    margin: 0 0 12px 0;
+    margin-bottom: 12px;
+    color: var(--ps-text-900);
   }
 
-  .step-description {
+  .ps-step-desc {
+    color: var(--ps-text-600);
     font-size: 15px;
-    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ============================================
+     VALUE PROP (Dark Mode Asimétrico)
+     ============================================ */
+  .ps-features-bg {
+    background-color: var(--ps-primary);
+    color: #FFFFFF;
+    padding: 120px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ps-features-bg .ps-section-title {
+    color: #FFFFFF;
+  }
+
+  .ps-features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .ps-feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid transparent;
+  }
+
+  .ps-feature-item:hover {
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.05);
+    transform: translateX(8px);
+  }
+
+  .ps-feature-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.05); /* Más sutil */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ps-feature-item:hover .ps-feature-icon {
+    background: var(--ps-accent);
+    color: white;
+  }
+
+  .ps-feature-text h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #FFF;
+  }
+
+  .ps-feature-text p {
+    color: #94A3B8;
+    font-size: 15px;
     margin: 0;
     line-height: 1.6;
   }
 
-  /* ============================================
-     PETS CAROUSEL INFINITO - Galería de mascotas
-     ============================================ */
-  .pets-gallery-section {
-    padding: 100px 0;
-    background: white;
-    overflow: hidden;
-  }
-
-  .pets-carousel-wrapper {
-    margin-top: 48px;
-    width: 100%;
-    overflow: hidden;
+  .ps-features-visual-wrapper {
     position: relative;
   }
 
-  /* Gradiente para suavizar los bordes */
-  .pets-carousel-wrapper::before,
-  .pets-carousel-wrapper::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    width: 100px;
-    height: 100%;
+  .ps-features-image {
+    width: 100%;
+    border-radius: 24px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    position: relative;
     z-index: 2;
-    pointer-events: none;
   }
-
-  .pets-carousel-wrapper::before {
-    left: 0;
-    background: linear-gradient(to right, white, transparent);
-  }
-
-  .pets-carousel-wrapper::after {
-    right: 0;
-    background: linear-gradient(to left, white, transparent);
-  }
-
-  .pets-carousel-track {
+  
+  .ps-floating-card {
+    position: absolute;
+    bottom: 40px;
+    left: -40px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 16px;
     display: flex;
-    gap: 24px;
-    animation: scroll-infinite 40s linear infinite;
-    width: max-content;
+    align-items: center;
+    gap: 16px;
+    z-index: 3;
+    animation: float 8s ease-in-out infinite; /* Animación más lenta y elegante */
   }
 
-  .pets-carousel-track:hover {
-    animation-play-state: paused;
-  }
-
-  @keyframes scroll-infinite {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-
-  .pet-carousel-item {
-    flex-shrink: 0;
-    width: 220px;
-  }
-
-  .pet-carousel-card {
-    position: relative;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .pet-carousel-card:hover {
-    transform: translateY(-12px);
-  }
-
-  .pet-carousel-card img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    border-radius: 20px;
-    box-shadow: var(--shadow-md);
-    transition: all 0.4s ease;
-    display: block;
-  }
-
-  .pet-carousel-card:hover img {
-    box-shadow: var(--shadow-xl);
-    transform: scale(1.05);
-  }
-
-  .pet-carousel-name {
-    text-align: center;
-    margin-top: 16px;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--ink);
-    transition: color 0.3s ease;
-  }
-
-  .pet-carousel-card:hover .pet-carousel-name {
-    color: var(--primary);
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); } /* Leve flotación */
   }
 
   /* ============================================
-     FAQ SECTION - Preguntas frecuentes
+     FAQ (Acordión Interactivo)
      ============================================ */
-  .faq-modern {
-    padding: 100px 0;
-    background: white;
-    position: relative;
+  .ps-faq-section {
+    background: var(--ps-bg-alt);
+    padding: 120px 0;
   }
-
-  .faq-container {
+     
+  .ps-faq-container {
     max-width: 800px;
     margin: 0 auto;
   }
 
-  .faq-item {
-    background: white;
-    border: 2px solid var(--border);
-    border-radius: 20px;
-    margin-bottom: 20px;
+  .ps-faq-item {
+    background: #FFFFFF;
+    border: 1px solid var(--ps-border);
+    border-radius: 16px;
+    margin-bottom: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
   }
 
-  .faq-item:hover {
-    border-color: var(--primary);
-    box-shadow: var(--shadow-md);
+  .ps-faq-item:hover {
+    border-color: rgba(37,99,235,0.2);
   }
 
-  .faq-question {
+  .ps-faq-item.active {
+    border-color: rgba(37,99,235,0.3);
+  }
+
+  .ps-faq-header {
+    padding: 24px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    padding: 24px 28px;
     cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .faq-question:hover {
-    background: rgba(78, 137, 232, 0.02);
-  }
-
-  .faq-icon {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    font-size: 20px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    flex-shrink: 0;
-  }
-
-  .faq-question-text {
-    flex: 1;
-  }
-
-  .faq-question-text h3 {
     font-size: 18px;
-    font-weight: 600;
-    color: var(--ink);
-    margin: 0;
+    font-weight: 700;
+    color: var(--ps-text-900);
+    user-select: none;
+    transition: color 0.3s ease;
   }
 
-  .faq-toggle {
+  .ps-faq-icon {
     width: 32px;
     height: 32px;
+    border-radius: 50%;
+    color: var(--ps-text-500);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    background: var(--bg-subtle);
-    color: var(--primary);
-    transition: all 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s;
     flex-shrink: 0;
   }
 
-  .faq-item.active .faq-toggle {
+  .ps-faq-item.active .ps-faq-icon {
     transform: rotate(180deg);
-    background: var(--primary);
-    color: white;
+    color: var(--ps-accent);
   }
 
-  .faq-content {
+  .ps-faq-body {
     max-height: 0;
+    opacity: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease, padding 0.4s ease;
-    padding: 0 28px;
+    padding: 0 24px;
+    transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), padding 0.5s ease, opacity 0.4s ease;
   }
 
-  .faq-item.active .faq-content {
-    max-height: 1000px;
-    padding: 0 28px 24px 96px;
+  .ps-faq-item.active .ps-faq-body {
+    padding: 0 24px 24px;
+    opacity: 1;
   }
 
-  .faq-content p {
-    color: var(--muted);
-    line-height: 1.7;
-    margin: 0 0 16px 0;
+  .ps-faq-body p {
+    color: var(--ps-text-600);
+    margin: 0;
+    line-height: 1.6;
+    font-size: 15px;
   }
 
-  .faq-features {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .faq-feature {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    background: var(--bg-subtle);
-    border-radius: 12px;
-  }
-
-  .faq-feature i {
-    color: var(--primary);
-    font-size: 18px;
-  }
-
-  .faq-feature span {
-    color: var(--ink);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  /* ============================================
-     SOCIAL CTA - Redes sociales
-     ============================================ */
-  .social-cta {
-    padding: 80px 0;
-    background: var(--bg-subtle);
+  /* Redes, Footer */
+  .ps-community-card {
+    background: linear-gradient(135deg, var(--ps-accent), var(--ps-primary));
+    border-radius: 32px;
+    padding: 64px 32px;
     text-align: center;
+    color: #FFFFFF;
+    box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.2); /* Sombra menos densa */
+    position: relative;
+    overflow: hidden;
   }
 
-  .social-buttons {
+  .ps-community-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .ps-community-content h2 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+    color: #FFFFFF;
+  }
+
+  .ps-community-content p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+
+  .ps-social-grid {
     display: flex;
     justify-content: center;
     gap: 16px;
-    flex-wrap: wrap;
   }
 
-  .social-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border: 2px solid var(--border);
-    background: white;
-    color: var(--ink);
-  }
-
-  .social-btn:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    color: var(--ink);
-  }
-
-  .social-btn.wa:hover {
-    border-color: #25d366;
-    color: #25d366;
-  }
-
-  .social-btn.fb:hover {
-    border-color: #1877f2;
-    color: #1877f2;
-  }
-
-  .social-btn.tt:hover {
-    border-color: #000000;
-    color: #000000;
-  }
-
-  .social-btn i {
-    font-size: 20px;
-  }
-
-  /* ============================================
-     FINAL CTA - Llamada a la acción
-     ============================================ */
-  .cta-final {
-    padding: 100px 0;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cta-final::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 70%);
-    animation: rotate 20s linear infinite;
-  }
-
-  .cta-final-content {
-    position: relative;
-    z-index: 2;
-  }
-
-  .cta-final h2 {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 900;
-    margin: 0 0 16px 0;
-  }
-
-  .cta-final p {
-    font-size: 18px;
-    margin: 0 0 32px 0;
-    opacity: 0.9;
-  }
-
-  .btn-cta-final {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 18px 40px;
-    background: white;
-    color: var(--primary);
-    font-size: 18px;
-    font-weight: 700;
-    border-radius: 14px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-  }
-
-  .btn-cta-final:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
-    color: var(--primary);
-  }
-
-  /* ============================================
-     WHATSAPP FLOAT BUTTON - Rediseñado
-     ============================================ */
-  .whatsapp-float {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
+  .ps-social-btn {
     width: 64px;
     height: 64px;
-    background: linear-gradient(135deg, #25d366, #20c45a);
-    color: white;
-    border-radius: 50%;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05); /* Más translúcido */
+    border: 1px solid rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
-    z-index: 1000;
-    transition: all 0.3s ease;
+    font-size: 24px;
+    color: #FFFFFF;
     text-decoration: none;
-    animation: floatWhatsApp 3s ease-in-out infinite;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .whatsapp-float:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 32px rgba(37, 211, 102, 0.6);
-    color: white;
+  .ps-social-btn:hover {
+    background: #FFFFFF;
+    transform: translateY(-4px); /* Hover sutil */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   }
 
-  @keyframes floatWhatsApp {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+  .ps-social-btn.instagram:hover { color: #E1306C; }
+  .ps-social-btn.facebook:hover { color: #1877F2; }
+  .ps-social-btn.tiktok:hover { color: #0f172a; }
+
+  .ps-footer {
+    background-color: var(--ps-bg-alt);
+    border-top: 1px solid var(--ps-border);
+    padding: 80px 0 32px;
   }
 
-  .whatsapp-tooltip {
-    position: absolute;
-    right: 80px;
-    background: white;
-    color: var(--ink);
-    padding: 12px 20px;
-    border-radius: 12px;
+  .ps-footer-top {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 64px;
+    margin-bottom: 64px;
+  }
+
+  .ps-footer-brand { max-width: 320px; }
+
+  .ps-footer-logo {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--ps-text-900);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .ps-footer-logo i { color: var(--ps-accent); }
+
+  .ps-footer-desc {
+    color: var(--ps-text-600);
     font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    box-shadow: var(--shadow-lg);
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s ease;
+    line-height: 1.6;
   }
 
-  .whatsapp-float:hover .whatsapp-tooltip {
-    opacity: 1;
-    right: 75px;
+  .ps-footer-links-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 80px;
   }
 
-  /* ============================================
-     REVEAL ANIMATIONS - Animaciones al scroll
-     ============================================ */
-  .reveal {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  .ps-footer-column h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ps-text-900);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
   }
 
-  .reveal.show {
-    opacity: 1;
-    transform: translateY(0);
+  .ps-footer-column a {
+    display: block;
+    color: var(--ps-text-600);
+    text-decoration: none;
+    font-size: 15px;
+    margin-bottom: 16px;
+    transition: opacity 0.2s ease;
   }
 
-  /* ============================================
-     RESPONSIVE DESIGN - Móviles
-     ============================================ */
+  .ps-footer-column a:hover {
+    color: var(--ps-accent);
+  }
+
+  .ps-footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 32px;
+    border-top: 1px solid var(--ps-border);
+    color: var(--ps-text-500);
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .ps-footer-made i {
+     color: #EF4444; margin: 0 4px;
+  }
+
+  /* MEDIA QUERIES */
+  @media (max-width: 1024px) {
+    .ps-steps-grid { grid-template-columns: repeat(2, 1fr); }
+    .ps-features-grid { gap: 40px; }
+    .ps-floating-card { display: none; }
+  }
+
   @media (max-width: 768px) {
-    .hero-modern {
-      min-height: auto;
-      padding: 80px 0 60px;
-    }
-
-    .hero-content {
-      margin-bottom: 40px;
-      z-index: 10;
-    }
-
-    .hero-image {
-      z-index: 1;
-      margin-top: 40px;
-    }
-
-    .hero-title {
-      font-size: clamp(1.75rem, 6vw, 2.5rem);
-      line-height: 1.2;
-      hyphens: none;
-    }
-
-    .hero-title-animated {
-      min-height: 100px;
-    }
-
-    .hero-subtitle {
-      font-size: 1rem;
-      line-height: 1.6;
-    }
-
-    .hero-cta {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .btn-hero {
-      justify-content: center;
-      width: 100%;
-      padding: 14px 24px;
-    }
-
-    .floating-circle:nth-child(1) {
-      width: 300px;
-      height: 300px;
-      top: -100px;
-      right: -100px;
-    }
-
-    .floating-circle:nth-child(2) {
-      width: 200px;
-      height: 200px;
-    }
-
-    .floating-circle:nth-child(3) {
-      display: none;
-    }
-
-    .metrics-section,
-    .features-section,
-    .benefits-section,
-    .how-it-works,
-    .pets-gallery-section,
-    .faq-modern {
-      padding: 60px 0;
-    }
-
-    .section-title {
-      font-size: 1.75rem;
-    }
-
-    .section-header {
-      margin-bottom: 40px;
-    }
-
-    .metric-card-modern {
-      padding: 32px 20px;
-    }
-
-    .feature-card-modern,
-    .benefit-card-modern {
-      padding: 28px 20px;
-    }
-
-    .faq-question {
-      padding: 20px;
-      gap: 12px;
-    }
-
-    .faq-icon {
-      width: 40px;
-      height: 40px;
-      font-size: 18px;
-    }
-
-    .faq-question-text h3 {
-      font-size: 16px;
-    }
-
-    .faq-item.active .faq-content {
-      padding: 0 20px 20px 20px;
-    }
-
-    .step-connector {
-      display: none;
-    }
-
-    .cta-final {
-      padding: 60px 0;
-    }
-
-    .social-buttons {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .social-btn {
-      justify-content: center;
-      width: 100%;
-    }
-
-    .whatsapp-float {
-      width: 56px;
-      height: 56px;
-      bottom: 20px;
-      right: 20px;
-      font-size: 28px;
-    }
-
-    .whatsapp-tooltip {
-      display: none;
-    }
-
-    .trust-badge-modern {
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
-    }
-  }
-
-  @media (max-width: 576px) {
-    .hero-title {
-      font-size: clamp(1.5rem, 7vw, 2rem);
-      line-height: 1.3;
-      margin-bottom: 20px;
-      padding: 0 10px;
-    }
-
-    .hero-title-animated {
-      min-height: 90px;
-    }
-
-    .hero-subtitle {
-      font-size: 0.95rem;
-      padding: 0 10px;
-    }
-
-    .hero-badge {
-      font-size: 12px;
-      padding: 8px 16px;
-    }
-
-    .btn-hero {
-      padding: 14px 24px;
-      font-size: 14px;
-    }
-
-    .metric-number {
-      font-size: 2rem;
-    }
-
-    .feature-icon-modern,
-    .benefit-icon-modern {
-      width: 56px;
-      height: 56px;
-      font-size: 24px;
-    }
-
-    .step-number {
-      width: 56px;
-      height: 56px;
-      font-size: 20px;
-    }
-
-    .section-title {
-      font-size: 1.5rem;
-      padding: 0 10px;
-    }
-
-    .section-subtitle {
-      font-size: 0.95rem;
-      padding: 0 10px;
-    }
-
-    /* Carousel de mascotas en móvil */
-    .pet-carousel-item {
-      width: 180px;
-    }
-
-    .pet-carousel-card img {
-      height: 180px;
-    }
-
-    .pet-carousel-name {
-      font-size: 16px;
-      margin-top: 12px;
-    }
-    
-    
-
-    .pets-carousel-wrapper::before,
-    .pets-carousel-wrapper::after {
-      width: 50px;
-    }
-
-    .pets-carousel-track {
-      gap: 16px;
-    }
-
-    /* Asegurar que nada se salga */
-    body {
-      overflow-x: hidden;
-    }
-
-    .container {
-      padding-left: 15px;
-      padding-right: 15px;
-    }
-
-    * {
-      max-width: 100%;
-    }
-  }
-
-  /* ============================================
-     PERFORMANCE OPTIMIZATIONS
-     ============================================ */
-  .will-change-transform {
-    will-change: transform;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
-  /* Reducir animaciones para usuarios que prefieren menos movimiento */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
+    .ps-hero { padding: 80px 0 60px; }
+    .ps-hero-title { font-size: 40px; letter-spacing: -1px; }
+    .ps-trust-grid { flex-direction: column; align-items: flex-start; padding: 0 24px; }
+    .ps-steps-grid, .ps-features-grid { grid-template-columns: 1fr; }
+    .ps-section { padding: 80px 0; }
+    .ps-features-bg { padding: 80px 0; }
+    .ps-features-image { margin-top: 40px; }
+    .ps-faq-section { padding: 80px 0; }
+    .ps-community-card { padding: 48px 24px; }
+    .ps-footer-top { grid-template-columns: 1fr; gap: 40px; }
+    .ps-footer-links-group { justify-content: flex-start; flex-direction: column; gap: 40px; }
+    .ps-footer-bottom { flex-direction: column; text-align: center; }
   }
 </style>
 @endpush
 
 @section('content')
 
-{{-- ====== HERO SECTION ====== --}}
-<section class="hero-modern">
-  <div class="hero-decoration">
-    <div class="floating-circle"></div>
-    <div class="floating-circle"></div>
-    <div class="floating-circle"></div>
-  </div>
-
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-6 hero-content">
-        <div class="hero-badge">
-          <i class="fa-solid fa-shield-check"></i>
-          <span>Tecnología de protección inteligente</span>
-        </div>
-        
-        <h1 class="hero-title">
-          <span class="hero-title-animated">
-            <span class="hero-title-text" id="heroTitle">Nunca más pierdas a tu mejor amigo 🐾</span> 
-            <span class="gradient-text"></span>
-          </span>
-        </h1>
-        
-        <p class="hero-subtitle">
-          Con QR-Pet Tag, tu mascota lleva un código QR único que permite a cualquier persona escanear y contactarte al instante si la encuentran. Protección 24/7 en segundos.
-        </p>
-
-        <div class="hero-cta">
-          @guest
-            <a href="{{ route('plans.index') }}" class="btn-hero btn-primary will-change-transform">
-              <i class="fa-solid fa-tags"></i>
-              Ver Planes
+<!-- HERO SECTION -->
+<section class="ps-hero" id="heroSection">
+    <div class="ps-container">
+        <div class="ps-hero-content ps-reveal">
+            <span class="ps-hero-badge">
+                <i class="fa-solid fa-satellite-dish"></i> Identificación Pasiva Segura
+            </span>
+            <h1 class="ps-hero-title">El enlace directo entre tú y la seguridad de tu mascota</h1>
+            <p class="ps-hero-subtitle">Manejamos su identidad en la nube. Placas inteligentes ultraligeras. Un perfil que habla por ellos cuando no pueden hacerlo.</p>
+            
+            <a href="#planes" class="ps-btn-primary">
+                Protege a tu mascota <i class="fa-solid fa-shield-cat ms-2"></i>
             </a>
-          @else
-            <a href="{{ route('plans.index') }}" class="btn-hero btn-primary will-change-transform">
-              <i class="fa-solid fa-tags"></i>
-              Ver Planes
-            </a>
-          @endguest
-
-          <a href="#como-funciona" class="btn-hero btn-secondary will-change-transform">
-            <i class="fa-solid fa-circle-play"></i>
-            Ver cómo funciona
-          </a>
         </div>
-      </div>
 
-      <div class="col-lg-6 hero-image">
-        <div class="hero-image-wrapper will-change-transform">
-          <div class="hero-image-inner">
-            <div class="hero-image-glow"></div>
-            <img src="https://images.unsplash.com/photo-1507146426996-ef05306b995a?q=80&w=1200&auto=format&fit=crop" 
-                 alt="Mascota con placa QR"
-                 width="520"
-                 height="360"
-                 loading="eager">
-          </div>
+        <div class="ps-hero-image-perspective ps-reveal ps-delay-1">
+            <div class="ps-hero-image-wrapper" id="heroImageWrapper">
+                <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=1200&h=600" alt="Placa Inteligente PetScan en uso">
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </section>
 
-{{-- ====== TRUST BADGES ====== --}}
-<section class="trust-section">
-  <div class="container">
-    <div class="row g-4">
-      <div class="col-md-4 reveal">
-        <div class="trust-badge-modern">
-          <div class="trust-badge-icon">
-            <i class="fa-solid fa-lock"></i>
-          </div>
-          <div class="trust-badge-content">
-            <h4>100% Seguro</h4>
-            <p>Tus datos protegidos</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 reveal">
-        <div class="trust-badge-modern">
-          <div class="trust-badge-icon">
-            <i class="fa-solid fa-bolt"></i>
-          </div>
-          <div class="trust-badge-content">
-            <h4>Activación Instantánea</h4>
-            <p>Rápida activación</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 reveal">
-        <div class="trust-badge-modern">
-          <div class="trust-badge-icon">
-            <i class="fa-solid fa-heart"></i>
-          </div>
-          <div class="trust-badge-content">
-            <h4>Seguridad en mascotas</h4>
-            <p>Ya protegidas</p>
-          </div>
-        </div>
-      </div>
+<!-- TRUST BAR -->
+<div class="ps-trust-bar">
+    <div class="ps-container ps-trust-grid ps-reveal">
+        <div class="ps-trust-item"><i class="fa-solid fa-bolt"></i> Escaneo mundial sin apps</div>
+        <div class="ps-trust-item"><i class="fa-solid fa-shield-halved"></i> Datos 100% encriptados</div>
+        <div class="ps-trust-item"><i class="fa-solid fa-battery-full"></i> Tecnología permanente</div>
+        <div class="ps-trust-item"><i class="fa-solid fa-truck-fast"></i> Envíos nacionales</div>
     </div>
-  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="ps-section">
+    <div class="ps-container">
+        <div class="ps-section-header ps-reveal">
+            <h2 class="ps-section-title">Diseñado para la urgencia</h2>
+            <p class="ps-section-subtitle">Cuando cada segundo cuenta, el flujo debe ser instantáneo y sin fricción para quien la encuentra.</p>
+        </div>
+
+        <div class="ps-steps-grid">
+            <!-- Step 1 -->
+            <div class="ps-step-card ps-reveal ps-delay-1">
+                <div class="ps-step-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                <h3 class="ps-step-title">1. Alguien la encuentra</h3>
+                <p class="ps-step-desc">La persona responsable escanea la tecnología pasiva de la placa. No necesita descargar nada, la lectura es instantánea con su cámara nativa.</p>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="ps-step-card ps-reveal ps-delay-2">
+                <div class="ps-step-icon"><i class="fa-solid fa-address-card"></i></div>
+                <h3 class="ps-step-title">2. Perfil vital revelado</h3>
+                <p class="ps-step-desc">Ven de inmediato su nombre, historial médico (alergias críticas) y los canales de comunicación de emergencia pre-autorizados por ti.</p>
+            </div>
+            
+            <!-- Step 3 -->
+            <div class="ps-step-card ps-reveal ps-delay-3">
+                <div class="ps-step-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+                <h3 class="ps-step-title">3. Alerta y ubicación</h3>
+                <p class="ps-step-desc">Se captura discretamente el ping de geolocalización en el momento del escaneo, enviándote un mapa silencioso directo a tus notificaciones.</p>
+            </div>
+        </div>
+    </div>
 </section>
 
-{{-- ===== SECCIÓN DE PLANES ===== --}}
+<!-- VALUE PROP / FEATURES -->
+<section class="ps-features-bg">
+    <div class="ps-container">
+        <div class="ps-features-grid">
+            
+            <div class="ps-features-content ps-reveal">
+                <h2 class="ps-section-title" style="text-align: left; margin-bottom: 48px;">No es solo una placa. Es un pasaporte de salud encriptado</h2>
+                
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="ps-feature-item">
+                        <div class="ps-feature-icon"><i class="fa-solid fa-notes-medical"></i></div>
+                        <div class="ps-feature-text">
+                            <h4>Historial Médico Centralizado</h4>
+                            <p>Actualiza vacunas, medicamentos y dietas desde la comodidad de tu portal en cualquier momento.</p>
+                        </div>
+                    </div>
+
+                    <div class="ps-feature-item">
+                        <div class="ps-feature-icon"><i class="fa-solid fa-bell-concierge"></i></div>
+                        <div class="ps-feature-text">
+                            <h4>Notificaciones de Eventos</h4>
+                            <p>Registro activo detallado. Sabrás en el segundo exacto cuando la placa fue interactuada.</p>
+                        </div>
+                    </div>
+
+                    <div class="ps-feature-item">
+                        <div class="ps-feature-icon"><i class="fa-solid fa-eye-slash"></i></div>
+                        <div class="ps-feature-text">
+                            <h4>Arquitectura Privada</h4>
+                            <p>Datos confidenciales resguardados. Tu información de contacto se abre al mundo solamente al declararlo perdido.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ps-features-visual-wrapper ps-reveal ps-delay-2">
+                <div class="ps-floating-card">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #2563EB; display:flex; align-items:center; justify-content:center; color:white;"><i class="fa-solid fa-location-dot"></i></div>
+                    <div>
+                        <div style="font-weight: 600; color: white; font-size: 14px;">Localización detectada</div>
+                        <div style="color: #94A3B8; font-size: 12px;">Vía coordenadas pasivas</div>
+                    </div>
+                </div>
+                <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=800&h=1000" alt="Mascota protegida" class="ps-features-image">
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- PRICING CREADO PREVIAMENTE -->
 @include('public.partials.plans-section')
 
-
-<!--{{-- ====== METRICS SECTION ====== --}}
-<section class="metrics-section">
-</section>
-
- {{-- ====== FEATURES SECTION ====== --}}
-<section class="features-section">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-badge">
-        <i class="fa-solid fa-star"></i> Características
-      </span>
-      <h2 class="section-title">Todo lo que necesitas en un <span class="gradient-text">solo lugar</span></h2>
-      <p class="section-subtitle">Herramientas poderosas para mantener a tu mascota segura y conectada contigo</p>
-    </div>
-
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4 reveal">
-        <div class="feature-card-modern will-change-transform">
-          <div class="feature-icon-modern">
-            <i class="fa-solid fa-qrcode"></i>
-          </div>
-          <h3 class="feature-title">Código QR único</h3>
-          <p class="feature-description">Cada mascota tiene su propio código QR inviolable que dirige a su perfil de contacto.</p>
+<!-- PREGUNTAS FRECUENTES (Acordión Interactivo JS) -->
+<section class="ps-faq-section ps-section">
+    <div class="ps-container">
+        <div class="ps-section-header ps-reveal">
+            <h2 class="ps-section-title">Preguntas Frecuentes</h2>
+            <p class="ps-section-subtitle">Claridad total antes de dar el siguiente paso.</p>
         </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4 reveal">
-        <div class="feature-card-modern will-change-transform">
-          <div class="feature-icon-modern">
-            <i class="fa-solid fa-mobile-screen"></i>
-          </div>
-          <h3 class="feature-title">Sin app necesaria</h3>
-          <p class="feature-description">Cualquier persona puede escanear el QR con la cámara de su teléfono. Simple y rápido.</p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4 reveal">
-        <div class="feature-card-modern will-change-transform">
-          <div class="feature-icon-modern">
-            <i class="fa-solid fa-bell"></i>
-          </div>
-          <h3 class="feature-title">Alertas instantáneas</h3>
-          <p class="feature-description">Recibe notificación al momento cuando alguien escanea el QR de tu mascota.</p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4 reveal">
-        <div class="feature-card-modern will-change-transform">
-          <div class="feature-icon-modern">
-            <i class="fa-solid fa-shield-halved"></i>
-          </div>
-          <h3 class="feature-title">Privacidad total</h3>
-          <p class="feature-description">Tú decides qué información compartir. Tus datos personales siempre protegidos.</p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4 reveal">
-        <div class="feature-card-modern will-change-transform">
-          <div class="feature-icon-modern">
-            <i class="fa-solid fa-pen-to-square"></i>
-          </div>
-          <h3 class="feature-title">Actualización fácil</h3>
-          <p class="feature-description">Cambia la información de contacto cuando quieras desde tu panel de control.</p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4 reveal">
-        <div class="feature-card-modern will-change-transform">
-          <div class="feature-icon-modern">
-            <i class="fa-solid fa-medal"></i>
-          </div>
-          <h3 class="feature-title">Sistema de recompensas</h3>
-          <p class="feature-description">Ofrece una recompensa para incentivar el retorno seguro de tu mascota.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section> -->
-
-{{-- ====== BENEFITS SECTION ====== --}}
-<section class="benefits-section">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-badge">
-        <i class="fa-solid fa-paw"></i> Beneficios
-      </span>
-      <h2 class="section-title">Descubre las ventajas de <span class="gradient-text">QR-Pet Tag</span></h2>
-      <p class="section-subtitle">Diseñado para mantener a tu mascota siempre identificada y protegida</p>
-    </div>
-
-    <div class="row g-4">
-      <div class="col-md-6 reveal">
-        <div class="benefit-card-modern">
-          <div class="benefit-icon-modern">
-            <i class="fa-solid fa-id-badge"></i>
-          </div>
-          <div class="benefit-content">
-            <h3>Identificación inteligente</h3>
-            <p>Cada etiqueta QR contiene la información esencial de tu mascota, accesible en segundos desde cualquier dispositivo.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 reveal">
-        <div class="benefit-card-modern">
-          <div class="benefit-icon-modern">
-            <i class="fa-solid fa-shield-heart"></i>
-          </div>
-          <div class="benefit-content">
-            <h3>Seguridad y tranquilidad</h3>
-            <p>Reduce el riesgo de pérdida al permitir que cualquier persona pueda contactarte fácilmente si encuentra a tu mascota.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 reveal">
-        <div class="benefit-card-modern">
-          <div class="benefit-icon-modern">
-            <i class="fa-solid fa-globe"></i>
-          </div>
-          <div class="benefit-content">
-            <h3>Disponible en cualquier lugar</h3>
-            <p>Funciona globalmente sin necesidad de aplicaciones adicionales.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 reveal">
-        <div class="benefit-card-modern">
-          <div class="benefit-icon-modern">
-            <i class="fa-solid fa-headset"></i>
-          </div>
-          <div class="benefit-content">
-            <h3>Soporte y acompañamiento</h3>
-            <p>Te brindamos asistencia continua para que puedas aprovechar al máximo tu sistema QR-Pet Tag.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-{{-- ====== HOW IT WORKS ====== --}}
-<section class="how-it-works" id="como-funciona">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-badge">
-        <i class="fa-solid fa-lightbulb"></i> Proceso
-      </span>
-      <h2 class="section-title">Activa la protección <span class="gradient-text">QR-Pet Tag</span> en 3 pasos</h2>
-      <p class="section-subtitle">Empieza hoy y mantén a tu mascota identificada y segura en 3 simples pasos</p>
-    </div>
-
-    <div class="row g-4">
-      <div class="col-md-4 reveal">
-        <div class="step-card">
-          <div class="step-number">1</div>
-          <div class="step-connector"></div>
-          <h3 class="step-title">Elige tu plan</h3>
-          <p class="step-description">
-            Selecciona el plan que mejor se adapte a tus necesidades y registra la cantidad de mascotas que deseas proteger.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-4 reveal">
-        <div class="step-card">
-          <div class="step-number">2</div>
-          <div class="step-connector"></div>
-          <h3 class="step-title">Sube tu comprobante</h3>
-          <p class="step-description">
-            Realiza el pago y carga el comprobante directamente en el sistema. Nuestro equipo verificará tu solicitud en menos de 24 horas.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-4 reveal">
-        <div class="step-card">
-          <div class="step-number">3</div>
-          <h3 class="step-title">Activa tu código QR</h3>
-          <p class="step-description">
-            Una vez verificado el pago, podrás acceder a tu panel, ver tus mascotas o activar sus códigos QR personalizados.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-{{-- ====== MASCOTAS PROTEGIDAS - Carousel Infinito ====== --}}
-<section class="pets-gallery-section">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-badge">
-        <i class="fa-solid fa-heart"></i> Mascotas Protegidas
-      </span>
-      <h2 class="section-title">Ellos ya están <span class="gradient-text">protegidos</span></h2>
-      <p class="section-subtitle">Mascotas que se encuentran protegidas por QR-Pet Tag para su seguridad</p>
-    </div>
-
-    @if($pets && $pets->count() > 0)
-    <div class="pets-carousel-wrapper reveal">
-      <div class="pets-carousel-track">
-        {{-- Primera iteración de mascotas --}}
-        @foreach($pets as $pet)
-          @php
-            $mainPhoto = $pet->photos->first();
-          @endphp
-          @if($mainPhoto)
-          <div class="pet-carousel-item">
-            <div class="pet-carousel-card">
-              <img src="{{ $mainPhoto->url }}"
-                   alt="{{ $pet->name }}"
-                   loading="lazy">
-              <div class="pet-carousel-name">{{ $pet->name }}</div>
+        
+        <div class="ps-faq-container ps-reveal ps-delay-1">
+            
+            <div class="ps-faq-item">
+                <div class="ps-faq-header">
+                    ¿Existen mensualidades ocultas?
+                    <div class="ps-faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="ps-faq-body">
+                    <p>No hay cargos ocultos. El plan de Pago Único te brinda la placa con su respectivo servicio online para siempre. Las modalidades de suscripción están reservadas solo si deseas envíos y hardware de reemplazo de por vida.</p>
+                </div>
             </div>
-          </div>
-          @endif
-        @endforeach
 
-        {{-- Duplicamos las mascotas para efecto infinito seamless --}}
-        @foreach($pets as $pet)
-          @php
-            $mainPhoto = $pet->photos->first();
-          @endphp
-          @if($mainPhoto)
-          <div class="pet-carousel-item" aria-hidden="true">
-            <div class="pet-carousel-card">
-              <img src="{{ $mainPhoto->url }}"
-                   alt="{{ $pet->name }}"
-                   loading="lazy">
-              <div class="pet-carousel-name">{{ $pet->name }}</div>
+            <div class="ps-faq-item">
+                <div class="ps-faq-header">
+                    ¿La placa necesita carga o baterías?
+                    <div class="ps-faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="ps-faq-body">
+                    <p>Esa es nuestra principal ventaja tecnológica. Operamos mediante lectura NFC y Mapeo QR de alta durabilidad, lo que significa que la placa nunca morirá sin batería durante los días que tu mascota esté fuera. Extrae la energía y conectividad del teléfono de la persona que la encuentra.</p>
+                </div>
             </div>
-          </div>
-          @endif
-        @endforeach
-      </div>
-    </div>
-    @else
-    {{-- Fallback: Mostrar imágenes estáticas si no hay mascotas en BD --}}
-    <div class="pets-carousel-wrapper reveal">
-      <div class="pets-carousel-track">
-        @php
-          $fallbackPets = [
-            ['image' => 'asha.jpeg', 'name' => 'Asha'],
-            ['image' => 'coqueta.jpeg', 'name' => 'Coqueta'],
-            ['image' => 'morgan.jpeg', 'name' => 'Morgan'],
-            ['image' => 'negro.jpeg', 'name' => 'Negro'],
-          ];
-        @endphp
 
-        @foreach($fallbackPets as $fallback)
-        <div class="pet-carousel-item">
-          <div class="pet-carousel-card">
-            <img src="{{ asset('storage/images/' . $fallback['image']) }}"
-                 alt="{{ $fallback['name'] }}"
-                 loading="lazy">
-            <div class="pet-carousel-name">{{ $fallback['name'] }}</div>
-          </div>
-        </div>
-        @endforeach
-
-        @foreach($fallbackPets as $fallback)
-        <div class="pet-carousel-item" aria-hidden="true">
-          <div class="pet-carousel-card">
-            <img src="{{ asset('storage/images/' . $fallback['image']) }}"
-                 alt="{{ $fallback['name'] }}"
-                 loading="lazy">
-            <div class="pet-carousel-name">{{ $fallback['name'] }}</div>
-          </div>
-        </div>
-        @endforeach
-      </div>
-    </div>
-    @endif
-  </div>
-</section>
-
-{{-- ====== FAQ SECTION ====== --}}
-<section class="faq-modern">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-badge">
-        <i class="fa-solid fa-circle-question"></i> FAQ
-      </span>
-      <h2 class="section-title">Preguntas <span class="gradient-text">frecuentes</span></h2>
-      <p class="section-subtitle">Resolvemos tus dudas sobre QR-Pet Tag</p>
-    </div>
-
-    <div class="faq-container">
-      <div class="faq-item reveal">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <div class="faq-icon">
-            <i class="fa-solid fa-qrcode"></i>
-          </div>
-          <div class="faq-question-text">
-            <h3>¿Cómo funciona el código QR?</h3>
-          </div>
-          <div class="faq-toggle">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-        </div>
-        <div class="faq-content">
-          <p>El código QR es único para cada mascota y está vinculado a su perfil. Cuando alguien lo escanea con la cámara de su teléfono, accede instantáneamente a la información de contacto que decidiste compartir.</p>
-          <p>No se necesita ninguna aplicación especial: cualquier smartphone moderno puede escanearlo directamente desde la cámara.</p>
-        </div>
-      </div>
-
-      <div class="faq-item reveal">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <div class="faq-icon">
-            <i class="fa-solid fa-shield"></i>
-          </div>
-          <div class="faq-question-text">
-            <h3>¿Mis datos personales están seguros?</h3>
-          </div>
-          <div class="faq-toggle">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-        </div>
-        <div class="faq-content">
-          <p>Absolutamente. Tú tienes control total sobre qué información se muestra en el perfil público de tu mascota.</p>
-          <p>Puedes elegir mostrar solo un número de teléfono, un email alternativo, o cualquier método de contacto que prefieras. Tu información personal completa nunca se comparte públicamente.</p>
-        </div>
-      </div>
-
-      <div class="faq-item reveal">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <div class="faq-icon">
-            <i class="fa-solid fa-credit-card"></i>
-          </div>
-          <div class="faq-question-text">
-            <h3>¿Cuánto cuesta el servicio?</h3>
-          </div>
-          <div class="faq-toggle">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-        </div>
-        <div class="faq-content">
-          <p>Registrate y selecciona el plan que mejor se adapte a tu necesidad. Puedes crear el perfil digital de tu mascota y generar su código QR.</p>
-          <p>Si deseas adquirir una placa física personalizada para el collar, esta viene incluido según el plan seleccionado.</p>
-        </div>
-      </div>
-
-      <div class="faq-item reveal">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <div class="faq-icon">
-            <i class="fa-solid fa-bell"></i>
-          </div>
-          <div class="faq-question-text">
-            <h3>¿Recibo alertas cuando escanean el QR?</h3>
-          </div>
-          <div class="faq-toggle">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-        </div>
-        <div class="faq-content">
-          <p>Sí, recibes una notificación por correo inmediata cada vez que alguien escanea el código QR de tu mascota.</p>
-          <p>Esto te permite saber al instante que tu mascota ha sido encontrada y alguien está intentando contactarte.</p>
-        </div>
-      </div>
-
-      <div class="faq-item reveal">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <div class="faq-icon">
-            <i class="fa-solid fa-pen"></i>
-          </div>
-          <div class="faq-question-text">
-            <h3>¿Puedo actualizar la información después?</h3>
-          </div>
-          <div class="faq-toggle">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-        </div>
-        <div class="faq-content">
-          <p>¡Por supuesto! Una de las grandes ventajas es que puedes actualizar toda la información desde tu panel de control en cualquier momento.</p>
-          <p>Los cambios se reflejan inmediatamente en el perfil, sin necesidad de cambiar la placa física ni el código QR.</p>
-        </div>
-      </div>
-
-      <div class="faq-item reveal">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <div class="faq-icon">
-            <i class="fa-solid fa-coins"></i>
-          </div>
-          <div class="faq-question-text">
-            <h3>¿Puedo ofrecer una recompensa?</h3>
-          </div>
-          <div class="faq-toggle">
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-        </div>
-        <div class="faq-content">
-          <p>¡Por supuesto! Desde tu panel de control puedes:</p>
-          <div class="faq-features">
-            <div class="faq-feature">
-              <i class="fa-solid fa-toggle-on"></i>
-              <span>Activar/desactivar recompensa cuando quieras</span>
+            <div class="ps-faq-item">
+                <div class="ps-faq-header">
+                    ¿Cúanto tardará en llegar mi pedido?
+                    <div class="ps-faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="ps-faq-body">
+                    <p>Procesamos los datos para grabación de inmediato. Generalmente, el tránsito desde nuestras instalaciones logísticas hasta tu dirección se completa en 24 a 48 horas en días laborables.</p>
+                </div>
             </div>
-            <div class="faq-feature">
-              <i class="fa-solid fa-coins"></i>
-              <span>Establecer el monto que consideres apropiado</span>
+
+            <div class="ps-faq-item">
+                <div class="ps-faq-header">
+                    ¿Puedo actualizar mis datos después?
+                    <div class="ps-faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                </div>
+                <div class="ps-faq-body">
+                    <p>Completamente. La belleza de la conexión en la nube es que puedes cambiar de casa, modificar teléfonos de emergencia o registrar nuevas alergias en el Portal; el perfil público enlazado a la placa física se actualizará al milisegundo exacto.</p>
+                </div>
             </div>
-            <div class="faq-feature">
-              <i class="fa-solid fa-eye"></i>
-              <span>La recompensa aparece destacada en el perfil público</span>
-            </div>
-          </div>
+
         </div>
-      </div>
     </div>
-  </div>
 </section>
 
-{{-- ====== SOCIAL CTA ====== --}}
-<section class="social-cta">
-  <div class="container reveal">
-    <h2 class="section-title mb-3">Únete a nuestra comunidad</h2>
-    <p class="section-subtitle mb-4">Muy pronto compartiremos tips, rescates y novedades. ¡Síguenos!</p>
-    <div class="social-buttons">
-      <a class="social-btn wa" href="https://www.instagram.com/qrpettag?igsh=MWRzdG1kMWVsZ2F0cQ%3D%3D&utm_source=qr" target="_blank" rel="noopener">
-        <i class="fa-brands fa-instagram"></i> Instagram
-      </a>
-      <a class="social-btn fb" href="https://www.facebook.com/share/17VnVJfcxr/?mibextid=wwXIfr" target="_blank" rel="noopener">
-        <i class="fa-brands fa-facebook-f"></i> Facebook
-      </a>
-      <a class="social-btn tt" href="#" target="_blank" rel="noopener">
-        <i class="fa-brands fa-tiktok"></i> TikTok
-      </a>
+<!-- SOCIAL MEDIA / COMMUNITY -->
+<section class="ps-section" style="padding: 0 0 80px 0; background: var(--ps-bg-alt);">
+    <div class="ps-container">
+        <div class="ps-community-card ps-reveal">
+            <div class="ps-community-content">
+                <span class="ps-hero-badge" style="background: rgba(255,255,255,0.1) !important; color: #FFF; margin-bottom: 16px; border:none; box-shadow:none;">COMUNIDAD</span>
+                <h2>Sigue nuestro progreso</h2>
+                <p>Nuestra visión tecnológica por la integridad animal documentada día a día.</p>
+                
+                <div class="ps-social-grid">
+                    <a href="https://instagram.com/petscan" target="_blank" class="ps-social-btn instagram" aria-label="Instagram">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="https://facebook.com/petscan" target="_blank" class="ps-social-btn facebook" aria-label="Facebook">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+                    <a href="https://tiktok.com/@petscan" target="_blank" class="ps-social-btn tiktok" aria-label="TikTok">
+                        <i class="fa-brands fa-tiktok"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
-{{-- ====== FINAL CTA ====== --}}
-<section class="cta-final">
-  <div class="container cta-final-content reveal">
-    <h2>Protege a tu mascota hoy mismo</h2>
-    <p>Regístrate y crea su QR-Pet Tag en minutos. Protección 24/7 para tu mejor amigo.</p>
-    @guest
-      <a href="{{ route('plans.index') }}" class="btn-cta-final will-change-transform">
-        <i class="fa-solid fa-tags"></i> Ver Planes
-      </a>
-    @else
-      <a href="{{ route('plans.index') }}" class="btn-cta-final will-change-transform">
-        <i class="fa-solid fa-tags"></i> Ver Planes
-      </a>
-    @endguest
-  </div>
-</section>
-
-{{-- ====== FOOTER ====== --}}
-<section class="py-4 text-center" style="background: var(--bg-subtle); color: var(--muted); border-top: 1px solid var(--border);">
-  <div class="container small">© {{ date('Y') }} QR-Pet Tag — Todos los derechos reservados</div>
-</section>
-
-{{-- ====== WHATSAPP BUTTON ====== --}}
-@php
-    $whatsappNumber = config('app.whatsapp_number');
-    $message = "¡Hola! Me gustaría obtener más información sobre los tags";
-    $encodedMessage = str_replace('+', '%20', urlencode($message));
-@endphp
-
-<a href="https://wa.me/{{ $whatsappNumber }}?text={{ $encodedMessage }}" 
-   class="whatsapp-float will-change-transform" 
-   target="_blank" 
-   title="Chatea con nosotros 💬">
-  <i class="fa-brands fa-whatsapp"></i>
-  <span class="whatsapp-tooltip">¿Necesitas ayuda? 💬</span>
-</a>
+<!-- FOOTER -->
+<footer class="ps-footer">
+    <div class="ps-container">
+        <div class="ps-footer-top">
+            <div class="ps-footer-brand ps-reveal">
+                <div class="ps-footer-logo">
+                    <i class="fa-solid fa-paw"></i> PetScan
+                </div>
+                <p class="ps-footer-desc">Plataforma integral inteligente. Nacimos bajo un único propósito: que toda mascota encontrada pueda volver con los suyos rápidamente.</p>
+            </div>
+            
+            <div class="ps-footer-links-group ps-reveal ps-delay-1">
+                <div class="ps-footer-column">
+                    <h4>Plataforma</h4>
+                    <a href="#planes">Planes y Tarifas</a>
+                    <a href="{{ route('login') }}">Mi Portal (Ingresar)</a>
+                    <a href="{{ route('register') }}">Registar Cuenta</a>
+                </div>
+                
+                <div class="ps-footer-column">
+                    <h4>Legales</h4>
+                    <a href="{{ route('legal.terms') }}">Condiciones de Uso</a>
+                    <a href="{{ route('legal.privacy') }}">Privacidad de Datos</a>
+                    <a href="{{ route('legal.help') }}">Soporte al Usuario</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ps-footer-bottom ps-reveal ps-delay-2">
+            <p>&copy; {{ date('Y') }} PetScan. Derechos reservados operativamente.</p>
+            <div class="ps-footer-made">Desarrollado con vocación para las mascotas.</div>
+        </div>
+    </div>
+</footer>
 
 @endsection
 
 @push('scripts')
 <script>
-// Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', () => {
-  
-  /* ========= TÍTULOS ALTERNANTES ========= */
-  const heroTitleEl = document.getElementById('heroTitle');
-  
-  const phrases = [
-    'Nunca más pierdas a tu mejor amigo 🐾',
-    'Tu mascota siempre vuelve a casa 🐾',
-    'Un QR que conecta en segundos 🐾',
-    'Más seguridad, menos estrés 🐾',
-    'Protección 24/7 para tu mascota 🐾'
-  ];
-  
-  let currentPhraseIndex = 0;
-  
-  function changePhrase() {
-    // Fade out
-    heroTitleEl.style.opacity = '0';
-    heroTitleEl.style.transform = 'translateY(20px)';
-    
-    setTimeout(() => {
-      // Cambiar texto
-      currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
-      heroTitleEl.textContent = phrases[currentPhraseIndex];
-      
-      // Fade in
-      heroTitleEl.style.opacity = '1';
-      heroTitleEl.style.transform = 'translateY(0)';
-    }, 500);
-  }
-  
-  // Cambiar frase cada 4 segundos
-  setInterval(changePhrase, 4000);
-  
-  // Estilos de transición para el título
-  heroTitleEl.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-  
-  /* ========= REVEAL ON SCROLL ========= */
-  const observerOptions = {
-    threshold: 0.15,
-    rootMargin: '0px 0px -50px 0px'
-  };
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, index) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => {
-          entry.target.classList.add('show');
-        }, index * 100); // Stagger animation
-        observer.unobserve(entry.target);
-      }
-    });
-  }, observerOptions);
-
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-  /* ========= COUNTER ANIMATION ========= */
-  const runCounter = (el) => {
-    const target = parseInt(el.dataset.target);
-    const duration = 2000; // 2 seconds
-    const increment = target / (duration / 16); // 60 FPS
-    let current = 0;
-
-    const updateCounter = () => {
-      current += increment;
-      if (current < target) {
-        el.textContent = Math.floor(current).toLocaleString();
-        requestAnimationFrame(updateCounter);
-      } else {
-        el.textContent = target.toLocaleString();
-      }
+    /* ========================================================
+       1. ANIMACIONES ESCALA Y FADE (SCROLL REVEAL SUAVE)
+       ======================================================== */
+    const revealElements = document.querySelectorAll('.ps-reveal');
+    const observerOptions = {
+        root: null,
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px"
     };
 
-    updateCounter();
-  };
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('ps-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
 
-  const counterObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        runCounter(entry.target);
-        counterObserver.unobserve(entry.target);
-      }
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    /* ========================================================
+       2. EFECTO PARALLAX 3D EXTRA SUTIL (SOLO DESKTOP)
+       ======================================================== */
+    const heroSection = document.getElementById('heroSection');
+    const heroImageWrapper = document.getElementById('heroImageWrapper');
+    
+    if(heroSection && heroImageWrapper && window.innerWidth > 768) {
+        heroSection.addEventListener('mousemove', (e) => {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            const mouseX = e.clientX - centerX;
+            const mouseY = e.clientY - centerY;
+            
+            // Factor 180 = rotación minúscula de ~2 grados, imperceptible pero elegante
+            const rotX = (mouseY / -180);
+            const rotY = (mouseX / 180);
+
+            heroImageWrapper.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        });
+
+        heroSection.addEventListener('mouseleave', () => {
+            heroImageWrapper.style.transform = `rotateX(0deg) rotateY(0deg)`;
+            heroImageWrapper.style.transition = 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+        });
+
+        heroSection.addEventListener('mouseenter', () => {
+            heroImageWrapper.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+        });
+    }
+
+    /* ========================================================
+       3. ACORDIÓN INTERACTIVO PARA FAQ
+       ======================================================== */
+    const faqItems = document.querySelectorAll('.ps-faq-item');
+    
+    faqItems.forEach(item => {
+        const header = item.querySelector('.ps-faq-header');
+        const body = item.querySelector('.ps-faq-body');
+        
+        header.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+            
+            if (isActive) {
+                item.classList.remove('active');
+                body.style.maxHeight = '0px';
+            } else {
+                item.classList.add('active');
+                body.style.maxHeight = body.scrollHeight + "px";
+            }
+        });
     });
-  }, { threshold: 0.5 });
 
-  document.querySelectorAll('.counter').forEach(counter => {
-    counterObserver.observe(counter);
-  });
-
-  /* ========= SMOOTH SCROLL ========= */
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      const href = this.getAttribute('href');
-      if (href !== '#' && href !== '') {
-        e.preventDefault();
-        const target = document.querySelector(href);
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      }
-    });
-  });
-
-  /* ========= PERFORMANCE: Lazy load images ========= */
-  if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          if (img.dataset.src) {
-            img.src = img.dataset.src;
-            img.removeAttribute('data-src');
-          }
-          imageObserver.unobserve(img);
-        }
-      });
-    });
-
-    document.querySelectorAll('img[data-src]').forEach(img => {
-      imageObserver.observe(img);
-    });
-  }
 });
-
-/* ========= FAQ TOGGLE ========= */
-function toggleFaq(element) {
-  const faqItem = element.closest('.faq-item');
-  const isActive = faqItem.classList.contains('active');
-  
-  // Close all FAQs
-  document.querySelectorAll('.faq-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  
-  // Open clicked FAQ if it wasn't active
-  if (!isActive) {
-    faqItem.classList.add('active');
-  }
-}
 </script>
 @endpush
