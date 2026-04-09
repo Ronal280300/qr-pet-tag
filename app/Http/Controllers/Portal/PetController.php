@@ -49,7 +49,7 @@ class PetController extends Controller
             });
         }
 
-        $pets = $query->paginate(12)->withQueryString();
+        $pets = $query->paginate(9)->withQueryString();
 
         return view('portal.pets.index', compact('pets'));
     }
