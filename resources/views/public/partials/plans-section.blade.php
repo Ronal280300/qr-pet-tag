@@ -16,7 +16,7 @@
         <!-- Encabezado Fuerte -->
         <div class="guided-header">
             <span class="guided-eyebrow">PROTECCIÓN PETSCAN</span>
-            <h2 class="guided-title">Construye la armadura perfecta para tu familia.</h2>
+            <h2 class="guided-title">Construye lo mejor para tu compañero</h2>
             <p class="guided-subtitle">Selecciona cuántos miembros de tu manada deseas proteger. Cobertura inmediata, tecnología permanente.</p>
         </div>
 
@@ -74,9 +74,11 @@
                     </div>
                     <p class="summary-billing" id="summaryBillingMode">Pago único</p>
 
+                    <hr class="summary-divider">
+
                     <!-- Beneficios -->
                     <div class="summary-features-container">
-                        <p class="features-title">Tu cobertura incluye:</p>
+                        <p class="features-title">TU COBERTURA INCLUYE:</p>
                         <ul class="summary-features" id="summaryFeatures">
                             <!-- Inyectado por JS -->
                         </ul>
@@ -111,31 +113,33 @@
 
 <style>
 /* ==========================================================================
-   ENFOQUE GUIADO - ESTILO APPLE/AIRBNB (SaaS Storytelling)
+   ENFOQUE GUIADO - REDISEÑO MODERNO Y ELEGANTE
    ========================================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 :root {
-    --vp-bg: #FAFAFA;
+    --vp-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+    --vp-bg: #F8FAFC; 
     --vp-surface: #FFFFFF;
-    --vp-text-primary: #1D1D1F;
-    --vp-text-secondary: #86868B;
-    --vp-accent: #0066CC;
-    --vp-accent-hover: #0055AA;
-    --vp-border: #D2D2D7;
-    --vp-border-light: #E5E5EA;
-    --vp-success: #34C759;
-    --vp-popular: #FF9500;
+    --vp-text-primary: #0F172A;
+    --vp-text-secondary: #64748B;
+    --vp-accent: #2563EB;
+    --vp-accent-hover: #1D4ED8;
+    --vp-border: #E2E8F0;
+    --vp-border-light: #F1F5F9;
+    --vp-popular: #3B82F6; 
 }
 
 .guided-pricing-section {
     background-color: var(--vp-bg);
-    padding: 100px 0 120px;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif;
+    padding: 120px 0;
+    font-family: var(--vp-font);
     color: var(--vp-text-primary);
 }
 
 .guided-container {
-    max-width: 1080px;
+    max-width: 1140px;
     margin: 0 auto;
     padding: 0 24px;
 }
@@ -143,30 +147,32 @@
 /* --- Header Fuerte --- */
 .guided-header {
     text-align: center;
-    max-width: 680px;
+    max-width: 720px;
     margin: 0 auto 60px;
 }
 
 .guided-eyebrow {
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 2px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
     color: var(--vp-accent);
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     display: inline-block;
+    text-transform: uppercase;
 }
 
 .guided-title {
-    font-size: 48px;
-    font-weight: 700;
-    line-height: 1.05;
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.1;
     letter-spacing: -1.5px;
     margin-bottom: 20px;
+    color: var(--vp-text-primary);
 }
 
 .guided-subtitle {
-    font-size: 20px;
-    line-height: 1.5;
+    font-size: 18px;
+    line-height: 1.6;
     color: var(--vp-text-secondary);
     font-weight: 400;
 }
@@ -174,8 +180,8 @@
 /* --- Layout Principal --- */
 .guided-layout {
     display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 60px;
+    grid-template-columns: 1fr 480px; /* Columna derecha más ancha para una tarjeta premium */
+    gap: 80px;
     align-items: start;
 }
 
@@ -188,13 +194,13 @@
 }
 
 .config-step:nth-child(2) {
-    animation-delay: 0.15s;
+    animation-delay: 0.1s;
 }
 
 .step-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 24px;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
     color: var(--vp-text-primary);
 }
 
@@ -202,20 +208,20 @@
 .premium-segmented-control {
     display: flex;
     position: relative;
-    background-color: #E3E3E8;
-    padding: 4px;
-    border-radius: 14px;
+    background-color: var(--vp-border-light);
+    padding: 6px;
+    border-radius: 16px;
 }
 
 .segmented-indicator {
     position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: 4px;
-    width: calc(50% - 4px);
+    top: 6px;
+    bottom: 6px;
+    left: 6px;
+    width: calc(50% - 6px);
     background-color: var(--vp-surface);
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.04);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.04);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 1;
 }
@@ -226,13 +232,14 @@
     z-index: 2;
     background: transparent;
     border: none;
-    padding: 14px 20px;
+    padding: 16px 20px;
     font-size: 15px;
     font-weight: 600;
     color: var(--vp-text-secondary);
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 12px;
     transition: color 0.3s;
+    font-family: inherit;
 }
 
 .segment-btn.active {
@@ -248,8 +255,8 @@
 
 .pet-btn {
     background: var(--vp-surface);
-    border: 2px solid var(--vp-border-light);
-    border-radius: 16px;
+    border: 2px solid var(--vp-border);
+    border-radius: 20px;
     padding: 24px 16px;
     display: flex;
     flex-direction: column;
@@ -258,17 +265,19 @@
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     outline: none;
+    font-family: inherit;
 }
 
 .pet-btn:hover {
-    border-color: var(--vp-border);
+    border-color: #CBD5E1;
     transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(15,23,42,0.05);
 }
 
 .pet-btn.active {
     border-color: var(--vp-accent);
-    background-color: #F5FAFF;
-    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+    background-color: #EFF6FF;
+    box-shadow: 0 4px 14px rgba(37,99,235,0.15);
 }
 
 .pet-btn i {
@@ -283,7 +292,7 @@
 
 .pet-btn span {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--vp-text-primary);
 }
 
@@ -294,45 +303,52 @@
     display: flex;
     align-items: flex-start;
     gap: 6px;
+    line-height: 1.5;
 }
 
 .pet-limit-note i {
-    margin-top: 3px;
+    margin-top: 2px;
 }
 
-/* --- Resumen Derecha (Tarjeta Final) --- */
+/* --- MÁS ELEGANTE: Tarjeta de Resumen (Derecha) --- */
 .guided-summary {
     position: sticky;
     top: 40px;
     opacity: 0;
     transform: translateY(20px);
     animation: fadeUp 0.6s ease forwards;
-    animation-delay: 0.3s;
+    animation-delay: 0.2s;
 }
 
 .summary-card {
     background-color: var(--vp-surface);
-    border-radius: 28px;
+    border-radius: 24px;
     padding: 48px;
-    box-shadow: 0 30px 60px rgba(0,0,0,0.06), 0 10px 20px rgba(0,0,0,0.03);
-    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: 0 20px 40px -10px rgba(15,23,42,0.08);
+    border: 1px solid rgba(15,23,42,0.05);
     position: relative;
     overflow: hidden;
-    transition: all 0.4s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.summary-card:hover {
+    box-shadow: 0 25px 50px -12px rgba(15,23,42,0.12);
+}
+
+/* Badge Popular Mejorado */
 .summary-badge-wrapper {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(90deg, #FF9500, #FF5E3A);
+    background: linear-gradient(135deg, var(--vp-accent), #60A5FA);
     color: #FFF;
     text-align: center;
     padding: 8px 0;
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
     opacity: 0;
     transform: translateY(-100%);
     transition: all 0.3s ease;
@@ -344,10 +360,10 @@
 }
 
 .summary-card.has-badge {
-    padding-top: 56px; /* Compensar la aparición de la bandera */
+    padding-top: 56px; 
 }
 
-/* Header Resumen */
+/* Header Resumen Elegante */
 .summary-header {
     display: flex;
     align-items: center;
@@ -356,30 +372,33 @@
 }
 
 .summary-icon {
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 60px;
     border-radius: 16px;
-    background: #F2F8FF;
-    color: var(--vp-accent);
+    background: var(--vp-accent);
+    color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 24px;
+    box-shadow: 0 10px 15px -3px rgba(37,99,235,0.3);
 }
 
 .summary-title-group h3 {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 800;
     margin: 0 0 4px;
+    color: var(--vp-text-primary);
+    letter-spacing: -0.5px;
 }
 
 .summary-title-group p {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--vp-text-secondary);
     margin: 0;
 }
 
-/* Precio Animable */
+/* Precio Estilo Stripe */
 .summary-price-wrapper {
     display: flex;
     align-items: flex-start;
@@ -394,34 +413,41 @@
 }
 
 .summary-price {
-    font-size: 64px;
-    font-weight: 700;
-    letter-spacing: -2px;
+    font-size: 72px; /* Más grande e imponente */
+    font-weight: 900;
+    letter-spacing: -3px;
     line-height: 1;
     color: var(--vp-text-primary);
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, transform 0.2s;
 }
 
 .summary-price.updating {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-10px) scale(0.95);
 }
 
 .summary-billing {
     font-size: 15px;
     color: var(--vp-text-secondary);
-    margin: 12px 0 40px;
+    margin: 16px 0 32px;
     font-weight: 500;
 }
 
-/* Lista de Beneficios */
+.summary-divider {
+    border: 0;
+    height: 1px;
+    background: var(--vp-border);
+    margin: 0 0 32px 0;
+}
+
+/* Lista de Beneficios Pulcra */
 .features-title {
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     color: var(--vp-text-secondary);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .summary-features {
@@ -435,11 +461,17 @@
     align-items: flex-start;
     gap: 16px;
     margin-bottom: 16px;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.5;
-    color: var(--vp-text-primary);
+    color: var(--vp-text-secondary);
+    font-weight: 500;
     animation: slideInRight 0.3s ease forwards;
     opacity: 0;
+}
+
+.summary-features li strong {
+    color: var(--vp-text-primary);
+    font-weight: 700;
 }
 
 /* Escalado para retraso en listas animadas */
@@ -451,32 +483,32 @@
 
 .summary-features li i {
     color: var(--vp-accent);
-    font-size: 18px;
-    margin-top: 3px;
+    font-size: 20px;
+    margin-top: 1px;
 }
 
-/* CTA */
+/* CTA Super Premium */
 .summary-cta {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
     width: 100%;
-    background-color: var(--vp-accent);
+    background-color: var(--vp-text-primary);
     color: #FFFFFF;
     text-decoration: none;
     padding: 20px;
     border-radius: 16px;
-    font-size: 18px;
-    font-weight: 600;
-    transition: all 0.3s;
-    box-shadow: 0 8px 16px rgba(0, 102, 204, 0.25);
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(15,23,42,0.15);
 }
 
 .summary-cta:hover {
-    background-color: var(--vp-accent-hover);
+    background-color: #000000;
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(0, 102, 204, 0.35);
+    box-shadow: 0 15px 25px rgba(15,23,42,0.25);
     color: #FFFFFF;
 }
 
@@ -485,18 +517,19 @@
 }
 
 .summary-cta:hover i {
-    transform: translateX(4px);
+    transform: translateX(6px);
 }
 
 .summary-guarantee {
     text-align: center;
     font-size: 13px;
     color: var(--vp-text-secondary);
-    margin: 20px 0 0;
+    margin: 24px 0 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
+    font-weight: 500;
 }
 
 @keyframes fadeUp {
@@ -513,14 +546,13 @@
 @media (max-width: 1024px) {
     .guided-layout {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 60px;
+        max-width: 600px;
+        margin: 0 auto;
     }
     .guided-summary {
         position: relative;
         top: 0;
-    }
-    .summary-card {
-        padding: 32px;
     }
 }
 
@@ -529,15 +561,15 @@
         padding: 60px 0 80px;
     }
     .guided-title {
-        font-size: 38px;
+        font-size: 34px;
         letter-spacing: -1px;
     }
     .premium-segmented-control {
         flex-direction: column;
     }
     .segmented-indicator {
-        width: calc(100% - 8px);
-        height: calc(50% - 4px);
+        width: calc(100% - 12px);
+        height: calc(50% - 6px);
     }
     .pet-selector-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -546,7 +578,7 @@
         font-size: 56px;
     }
     .summary-card {
-        padding: 24px;
+        padding: 32px 24px;
     }
 }
 </style>
@@ -658,7 +690,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fallback if current pets choice isn't in new array
         if(!foundCurrentPets && plansList.length > 0) {
             currentPets = plansList[0].pets_included;
-            document.querySelector('.pet-btn').classList.add('active'); // select first
+            // Solo si hay elementos renderizados
+            const firstBtn = document.querySelector('.pet-btn');
+            if(firstBtn) firstBtn.classList.add('active');
         }
     }
 
@@ -690,7 +724,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Precio
             const formattedPrice = Number(activePlan.price).toLocaleString('es-CR');
-            sumPrice.textContent = formattedPrice;
+            // Mantenemos solo el número entero, separando con espacio si prefieres visualmente, 
+            // pero toLocaleString ya lo hace según el locale.
+            sumPrice.textContent = formattedPrice.replace(/,/g, ' ');
 
             // Billing Period
             if(currentType === 'onetime') {
@@ -698,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sumBilling.textContent = "Pago único. Sin cargos ocultos.";
                 ctaText.textContent = "Elegir Plan";
             } else {
-                sumDesc.textContent = "Protección con esteroides y soporte premium.";
+                sumDesc.textContent = "Protección superior y soporte premium.";
                 sumBilling.textContent = `Renovación cada ${data.subDuration} meses. Cancela cuando quieras.`;
                 ctaText.textContent = "Iniciar suscripción";
             }
@@ -709,11 +745,10 @@ document.addEventListener('DOMContentLoaded', () => {
             let features = [];
             if(currentType === 'onetime') {
                 features = [
-                    `<strong>${activePlan.pets_included} ${activePlan.pets_included == 1 ? 'Placa inteligente' : 'Placas inteligentes'} QR</strong>`,
+                    `<strong>${activePlan.pets_included} ${activePlan.pets_included == 1 ? 'Placa Inteligente' : 'Placas Inteligentes'} QR</strong>`,
                     "Perfil digital siempre disponible",
-                    "Alertas de escaneo al WhatsApp",
-                    "Acceso ilimitado a actualizaciones médicas",
-                    "Sistema de reporte automático en portal"
+                    "Alertas de escaneo al correo",
+                    "Sistema de reporte rápido en plataforma"
                 ];
             } else {
                 features = [
@@ -733,7 +768,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             features.forEach(feat => {
                 const li = document.createElement('li');
-                li.innerHTML = `<i class="fa-solid fa-check-circle"></i> <span>${feat}</span>`;
+                // Icono sólido moderno azul
+                li.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${feat}</span>`;
                 sumFeatures.appendChild(li);
             });
 
