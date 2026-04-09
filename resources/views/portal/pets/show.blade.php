@@ -163,7 +163,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
           @csrf
           <button type="submit" class="saas-btn-xl {{ $pet->is_lost ? 'btn-warn' : 'btn-danger-gradient' }}" id="toggleLostBtn">
             <i class="fa-solid fa-bullhorn"></i>
-            <span>{{ $pet->is_lost ? 'Reportar mascota encontrada' : 'Reportar Extraviada/Robada' }}</span>
+            <span>{{ $pet->is_lost ? 'Reportar mascota encontrada' : 'Declarar extravío' }}</span>
           </button>
         </form>
         @if($pet->is_lost)
@@ -205,7 +205,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
         <div class="panel-header justify-between">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-qrcode panel-icon"></i>
-            <h3 class="m-0">Código QR</h3>
+            <h3 class="m-0">Placa y QR</h3>
           </div>
         </div>
 
@@ -249,10 +249,10 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
           
           <div class="grid-2-col">
             <a href="{{ $canDownloadQr ? route('portal.pets.download-qr', $pet) : '#' }}" class="saas-btn-block saas-btn-light {{ !$canDownloadQr ? 'disabled' : '' }}">
-              <i class="fa-solid fa-download"></i> Descargar QR
+              <i class="fa-solid fa-download"></i> Bajar QR
             </a>
             <a href="{{ $publicUrl ?: '#' }}" target="_blank" class="saas-btn-block saas-btn-light {{ !$publicUrl ? 'disabled' : '' }}">
-              <i class="fa-solid fa-eye"></i> Perfil
+              <i class="fa-solid fa-eye"></i> Público
             </a>
           </div>
 
@@ -309,7 +309,7 @@ $sexLabel = ['male' => 'Macho', 'female' => 'Hembra', 'unknown' => 'Desconocido'
           </div>
 
           <button type="submit" id="rwSave" class="saas-btn-block btn-green-gradient mt-1">
-            <i class="fa-solid fa-floppy-disk"></i> Guardar Recompensa
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Premio
           </button>
         </form>
       </div>
